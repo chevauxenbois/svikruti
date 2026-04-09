@@ -4,6 +4,7 @@ Production-grade page functions for Records of Processing Activities, Consent Ma
 Privacy Notices, Data Principal Rights Tracker, and Vendor Management.
 
 Multi-user, multi-tenant with role-based access control and comprehensive error handling.
+Enhanced UX with styled containers, clean typography, and dark theme consistency.
 """
 
 import streamlit as st
@@ -21,10 +22,30 @@ def _check_role_permission(user_info: Dict, required_roles: List[str]) -> bool:
     return user_info.get("role") in required_roles
 
 
+def _render_styled_container(content_func) -> None:
+    """Render content within a styled glass-morphism container."""
+    st.markdown(
+        '<div style="background: rgba(17,24,39,0.8); border: 1px solid rgba(30,41,59,0.5); '
+        'border-radius: 16px; padding: 24px; margin-bottom: 16px;">',
+        unsafe_allow_html=True
+    )
+    content_func()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
 def _render_empty_state(message: str, action_tab: str) -> None:
-    """Render helpful empty state UI."""
-    st.info(message)
-    st.write(f"Use the '{action_tab}' tab to get started.")
+    """Render styled empty state UI."""
+    st.markdown(
+        '<div style="background: rgba(17,24,39,0.8); border: 1px dashed rgba(20,184,166,0.3); '
+        'border-radius: 12px; padding: 40px; text-align: center; margin: 20px 0;">',
+        unsafe_allow_html=True
+    )
+    st.markdown(f'<p style="color: #A1A5B0; font-size: 16px; margin-bottom: 16px;">{message}</p>', unsafe_allow_html=True)
+    st.markdown(
+        f'<p style="color: #14B8A6; font-size: 14px;">Use the <strong>{action_tab}</strong> tab to get started.</p>',
+        unsafe_allow_html=True
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def _safe_db_call(func, *args, **kwargs):
@@ -32,8 +53,37 @@ def _safe_db_call(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
     except Exception as e:
-        st.error(f"Database error: {str(e)}")
+        st.error(f"An error occurred while processing your request. Please try again.")
         return None
+
+
+def _render_page_header(title: str) -> None:
+    """Render styled page header with clean typography."""
+    st.markdown(
+        f'<h2 style="color: #E2E8F0; font-size: 32px; font-weight: 600; '
+        f'margin-bottom: 8px; letter-spacing: -0.5px;">{title}</h2>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '<div style="height: 2px; background: linear-gradient(90deg, #14B8A6 0%, transparent 100%); '
+        'margin-bottom: 24px;"></div>',
+        unsafe_allow_html=True
+    )
+
+
+def _configure_dark_chart(title: str, height: int = 400) -> Dict:
+    """Return dark-themed Plotly layout configuration."""
+    return go.Layout(
+        title=dict(text=title, font=dict(color="#E2E8F0", size=16)),
+        height=height,
+        paper_bgcolor="#0A0F1E",
+        plot_bgcolor="#0A0F1E",
+        font=dict(color="#E2E8F0", family="sans-serif"),
+        xaxis=dict(gridcolor="#1E293B", zeroline=False),
+        yaxis=dict(gridcolor="#1E293B", zeroline=False),
+        hovermode="x unified",
+        margin=dict(l=60, r=30, t=60, b=50)
+    )
 
 
 # ============================================================================
@@ -45,7 +95,7 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
     Records of Processing Activities page - Track and manage all data processing activities.
     Full DPDPA compliance with activity registry, analytics, and role-based access.
     """
-    st.title("📋 Records of Processing Activities")
+    _render_page_header("Records of Processing Activities")
 
     # Fetch ROPA entries
     ropa_entries = _safe_db_call(db.get_ropa_entries, org_id) or []
@@ -71,9 +121,9 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
     can_edit = _check_role_permission(user_info, ["admin", "member"])
 
     if can_edit:
-        tab1, tab2, tab3 = st.tabs(["📊 Registry", "➕ Add Entry", "📈 Analytics"])
+        tab1, tab2, tab3 = st.tabs(["Registry", "Add Entry", "Analytics"])
     else:
-        tab1 = st.tabs(["📊 Registry"])[0]
+        tab1 = st.tabs(["Registry"])[0]
 
     # TAB 1: Registry
     with tab1:
@@ -82,10 +132,10 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
             table_data = []
             for entry in ropa_entries:
                 table_data.append({
-                    "Activity Name": entry.get("activity_name", ""),
+                    "Activity Name": entry.get("activity_name", "")[:40],
                     "Department": entry.get("department", ""),
-                    "Data Categories": entry.get("data_categories", ""),
-                    "Lawful Basis": entry.get("lawful_basis", ""),
+                    "Data Categories": entry.get("data_categories", "")[:35],
+                    "Lawful Basis": entry.get("lawful_basis", "")[:30],
                     "Retention": entry.get("retention_period", ""),
                     "Status": entry.get("status", ""),
                 })
@@ -94,7 +144,10 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
 
             # Edit/Delete actions (admin/member only)
             if can_edit:
-                st.subheader("Manage Entries")
+                st.markdown(
+                    '<h3 style="color: #E2E8F0; margin-top: 32px; margin-bottom: 20px;">Manage Entries</h3>',
+                    unsafe_allow_html=True
+                )
                 col1, col2 = st.columns(2)
 
                 selected_activity = st.selectbox(
@@ -104,19 +157,19 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                 )
 
                 with col1:
-                    if st.button("✏️ Edit", key="ropa_edit_btn"):
+                    if st.button("Edit Entry", key="ropa_edit_btn", use_container_width=True):
                         st.info("Edit functionality: Database integration ready.")
 
                 with col2:
-                    if st.button("🗑️ Delete", key="ropa_delete_btn"):
+                    if st.button("Delete Entry", key="ropa_delete_btn", use_container_width=True):
                         try:
                             matching = [e for e in ropa_entries if e.get("activity_name") == selected_activity]
                             if matching:
                                 _safe_db_call(db.delete_ropa_entry, matching[0].get("id"))
-                                st.success("Entry deleted.")
+                                st.success("Entry deleted successfully.")
                                 st.rerun()
                         except Exception as e:
-                            st.error(f"Delete failed: {str(e)}")
+                            st.error("Unable to delete entry. Please try again.")
         else:
             _render_empty_state(
                 "No processing activities recorded yet.",
@@ -126,7 +179,10 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
     # TAB 2: Add Entry (admin/member only)
     if can_edit:
         with tab2:
-            st.subheader("Add New Processing Activity")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Add New Processing Activity</h3>',
+                unsafe_allow_html=True
+            )
 
             with st.form("ropa_form_key", clear_on_submit=True):
                 col1, col2 = st.columns(2)
@@ -134,11 +190,13 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                 with col1:
                     activity_name = st.text_input(
                         "Activity Name *",
-                        placeholder="e.g., Customer Data Processing"
+                        placeholder="e.g., Customer Data Processing",
+                        help="Clear name for this processing activity"
                     )
                     department = st.selectbox(
                         "Department *",
-                        ["HR", "IT", "Marketing", "Finance", "Operations", "Legal", "Customer Support", "Product", "Engineering"]
+                        ["HR", "IT", "Marketing", "Finance", "Operations", "Legal", "Customer Support", "Product", "Engineering"],
+                        help="Which department owns this activity?"
                     )
 
                 with col2:
@@ -146,20 +204,23 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                         "Lawful Basis *",
                         ["Consent - Section 6", "Voluntary Provision - Section 7(a)",
                          "Employment - Section 7(b)", "State Functions - Section 7(c)",
-                         "Legal Obligation - Section 7(d)", "Medical Emergency - Section 7(e)"]
+                         "Legal Obligation - Section 7(d)", "Medical Emergency - Section 7(e)"],
+                        help="DPDPA legal basis for processing"
                     )
                     retention_period = st.text_input(
                         "Retention Period *",
-                        placeholder="e.g., 3 years"
+                        placeholder="e.g., 3 years",
+                        help="How long data is retained"
                     )
 
                 purpose = st.text_area(
                     "Purpose *",
                     height=80,
-                    placeholder="Describe the processing purpose"
+                    placeholder="Describe the processing purpose in detail",
+                    help="Clear statement of why this processing occurs"
                 )
 
-                st.markdown("**Data Categories** *")
+                st.markdown('**Data Categories** *')
                 col1, col2, col3 = st.columns(3)
                 categories = []
                 cat_options = [
@@ -173,7 +234,7 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                         if st.checkbox(cat, key=f"ropa_cat_{cat}"):
                             categories.append(cat)
 
-                st.markdown("**Data Subjects** *")
+                st.markdown('**Data Subjects** *')
                 col1, col2 = st.columns(2)
                 subjects = []
                 subj_options = ["Customers", "Employees", "Job Applicants", "Vendors/Contractors",
@@ -189,30 +250,35 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                 with col1:
                     data_processor = st.text_input(
                         "Data Processor",
-                        placeholder="External processor name (if applicable)"
+                        placeholder="External processor name (if applicable)",
+                        help="Optional: name of processor handling data"
                     )
                     processing_location = st.text_input(
                         "Processing Location",
-                        placeholder="e.g., India"
+                        placeholder="e.g., India",
+                        help="Geographic location of processing"
                     )
 
                 with col2:
                     security_measures = st.text_area(
                         "Security Measures *",
                         height=80,
-                        placeholder="Encryption, access controls, audits"
+                        placeholder="Encryption, access controls, audits",
+                        help="Technical and organizational measures"
                     )
 
                 cross_border = st.checkbox(
-                    "Cross-border Data Transfer"
+                    "Cross-border Data Transfer",
+                    help="Check if data is transferred outside India"
                 )
 
                 status = st.selectbox(
                     "Status",
-                    ["Active", "Inactive"]
+                    ["Active", "Inactive"],
+                    help="Is this activity currently in use?"
                 )
 
-                submitted = st.form_submit_button("✅ Add Entry", use_container_width=True)
+                submitted = st.form_submit_button("Add Entry", use_container_width=True)
 
                 if submitted:
                     if not (activity_name and department and categories and subjects and purpose and retention_period and security_measures):
@@ -240,7 +306,10 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
 
         # TAB 3: Analytics (admin/member only)
         with tab3:
-            st.subheader("Analytics & Insights")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Analytics & Insights</h3>',
+                unsafe_allow_html=True
+            )
 
             if ropa_entries:
                 col1, col2 = st.columns(2)
@@ -253,10 +322,12 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                         dept_counts[dept] = dept_counts.get(dept, 0) + 1
 
                     fig1 = go.Figure(
-                        data=[go.Bar(x=list(dept_counts.keys()), y=list(dept_counts.values()),
-                                    marker_color="#14B8A6")],
-                        layout=go.Layout(title="Entries by Department", height=400,
-                                       plot_bgcolor="#1E293B", paper_bgcolor="#0F172A")
+                        data=[go.Bar(
+                            x=list(dept_counts.keys()),
+                            y=list(dept_counts.values()),
+                            marker=dict(color="#14B8A6", line=dict(color="#0D9488", width=1))
+                        )],
+                        layout=_configure_dark_chart("Entries by Department")
                     )
                     st.plotly_chart(fig1, use_container_width=True)
 
@@ -268,16 +339,19 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                         basis_counts[basis] = basis_counts.get(basis, 0) + 1
 
                     fig2 = go.Figure(
-                        data=[go.Pie(labels=list(basis_counts.keys()), values=list(basis_counts.values()))],
-                        layout=go.Layout(title="Distribution by Lawful Basis", height=400,
-                                       plot_bgcolor="#1E293B", paper_bgcolor="#0F172A")
+                        data=[go.Pie(
+                            labels=list(basis_counts.keys()),
+                            values=list(basis_counts.values()),
+                            marker=dict(colors=["#14B8A6", "#0D9488", "#06B6D4", "#0891B2", "#0E7490", "#155E75"])
+                        )],
+                        layout=_configure_dark_chart("Distribution by Lawful Basis")
                     )
                     st.plotly_chart(fig2, use_container_width=True)
 
                 # Cross-border summary
                 st.metric("Cross-Border Transfers", cross_border_count)
             else:
-                st.info("No data to display yet.")
+                _render_empty_state("No data to display yet.", "Add Entry")
 
 
 # ============================================================================
@@ -289,15 +363,18 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
     Consent Management page - Track all consents, audit compliance against DPDPA Section 6.
     Comprehensive consent lifecycle management with withdrawal tracking.
     """
-    st.title("✅ Consent Management")
+    _render_page_header("Consent Management")
 
-    st.info(
-        """
-        **DPDPA Section 6 Requirements:**
-        Consent must be free (no coercion), specific (per-purpose), informed (clear notice),
-        unambiguous (affirmative action), and unconditional (no bundling with services).
-        """
+    st.markdown(
+        '<div style="background: rgba(20,184,166,0.1); border-left: 4px solid #14B8A6; '
+        'border-radius: 8px; padding: 16px; margin-bottom: 24px;">',
+        unsafe_allow_html=True
     )
+    st.markdown(
+        '**DPDPA Section 6 Requirements:** Consent must be free, specific, informed, unambiguous, and unconditional.',
+        unsafe_allow_html=True
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Fetch consent records
     consents = _safe_db_call(db.get_consent_records, org_id) or []
@@ -323,9 +400,9 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
     can_edit = _check_role_permission(user_info, ["admin", "member"])
 
     if can_edit:
-        tab1, tab2, tab3 = st.tabs(["📊 Records", "➕ Add Consent", "✓ Compliance Audit"])
+        tab1, tab2, tab3 = st.tabs(["Records", "Add Consent", "Compliance Audit"])
     else:
-        tab1 = st.tabs(["📊 Records"])[0]
+        tab1 = st.tabs(["Records"])[0]
 
     # TAB 1: Consent Records
     with tab1:
@@ -348,16 +425,20 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
     # TAB 2: Add Consent (admin/member only)
     if can_edit:
         with tab2:
-            st.subheader("Create New Consent Record")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Create New Consent Record</h3>',
+                unsafe_allow_html=True
+            )
 
             with st.form("consent_form_key", clear_on_submit=True):
                 purpose = st.text_area(
                     "Purpose *",
                     height=60,
-                    placeholder="Clear description of why data is collected"
+                    placeholder="Clear description of why data is collected",
+                    help="Be specific about the purpose of data collection"
                 )
 
-                st.markdown("**Data Categories** *")
+                st.markdown('**Data Categories** *')
                 col1, col2, col3 = st.columns(3)
                 categories = []
                 cat_opts = [
@@ -377,31 +458,36 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
                     mechanism = st.selectbox(
                         "Collection Mechanism *",
                         ["Online Checkbox", "In-App Toggle", "Paper Form",
-                         "Verbal/Call Center", "Email Opt-in", "API/Programmatic"]
+                         "Verbal/Call Center", "Email Opt-in", "API/Programmatic"],
+                        help="How is consent collected from users?"
                     )
                     is_children_data = st.checkbox(
-                        "Children's Data (under 18)"
+                        "Children's Data (under 18)",
+                        help="Does this consent involve children's data?"
                     )
 
                 with col2:
                     withdrawal_method = st.selectbox(
                         "Withdrawal Method *",
                         ["Same channel as collection", "Email request", "In-app toggle",
-                         "Phone call", "Written request"]
+                         "Phone call", "Written request"],
+                        help="How can users withdraw consent?"
                     )
 
                 consent_text = st.text_area(
                     "Consent Text (shown to users) *",
                     height=100,
-                    placeholder="Plain-language consent statement"
+                    placeholder="Plain-language consent statement",
+                    help="The exact text users will see and agree to"
                 )
 
                 status = st.selectbox(
                     "Initial Status",
-                    ["Active", "Paused", "Withdrawn"]
+                    ["Active", "Paused", "Withdrawn"],
+                    help="Should this consent be active immediately?"
                 )
 
-                submitted = st.form_submit_button("✅ Add Consent", use_container_width=True)
+                submitted = st.form_submit_button("Add Consent", use_container_width=True)
 
                 if submitted:
                     if not (purpose and categories and consent_text and mechanism and withdrawal_method):
@@ -424,11 +510,14 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
 
         # TAB 3: Compliance Audit (admin/member only)
         with tab3:
-            st.subheader("Compliance Audit - DPDPA Section 6")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Compliance Audit - DPDPA Section 6</h3>',
+                unsafe_allow_html=True
+            )
 
             if consents:
                 for idx, consent in enumerate(consents):
-                    with st.expander(f"📋 {consent.get('purpose', 'Consent')[:40]}..."):
+                    with st.expander(f"{consent.get('purpose', 'Consent')[:40]}..."):
                         col1, col2, col3 = st.columns(3)
 
                         # Free
@@ -484,7 +573,7 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
                         st.divider()
                         st.caption(f"Withdrawal: {consent.get('withdrawal_method', '')}")
             else:
-                st.info("No consent records to audit.")
+                _render_empty_state("No consent records to audit.", "Add Consent")
 
 
 # ============================================================================
@@ -496,7 +585,7 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
     Privacy Notice Builder - Create and manage privacy notices, policies, and collection notices.
     DPDPA Rule 2 compliance with plain-language notice rendering.
     """
-    st.title("📄 Privacy Notice Builder")
+    _render_page_header("Privacy Notice Builder")
 
     # Fetch notices
     notices = _safe_db_call(db.get_privacy_notices, org_id) or []
@@ -519,9 +608,9 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
     can_edit = _check_role_permission(user_info, ["admin", "member"])
 
     if can_edit:
-        tab1, tab2, tab3 = st.tabs(["📋 All Notices", "✏️ Create Notice", "👁️ Preview"])
+        tab1, tab2, tab3 = st.tabs(["All Notices", "Create Notice", "Preview"])
     else:
-        tab1 = st.tabs(["📋 All Notices"])[0]
+        tab1 = st.tabs(["All Notices"])[0]
 
     # TAB 1: All Notices
     with tab1:
@@ -530,7 +619,7 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
             for n in notices:
                 table_data.append({
                     "Type": n.get("notice_type", ""),
-                    "Title": n.get("title", ""),
+                    "Title": n.get("title", "")[:40],
                     "Version": n.get("version", "1.0"),
                     "Status": n.get("status", ""),
                     "Last Updated": str(n.get("last_updated", ""))[:10],
@@ -543,7 +632,10 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
     # TAB 2: Create Notice (admin/member only)
     if can_edit:
         with tab2:
-            st.subheader("Create Privacy Notice")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Create Privacy Notice</h3>',
+                unsafe_allow_html=True
+            )
 
             with st.form("privacy_notice_form_key", clear_on_submit=True):
                 col1, col2 = st.columns(2)
@@ -553,24 +645,28 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
                         "Notice Type *",
                         ["Website Privacy Policy", "Mobile App Privacy Policy",
                          "Employee Privacy Notice", "Short-Form Collection Notice",
-                         "Cookie/Tracking Notice", "Third-Party Sharing Notice"]
+                         "Cookie/Tracking Notice", "Third-Party Sharing Notice"],
+                        help="What type of privacy notice is this?"
                     )
                     title = st.text_input(
                         "Notice Title *",
-                        placeholder="e.g., Privacy Policy"
+                        placeholder="e.g., Privacy Policy",
+                        help="Clear title for this notice"
                     )
 
                 with col2:
                     version = st.text_input(
                         "Version",
-                        value="1.0"
+                        value="1.0",
+                        help="Version number for tracking updates"
                     )
                     status = st.selectbox(
                         "Status",
-                        ["Draft", "Under Review", "Published", "Archived"]
+                        ["Draft", "Under Review", "Published", "Archived"],
+                        help="Publication status of this notice"
                     )
 
-                st.markdown("**Data Categories Collected** *")
+                st.markdown('**Data Categories Collected** *')
                 col1, col2, col3 = st.columns(3)
                 categories = []
                 cat_opts = [
@@ -587,23 +683,26 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
                 purposes = st.text_area(
                     "Processing Purposes *",
                     height=60,
-                    placeholder="Service delivery, analytics, communications"
+                    placeholder="Service delivery, analytics, communications",
+                    help="Why is this data being collected?"
                 )
 
                 third_parties = st.text_area(
                     "Third Parties (if any)",
                     height=60,
-                    placeholder="Payment processors, analytics providers"
+                    placeholder="Payment processors, analytics providers",
+                    help="Who receives the data?"
                 )
 
                 retention = st.text_area(
                     "Data Retention Information *",
                     height=60,
-                    placeholder="e.g., Customer data retained for 3 years after account closure"
+                    placeholder="e.g., Customer data retained for 3 years after account closure",
+                    help="How long is data kept?"
                 )
 
                 # Pre-filled DPDPA rights
-                st.markdown("**Data Principal Rights** (DPDPA mandated)")
+                st.markdown('**Data Principal Rights** (DPDPA mandated)')
                 dpdpa_rights = (
                     "Right to Access (Section 11): Request a copy of your personal data.\n"
                     "Right to Correction (Section 12): Request corrections to inaccurate data.\n"
@@ -620,10 +719,11 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
 
                 grievance_officer = st.text_input(
                     "Grievance Officer Email/Contact",
-                    placeholder="grievance@company.com"
+                    placeholder="grievance@company.com",
+                    help="Contact for data principal grievances"
                 )
 
-                submitted = st.form_submit_button("✅ Create Notice", use_container_width=True)
+                submitted = st.form_submit_button("Create Notice", use_container_width=True)
 
                 if submitted:
                     if not (title and notice_type and categories and purposes and retention):
@@ -649,7 +749,10 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
 
         # TAB 3: Preview (admin/member only)
         with tab3:
-            st.subheader("Preview Privacy Notice")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Preview Privacy Notice</h3>',
+                unsafe_allow_html=True
+            )
 
             if notices:
                 selected_notice = st.selectbox(
@@ -662,30 +765,40 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
                 if matching:
                     notice = matching[0]
 
-                    # Render as plain-language notice
-                    st.markdown(f"# {notice.get('title', 'Privacy Notice')}")
+                    # Render as styled notice preview
+                    st.markdown(
+                        '<div style="background: rgba(17,24,39,0.8); border: 1px solid rgba(30,41,59,0.5); '
+                        'border-radius: 16px; padding: 32px; margin-bottom: 16px;">',
+                        unsafe_allow_html=True
+                    )
+
+                    st.markdown(f'<h2 style="color: #14B8A6; margin-bottom: 12px;">{notice.get("title", "Privacy Notice")}</h2>', unsafe_allow_html=True)
                     st.caption(f"Version {notice.get('version', '1.0')} | Last updated {notice.get('last_updated', 'N/A')}")
 
-                    st.markdown("## What We Collect")
+                    st.markdown('---')
+
+                    st.markdown('**What We Collect**')
                     st.write(notice.get("data_categories", ""))
 
-                    st.markdown("## Why We Collect It")
+                    st.markdown('**Why We Collect It**')
                     st.write(notice.get("purposes", ""))
 
-                    st.markdown("## Who We Share With")
+                    st.markdown('**Who We Share With**')
                     shared = notice.get("third_parties", "")
                     st.write(shared if shared else "We do not share your data with third parties.")
 
-                    st.markdown("## How Long We Keep It")
+                    st.markdown('**How Long We Keep It**')
                     st.write(notice.get("retention_info", ""))
 
-                    st.markdown("## Your Rights")
+                    st.markdown('**Your Rights**')
                     st.write(notice.get("rights_info", ""))
 
-                    st.markdown("## Contact Us")
+                    st.markdown('**Contact Us**')
                     st.write(f"Grievance Officer: {notice.get('grievance_officer', 'contact@company.com')}")
+
+                    st.markdown('</div>', unsafe_allow_html=True)
             else:
-                st.info("No notices to preview.")
+                _render_empty_state("No notices to preview.", "Create Notice")
 
 
 # ============================================================================
@@ -697,12 +810,19 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
     Data Principal Rights Tracker - Manage SARs, correction, erasure, and grievance requests.
     30-day DPDPA Rule 8 deadline tracking with SLA monitoring and status workflow.
     """
-    st.title("🛡️ Data Principal Rights Requests")
+    _render_page_header("Data Principal Rights Requests")
 
-    st.info(
-        "Track all Subject Access Requests (SARs), corrections, erasures, and grievances. "
-        "DPDPA Rule 8 mandates 30-day response deadline."
+    st.markdown(
+        '<div style="background: rgba(59,130,246,0.1); border-left: 4px solid #3B82F6; '
+        'border-radius: 8px; padding: 16px; margin-bottom: 24px;">',
+        unsafe_allow_html=True
     )
+    st.markdown(
+        'Track all Subject Access Requests (SARs), corrections, erasures, and grievances. '
+        'DPDPA Rule 8 mandates 30-day response deadline.',
+        unsafe_allow_html=True
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Fetch requests
     requests = _safe_db_call(db.get_rights_requests, org_id) or []
@@ -738,9 +858,9 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
     can_edit = _check_role_permission(user_info, ["admin", "member"])
 
     if can_edit:
-        tab1, tab2, tab3 = st.tabs(["📊 All Requests", "➕ Log Request", "📋 Manage"])
+        tab1, tab2, tab3 = st.tabs(["All Requests", "Log Request", "Manage"])
     else:
-        tab1 = st.tabs(["📊 All Requests"])[0]
+        tab1 = st.tabs(["All Requests"])[0]
 
     # TAB 1: All Requests
     with tab1:
@@ -763,8 +883,8 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
 
                 table_data.append({
                     "ID": r.get("id", "")[:8],
-                    "Type": r.get("request_type", ""),
-                    "Requester": r.get("requester_name", ""),
+                    "Type": r.get("request_type", "")[:25],
+                    "Requester": r.get("requester_name", "")[:20],
                     "Status": f"{status_icon} {r.get('status', '')}",
                     "Created": str(created)[:10],
                     "Due": str(due)[:10],
@@ -781,7 +901,10 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
     # TAB 2: Log Request (admin/member only)
     if can_edit:
         with tab2:
-            st.subheader("Log New Data Principal Request")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Log New Data Principal Request</h3>',
+                unsafe_allow_html=True
+            )
 
             with st.form("rights_request_form_key", clear_on_submit=True):
                 col1, col2 = st.columns(2)
@@ -791,38 +914,44 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                         "Request Type *",
                         ["Access Request - Section 11", "Correction Request - Section 12",
                          "Erasure Request - Section 12", "Grievance - Section 14",
-                         "Nomination - Section 14(3)"]
+                         "Nomination - Section 14(3)"],
+                        help="What type of rights request is this?"
                     )
                     requester_name = st.text_input(
                         "Requester Name *",
-                        placeholder="Full name"
+                        placeholder="Full name",
+                        help="Full name of the data principal"
                     )
 
                 with col2:
                     requester_email = st.text_input(
                         "Requester Email *",
-                        placeholder="email@example.com"
+                        placeholder="email@example.com",
+                        help="Contact email for the requester"
                     )
                     identity_verified = st.checkbox(
-                        "Identity Verified"
+                        "Identity Verified",
+                        help="Has the requester's identity been verified?"
                     )
 
                 description = st.text_area(
                     "Request Description *",
                     height=80,
-                    placeholder="Details of the request"
+                    placeholder="Details of the request",
+                    help="Specific details of what is being requested"
                 )
 
                 created_date = datetime.now()
                 due_date = created_date + timedelta(days=30)
-                st.markdown(f"**Auto-calculated Due Date (30 days): {due_date.strftime('%Y-%m-%d')}**")
+                st.markdown(f'<p style="color: #A1A5B0; font-size: 14px;">Auto-calculated Due Date (30 days): <strong style="color: #14B8A6;">{due_date.strftime("%Y-%m-%d")}</strong></p>', unsafe_allow_html=True)
 
                 status = st.selectbox(
                     "Initial Status",
-                    ["Received", "Identity Verification", "In Progress"]
+                    ["Received", "Identity Verification", "In Progress"],
+                    help="What is the initial status of this request?"
                 )
 
-                submitted = st.form_submit_button("✅ Log Request", use_container_width=True)
+                submitted = st.form_submit_button("Log Request", use_container_width=True)
 
                 if submitted:
                     if not (request_type and requester_name and requester_email and description):
@@ -846,17 +975,20 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
 
         # TAB 3: Manage (admin/member only)
         with tab3:
-            st.subheader("Manage Request Status")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Manage Request Status</h3>',
+                unsafe_allow_html=True
+            )
 
             if requests:
                 selected = st.selectbox(
                     "Select request",
-                    [f"{r.get('request_type', '')} - {r.get('requester_name', '')}" for r in requests],
+                    [f"{r.get('request_type', '')[:25]} - {r.get('requester_name', '')[:20]}" for r in requests],
                     key="req_manage_select"
                 )
 
                 matching = [r for r in requests
-                           if f"{r.get('request_type', '')} - {r.get('requester_name', '')}" == selected]
+                           if f"{r.get('request_type', '')[:25]} - {r.get('requester_name', '')[:20]}" == selected]
 
                 if matching:
                     req = matching[0]
@@ -870,7 +1002,7 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                         )
 
                     with col2:
-                        if st.button("Update Status", key="req_update_btn"):
+                        if st.button("Update Status", key="req_update_btn", use_container_width=True):
                             _safe_db_call(
                                 db.update_rights_request_status,
                                 req.get("id"),
@@ -880,20 +1012,30 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                             st.rerun()
 
                     st.divider()
-                    st.markdown(f"**Requester:** {req.get('requester_name', '')} ({req.get('requester_email', '')})")
-                    st.markdown(f"**Type:** {req.get('request_type', '')}")
-                    st.markdown(f"**Description:** {req.get('description', '')}")
-                    st.markdown(f"**Identity Verified:** {'Yes' if req.get('identity_verified') else 'No'}")
+
+                    st.markdown(
+                        '<div style="background: rgba(17,24,39,0.8); border-left: 4px solid #14B8A6; '
+                        'border-radius: 8px; padding: 16px; margin-bottom: 16px;">',
+                        unsafe_allow_html=True
+                    )
+                    st.markdown(f'<p><strong>Requester:</strong> {req.get("requester_name", "")} ({req.get("requester_email", "")})</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p><strong>Type:</strong> {req.get("request_type", "")}</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p><strong>Identity Verified:</strong> {"Yes" if req.get("identity_verified") else "No"}</p>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+                    st.markdown('**Request Description**')
+                    st.write(req.get('description', ''))
 
                     # Response notes
                     response_notes = st.text_area(
                         "Response Notes",
                         height=100,
                         placeholder="Add resolution details, data provided, etc.",
-                        key="req_notes"
+                        key="req_notes",
+                        help="Document the response and resolution"
                     )
 
-                    if response_notes and st.button("Save Notes", key="req_save_notes"):
+                    if response_notes and st.button("Save Notes", key="req_save_notes", use_container_width=True):
                         _safe_db_call(
                             db.update_rights_request_notes,
                             req.get("id"),
@@ -901,7 +1043,7 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                         )
                         st.success("Notes saved!")
             else:
-                st.info("No requests to manage.")
+                _render_empty_state("No requests to manage.", "Log Request")
 
 
 # ============================================================================
@@ -913,12 +1055,19 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
     Vendor/Processor Management - Track third-party data processors, DPA status, and security assessments.
     Risk-rated vendor registry with certification tracking and overdue assessment alerts.
     """
-    st.title("🤝 Vendor & Processor Management")
+    _render_page_header("Vendor & Processor Management")
 
-    st.info(
-        "Track all third-party data processors. Data Processing Agreements (DPAs) required for all vendors "
-        "processing personal data per DPDPA Section 4."
+    st.markdown(
+        '<div style="background: rgba(168,85,247,0.1); border-left: 4px solid #A855F7; '
+        'border-radius: 8px; padding: 16px; margin-bottom: 24px;">',
+        unsafe_allow_html=True
     )
+    st.markdown(
+        'Track all third-party data processors. Data Processing Agreements (DPAs) required for all vendors '
+        'processing personal data per DPDPA Section 4.',
+        unsafe_allow_html=True
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Fetch vendors
     vendors = _safe_db_call(db.get_vendors, org_id) or []
@@ -950,9 +1099,9 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
     can_edit = _check_role_permission(user_info, ["admin", "member"])
 
     if can_edit:
-        tab1, tab2, tab3 = st.tabs(["📊 Registry", "➕ Add Vendor", "📈 Risk Dashboard"])
+        tab1, tab2, tab3 = st.tabs(["Registry", "Add Vendor", "Risk Dashboard"])
     else:
-        tab1 = st.tabs(["📊 Registry"])[0]
+        tab1 = st.tabs(["Registry"])[0]
 
     # TAB 1: Vendor Registry
     with tab1:
@@ -970,10 +1119,10 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 assess_flag = "⚠️ OVERDUE" if days_old > 365 else f"{days_old}d ago"
 
                 table_data.append({
-                    "Vendor": v.get("vendor_name", ""),
-                    "Service Type": v.get("service_type", ""),
-                    "Data Shared": v.get("data_shared", "")[:30],
-                    "DPA": f"{dpa_icon} {dpa}",
+                    "Vendor": v.get("vendor_name", "")[:25],
+                    "Service Type": v.get("service_type", "")[:20],
+                    "Data Shared": v.get("data_shared", "")[:25],
+                    "DPA": f"{dpa_icon} {dpa[:15]}",
                     "Risk": f"{risk_icon} {risk}",
                     "ISO 27001": "✅" if v.get("iso_27001_certified") else "❌",
                     "SOC2": "✅" if v.get("soc2_certified") else "❌",
@@ -990,7 +1139,10 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
     # TAB 2: Add Vendor (admin/member only)
     if can_edit:
         with tab2:
-            st.subheader("Add New Vendor/Processor")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Add New Vendor/Processor</h3>',
+                unsafe_allow_html=True
+            )
 
             with st.form("vendor_form_key", clear_on_submit=True):
                 col1, col2 = st.columns(2)
@@ -998,27 +1150,31 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 with col1:
                     vendor_name = st.text_input(
                         "Vendor Name *",
-                        placeholder="e.g., AWS, Salesforce"
+                        placeholder="e.g., AWS, Salesforce",
+                        help="Official name of the vendor/processor"
                     )
                     service_type = st.selectbox(
                         "Service Type *",
                         ["Cloud Infrastructure", "SaaS Platform", "Payment Processing",
                          "Marketing/Advertising", "Analytics", "IT Services/Outsourcing",
-                         "Logistics/Delivery", "HR/Payroll", "Legal/Consulting", "Data Center/Hosting"]
+                         "Logistics/Delivery", "HR/Payroll", "Legal/Consulting", "Data Center/Hosting"],
+                        help="What type of service does this vendor provide?"
                     )
 
                 with col2:
                     dpa_status = st.selectbox(
                         "DPA Status *",
                         ["Not Started", "Draft In Progress", "Under Legal Review",
-                         "Signed", "Expired", "Not Required"]
+                         "Signed", "Expired", "Not Required"],
+                        help="Status of Data Processing Agreement"
                     )
                     security_rating = st.selectbox(
                         "Security Rating",
-                        ["A", "B", "C", "D", "Not Assessed"]
+                        ["A", "B", "C", "D", "Not Assessed"],
+                        help="Overall security assessment rating"
                     )
 
-                st.markdown("**Data Shared with Vendor** *")
+                st.markdown('**Data Shared with Vendor** *')
                 col1, col2, col3 = st.columns(3)
                 data_shared = []
                 data_opts = [
@@ -1035,40 +1191,45 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 col1, col2, col3 = st.columns(3)
 
                 with col1:
-                    iso_27001 = st.checkbox("ISO 27001 Certified")
-                    soc2 = st.checkbox("SOC 2 Certified")
+                    iso_27001 = st.checkbox("ISO 27001 Certified", help="Does vendor have ISO 27001 certification?")
+                    soc2 = st.checkbox("SOC 2 Certified", help="Does vendor have SOC 2 certification?")
 
                 with col2:
                     last_assessment = st.date_input(
                         "Last Assessment Date *",
-                        value=datetime.now().date()
+                        value=datetime.now().date(),
+                        help="When was the last security assessment conducted?"
                     )
 
                 with col3:
                     risk_level = st.selectbox(
                         "Risk Level *",
-                        ["Low", "Medium", "High", "Critical"]
+                        ["Low", "Medium", "High", "Critical"],
+                        help="Assessment of risk for this vendor"
                     )
 
                 col1, col2 = st.columns(2)
 
                 with col1:
                     contract_expiry = st.date_input(
-                        "Contract Expiry Date"
+                        "Contract Expiry Date",
+                        help="When does the contract with this vendor expire?"
                     )
 
                 with col2:
                     next_assessment = st.date_input(
-                        "Next Assessment Due"
+                        "Next Assessment Due",
+                        help="When is the next security assessment scheduled?"
                     )
 
                 notes = st.text_area(
                     "Notes",
                     height=60,
-                    placeholder="e.g., Renewal pending, certification in progress"
+                    placeholder="e.g., Renewal pending, certification in progress",
+                    help="Additional information about this vendor"
                 )
 
-                submitted = st.form_submit_button("✅ Add Vendor", use_container_width=True)
+                submitted = st.form_submit_button("Add Vendor", use_container_width=True)
 
                 if submitted:
                     if not (vendor_name and service_type and data_shared and dpa_status and risk_level):
@@ -1096,7 +1257,10 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
 
         # TAB 3: Risk Dashboard (admin/member only)
         with tab3:
-            st.subheader("Risk & Compliance Dashboard")
+            st.markdown(
+                '<h3 style="color: #E2E8F0; margin-bottom: 20px;">Risk & Compliance Dashboard</h3>',
+                unsafe_allow_html=True
+            )
 
             if vendors:
                 col1, col2 = st.columns(2)
@@ -1112,16 +1276,9 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                         data=[go.Bar(
                             x=list(risk_counts.keys()),
                             y=list(risk_counts.values()),
-                            marker_color=["#dc2626", "#f59e0b", "#eab308", "#22c55e"]
+                            marker=dict(color=["#DC2626", "#F59E0B", "#EAB308", "#22C55E"], line=dict(color="#1E293B", width=1))
                         )],
-                        layout=go.Layout(
-                            title="Vendor Risk Distribution",
-                            height=400,
-                            plot_bgcolor="#1E293B",
-                            paper_bgcolor="#0F172A",
-                            xaxis_title="Risk Level",
-                            yaxis_title="Count"
-                        )
+                        layout=_configure_dark_chart("Vendor Risk Distribution")
                     )
                     st.plotly_chart(fig1, use_container_width=True)
 
@@ -1133,18 +1290,20 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                         dpa_counts[dpa] = dpa_counts.get(dpa, 0) + 1
 
                     fig2 = go.Figure(
-                        data=[go.Pie(labels=list(dpa_counts.keys()), values=list(dpa_counts.values()))],
-                        layout=go.Layout(
-                            title="DPA Status Breakdown",
-                            height=400,
-                            plot_bgcolor="#1E293B",
-                            paper_bgcolor="#0F172A"
-                        )
+                        data=[go.Pie(
+                            labels=list(dpa_counts.keys()),
+                            values=list(dpa_counts.values()),
+                            marker=dict(colors=["#14B8A6", "#0D9488", "#06B6D4", "#0891B2", "#0E7490"])
+                        )],
+                        layout=_configure_dark_chart("DPA Status Breakdown")
                     )
                     st.plotly_chart(fig2, use_container_width=True)
 
                 # Summary cards
-                st.markdown("## Compliance Summary")
+                st.markdown(
+                    '<h3 style="color: #E2E8F0; margin-top: 32px; margin-bottom: 20px;">Compliance Summary</h3>',
+                    unsafe_allow_html=True
+                )
                 col1, col2, col3, col4 = st.columns(4)
 
                 dpa_pct = int((dpas_signed / max(1, len(vendors))) * 100)
@@ -1165,4 +1324,4 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 with col4:
                     st.metric("Avg Assessment Age (days)", avg_age)
             else:
-                st.info("No vendor data to display.")
+                _render_empty_state("No vendor data to display.", "Add Vendor")

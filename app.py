@@ -16,6 +16,7 @@ from pathlib import Path
 import os
 import tempfile
 import hashlib
+import plotly.graph_objects as go
 
 # Import local modules with graceful fallback
 try:
@@ -91,68 +92,122 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] {
+* {
     font-family: 'Inter', sans-serif;
 }
 
-/* Metric cards */
-[data-testid="metric-container"] {
-    background: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 16px;
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+    background: #0A0F1E;
+    color: #E2E8F0;
 }
 
-/* Sidebar */
+/* Main container */
+.main {
+    background: #0A0F1E;
+}
+
+/* Remove Streamlit branding */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+.stDeployButton { display: none; }
+
+/* Metric cards with glass-morphism */
+[data-testid="metric-container"] {
+    background: rgba(17, 24, 39, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(30, 41, 59, 0.5);
+    border-radius: 16px;
+    padding: 20px;
+    border-left: 4px solid #14B8A6;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar styling */
 [data-testid="stSidebar"] {
-    background: #0F172A;
-    border-right: 1px solid #1E293B;
+    background: #060A14;
+    border-right: 1px solid rgba(30, 41, 59, 0.5);
 }
 
 /* Tabs */
 .stTabs [data-baseweb="tab-list"] {
     gap: 8px;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.5);
 }
+
 .stTabs [data-baseweb="tab"] {
-    background: #1E293B;
-    border-radius: 8px;
-    padding: 8px 16px;
+    background: transparent;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 20px;
     color: #94A3B8;
+    font-weight: 500;
+    border: none;
 }
+
 .stTabs [aria-selected="true"] {
-    background: #14B8A6 !important;
-    color: #0F172A !important;
+    background: rgba(20, 184, 166, 0.1) !important;
+    color: #14B8A6 !important;
+    border-bottom: 2px solid #14B8A6 !important;
 }
 
 /* Expander */
 .streamlit-expanderHeader {
-    background: #1E293B;
-    border-radius: 8px;
+    background: rgba(17, 24, 39, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(30, 41, 59, 0.5);
+    color: #E2E8F0;
+}
+
+.streamlit-expanderHeader:hover {
+    background: rgba(20, 184, 166, 0.1);
 }
 
 /* Buttons */
-.stButton > button[kind="primary"] {
-    background: #14B8A6;
-    color: #0F172A;
-    border: none;
-    border-radius: 8px;
+.stButton > button {
+    border-radius: 12px;
     font-weight: 600;
+    font-size: 14px;
+    padding: 10px 24px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #14B8A6, #06B6D4);
+    color: #0A0F1E;
+}
+
+.stButton > button[kind="primary"]:hover {
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    transform: translateY(-2px);
+}
+
+.stButton > button[kind="secondary"] {
+    background: transparent;
+    border: 1px solid #14B8A6;
+    color: #14B8A6;
+}
+
+.stButton > button[kind="secondary"]:hover {
+    background: rgba(20, 184, 166, 0.1);
 }
 
 /* Cards */
 .card {
-    background: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 12px;
+    background: rgba(17, 24, 39, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(30, 41, 59, 0.5);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
     color: #14B8A6;
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
 
 .card-body {
@@ -161,14 +216,170 @@ html, body, [class*="css"] {
     line-height: 1.6;
 }
 
+/* Text inputs and forms */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stSelectbox > div > div > select,
+.stNumberInput > div > div > input {
+    background: #0F172A !important;
+    border: 1px solid rgba(30, 41, 59, 0.8) !important;
+    color: #E2E8F0 !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stSelectbox > div > div > select:focus,
+.stNumberInput > div > div > input:focus {
+    border: 2px solid #14B8A6 !important;
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.3) !important;
+}
+
+/* Radio buttons */
+.stRadio > div > label {
+    color: #E2E8F0;
+}
+
+.stRadio > div > div {
+    margin: 8px 0;
+}
+
+/* Progress bars */
+.stProgress > div > div > div > div {
+    background: linear-gradient(90deg, #14B8A6, #06B6D4);
+    border-radius: 12px;
+}
+
+/* Dividers */
+hr {
+    border-color: rgba(30, 41, 59, 0.5);
+}
+
+/* Titles and headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #E2E8F0;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    margin-top: 0;
+}
+
+/* Info/Warning/Error boxes */
+.stAlert {
+    border-radius: 12px;
+    background: rgba(17, 24, 39, 0.8) !important;
+    border: 1px solid rgba(30, 41, 59, 0.5) !important;
+}
+
+/* Caption text */
+.stCaption {
+    color: #94A3B8;
+}
+
+/* Dataframe styling */
+[role="grid"] {
+    background: rgba(17, 24, 39, 0.8) !important;
+    border-radius: 12px;
+    border: 1px solid rgba(30, 41, 59, 0.5) !important;
+}
+
+/* Container styles */
+.stContainer {
+    background: transparent;
+}
+
+/* Columns and layouts */
+[data-testid="column"] {
+    background: transparent;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(20, 184, 166, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(20, 184, 166, 0.5);
+}
+
+/* Form styling */
+.stForm {
+    background: transparent;
+    border: none;
+}
+
 /* Footer */
 .footer {
     text-align: center;
-    padding: 24px 0;
+    padding: 32px 0;
     color: #64748B;
-    border-top: 1px solid #1E293B;
-    margin-top: 48px;
-    font-size: 13px;
+    border-top: 1px solid rgba(30, 41, 59, 0.5);
+    margin-top: 64px;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Login page specific */
+.login-hero {
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(6, 182, 212, 0.1));
+    border-radius: 20px;
+    padding: 48px;
+    text-align: center;
+    margin-bottom: 32px;
+    border: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+.login-logo {
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #14B8A6, #06B6D4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+}
+
+.login-tagline {
+    color: #94A3B8;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    color: #CBD5E1;
+    font-size: 16px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -186,7 +397,7 @@ def init_session_state():
             init_ai_tables(conn)
             conn.close()
         except Exception:
-            pass  # Silently skip if tables already exist or other issue
+            pass
 
     # Authentication states
     if "authenticated" not in st.session_state:
@@ -262,9 +473,9 @@ def get_status_icon(status):
 def get_role_badge(role):
     """Get badge display for user role"""
     badges = {
-        "admin": "🔴",
-        "member": "🟢",
-        "viewer": "🔵"
+        "admin": "👑",
+        "member": "👤",
+        "viewer": "👁️"
     }
     return f"{badges.get(role, '•')} {role.capitalize()}"
 
@@ -275,35 +486,30 @@ def render_login_page():
 
     with col2:
         st.markdown("""
-        <div style="text-align: center; padding: 2rem 0;">
-            <h1 style="color: #14B8A6; margin: 0;">🛡️ Svikruti.ai</h1>
-            <p style="color: #94A3B8; margin: 0.5rem 0 0 0; font-size: 1.1rem;">
-                DPDPA Compliance Automation Platform
-            </p>
+        <div class="login-hero">
+            <div class="login-logo">Svikruti.ai</div>
+            <div class="login-tagline">India's AI-powered DPDPA compliance platform</div>
+            <div class="login-subtitle">Automate compliance. Reduce risk. Stay compliant.</div>
         </div>
         """, unsafe_allow_html=True)
-
-        st.markdown("---")
 
         tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
         with tab1:
-            st.subheader("Login to Your Account")
+            st.markdown("### Welcome Back")
 
             with st.form("login_form", clear_on_submit=True):
                 email = st.text_input("Email Address", placeholder="you@example.com")
-                password = st.text_input("Password", type="password", placeholder="Enter your password")
-                submit = st.form_submit_button("Login", use_container_width=True, type="primary")
+                password = st.text_input("Password", type="password", placeholder="••••••••")
+                submit = st.form_submit_button("Sign In", use_container_width=True, type="primary")
 
                 if submit:
                     if not email or not password:
                         st.error("Please enter both email and password")
                     else:
-                        # Check if user exists
                         user = st.session_state.db.authenticate_user(email, password)
 
                         if user:
-                            # Login successful
                             st.session_state.authenticated = True
                             st.session_state.user_id = user['id']
                             st.session_state.org_id = user['org_id']
@@ -316,41 +522,27 @@ def render_login_page():
                             }
                             st.session_state.page = "Dashboard"
                             st.session_state.db.update_last_login(user['id'])
-                            st.success("Login successful! Redirecting...")
+                            st.success("Welcome back!")
                             st.rerun()
                         else:
                             st.error("Invalid email or password.")
 
         with tab2:
-            st.subheader("Create a New Account")
+            st.markdown("### Create Account")
 
             with st.form("signup_form", clear_on_submit=True):
-                col1, col2 = st.columns(2)
+                full_name = st.text_input("Full Name", placeholder="John Doe")
+                email = st.text_input("Email Address", placeholder="you@example.com")
+                org_name = st.text_input("Organization Name", placeholder="Acme Corp")
+                industry = st.selectbox("Industry", config.INDUSTRY_TYPES)
 
-                with col1:
-                    full_name = st.text_input("Full Name", placeholder="John Doe")
-                    email = st.text_input("Email Address", placeholder="you@example.com")
+                org_size = st.selectbox("Organization Size", config.ORG_SIZES)
+                password = st.text_input("Password", type="password", placeholder="Min 8 characters")
+                confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm password")
 
-                with col2:
-                    org_name = st.text_input("Organization Name", placeholder="Acme Corp")
-                    industry = st.selectbox("Industry", config.INDUSTRY_TYPES)
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    org_size = st.selectbox("Organization Size", config.ORG_SIZES)
-                    password = st.text_input("Password", type="password", placeholder="Min 8 characters")
-
-                with col2:
-                    st.write("")
-                    st.write("")
-                    confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm password")
-
-                st.markdown("---")
                 submit = st.form_submit_button("Create Account", use_container_width=True, type="primary")
 
                 if submit:
-                    # Validation
                     if not all([full_name, email, org_name, password, confirm_password]):
                         st.error("Please fill in all fields")
                     elif len(password) < 8:
@@ -358,7 +550,6 @@ def render_login_page():
                     elif password != confirm_password:
                         st.error("Passwords do not match")
                     else:
-                        # Check if email already exists
                         conn = st.session_state.db.get_connection()
                         cursor = conn.cursor()
                         cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
@@ -369,7 +560,6 @@ def render_login_page():
                             st.error("Email already registered. Please login instead.")
                         else:
                             try:
-                                # Create organization (created_by=0 initially, updated after user creation)
                                 org_id = st.session_state.db.create_organization(
                                     name=org_name,
                                     created_by=0,
@@ -379,7 +569,6 @@ def render_login_page():
                                     compliance_level="Getting Started"
                                 )
 
-                                # Create user as admin
                                 user_id = st.session_state.db.create_user(
                                     email=email,
                                     password=password,
@@ -388,10 +577,8 @@ def render_login_page():
                                     org_id=org_id
                                 )
 
-                                # Update org created_by
                                 st.session_state.db.update_organization(org_id, created_by=user_id)
 
-                                # Auto-login
                                 st.session_state.authenticated = True
                                 st.session_state.user_id = user_id
                                 st.session_state.org_id = org_id
@@ -403,7 +590,7 @@ def render_login_page():
                                     "org_id": org_id
                                 }
                                 st.session_state.page = "Dashboard"
-                                st.success("Account created successfully! Welcome to Svikruti.ai")
+                                st.success("Account created successfully!")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error creating account: {str(e)}")
@@ -415,87 +602,88 @@ def render_sidebar():
         return
 
     with st.sidebar:
-        st.markdown(f"""
-            <div style="text-align: center; padding: 1rem 0; border-bottom: 2px solid #14B8A6;">
-                <h1 style="color: #14B8A6; margin: 0;">🛡️ Svikruti.ai</h1>
-                <p style="color: #E2E8F0; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
-                    DPDPA Compliance Automation
-                </p>
+        st.markdown("""
+        <div style="text-align: center; padding: 20px 0; margin-bottom: 24px;">
+            <div style="font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #14B8A6, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">
+                Svikruti.ai
             </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("---")
-
-        # User info
-        user = st.session_state.user_info
-        org = st.session_state.db.get_organization(st.session_state.org_id)
-
-        st.markdown(f"""
-        <div style="background: #1E293B; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            <div style="color: #14B8A6; font-weight: bold; margin-bottom: 0.5rem;">{user['full_name']}</div>
-            <div style="color: #94A3B8; font-size: 0.9rem;">{org['name']}</div>
-            <div style="color: #64748B; font-size: 0.85rem; margin-top: 0.5rem;">{get_role_badge(user['role'])}</div>
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 500;">
+                DPDPA Compliance Platform
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("---")
 
-        # Navigation menu
-        st.subheader("Navigation")
+        user = st.session_state.user_info
+        org = st.session_state.db.get_organization(st.session_state.org_id)
 
-        pages = [
-            ("📊 Dashboard", "Dashboard"),
-            ("🔍 Gap Assessment", "Gap Assessment"),
-            ("📋 RoPA Registry", "RoPA Registry"),
-            ("🤝 Consent Manager", "Consent Manager"),
-            ("📝 Privacy Notices", "Privacy Notices"),
-            ("👤 Rights Requests", "Rights Requests"),
-            ("🏢 Vendor Management", "Vendor Management"),
-            ("📄 Document Generator", "Document Generator"),
-            ("✅ Compliance Tracker", "Compliance Tracker"),
-            ("⚠️ Breach Response", "Breach Response"),
-            ("📚 Knowledge Base", "Knowledge Base"),
-            ("⚙️ Settings", "Settings"),
-        ]
+        st.markdown(f"""
+        <div style="background: rgba(17, 24, 39, 0.8); padding: 16px; border-radius: 12px; border: 1px solid rgba(30, 41, 59, 0.5); margin-bottom: 24px;">
+            <div style="color: #14B8A6; font-weight: 600; margin-bottom: 8px; font-size: 14px;">{user['full_name']}</div>
+            <div style="color: #94A3B8; font-size: 13px; margin-bottom: 8px;">{org['name']}</div>
+            <div style="color: #64748B; font-size: 12px;">{get_role_badge(user['role'])}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        # Add AI-powered pages if available
+        st.markdown("---")
+
+        nav_sections = {
+            "OVERVIEW": [
+                ("📊 Dashboard", "Dashboard"),
+            ],
+            "COMPLIANCE": [
+                ("🔍 Gap Assessment", "Gap Assessment"),
+                ("📋 RoPA Registry", "RoPA Registry"),
+                ("🤝 Consent Manager", "Consent Manager"),
+                ("📝 Privacy Notices", "Privacy Notices"),
+            ],
+            "OPERATIONS": [
+                ("👤 Rights Requests", "Rights Requests"),
+                ("🏢 Vendor Management", "Vendor Management"),
+                ("📄 Document Generator", "Document Generator"),
+            ],
+            "MONITORING": [
+                ("✅ Compliance Tracker", "Compliance Tracker"),
+                ("⚠️ Breach Response", "Breach Response"),
+            ],
+            "REFERENCE": [
+                ("📚 Knowledge Base", "Knowledge Base"),
+            ],
+        }
+
         if AI_PAGES_AVAILABLE:
-            pages.insert(-1, ("", ""))  # separator placeholder
-            ai_pages_list = [
+            nav_sections["AI TOOLS"] = [
                 ("🤖 AI Assistant", "AI Assistant"),
                 ("✨ AI Doc Drafter", "AI Doc Drafter"),
                 ("🎯 AI Compliance Advisor", "AI Compliance Advisor"),
                 ("🚨 AI Breach Analyzer", "AI Breach Analyzer"),
                 ("📝 AI Notice Reviewer", "AI Notice Reviewer"),
+            ]
+
+        if user['role'] == "admin":
+            nav_sections["ADMIN"] = [
+                ("⚙️ Settings", "Settings"),
                 ("🔧 AI Configuration", "AI Configuration"),
             ]
-            # Insert AI pages before Settings
-            for ap in ai_pages_list:
-                pages.insert(-1, ap)
 
-        for label, page_name in pages:
-            # Skip empty separator entries
-            if not page_name:
-                st.markdown("---")
-                st.markdown('<p style="color: #14B8A6; font-weight: 600; font-size: 0.8rem; margin: 0;">AI-POWERED</p>', unsafe_allow_html=True)
+        for section_name, pages in nav_sections.items():
+            if section_name == "AI TOOLS" and not AI_PAGES_AVAILABLE:
+                continue
+            if section_name == "ADMIN" and user['role'] != "admin":
                 continue
 
-            # Skip Settings and AI Configuration if not admin
-            if page_name in ("Settings", "AI Configuration") and user['role'] != "admin":
-                continue
+            st.markdown(f'<p style="color: #64748B; font-size: 11px; font-weight: 600; margin: 16px 0 8px 0; text-transform: uppercase;">{section_name}</p>', unsafe_allow_html=True)
 
-            btn_type = "primary" if st.session_state.page == page_name else "secondary"
-            if st.button(label, key=f"nav_{page_name}", use_container_width=True, type=btn_type):
-                st.session_state.page = page_name
+            for label, page_name in pages:
+                btn_type = "primary" if st.session_state.page == page_name else "secondary"
+                if st.button(label, key=f"nav_{page_name}", use_container_width=True, type=btn_type):
+                    st.session_state.page = page_name
 
         st.markdown("---")
 
-        # Team Management (admin only)
         if user['role'] == "admin":
-            st.subheader("👥 Team Management")
-
-            with st.expander("Manage Team", expanded=False):
-                # Show org members
+            with st.expander("👥 Team Management", expanded=False):
                 conn = st.session_state.db.get_connection()
                 cursor = conn.cursor()
                 cursor.execute("SELECT id, email, full_name, role FROM users WHERE org_id = ? ORDER BY full_name",
@@ -507,7 +695,7 @@ def render_sidebar():
                 for member in members:
                     col1, col2 = st.columns([2, 1])
                     with col1:
-                        st.write(f"{member['full_name']} ({member['email']})")
+                        st.write(f"{member['full_name']}")
                     with col2:
                         st.caption(member['role'])
 
@@ -519,11 +707,8 @@ def render_sidebar():
 
                 if st.button("Send Invite", use_container_width=True):
                     if invite_email:
-                        # Generate invite (in production, this would send an email)
                         conn = st.session_state.db.get_connection()
                         cursor = conn.cursor()
-
-                        # Check if email already in org
                         cursor.execute("SELECT id FROM users WHERE email = ? AND org_id = ?",
                                      (invite_email, st.session_state.org_id))
                         existing = cursor.fetchone()
@@ -531,35 +716,13 @@ def render_sidebar():
                         if existing:
                             st.error("User already in organization")
                         else:
-                            # For demo: create user directly with invite role
-                            # In production, you'd generate an invite token and send email
-                            st.info(f"Invite sent to {invite_email} with {invite_role} role")
+                            st.info(f"Invite sent to {invite_email}")
 
                         conn.close()
 
         st.markdown("---")
 
-        # Help section
-        with st.expander("ℹ️ About Svikruti.ai"):
-            st.markdown(f"""
-            **Version:** {config.APP_VERSION}
-
-            Svikruti.ai is an open-source DPDPA compliance automation platform
-            designed to help organizations implement and maintain compliance
-            with India's Digital Personal Data Protection Act.
-
-            **Key Features:**
-            - No external dependencies
-            - Fully offline and secure
-            - Rule-based compliance checks
-            - Automated document generation
-            - Breach incident tracking
-            """)
-
-        st.markdown("---")
-
-        # Logout
-        if st.button("🚪 Logout", use_container_width=True):
+        if st.button("🚪 Logout", use_container_width=True, type="secondary"):
             st.session_state.authenticated = False
             st.session_state.user_id = None
             st.session_state.org_id = None
@@ -575,87 +738,117 @@ def page_dashboard():
         st.warning("Please log in to access the dashboard.")
         return
 
-    st.title(f"📊 Welcome back, {st.session_state.user_info['full_name']}")
+    st.title(f"Welcome, {st.session_state.user_info['full_name']}")
 
     org_id = st.session_state.org_id
     stats = st.session_state.db.get_dashboard_stats(org_id)
     org = stats["organization"]
 
-    # Header info
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        st.metric("Organization", org["name"])
-    with col2:
-        st.metric("Industry", org["industry"])
-    with col3:
-        st.metric("Compliance Level", org["compliance_level"])
-
-    st.markdown("---")
-
-    # Main metrics
+    # Metric cards
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         latest_score = stats["latest_assessment"]
         if latest_score:
             score = round(latest_score["overall_score"], 1)
-            st.metric("Compliance Score", f"{score}%", delta="out of 100")
+            st.metric("Compliance Score", f"{score}%", "out of 100")
         else:
-            st.metric("Compliance Score", "—", delta="No assessment yet")
+            st.metric("Compliance Score", "—", "Not assessed")
 
     with col2:
         pending_tasks = stats["task_counts"].get("PENDING", 0)
-        st.metric("Pending Tasks", pending_tasks)
+        st.metric("Pending Tasks", pending_tasks, "to complete")
 
     with col3:
         open_breaches = stats["open_breaches"]
-        st.metric("Open Breaches", open_breaches)
+        st.metric("Open Breaches", open_breaches, "incidents")
 
     with col4:
         docs = stats["total_documents"]
-        st.metric("Documents Generated", docs)
+        st.metric("Documents", docs, "generated")
 
     st.markdown("---")
 
-    # Compliance score and breakdown
-    if stats["latest_assessment"]:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.subheader("Overall Compliance Score")
-            score = stats["latest_assessment"]["overall_score"]
-            gauge_color = "#E63946" if score < 50 else "#FF9F1C" if score < 75 else "#2EC4B6"
-            st.markdown(f"""
-                <div style="text-align: center;">
-                    <div style="font-size: 3rem; color: {gauge_color}; font-weight: bold;">
-                        {score:.1f}%
-                    </div>
-                    <div style="color: #94A3B8;">Compliance Status</div>
-                </div>
-            """, unsafe_allow_html=True)
-
-        with col2:
-            st.subheader("Category Breakdown")
-            category_scores = stats["latest_assessment"]["category_scores"]
-
-            cat_data = []
-            for cat, score in sorted(category_scores.items()):
-                status = "🟢" if score >= 75 else "🟡" if score >= 50 else "🔴"
-                cat_data.append({
-                    "Category": cat,
-                    "Score": f"{score:.1f}%",
-                    "Status": status
-                })
-
-            st.dataframe(cat_data, use_container_width=True, hide_index=True)
-
-    st.markdown("---")
-
-    # Upcoming deadlines and modules
+    # Compliance visualization
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📅 Upcoming Deadlines")
+        st.markdown("### Compliance Score")
+        if stats["latest_assessment"]:
+            score = stats["latest_assessment"]["overall_score"]
+            fig = go.Figure(data=[go.Indicator(
+                mode="gauge+number+delta",
+                value=score,
+                domain={'x': [0, 1], 'y': [0, 1]},
+                title={'text': "Overall Score"},
+                gauge={
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "#14B8A6"},
+                    'steps': [
+                        {'range': [0, 50], 'color': "rgba(230, 57, 70, 0.2)"},
+                        {'range': [50, 75], 'color': "rgba(255, 159, 28, 0.2)"},
+                        {'range': [75, 100], 'color': "rgba(46, 196, 182, 0.2)"}
+                    ],
+                    'threshold': {
+                        'line': {'color': "#06B6D4", 'width': 2},
+                        'thickness': 0.75,
+                        'value': 75
+                    }
+                }
+            )])
+            fig.update_layout(
+                paper_bgcolor="rgba(10, 15, 30, 0)",
+                font=dict(color="#E2E8F0", family="Inter"),
+                height=300
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Complete a gap assessment to see your compliance score.")
+
+    with col2:
+        st.markdown("### Category Breakdown")
+        if stats["latest_assessment"]:
+            category_scores = stats["latest_assessment"]["category_scores"]
+            categories = list(category_scores.keys())
+            scores = list(category_scores.values())
+
+            fig = go.Figure(data=[go.Scatterpolar(
+                r=scores,
+                theta=categories,
+                fill='toself',
+                line=dict(color='#14B8A6'),
+                fillcolor='rgba(20, 184, 166, 0.3)',
+                name='Score'
+            )])
+            fig.update_layout(
+                polar=dict(
+                    bgcolor="rgba(15, 23, 42, 0.5)",
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100],
+                        tickfont=dict(color="#94A3B8"),
+                        gridcolor="rgba(30, 41, 59, 0.5)"
+                    ),
+                    angularaxis=dict(
+                        tickfont=dict(color="#E2E8F0")
+                    )
+                ),
+                paper_bgcolor="rgba(10, 15, 30, 0)",
+                font=dict(color="#E2E8F0", family="Inter"),
+                height=300,
+                showlegend=False
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Your category scores will appear here after assessment.")
+
+    st.markdown("---")
+
+    # Deadlines and status
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### Upcoming Deadlines")
         next_deadline = config.get_next_deadline()
 
         if next_deadline:
@@ -663,38 +856,26 @@ def page_dashboard():
             deadline_color = "#E63946" if days < 30 else "#FF9F1C" if days < 90 else "#2EC4B6"
 
             st.markdown(f"""
-                <div style="
-                    background-color: #1E293B;
-                    padding: 1.5rem;
-                    border-radius: 12px;
-                    border-left: 4px solid {deadline_color};
-                ">
-                    <div style="font-weight: bold; color: #14B8A6;">
-                        {next_deadline['name']}
-                    </div>
-                    <div style="color: #CBD5E1; margin-top: 0.5rem;">
-                        {next_deadline['date'].strftime('%B %d, %Y')}
-                    </div>
-                    <div style="color: {deadline_color}; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
-                        {days} days remaining
-                    </div>
-                </div>
+            <div class="card" style="border-left: 4px solid {deadline_color};">
+                <div style="font-weight: 600; color: #14B8A6; margin-bottom: 8px;">{next_deadline['name']}</div>
+                <div style="color: #CBD5E1; margin-bottom: 12px;">{next_deadline['date'].strftime('%B %d, %Y')}</div>
+                <div style="font-size: 24px; font-weight: 700; color: {deadline_color};">{days} days</div>
+            </div>
             """, unsafe_allow_html=True)
 
-            st.write("**All Compliance Deadlines:**")
+            st.write("**All Deadlines**")
             for name, deadline in config.COMPLIANCE_DEADLINES.items():
                 days = (deadline["date"] - datetime.now()).days
                 status_icon = "🔴" if days < 0 else "🟡" if days < 30 else "🟢"
-                st.write(f"{status_icon} **{name}:** {deadline['date'].strftime('%B %d, %Y')} ({days} days)")
+                st.write(f"{status_icon} **{name}:** {deadline['date'].strftime('%B %d')} ({days} days)")
 
     with col2:
-        st.subheader("📋 Module Completion Status")
-
+        st.markdown("### Module Status")
         modules = {
             "Gap Assessment": stats["latest_assessment"] is not None,
-            "Documents Generated": stats["total_documents"] > 0,
+            "Documents": stats["total_documents"] > 0,
             "Tasks Created": sum(stats["task_counts"].values()) > 0,
-            "Breach Plan": stats["open_breaches"] >= 0,
+            "Breach Plan": True,
             "Activity Log": len(st.session_state.db.get_activity_log(org_id, limit=1)) > 0,
         }
 
@@ -704,31 +885,29 @@ def page_dashboard():
 
     st.markdown("---")
 
-    # Recent activity
-    col1, col2 = st.columns([1, 1])
+    # Activity
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📝 Recent Activity")
-        activities = st.session_state.db.get_activity_log(org_id, limit=10)
+        st.markdown("### Recent Activity")
+        activities = st.session_state.db.get_activity_log(org_id, limit=8)
 
         if activities:
             for activity in activities:
                 timestamp = datetime.fromisoformat(activity["created_at"])
                 time_str = timestamp.strftime("%b %d, %H:%M")
-                st.write(f"**{activity['action_type']}** - {time_str}")
+                st.write(f"**{activity['action_type']}** — {time_str}")
                 st.caption(activity["description"])
         else:
-            st.info("No recent activity")
+            st.info("No activity yet")
 
     with col2:
-        st.subheader("⏰ Key Metrics")
+        st.markdown("### Key Information")
+        st.write(f"**Organization:** {org['name']}")
+        st.write(f"**Industry:** {org['industry']}")
+        st.write(f"**Size:** {org['size']}")
         if stats['latest_assessment']:
-            st.write(f"**Assessment Date:** {stats['latest_assessment']['assessment_date'][:10]}")
-        else:
-            st.write("**Assessment Date:** Never")
-        st.write(f"**Total Tasks:** {sum(stats['task_counts'].values())}")
-        st.write(f"**Completed Tasks:** {stats['task_counts'].get('COMPLETED', 0)}")
-        st.write(f"**Open Breaches:** {stats['open_breaches']}")
+            st.write(f"**Last Assessment:** {stats['latest_assessment']['assessment_date'][:10]}")
         st.write(f"**SDF Status:** {org['sdf_status']}")
 
 # ==================== PAGE: GAP ASSESSMENT ====================
@@ -738,7 +917,7 @@ def page_gap_assessment():
         st.warning("Please log in to access this page.")
         return
 
-    st.title("🔍 Gap Assessment")
+    st.title("Gap Assessment")
 
     org_id = st.session_state.org_id
 
@@ -746,11 +925,10 @@ def page_gap_assessment():
 
     with tabs[0]:
         st.markdown("""
-        This assessment evaluates your organization's compliance with DPDPA requirements.
+        Evaluate your organization's compliance with DPDPA requirements.
         Answer questions across different compliance categories to identify gaps.
         """)
 
-        # Create tabs for each category
         category_tabs = st.tabs(list(config.GAP_ASSESSMENT_QUESTIONS.keys()))
 
         for idx, (category, questions) in enumerate(config.GAP_ASSESSMENT_QUESTIONS.items()):
@@ -783,9 +961,9 @@ def page_gap_assessment():
 
                     st.markdown("---")
 
-        if st.button("📊 Calculate Assessment Score", use_container_width=True, type="primary"):
+        if st.button("Calculate Score", use_container_width=True, type="primary"):
             scores = st.session_state.db.save_assessment(org_id)
-            st.success("Assessment completed and saved!")
+            st.success("Assessment completed!")
             st.balloons()
 
     with tabs[1]:
@@ -794,9 +972,8 @@ def page_gap_assessment():
 
         if latest:
             overall_score = latest['overall_score']
-            st.metric("Overall Compliance Score", f"{overall_score:.1f}%")
+            st.metric("Overall Score", f"{overall_score:.1f}%")
 
-            # Interpretation
             interpretation = get_compliance_score_interpretation(overall_score)
             st.info(f"**Interpretation:** {interpretation}")
 
@@ -811,18 +988,15 @@ def page_gap_assessment():
                     st.write(f"**{score:.1f}%**")
                 st.caption(cat)
 
-            # Recommendations
-            st.subheader("📌 Recommendations")
+            st.subheader("Recommendations")
             low_scoring = {cat: score for cat, score in cat_scores.items() if score < 50}
 
             if low_scoring:
                 st.warning("Focus Areas (Below 50%):")
                 for cat, score in low_scoring.items():
-                    st.write(f"- **{cat}** ({score:.1f}%) - Needs immediate attention")
+                    st.write(f"- **{cat}** ({score:.1f}%) - Needs attention")
             else:
-                st.success("All areas have reasonable coverage!")
-
-            st.write(f"**Assessment Date:** {latest['assessment_date']}")
+                st.success("All areas have good coverage!")
 
         else:
             st.info("No assessment results yet. Complete the assessment above.")
@@ -849,21 +1023,20 @@ def page_gap_assessment():
                     st.write(f"**ID:** #{assessment['id']}")
                 st.divider()
         else:
-            st.info("No assessments completed yet.")
+            st.info("No assessments yet.")
 
 # ==================== PAGE: DOCUMENT GENERATOR ====================
 def page_document_generator():
-    """Document Generator page - FULLY FUNCTIONAL"""
+    """Document Generator page"""
     if not st.session_state.org_id:
         st.warning("Please log in to access this page.")
         return
 
-    st.title("📄 Document Generator")
+    st.title("Document Generator")
 
     if not DOC_GENERATOR_AVAILABLE:
         st.error("Document generation requires `python-docx`. Install it with:")
         st.code("pip install python-docx", language="bash")
-        st.info("Once installed, restart the app and this page will be fully functional.")
         return
 
     org_id = st.session_state.org_id
@@ -871,13 +1044,13 @@ def page_document_generator():
 
     st.markdown("""
     Generate DPDPA-compliant documents tailored to your organization.
-    All documents are templates that you can customize for your needs.
+    All documents are templates that you can customize.
     """)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Generate Documents")
+        st.subheader("Generate Document")
 
         doc_type = st.selectbox(
             "Select Document Type",
@@ -892,38 +1065,31 @@ def page_document_generator():
             ]
         )
 
-        with st.expander("📋 Document Details", expanded=True):
+        with st.expander("Document Details", expanded=True):
             if doc_type == "Privacy Policy":
                 data_categories = st.multiselect(
-                    "Data Categories Collected",
+                    "Data Categories",
                     options=[
-                        "Name and Contact Information",
-                        "Financial Information",
-                        "Health Information",
-                        "Biometric Data",
-                        "Location Data",
-                        "Online Activity Data",
-                        "Device Information"
+                        "Name and Contact",
+                        "Financial",
+                        "Health",
+                        "Biometric",
+                        "Location",
+                        "Online Activity",
+                        "Device"
                     ],
-                    default=["Name and Contact Information"]
+                    default=["Name and Contact"]
                 )
                 purposes = st.multiselect(
                     "Processing Purposes",
-                    options=[
-                        "Service Delivery",
-                        "Customer Support",
-                        "Marketing",
-                        "Legal Compliance",
-                        "Risk Management",
-                        "Analytics"
-                    ],
+                    options=["Service Delivery", "Support", "Marketing", "Compliance", "Risk", "Analytics"],
                     default=["Service Delivery"]
                 )
-                retention_period = st.text_input("Data Retention Period", value="3 years")
+                retention_period = st.text_input("Retention Period", value="3 years")
                 contact_email = st.text_input("Contact Email", value=org.get("name", "contact@example.com"))
-                dpo_name = st.text_input("Data Protection Officer Name", value="DPO")
+                dpo_name = st.text_input("DPO Name", value="DPO")
 
-                if st.button("Generate Privacy Policy", type="primary", use_container_width=True):
+                if st.button("Generate Policy", type="primary", use_container_width=True):
                     try:
                         filepath = st.session_state.doc_generator.generate_privacy_policy(
                             org_name=org["name"],
@@ -938,36 +1104,31 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "privacy_policy",
-                            "Privacy Policy",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "privacy_policy", "Privacy Policy", filepath)
 
                         st.download_button(
-                            label="📥 Download Privacy Policy (DOCX)",
+                            label="Download Policy",
                             data=doc_bytes,
                             file_name="Privacy_Policy.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("Privacy Policy generated successfully!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "Privacy Policy created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
             elif doc_type == "Consent Notice":
-                consent_scope = st.text_area("Scope of Consent", value="Processing of personal data for service delivery")
+                consent_scope = st.text_area("Consent Scope", value="Processing for service delivery")
                 data_types = st.multiselect(
-                    "Data Types Requiring Consent",
+                    "Data Types",
                     options=["Personal", "Financial", "Health", "Biometric", "Location"],
                     default=["Personal"]
                 )
-                retention = st.text_input("Retention Period", value="2 years")
+                retention = st.text_input("Retention", value="2 years")
 
-                if st.button("Generate Consent Notice", type="primary", use_container_width=True):
+                if st.button("Generate Notice", type="primary", use_container_width=True):
                     try:
                         filepath = st.session_state.doc_generator.generate_consent_notice(
                             org_name=org["name"],
@@ -979,25 +1140,20 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "consent_notice",
-                            "Consent Notice",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "consent_notice", "Consent Notice", filepath)
 
                         st.download_button(
-                            label="📥 Download Consent Notice (DOCX)",
+                            label="Download Notice",
                             data=doc_bytes,
                             file_name="Consent_Notice.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("Consent Notice generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "Consent Notice created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
             elif doc_type == "Data Processing Agreement":
                 processor_name = st.text_input("Processor Name")
@@ -1014,28 +1170,23 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "dpa",
-                            "Data Processing Agreement",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "dpa", "Data Processing Agreement", filepath)
 
                         st.download_button(
-                            label="📥 Download DPA (DOCX)",
+                            label="Download DPA",
                             data=doc_bytes,
                             file_name="Data_Processing_Agreement.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("DPA generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "DPA created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
             elif doc_type == "Privacy Impact Assessment":
-                processing_name = st.text_input("Processing Activity Name")
+                processing_name = st.text_input("Processing Name")
                 processing_desc = st.text_area("Processing Description")
                 data_subjects = st.text_input("Data Subjects", value="Customers")
 
@@ -1051,32 +1202,27 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "dpia",
-                            "Privacy Impact Assessment",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "dpia", "Privacy Impact Assessment", filepath)
 
                         st.download_button(
-                            label="📥 Download DPIA (DOCX)",
+                            label="Download DPIA",
                             data=doc_bytes,
                             file_name="Privacy_Impact_Assessment.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("DPIA generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "DPIA created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
             elif doc_type == "Breach Notification":
                 breach_desc = st.text_area("Breach Description")
-                affected_data = st.text_input("Data Types Affected", value="Personal data")
-                individuals = st.number_input("Number of Individuals Affected", value=1, min_value=1)
+                affected_data = st.text_input("Data Types", value="Personal data")
+                individuals = st.number_input("Individuals Affected", value=1, min_value=1)
 
-                if st.button("Generate Breach Notification", type="primary", use_container_width=True):
+                if st.button("Generate Notification", type="primary", use_container_width=True):
                     try:
                         filepath = st.session_state.doc_generator.generate_breach_notification(
                             org_name=org["name"],
@@ -1088,29 +1234,24 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "breach_notification",
-                            "Breach Notification",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "breach_notification", "Breach Notification", filepath)
 
                         st.download_button(
-                            label="📥 Download Breach Notification (DOCX)",
+                            label="Download Notification",
                             data=doc_bytes,
                             file_name="Breach_Notification.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("Breach Notification generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "Breach Notification created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
             elif doc_type == "Record of Processing Activities":
                 processing_name = st.text_input("Processing Name")
-                purposes = st.text_area("Purposes of Processing")
+                purposes = st.text_area("Purposes")
 
                 if st.button("Generate RoPA", type="primary", use_container_width=True):
                     try:
@@ -1127,31 +1268,26 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "ropa",
-                            "Record of Processing Activities",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "ropa", "Record of Processing Activities", filepath)
 
                         st.download_button(
-                            label="📥 Download RoPA (DOCX)",
+                            label="Download RoPA",
                             data=doc_bytes,
                             file_name="Record_of_Processing_Activities.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("RoPA generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "RoPA created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
-            else:  # Grievance Redressal Policy
-                grievance_contact = st.text_input("Grievance Contact Email", value="grievance@example.com")
-                resolution_time = st.text_input("Resolution Timeframe", value="30 days")
+            else:
+                grievance_contact = st.text_input("Contact Email", value="grievance@example.com")
+                resolution_time = st.text_input("Resolution Time", value="30 days")
 
-                if st.button("Generate Grievance Policy", type="primary", use_container_width=True):
+                if st.button("Generate Policy", type="primary", use_container_width=True):
                     try:
                         filepath = st.session_state.doc_generator.generate_grievance_policy(
                             org_name=org["name"],
@@ -1162,25 +1298,20 @@ def page_document_generator():
                         with open(filepath, "rb") as f:
                             doc_bytes = f.read()
 
-                        st.session_state.db.create_document(
-                            org_id,
-                            "grievance_policy",
-                            "Grievance Redressal Policy",
-                            filepath
-                        )
+                        st.session_state.db.create_document(org_id, "grievance_policy", "Grievance Redressal Policy", filepath)
 
                         st.download_button(
-                            label="📥 Download Grievance Policy (DOCX)",
+                            label="Download Policy",
                             data=doc_bytes,
                             file_name="Grievance_Redressal_Policy.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             use_container_width=True
                         )
-                        st.success("Grievance Policy generated!")
+                        st.success("Generated!")
                         st.session_state.db.log_activity(org_id, "DOCUMENT_GENERATED", "Grievance Policy created")
 
                     except Exception as e:
-                        st.error(f"Error generating document: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
     with col2:
         st.subheader("Generated Documents")
@@ -1190,32 +1321,31 @@ def page_document_generator():
         if docs:
             for doc in docs:
                 if doc['status'] != 'DELETED':
-                    with st.container():
-                        st.markdown(f"**{doc['title']}**")
-                        st.caption(f"Created: {doc['created_at'][:10]} | Status: {doc['status']}")
-                        st.divider()
+                    st.markdown(f"**{doc['title']}**")
+                    st.caption(f"Created: {doc['created_at'][:10]} | {doc['status']}")
+                    st.divider()
         else:
-            st.info("No documents generated yet. Start by selecting a document type on the left.")
+            st.info("No documents yet. Generate your first document.")
 
 # ==================== PAGE: COMPLIANCE TRACKER ====================
 def page_compliance_tracker():
-    """Compliance Tracker page - FULLY DYNAMIC"""
+    """Compliance Tracker page"""
     if not st.session_state.org_id:
         st.warning("Please log in to access this page.")
         return
 
-    st.title("✅ Compliance Tracker")
+    st.title("Compliance Tracker")
 
     org_id = st.session_state.org_id
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("➕ Add New Task", use_container_width=True):
+        if st.button("Add New Task", use_container_width=True):
             st.session_state.show_new_task = True
 
     with col2:
-        if st.button("📋 Import Default Tasks", use_container_width=True):
+        if st.button("Import Default Tasks", use_container_width=True):
             for task in config.DEFAULT_COMPLIANCE_TASKS:
                 due_date = datetime.now() + timedelta(days=task["days_to_deadline"])
                 st.session_state.db.create_task(
@@ -1226,16 +1356,12 @@ def page_compliance_tracker():
                     task["priority"],
                     due_date.strftime("%Y-%m-%d")
                 )
-            st.success("Default tasks imported!")
+            st.success("Tasks imported!")
             st.rerun()
-
-    with col3:
-        st.write("")
 
     st.markdown("---")
 
-    # Show tasks by status
-    tabs = st.tabs(["Pending", "In Progress", "Completed", "Add New"])
+    tabs = st.tabs(["Pending", "In Progress", "Completed", "Create New"])
 
     with tabs[0]:
         st.subheader("Pending Tasks")
@@ -1247,19 +1373,19 @@ def page_compliance_tracker():
 
                 with col1:
                     st.write(f"**{task['title']}**")
-                    st.caption(f"Category: {task['category']} | Priority: {task['priority']}")
+                    st.caption(f"{task['category']} | Priority: {task['priority']}")
                     st.caption(f"Due: {task['due_date']}")
 
                 with col2:
                     if st.button("Start", key=f"start_{task['id']}", use_container_width=True):
                         st.session_state.db.update_task(org_id, task["id"], status="IN_PROGRESS")
-                        st.session_state.db.log_activity(org_id, "TASK_STARTED", f"Task '{task['title']}' started")
+                        st.session_state.db.log_activity(org_id, "TASK_STARTED", f"'{task['title']}'")
                         st.rerun()
         else:
             st.info("No pending tasks")
 
     with tabs[1]:
-        st.subheader("In Progress Tasks")
+        st.subheader("In Progress")
         tasks = st.session_state.db.get_tasks(org_id, "IN_PROGRESS")
 
         if tasks:
@@ -1268,38 +1394,38 @@ def page_compliance_tracker():
 
                 with col1:
                     st.write(f"**{task['title']}**")
-                    st.caption(f"Category: {task['category']} | Priority: {task['priority']}")
+                    st.caption(f"{task['category']} | Priority: {task['priority']}")
                     st.caption(f"Due: {task['due_date']}")
 
                 with col2:
                     if st.button("Complete", key=f"complete_{task['id']}", use_container_width=True):
                         st.session_state.db.update_task(org_id, task["id"], status="COMPLETED")
-                        st.session_state.db.log_activity(org_id, "TASK_COMPLETED", f"Task '{task['title']}' completed")
+                        st.session_state.db.log_activity(org_id, "TASK_COMPLETED", f"'{task['title']}'")
                         st.rerun()
         else:
             st.info("No in-progress tasks")
 
     with tabs[2]:
-        st.subheader("Completed Tasks")
+        st.subheader("Completed")
         tasks = st.session_state.db.get_tasks(org_id, "COMPLETED")
 
         if tasks:
             st.success(f"{len(tasks)} task(s) completed!")
             for task in tasks:
-                st.write(f"✅ {task['title']} (Due: {task['due_date']})")
+                st.write(f"✅ {task['title']}")
         else:
-            st.info("No completed tasks yet")
+            st.info("No completed tasks")
 
     with tabs[3]:
-        st.subheader("Create New Task")
+        st.subheader("Create Task")
 
-        task_title = st.text_input("Task Title")
-        task_desc = st.text_area("Task Description")
+        task_title = st.text_input("Title")
+        task_desc = st.text_area("Description")
         task_cat = st.selectbox("Category", list(config.COMPLIANCE_CATEGORIES.keys()))
         task_priority = st.selectbox("Priority", ["LOW", "MEDIUM", "HIGH", "CRITICAL"])
         task_due = st.date_input("Due Date")
 
-        if st.button("Create Task", type="primary", use_container_width=True):
+        if st.button("Create", type="primary", use_container_width=True):
             if task_title:
                 st.session_state.db.create_task(
                     org_id,
@@ -1312,47 +1438,46 @@ def page_compliance_tracker():
                 st.success("Task created!")
                 st.rerun()
             else:
-                st.error("Please enter a task title")
+                st.error("Enter a title")
 
-    # Progress bar
     st.markdown("---")
     all_tasks = st.session_state.db.get_tasks(org_id)
     if all_tasks:
         completed = len([t for t in all_tasks if t['status'] == 'COMPLETED'])
         progress = completed / len(all_tasks)
-        st.write(f"**Overall Progress:** {completed}/{len(all_tasks)} tasks completed")
+        st.write(f"**Progress:** {completed}/{len(all_tasks)} tasks")
         st.progress(progress)
 
 # ==================== PAGE: BREACH RESPONSE ====================
 def page_breach_response():
-    """Breach Response page - INCIDENT MANAGEMENT"""
+    """Breach Response page"""
     if not st.session_state.org_id:
         st.warning("Please log in to access this page.")
         return
 
-    st.title("⚠️ Breach Response Management")
+    st.title("Breach Response")
 
     org_id = st.session_state.org_id
 
-    tabs = st.tabs(["Report Breach", "Active Incidents", "Timeline", "Guidelines"])
+    tabs = st.tabs(["Report", "Active", "Timeline", "Guide"])
 
     with tabs[0]:
-        st.subheader("Report New Breach")
+        st.subheader("Report Breach")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            incident_date = st.date_input("Incident Date", value=datetime.now())
+            incident_date = st.date_input("Date", value=datetime.now())
             severity = st.selectbox("Severity", ["LOW", "MEDIUM", "HIGH", "CRITICAL"])
 
         with col2:
-            data_affected = st.text_input("Data Types Affected", value="Personal data")
+            data_affected = st.text_input("Data Types", value="Personal data")
             individuals = st.number_input("Individuals Affected", value=1, min_value=1)
 
-        description = st.text_area("Breach Description", height=150)
-        notes = st.text_area("Additional Notes", height=100)
+        description = st.text_area("Description", height=120)
+        notes = st.text_area("Notes", height=80)
 
-        if st.button("Report Breach", type="primary", use_container_width=True):
+        if st.button("Report", type="primary", use_container_width=True):
             if description:
                 breach_id = st.session_state.db.create_breach_incident(
                     org_id,
@@ -1362,13 +1487,13 @@ def page_breach_response():
                     severity,
                     notes
                 )
-                st.success(f"Breach incident #{breach_id} reported!")
+                st.success(f"Breach #{breach_id} reported!")
                 st.rerun()
             else:
-                st.error("Please provide a breach description")
+                st.error("Enter description")
 
     with tabs[1]:
-        st.subheader("Active Breach Incidents")
+        st.subheader("Active Breaches")
 
         breaches = st.session_state.db.get_breach_incidents(org_id)
         open_breaches = [b for b in breaches if b['status'] == 'OPEN']
@@ -1380,7 +1505,7 @@ def page_breach_response():
                 with col1:
                     severity_color = get_severity_color(breach['severity'])
                     st.markdown(f"""
-                    <div style="background: #1E293B; border-left: 4px solid {severity_color}; padding: 1rem; border-radius: 8px;">
+                    <div class="card" style="border-left: 4px solid {severity_color};">
                         <strong>Breach #{breach['id']}</strong><br>
                         <em>{breach['incident_date']}</em><br>
                         {breach['description']}<br>
@@ -1395,9 +1520,9 @@ def page_breach_response():
                     hours_remaining = 72 - hours_elapsed
 
                     if hours_remaining > 0:
-                        st.warning(f"⏱️ {hours_remaining:.1f}h remaining")
+                        st.warning(f"{hours_remaining:.1f}h left")
                     else:
-                        st.error("⏰ 72h deadline passed!")
+                        st.error("Deadline passed!")
 
                 col1, col2, col3 = st.columns(3)
 
@@ -1410,17 +1535,17 @@ def page_breach_response():
                     )
                     if new_status != breach['status']:
                         st.session_state.db.update_breach_incident(org_id, breach['id'], status=new_status)
-                        st.session_state.db.log_activity(org_id, "BREACH_UPDATED", f"Breach #{breach['id']} status: {new_status}")
+                        st.session_state.db.log_activity(org_id, "BREACH_UPDATED", f"Status: {new_status}")
                         st.rerun()
 
                 with col2:
-                    if st.button("📝 Add Notes", key=f"notes_{breach['id']}", use_container_width=True):
+                    if st.button("Notes", key=f"notes_{breach['id']}", use_container_width=True):
                         st.session_state.show_breach_notes = breach['id']
 
                 with col3:
                     if st.button("Close", key=f"close_{breach['id']}", use_container_width=True):
                         st.session_state.db.update_breach_incident(org_id, breach['id'], status="RESOLVED")
-                        st.session_state.db.log_activity(org_id, "BREACH_CLOSED", f"Breach #{breach['id']} closed")
+                        st.session_state.db.log_activity(org_id, "BREACH_CLOSED", f"Breach #{breach['id']}")
                         st.rerun()
 
                 st.divider()
@@ -1435,71 +1560,41 @@ def page_breach_response():
 
         if all_breaches:
             for breach in all_breaches:
-                st.write(f"**Breach #{breach['id']}** - {breach['incident_date']} ({breach['severity']})")
-                st.caption(f"Status: {get_status_icon(breach['status'])} {breach['status']}")
-                st.caption(breach['description'][:100] + "...")
+                st.write(f"**Breach #{breach['id']}** — {breach['incident_date']} ({breach['severity']})")
+                st.caption(f"{get_status_icon(breach['status'])} {breach['status']}")
+                st.caption(breach['description'][:100])
                 st.divider()
         else:
-            st.info("No breach incidents recorded")
+            st.info("No breaches")
 
     with tabs[3]:
-        st.subheader("📖 Breach Response Guidelines")
+        st.subheader("DPDPA Breach Guidelines")
 
         st.markdown("""
-        ### DPDPA 72-Hour Rule
-        Data breaches must be reported to the Data Protection Board within **72 hours** of discovery.
+        ### 72-Hour Rule
+        Breaches must be reported to the Data Protection Board within **72 hours**.
 
         ### Response Steps
 
-        1. **DETECT & ASSESS** (Immediate)
-           - Identify the breach
-           - Determine scope and severity
-           - Log incident details
-
-        2. **CONTAIN** (Within 24 hours)
-           - Isolate affected systems
-           - Prevent further data loss
-           - Preserve evidence
-
-        3. **NOTIFY AUTHORITIES** (Within 72 hours)
-           - Report to Data Protection Board
-           - Provide detailed incident report
-           - Document notification
-
-        4. **NOTIFY INDIVIDUALS** (Within 7 days)
-           - Communicate with affected individuals
-           - Explain mitigation measures
-           - Provide guidance
-
-        5. **INVESTIGATE** (Ongoing)
-           - Root cause analysis
-           - Document findings
-           - Implement preventive measures
-
-        6. **DOCUMENT & IMPROVE** (Post-incident)
-           - Update breach log
-           - Review and improve processes
-           - Train staff
-
-        ### Key Deadlines
-        - **Detection to Board:** 72 hours
-        - **Board to Individuals:** Reasonable time
-        - **Investigation:** Complete within 90 days
-        - **Report:** Submit incident report to DPB
+        1. **DETECT** (Immediate) — Identify and assess the breach
+        2. **CONTAIN** (24h) — Isolate systems and prevent loss
+        3. **NOTIFY BOARD** (72h) — Report to Data Protection Board
+        4. **NOTIFY INDIVIDUALS** (7 days) — Communicate with affected parties
+        5. **INVESTIGATE** — Complete root cause analysis
+        6. **DOCUMENT** — Update logs and improve processes
         """)
 
 # ==================== PAGE: KNOWLEDGE BASE ====================
 def page_knowledge_base():
-    """Knowledge Base page - SEARCHABLE & INTERACTIVE"""
-    st.title("📚 Knowledge Base")
+    """Knowledge Base page"""
+    st.title("Knowledge Base")
 
     st.markdown("Learn about DPDPA compliance requirements and best practices.")
 
-    # Search bar
-    search_query = st.text_input("🔍 Search Knowledge Base", placeholder="Search for sections, definitions, FAQs...")
+    search_query = st.text_input("Search Knowledge Base", placeholder="Search...")
 
     if search_query:
-        st.subheader("Search Results")
+        st.subheader("Results")
         results = search_knowledge(search_query)
 
         if results:
@@ -1507,20 +1602,11 @@ def page_knowledge_base():
                 with st.expander(f"{result['type'].upper()}: {result['title']}", expanded=False):
                     st.write(result['content'][:500])
         else:
-            st.info("No results found. Try different keywords.")
+            st.info("No results found.")
 
         st.divider()
 
-    # Knowledge tabs
-    kb_tabs = st.tabs([
-        "Sections",
-        "Definitions",
-        "Checklist",
-        "FAQs",
-        "Penalties",
-        "Sector Guide",
-        "Timeline"
-    ])
+    kb_tabs = st.tabs(["Sections", "Definitions", "Checklist", "FAQs", "Penalties", "Guidance", "Timeline"])
 
     with kb_tabs[0]:
         st.subheader("DPDPA Sections")
@@ -1538,7 +1624,7 @@ def page_knowledge_base():
         st.write(f"**Penalties:** {section.get('penalties', 'N/A')}")
 
     with kb_tabs[1]:
-        st.subheader("Key Definitions")
+        st.subheader("Definitions")
 
         for term, definition in KEY_DEFINITIONS.items():
             with st.expander(f"**{term}**", expanded=False):
@@ -1550,92 +1636,78 @@ def page_knowledge_base():
         checklist_items = list(COMPLIANCE_CHECKLIST.items())[:15]
 
         for item, description in checklist_items:
-            col1, col2 = st.columns([0.1, 0.9])
-            with col1:
-                st.write("☐")
-            with col2:
-                st.write(f"**{item}:** {description}")
+            st.write(f"☐ **{item}:** {description}")
 
     with kb_tabs[3]:
-        st.subheader("Frequently Asked Questions")
+        st.subheader("FAQs")
 
-        for idx, (question, answer) in enumerate(list(FAQ.items())[:10]):
+        for question, answer in list(FAQ.items())[:10]:
             with st.expander(f"Q: {question}", expanded=False):
                 st.write(f"**A:** {answer}")
 
     with kb_tabs[4]:
-        st.subheader("Penalty Matrix")
+        st.subheader("Penalties")
 
         for violation, penalty_info in list(PENALTY_MATRIX.items())[:10]:
             st.write(f"**{violation}**")
-            st.write(f"- Amount: ₹{penalty_info.get('amount', 'N/A')}")
-            st.write(f"- Section: {penalty_info.get('section', 'N/A')}")
-            st.write(f"- Description: {penalty_info.get('description', 'N/A')}")
+            st.write(f"- ₹{penalty_info.get('amount', 'N/A')}")
+            st.write(f"- Section {penalty_info.get('section', 'N/A')}")
             st.divider()
 
     with kb_tabs[5]:
-        st.subheader("Sector-Specific Guidance")
+        st.subheader("Sector Guidance")
 
-        sector = st.selectbox("Select Industry", list(SECTOR_GUIDANCE.keys()))
+        sector = st.selectbox("Industry", list(SECTOR_GUIDANCE.keys()))
         guidance = SECTOR_GUIDANCE[sector]
 
-        st.write(f"**{sector}**")
         st.write(guidance.get('overview', ''))
 
-        st.write("**Key Requirements:**")
+        st.write("**Requirements:**")
         for req in guidance.get('requirements', []):
             st.write(f"- {req}")
 
-        st.write("**Best Practices:**")
-        for practice in guidance.get('best_practices', []):
-            st.write(f"- {practice}")
-
     with kb_tabs[6]:
-        st.subheader("DPDPA Timeline")
+        st.subheader("Timeline")
 
         for event, date_info in TIMELINE.items():
             st.write(f"**{event}:** {date_info.get('date', 'N/A')}")
             st.caption(date_info.get('description', ''))
-            st.divider()
 
 # ==================== PAGE: SETTINGS ====================
 def page_settings():
-    """Settings page - ORGANIZATION MANAGEMENT (ADMIN ONLY)"""
+    """Settings page"""
     if st.session_state.user_info['role'] != "admin":
-        st.error("Only administrators can access settings.")
+        st.error("Only admins can access settings.")
         return
 
-    st.title("⚙️ Settings")
+    st.title("Settings")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Organization Settings")
+        st.subheader("Organization")
 
         orgs = st.session_state.db.get_all_organizations()
 
         if orgs:
             selected_org = st.selectbox(
-                "Select Organization to Edit",
+                "Select Organization",
                 [org["name"] for org in orgs],
                 key="org_settings"
             )
 
-            org_id = next(
-                (org["id"] for org in orgs if org["name"] == selected_org),
-                None
-            )
+            org_id = next((org["id"] for org in orgs if org["name"] == selected_org), None)
 
             if org_id:
                 org = st.session_state.db.get_organization(org_id)
 
-                new_name = st.text_input("Organization Name", org["name"])
+                new_name = st.text_input("Name", org["name"])
                 new_industry = st.selectbox("Industry", config.INDUSTRY_TYPES, index=config.INDUSTRY_TYPES.index(org["industry"]))
                 new_size = st.selectbox("Size", config.ORG_SIZES, index=config.ORG_SIZES.index(org["size"]))
                 new_sdf = st.selectbox("SDF Status", config.SDF_STATUSES, index=config.SDF_STATUSES.index(org["sdf_status"]))
                 new_compliance = st.selectbox("Compliance Level", config.COMPLIANCE_LEVELS, index=config.COMPLIANCE_LEVELS.index(org["compliance_level"]))
 
-                if st.button("💾 Save Changes", use_container_width=True):
+                if st.button("Save", use_container_width=True, type="primary"):
                     st.session_state.db.update_organization(
                         org_id,
                         name=new_name,
@@ -1644,19 +1716,19 @@ def page_settings():
                         sdf_status=new_sdf,
                         compliance_level=new_compliance
                     )
-                    st.success("Organization updated!")
+                    st.success("Updated!")
                     st.rerun()
 
     with col2:
-        st.subheader("Add New Organization")
+        st.subheader("New Organization")
 
-        new_org_name = st.text_input("Organization Name", key="new_org_name")
+        new_org_name = st.text_input("Name", key="new_org_name")
         new_org_industry = st.selectbox("Industry", config.INDUSTRY_TYPES, key="new_org_industry")
-        new_org_size = st.selectbox("Organization Size", config.ORG_SIZES, key="new_org_size")
+        new_org_size = st.selectbox("Size", config.ORG_SIZES, key="new_org_size")
         new_org_sdf = st.selectbox("SDF Status", config.SDF_STATUSES, key="new_org_sdf")
-        new_org_compliance = st.selectbox("Current Compliance Level", config.COMPLIANCE_LEVELS, key="new_org_compliance")
+        new_org_compliance = st.selectbox("Compliance Level", config.COMPLIANCE_LEVELS, key="new_org_compliance")
 
-        if st.button("Create Organization", use_container_width=True):
+        if st.button("Create", use_container_width=True, type="primary"):
             if new_org_name:
                 try:
                     org_id = st.session_state.db.create_organization(
@@ -1667,102 +1739,81 @@ def page_settings():
                         sdf_status=new_org_sdf,
                         compliance_level=new_org_compliance
                     )
-                    st.success(f"Organization '{new_org_name}' created!")
-                    st.session_state.org_id = org_id
+                    st.success(f"Created!")
                     st.rerun()
                 except ValueError as e:
                     st.error(str(e))
             else:
-                st.error("Please enter organization name")
+                st.error("Enter name")
 
     st.markdown("---")
 
-    st.subheader("Application Settings")
+    st.subheader("Application")
 
-    col1, col2 = st.columns(2)
+    st.write(f"**Version:** {config.APP_VERSION}")
+    st.write(f"**Created by:** {config.CREATED_BY}")
+    st.write(f"**Database:** {st.session_state.db.db_path}")
 
-    with col1:
-        st.write(f"**App Version:** {config.APP_VERSION}")
-        st.write(f"**Created by:** {config.CREATED_BY}")
-        st.write(f"**Database:** {st.session_state.db.db_path}")
-
-    with col2:
-        if st.button("🔄 Export Data"):
-            st.info("Export feature coming soon")
-
-        if st.button("🗑️ Clear Cache"):
-            st.cache_data.clear()
-            st.success("Cache cleared!")
+    if st.button("Clear Cache"):
+        st.cache_data.clear()
+        st.success("Cache cleared!")
 
 # ==================== PAGE ROUTING FUNCTIONS ====================
 def render_ropa_page():
-    """RoPA page with multi-tenant support"""
     if not st.session_state.org_id:
-        st.warning("Please log in to access this page.")
+        st.warning("Please log in.")
         return
-
     if NEW_PAGES_AVAILABLE:
         page_ropa(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     else:
-        st.info("RoPA Registry module not yet available.")
+        st.info("RoPA Registry not available.")
 
 def render_consent_page():
-    """Consent Manager page with multi-tenant support"""
     if not st.session_state.org_id:
-        st.warning("Please log in to access this page.")
+        st.warning("Please log in.")
         return
-
     if NEW_PAGES_AVAILABLE:
         page_consent_manager(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     else:
-        st.info("Consent Manager module not yet available.")
+        st.info("Consent Manager not available.")
 
 def render_privacy_notices_page():
-    """Privacy Notices page with multi-tenant support"""
     if not st.session_state.org_id:
-        st.warning("Please log in to access this page.")
+        st.warning("Please log in.")
         return
-
     if NEW_PAGES_AVAILABLE:
         page_privacy_notices(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     else:
-        st.info("Privacy Notices module not yet available.")
+        st.info("Privacy Notices not available.")
 
 def render_rights_requests_page():
-    """Rights Requests page with multi-tenant support"""
     if not st.session_state.org_id:
-        st.warning("Please log in to access this page.")
+        st.warning("Please log in.")
         return
-
     if NEW_PAGES_AVAILABLE:
         page_rights_requests(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     else:
-        st.info("Rights Requests module not yet available.")
+        st.info("Rights Requests not available.")
 
 def render_vendor_management_page():
-    """Vendor Management page with multi-tenant support"""
     if not st.session_state.org_id:
-        st.warning("Please log in to access this page.")
+        st.warning("Please log in.")
         return
-
     if NEW_PAGES_AVAILABLE:
         page_vendor_management(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     else:
-        st.info("Vendor Management module not yet available.")
+        st.info("Vendor Management not available.")
 
 # ==================== MAIN APP ROUTING ====================
 def main():
     """Main application router"""
 
-    # Check if user is authenticated
     if not st.session_state.authenticated:
         render_login_page()
         return
 
-    # Render sidebar for authenticated users
     render_sidebar()
 
-    # Page routing for authenticated users
     if st.session_state.page == "Dashboard":
         page_dashboard()
     elif st.session_state.page == "Gap Assessment":
@@ -1787,7 +1838,6 @@ def main():
         page_knowledge_base()
     elif st.session_state.page == "Settings":
         page_settings()
-    # AI-powered pages
     elif st.session_state.page == "AI Assistant" and AI_PAGES_AVAILABLE:
         page_ai_chatbot(st.session_state.db, st.session_state.org_id, st.session_state.user_info)
     elif st.session_state.page == "AI Doc Drafter" and AI_PAGES_AVAILABLE:
@@ -1803,10 +1853,7 @@ def main():
     else:
         page_dashboard()
 
-    # Footer
-    st.markdown('<div class="footer">Svikruti.ai v0.2.0 | Multi-tenant DPDPA Compliance Platform | Built by Harsh Kahate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer">Svikruti.ai v0.2.0 | Multi-tenant DPDPA Compliance | Built by Harsh Kahate</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
-
-# END OF FILE - PRODUCTION MULTI-TENANT VERSION WITH AUTHENTICATION AND RBAC

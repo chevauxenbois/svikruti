@@ -62,10 +62,26 @@ def _get_ai_engine(db, org_id: int):
 
         settings = get_ai_settings(db, org_id)
         if not settings or not settings.get("api_key"):
-            st.warning(
-                "⚠️ AI is not configured yet. "
-                "[Configure AI settings](javascript:alert('Go to AI Configuration page'))"
-            )
+            # Styled card for unconfigured AI
+            st.markdown("""
+            <div style="
+                background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(59, 130, 246, 0.1));
+                border: 1px solid rgba(20, 184, 166, 0.3);
+                border-radius: 12px;
+                padding: 24px;
+                margin: 16px 0;
+            ">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="font-size: 32px;">⚙️</div>
+                    <div>
+                        <p style="margin: 0; font-weight: 600; color: #14B8A6;">AI Configuration Required</p>
+                        <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px;">
+                            Please configure your AI settings first to use this feature.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             return None
 
         ai = AIEngine(
@@ -108,6 +124,42 @@ def _get_org_context(db, org_id: int) -> Dict[str, Any]:
         return {}
 
 
+def _render_styled_header(title: str, subtitle: str = "") -> None:
+    """Render a clean styled HTML header."""
+    st.markdown(f"""
+    <div style="margin-bottom: 32px;">
+        <h1 style="
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #F5F5F5;
+        ">{title}</h1>
+        {f'<p style="margin: 0; color: #9CA3AF; font-size: 16px;">{subtitle}</p>' if subtitle else ''}
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def _render_glass_container(content_func, title: str = "") -> None:
+    """Render content in a glass-morphism container."""
+    st.markdown(f"""
+    <div style="
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(20, 184, 166, 0.2);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 16px 0;
+    ">
+    """, unsafe_allow_html=True)
+
+    if title:
+        st.markdown(f"#### {title}")
+
+    content_func()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 # ============================================================================
 # PAGE 1: AI CHATBOT
 # ============================================================================
@@ -124,16 +176,11 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    st.title("🤖 DPDPA AI Assistant")
-
-    st.markdown(
-        "Ask me anything about DPDPA compliance, data protection, and best practices."
-    )
+    _render_styled_header("DPDPA AI Assistant", "Ask me anything about DPDPA compliance, data protection, and best practices")
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
     if not ai_engine:
-        st.info("Please configure AI settings to use this feature.")
         return
 
     # Get org context for personalization
@@ -151,7 +198,7 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
             st.rerun()
 
         st.divider()
-        st.subheader("📚 Suggested Questions")
+        st.subheader("Suggested Questions")
 
         suggestions = [
             "What is a Significant Data Fiduciary (SDF)?",
@@ -163,17 +210,49 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
         ]
 
         for i, suggestion in enumerate(suggestions):
-            if st.button(f"❓ {suggestion}", key=f"suggest_{i}", use_container_width=True):
+            if st.button(suggestion, key=f"suggest_{i}", use_container_width=True):
                 st.session_state.ai_chat_history.append({
                     "role": "user",
                     "content": suggestion
                 })
                 st.rerun()
 
-    # Display chat history
+    # Display chat history with styled messages
     for message in st.session_state.ai_chat_history:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
+        if message["role"] == "user":
+            # User message - right aligned with blue background
+            st.markdown(f"""
+            <div style="display: flex; justify-content: flex-end; margin: 12px 0;">
+                <div style="
+                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+                    border: 1px solid rgba(59, 130, 246, 0.3);
+                    border-radius: 12px;
+                    padding: 12px 16px;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                    color: #F5F5F5;
+                ">
+                    {message['content']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Assistant message - left aligned with teal accent
+            st.markdown(f"""
+            <div style="display: flex; justify-content: flex-start; margin: 12px 0;">
+                <div style="
+                    background: rgba(17, 24, 39, 0.8);
+                    border-left: 4px solid #14B8A6;
+                    border-radius: 8px;
+                    padding: 12px 16px;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                    color: #F5F5F5;
+                ">
+                    {message['content']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Chat input
     user_input = st.chat_input("Ask your DPDPA question...")
@@ -186,7 +265,7 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
         })
 
         # Get AI response
-        with st.spinner("🤔 Thinking..."):
+        with st.spinner("Thinking..."):
             try:
                 # Prepare context message
                 context_msg = f"""
@@ -236,16 +315,11 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
         st.error("This feature is available to admins and members only.")
         return
 
-    st.title("✨ AI Document Drafter")
-
-    st.markdown(
-        "Generate compliance documents tailored to your organization using AI."
-    )
+    _render_styled_header("AI Document Drafter", "Generate compliance documents tailored to your organization using AI")
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
     if not ai_engine:
-        st.info("Please configure AI settings to use this feature.")
         return
 
     # Document type selection
@@ -271,10 +345,10 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
     # Generate button
     col1, col2 = st.columns([3, 1])
     with col2:
-        generate_btn = st.button("📝 Generate", use_container_width=True)
+        generate_btn = st.button("Generate", use_container_width=True)
 
     if generate_btn:
-        with st.spinner("🔄 Generating document..."):
+        with st.spinner("Generating document..."):
             try:
                 # Fetch org data for context
                 org_data = {
@@ -303,20 +377,20 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
                     col1, col2, col3 = st.columns(3)
 
                     with col1:
-                        if st.button("📋 Copy to Clipboard"):
-                            st.write(":clipboard: Copy the text above manually or use Ctrl+A")
+                        if st.button("Copy to Clipboard"):
+                            st.write("Copy the text above manually or use Ctrl+A")
 
                     with col2:
-                        if st.button("⬇️ Download as Text"):
+                        if st.button("Download as Text"):
                             st.download_button(
-                                label="📄 Download",
+                                label="Download",
                                 data=generated_content,
                                 file_name=f"{selected_doc_type}_{datetime.now().strftime('%Y%m%d')}.txt",
                                 mime="text/plain"
                             )
 
                     with col3:
-                        if st.button("💾 Save to Organization"):
+                        if st.button("Save to Organization"):
                             try:
                                 _safe_db_call(
                                     db.save_document,
@@ -351,24 +425,36 @@ def page_gap_assessment_advisor(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    st.title("🎯 AI Compliance Advisor")
-
-    st.markdown(
-        "Get AI-powered recommendations to close compliance gaps."
-    )
+    _render_styled_header("AI Compliance Advisor", "Get AI-powered recommendations to close compliance gaps")
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
     if not ai_engine:
-        st.info("Please configure AI settings to use this feature.")
         return
 
     # Check if assessment has been completed
     assessment = _safe_db_call(db.get_latest_assessment, org_id)
 
     if not assessment:
-        st.warning("⚠️ Complete the Gap Assessment first to get AI-powered recommendations.")
-        st.info("Go to the Gap Assessment page and complete the assessment to proceed.")
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+        ">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="font-size: 32px;">📋</div>
+                <div>
+                    <p style="margin: 0; font-weight: 600; color: #14B8A6;">Complete Assessment First</p>
+                    <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px;">
+                        Go to the Gap Assessment page and complete the assessment to get AI-powered recommendations.
+                    </p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     # Display current scores
@@ -413,8 +499,8 @@ def page_gap_assessment_advisor(db, org_id: int, user_info: Dict) -> None:
             st.divider()
 
             # AI Analysis button
-            if st.button("🔍 Get AI Analysis & Recommendations", use_container_width=True):
-                with st.spinner("🤖 Analyzing gaps and generating recommendations..."):
+            if st.button("Get AI Analysis & Recommendations", use_container_width=True):
+                with st.spinner("Analyzing gaps and generating recommendations..."):
                     try:
                         recommendations = ai_engine.analyze_gap_assessment(
                             scores=scores,
@@ -433,7 +519,7 @@ def page_gap_assessment_advisor(db, org_id: int, user_info: Dict) -> None:
             if "gap_analysis_cache" in st.session_state:
                 analysis = st.session_state.gap_analysis_cache
 
-                st.subheader("📊 AI Recommendations")
+                st.subheader("AI Recommendations")
 
                 # Try to parse recommendations if JSON
                 try:
@@ -475,20 +561,15 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
         st.error("This feature is available to admins and members only.")
         return
 
-    st.title("🚨 AI Breach Analyzer")
-
-    st.markdown(
-        "Analyze data breaches and generate required notifications."
-    )
+    _render_styled_header("AI Breach Analyzer", "Analyze data breaches and generate required notifications")
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
     if not ai_engine:
-        st.info("Please configure AI settings to use this feature.")
         return
 
     # Tabs for new vs existing breach
-    tab1, tab2 = st.tabs(["🆕 Analyze New Breach", "📋 Analyze Existing Breach"])
+    tab1, tab2 = st.tabs(["Analyze New Breach", "Analyze Existing Breach"])
 
     # TAB 1: New Breach Analysis
     with tab1:
@@ -538,13 +619,13 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
                     ["Ongoing", "Contained", "Fully Resolved"]
                 )
 
-            submitted = st.form_submit_button("🔍 Classify & Generate Response", use_container_width=True)
+            submitted = st.form_submit_button("Classify & Generate Response", use_container_width=True)
 
         if submitted:
             if not (description and data_categories and affected_count and discovery_date):
                 st.error("Please fill all required fields (marked *).")
             else:
-                with st.spinner("🤖 Analyzing breach..."):
+                with st.spinner("Analyzing breach..."):
                     try:
                         analysis = ai_engine.classify_breach(
                             description=description,
@@ -574,11 +655,11 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
                 format_func=lambda x: breach_options[x]
             )
 
-            if st.button("🔍 Analyze Selected Breach"):
+            if st.button("Analyze Selected Breach"):
                 selected = next((b for b in breaches if b.get("id") == selected_breach_id), None)
 
                 if selected:
-                    with st.spinner("🤖 Analyzing breach..."):
+                    with st.spinner("Analyzing breach..."):
                         try:
                             analysis = ai_engine.classify_breach(
                                 description=selected.get("description", ""),
@@ -592,14 +673,27 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
                         except Exception as e:
                             st.error(f"Error: {str(e)}")
         else:
-            st.info("No breach incidents recorded yet.")
+            st.markdown("""
+            <div style="
+                background: rgba(17, 24, 39, 0.8);
+                border: 1px solid rgba(107, 114, 128, 0.3);
+                border-radius: 12px;
+                padding: 24px;
+                margin: 16px 0;
+                text-align: center;
+            ">
+                <p style="margin: 0; color: #9CA3AF; font-size: 16px;">
+                    No breach incidents recorded yet.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Display analysis results
     if "breach_analysis" in st.session_state:
         analysis = st.session_state.breach_analysis
 
         st.divider()
-        st.subheader("📊 Breach Analysis Results")
+        st.subheader("Breach Analysis Results")
 
         # Parse analysis if needed
         try:
@@ -610,35 +704,50 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
 
         # Display results
         if isinstance(analysis, dict):
-            # Severity badge
+            # Severity badge with color-coded card
             severity = analysis.get("severity", "Medium").upper()
+
             severity_colors = {
-                "CRITICAL": "🔴",
-                "HIGH": "🟠",
-                "MEDIUM": "🟡",
-                "LOW": "🟢"
+                "CRITICAL": ("#EF4444", "#DC2626", "🔴"),
+                "HIGH": ("#F97316", "#EA580C", "🟠"),
+                "MEDIUM": ("#FBBF24", "#F59E0B", "🟡"),
+                "LOW": ("#4ADE80", "#22C55E", "🟢")
             }
 
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
-                st.metric("Severity Level", f"{severity_colors.get(severity, '⚪')} {severity}")
+            bg_color, border_color, emoji = severity_colors.get(severity, ("#9CA3AF", "#6B7280", "⚪"))
+
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.1), rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.05));
+                border: 2px solid {border_color};
+                border-radius: 12px;
+                padding: 20px;
+                margin: 16px 0;
+                text-align: center;
+            ">
+                <div style="font-size: 32px; margin-bottom: 8px;">{emoji}</div>
+                <p style="margin: 0; font-size: 24px; font-weight: 700; color: {border_color};">
+                    {severity} Severity
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
             st.divider()
 
             # Risk assessment
-            with st.expander("⚠️ Risk Assessment", expanded=True):
+            with st.expander("Risk Assessment", expanded=True):
                 st.write(analysis.get("risk_assessment", "No risk assessment available"))
 
             # DPB Notification draft
-            with st.expander("📧 DPB Notification Draft"):
+            with st.expander("DPB Notification Draft"):
                 st.markdown(analysis.get("dpb_notification", "No notification draft available"))
 
             # Data Principal Notification draft
-            with st.expander("👤 Data Principal Notification Draft"):
+            with st.expander("Data Principal Notification Draft"):
                 st.markdown(analysis.get("principal_notification", "No notification draft available"))
 
             # Recommended actions
-            with st.expander("✓ Recommended Actions"):
+            with st.expander("Recommended Actions"):
                 actions = analysis.get("actions", "No actions listed")
                 if isinstance(actions, list):
                     for i, action in enumerate(actions, 1):
@@ -665,28 +774,23 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    st.title("📝 AI Privacy Notice Reviewer")
-
-    st.markdown(
-        "Get AI feedback on your privacy policy or notice."
-    )
+    _render_styled_header("AI Privacy Notice Reviewer", "Get AI feedback on your privacy policy or notice")
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
     if not ai_engine:
-        st.info("Please configure AI settings to use this feature.")
         return
 
     # Input method selection
     input_method = st.radio(
         "How would you like to provide the notice?",
-        ["📝 Paste Text", "📋 Select Existing Notice"],
+        ["Paste Text", "Select Existing Notice"],
         horizontal=True
     )
 
     notice_text = None
 
-    if input_method == "📝 Paste Text":
+    if input_method == "Paste Text":
         notice_text = st.text_area(
             "Privacy Notice Text *",
             height=300,
@@ -709,14 +813,27 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
             if selected:
                 notice_text = selected.get("content", "")
         else:
-            st.info("No privacy notices found. Create one first or paste text above.")
+            st.markdown("""
+            <div style="
+                background: rgba(17, 24, 39, 0.8);
+                border: 1px solid rgba(107, 114, 128, 0.3);
+                border-radius: 12px;
+                padding: 24px;
+                margin: 16px 0;
+                text-align: center;
+            ">
+                <p style="margin: 0; color: #9CA3AF; font-size: 16px;">
+                    No privacy notices found. Create one first or paste text above.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Review button
-    if st.button("🔍 Review Notice", use_container_width=True):
+    if st.button("Review Notice", use_container_width=True):
         if not notice_text:
             st.error("Please provide a privacy notice to review.")
         else:
-            with st.spinner("🤖 Reviewing notice..."):
+            with st.spinner("Reviewing notice..."):
                 try:
                     review = ai_engine.review_privacy_notice(notice_text)
 
@@ -731,7 +848,7 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
         review = st.session_state.notice_review
 
         st.divider()
-        st.subheader("📊 Review Results")
+        st.subheader("Review Results")
 
         # Parse review if needed
         try:
@@ -741,52 +858,115 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
             pass
 
         if isinstance(review, dict):
-            # Overall score
+            # Overall score with visual gauge indicators
             col1, col2, col3 = st.columns(3)
 
+            overall = review.get("overall_score", 0)
+            readability = review.get("readability_score", 0)
+            compliance = review.get("compliance_score", 0)
+
+            def render_gauge(label: str, score: int, color: str) -> None:
+                """Render a visual gauge indicator."""
+                st.markdown(f"""
+                <div style="text-align: center; padding: 12px;">
+                    <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px;">{label}</p>
+                    <div style="
+                        background: rgba(107, 114, 128, 0.2);
+                        border-radius: 50%;
+                        width: 80px;
+                        height: 80px;
+                        margin: 0 auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: 3px solid {color};
+                    ">
+                        <span style="font-size: 28px; font-weight: 700; color: {color};">{score}</span>
+                    </div>
+                    <p style="margin: 8px 0 0 0; color: #F5F5F5; font-size: 12px;">out of 10</p>
+                </div>
+                """, unsafe_allow_html=True)
+
             with col1:
-                overall = review.get("overall_score", 0)
-                st.metric("Overall Score", f"{overall}/10", delta="Complete" if overall >= 8 else "Needs Work")
-
+                render_gauge("Overall Score", overall, "#14B8A6")
             with col2:
-                readability = review.get("readability_score", 0)
-                st.metric("Readability", f"{readability}/10")
-
+                render_gauge("Readability", readability, "#3B82F6")
             with col3:
-                compliance = review.get("compliance_score", 0)
-                st.metric("DPDPA Compliance", f"{compliance}/10")
+                render_gauge("Compliance", compliance, "#F59E0B")
 
             # Completeness score
             st.divider()
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                completeness = review.get("completeness_score", 0)
-                st.metric("Completeness", f"{completeness}/10")
+            completeness = review.get("completeness_score", 0)
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                border-radius: 12px;
+                padding: 16px;
+                margin: 16px 0;
+            ">
+                <p style="margin: 0 0 8px 0; color: #9CA3AF; font-size: 14px;">Completeness</p>
+                <div style="
+                    background: rgba(107, 114, 128, 0.2);
+                    height: 8px;
+                    border-radius: 4px;
+                    overflow: hidden;
+                ">
+                    <div style="
+                        background: linear-gradient(90deg, #8B5CF6, #3B82F6);
+                        height: 100%;
+                        width: {completeness}%;
+                        transition: width 0.3s ease;
+                    "></div>
+                </div>
+                <p style="margin: 8px 0 0 0; color: #F5F5F5; font-weight: 600;">{completeness}/10</p>
+            </div>
+            """, unsafe_allow_html=True)
 
             # Issues found
-            with st.expander("🔴 Issues Found", expanded=True):
+            with st.expander("Issues Found", expanded=True):
                 issues = review.get("issues", [])
                 if isinstance(issues, list):
                     if issues:
                         for issue in issues:
-                            st.warning(f"• {issue}")
+                            st.markdown(f"""
+                            <div style="
+                                background: rgba(239, 68, 68, 0.1);
+                                border-left: 3px solid #EF4444;
+                                border-radius: 4px;
+                                padding: 12px;
+                                margin: 8px 0;
+                            ">
+                                <p style="margin: 0; color: #FCA5A5;">• {issue}</p>
+                            </div>
+                            """, unsafe_allow_html=True)
                     else:
                         st.success("No major issues found!")
                 else:
                     st.write(issues)
 
             # Suggestions
-            with st.expander("💡 Suggested Improvements", expanded=True):
+            with st.expander("Suggested Improvements", expanded=True):
                 suggestions = review.get("suggestions", "No suggestions available")
                 if isinstance(suggestions, list):
                     for i, suggestion in enumerate(suggestions, 1):
-                        st.write(f"{i}. {suggestion}")
+                        st.markdown(f"""
+                        <div style="
+                            background: rgba(59, 130, 246, 0.1);
+                            border-left: 3px solid #3B82F6;
+                            border-radius: 4px;
+                            padding: 12px;
+                            margin: 8px 0;
+                        ">
+                            <p style="margin: 0; color: #93C5FD;"><strong>{i}.</strong> {suggestion}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
                     st.write(suggestions)
 
             # Generate improved version
-            if st.button("✨ Generate Improved Version"):
-                with st.spinner("🤖 Generating improved notice..."):
+            if st.button("Generate Improved Version"):
+                with st.spinner("Generating improved notice..."):
                     try:
                         # Ask AI to rewrite
                         improved = ai_engine.chat_completion([
@@ -805,7 +985,7 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
                             st.markdown(improved)
 
                             st.download_button(
-                                label="⬇️ Download Improved Version",
+                                label="Download Improved Version",
                                 data=improved,
                                 file_name=f"privacy_notice_improved_{datetime.now().strftime('%Y%m%d')}.txt",
                                 mime="text/plain"
@@ -837,11 +1017,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         st.error("This page is available to admins only.")
         return
 
-    st.title("⚙️ AI Configuration")
-
-    st.markdown(
-        "Configure your AI provider and monitor usage."
-    )
+    _render_styled_header("AI Configuration", "Configure your AI provider and monitor usage")
 
     try:
         from ai_engine import get_ai_settings, save_ai_settings, get_usage_stats
@@ -850,20 +1026,21 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         current_settings = get_ai_settings(db, org_id) or {}
 
         # Configuration section
-        st.subheader("📡 Provider Configuration")
+        st.subheader("Provider Configuration")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            # Provider selection
+            # Provider selection with visual cards
+            provider_options = ["OpenAI", "Anthropic", "Google Gemini"]
+            current_provider = current_settings.get("provider", "openai").title().replace("_", " ")
+            provider_index = provider_options.index(current_provider) if current_provider in provider_options else 0
+
             provider = st.radio(
                 "AI Provider",
-                ["OpenAI", "Anthropic", "Google Gemini"],
-                horizontal=False,
-                index=["OpenAI", "Anthropic", "Google Gemini"].index(
-                    current_settings.get("provider", "OpenAI").title()
-                    if current_settings.get("provider") else "OpenAI"
-                )
+                provider_options,
+                index=provider_index,
+                horizontal=False
             )
             provider = provider.lower().replace(" ", "_")
 
@@ -878,7 +1055,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         st.divider()
 
         # Model selection based on provider
-        st.subheader("🤖 Model Selection")
+        st.subheader("Model Selection")
 
         model_options = {
             "openai": {
@@ -909,7 +1086,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         st.divider()
 
         # Usage limits
-        st.subheader("📊 Usage Limits")
+        st.subheader("Usage Limits")
 
         col1, col2 = st.columns(2)
 
@@ -922,7 +1099,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
             )
 
         with col2:
-            if st.button("🔗 Test Connection"):
+            if st.button("Test Connection"):
                 with st.spinner("Testing connection..."):
                     try:
                         # Attempt to initialize AIEngine to test connection
@@ -942,16 +1119,16 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                         ])
 
                         if response:
-                            st.success("✅ Connection successful!")
+                            st.success("Connection successful!")
                         else:
-                            st.error("❌ Connection failed")
+                            st.error("Connection failed")
                     except Exception as e:
-                        st.error(f"❌ Connection error: {str(e)}")
+                        st.error(f"Connection error: {str(e)}")
 
         st.divider()
 
         # Save settings button
-        if st.button("💾 Save Settings", use_container_width=True):
+        if st.button("Save Settings", use_container_width=True):
             try:
                 save_ai_settings(
                     db=db,
@@ -961,7 +1138,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                     model=selected_model,
                     monthly_limit=monthly_limit
                 )
-                st.success("✅ Settings saved successfully!")
+                st.success("Settings saved successfully!")
                 st.rerun()
             except Exception as e:
                 st.error(f"Failed to save settings: {str(e)}")
@@ -969,7 +1146,7 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         st.divider()
 
         # Usage dashboard
-        st.subheader("📈 Usage Dashboard")
+        st.subheader("Usage Dashboard")
 
         try:
             usage = get_usage_stats(db, org_id) or {}
@@ -1011,9 +1188,11 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                         layout=go.Layout(
                             title="Queries by Feature",
                             height=400,
-                            plot_bgcolor="#1E293B",
-                            paper_bgcolor="#0F172A",
-                            font=dict(color="#F5F5F5")
+                            plot_bgcolor="#0A0F1E",
+                            paper_bgcolor="#0A0F1E",
+                            font=dict(color="#F5F5F5"),
+                            xaxis=dict(showgrid=False),
+                            yaxis=dict(showgrid=True, gridcolor="rgba(107, 114, 128, 0.1)")
                         )
                     )
                     st.plotly_chart(fig, use_container_width=True)
