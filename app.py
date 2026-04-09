@@ -1,5 +1,5 @@
 """
-Anumati.ai - DPDPA Compliance Automation Platform
+Svikruti.ai - DPDPA Compliance Automation Platform
 
 A comprehensive, offline, rule-based compliance tool for automating
 Digital Personal Data Protection Act (DPDPA) compliance in India.
@@ -80,7 +80,7 @@ except (ImportError, Exception):
 
 # ==================== PAGE CONFIG ====================
 st.set_page_config(
-    page_title="Anumati.ai - DPDPA Compliance",
+    page_title="Svikruti.ai - DPDPA Compliance",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -276,7 +276,7 @@ def render_login_page():
     with col2:
         st.markdown("""
         <div style="text-align: center; padding: 2rem 0;">
-            <h1 style="color: #14B8A6; margin: 0;">🛡️ Anumati.ai</h1>
+            <h1 style="color: #14B8A6; margin: 0;">🛡️ Svikruti.ai</h1>
             <p style="color: #94A3B8; margin: 0.5rem 0 0 0; font-size: 1.1rem;">
                 DPDPA Compliance Automation Platform
             </p>
@@ -403,7 +403,7 @@ def render_login_page():
                                     "org_id": org_id
                                 }
                                 st.session_state.page = "Dashboard"
-                                st.success("Account created successfully! Welcome to Anumati.ai")
+                                st.success("Account created successfully! Welcome to Svikruti.ai")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error creating account: {str(e)}")
@@ -417,7 +417,7 @@ def render_sidebar():
     with st.sidebar:
         st.markdown(f"""
             <div style="text-align: center; padding: 1rem 0; border-bottom: 2px solid #14B8A6;">
-                <h1 style="color: #14B8A6; margin: 0;">🛡️ Anumati.ai</h1>
+                <h1 style="color: #14B8A6; margin: 0;">🛡️ Svikruti.ai</h1>
                 <p style="color: #E2E8F0; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
                     DPDPA Compliance Automation
                 </p>
@@ -540,11 +540,11 @@ def render_sidebar():
         st.markdown("---")
 
         # Help section
-        with st.expander("ℹ️ About Anumati.ai"):
+        with st.expander("ℹ️ About Svikruti.ai"):
             st.markdown(f"""
             **Version:** {config.APP_VERSION}
 
-            Anumati.ai is an open-source DPDPA compliance automation platform
+            Svikruti.ai is an open-source DPDPA compliance automation platform
             designed to help organizations implement and maintain compliance
             with India's Digital Personal Data Protection Act.
 
@@ -1804,7 +1804,7 @@ def main():
         page_dashboard()
 
     # Footer
-    st.markdown('<div class="footer">Anumati.ai v0.2.0 | Multi-tenant DPDPA Compliance Platform | Built by Harsh Kahate</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer">Svikruti.ai v0.2.0 | Multi-tenant DPDPA Compliance Platform | Built by Harsh Kahate</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

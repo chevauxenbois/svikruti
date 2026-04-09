@@ -1,5 +1,5 @@
 """
-Anumati.ai - AI-Powered DPDPA Compliance Pages
+Svikruti.ai - AI-Powered DPDPA Compliance Pages
 Production-grade AI features for document generation, breach analysis, compliance advisement,
 and intelligent privacy reviews. Integrates with AIEngine for advanced language model capabilities.
 

@@ -1,9 +1,9 @@
 """
-DPDPA Knowledge Base for Anumati.ai
+DPDPA Knowledge Base for Svikruti.ai
 Complete reference data for DPDPA 2023 and DPDP Rules 2025
 
 This module stores all DPDPA 2023 and DPDP Rules 2025 knowledge in structured data
-for the Anumati.ai compliance tool. Pure data structure - NO AI/LLM dependency.
+for the Svikruti.ai compliance tool. Pure data structure - NO AI/LLM dependency.
 
 Covers:
 - DPDPA Sections (Act sections 1-33)

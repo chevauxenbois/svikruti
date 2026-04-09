@@ -1,11 +1,11 @@
 """
-AI Engine Module for Anumati.ai DPDPA Compliance Platform
+AI Engine Module for Svikruti.ai DPDPA Compliance Platform
 
 This module handles all LLM interactions for the platform, supporting multiple
 providers (OpenAI, Anthropic Claude, Google Gemini) with cost controls, usage
 tracking, and caching.
 
-Author: Anumati.ai
+Author: Svikruti.ai
 License: Proprietary
 """
 
@@ -294,7 +294,7 @@ class AIEngine:
         else:
             cache_key = None
 
-        system_prompt = """You are Anumati AI, an expert on India's DPDPA 2023 and DPDP Rules 2025.
+        system_prompt = """You are Svikruti AI, an expert on India's DPDPA 2023 and DPDP Rules 2025.
 
 You help compliance officers understand requirements, provide accurate section references,
 and give practical implementation advice.

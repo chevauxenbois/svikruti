@@ -1,5 +1,5 @@
 """
-Configuration and constants for Anumati.ai DPDPA Compliance Tool
+Configuration and constants for Svikruti.ai DPDPA Compliance Tool
 
 This module contains all configuration values, enums, and constants
 used throughout the application. Centralized configuration makes it
@@ -12,7 +12,7 @@ from typing import Dict, List
 
 # ==================== VERSION INFO ====================
 APP_VERSION = "0.1.0"
-APP_NAME = "Anumati.ai"
+APP_NAME = "Svikruti.ai"
 APP_SUBTITLE = "DPDPA Compliance Automation Platform"
 CREATED_BY = "Harsh Kahate"
 

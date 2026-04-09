@@ -1,8 +1,8 @@
-# 🛡️ Anumati.ai — DPDPA Compliance Automation Platform
+# 🛡️ Svikruti.ai — DPDPA Compliance Automation Platform
 
 **Open-source, offline, rule-based compliance tool for India's Digital Personal Data Protection Act (DPDPA) 2023**
 
-> *"Anumati" (अनुमति) means "consent" in Sanskrit — the foundation of data privacy.*
+> *"Svikruti" (स्वीकृति) means "acceptance/consent" in Sanskrit — the foundation of data privacy.*
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
@@ -11,9 +11,9 @@
 
 ---
 
-## Why Anumati?
+## Why Svikruti?
 
-Most DPDPA compliance tools are enterprise-priced (OneTrust at $2,275/month, TrustArc at $8,000+/year) and treat India's law as an afterthought. Anumati is built specifically for DPDPA, by someone who has implemented it.
+Most DPDPA compliance tools are enterprise-priced (OneTrust at $2,275/month, TrustArc at $8,000+/year) and treat India's law as an afterthought. Svikruti is built specifically for DPDPA, by someone who has implemented it.
 
 **Key differentiators:**
 - **AI-Powered** — GPT-4o / Claude / Gemini integration for intelligent compliance guidance
@@ -70,8 +70,8 @@ Most DPDPA compliance tools are enterprise-priced (OneTrust at $2,275/month, Tru
 
 ```bash
 # Clone the repo
-git clone https://github.com/chevauxenbois/anumati.git
-cd anumati
+git clone https://github.com/chevauxenbois/svikruti.git
+cd svikruti
 
 # Install dependencies
 pip install -r requirements.txt
@@ -87,7 +87,7 @@ Opens at `http://localhost:8501`
 ## Project Structure
 
 ```
-anumati/
+svikruti/
 ├── app.py              # Main Streamlit application + routing (1,812 lines)
 ├── ai_engine.py        # AI/LLM integration engine (1,056 lines)
 ├── ai_pages.py         # AI-powered UI pages (1,026 lines)
@@ -208,4 +208,4 @@ Information Security & Data Privacy Professional
 
 ---
 
-*Anumati.ai — Making DPDPA compliance accessible for every Indian organization.*
+*Svikruti.ai — Making DPDPA compliance accessible for every Indian organization.*

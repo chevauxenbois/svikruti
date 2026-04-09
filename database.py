@@ -1,5 +1,5 @@
 """
-Production-quality database layer for Anumati.ai
+Production-quality database layer for Svikruti.ai
 
 Multi-tenant DPDPA compliance platform with:
 - User authentication and role-based access control
@@ -30,7 +30,7 @@ except ImportError:
 
 
 class Database:
-    """Production-grade SQLite database handler for multi-tenant Anumati.ai platform"""
+    """Production-grade SQLite database handler for multi-tenant Svikruti.ai platform"""
 
     def __init__(self, db_path: Optional[str] = None):
         """
@@ -41,7 +41,7 @@ class Database:
         """
         if db_path is None:
             import tempfile
-            self.db_path = str(Path(tempfile.gettempdir()) / "anumati_data.db")
+            self.db_path = str(Path(tempfile.gettempdir()) / "svikruti_data.db")
         else:
             self.db_path = db_path
 

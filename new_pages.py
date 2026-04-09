@@ -1,5 +1,5 @@
 """
-Anumati.ai - DPDPA Compliance Platform
+Svikruti.ai - DPDPA Compliance Platform
 Production-grade page functions for Records of Processing Activities, Consent Management,
 Privacy Notices, Data Principal Rights Tracker, and Vendor Management.
 
