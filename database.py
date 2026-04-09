@@ -40,8 +40,14 @@ class Database:
             db_path: Path to SQLite database file. If None, uses temp directory.
         """
         if db_path is None:
-            import tempfile
-            self.db_path = str(Path(tempfile.gettempdir()) / "svikruti_data.db")
+            import os
+            # Use persistent volume on Railway/Docker, fallback to temp dir
+            data_dir = os.environ.get("DATA_DIR", "/data")
+            if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK):
+                self.db_path = str(Path(data_dir) / "svikruti_data.db")
+            else:
+                import tempfile
+                self.db_path = str(Path(tempfile.gettempdir()) / "svikruti_data.db")
         else:
             self.db_path = db_path
 
