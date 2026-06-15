@@ -26,6 +26,8 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
+.venv*/
 venv/
 ENV/
 env/
@@ -46,3 +48,14 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local Svikruti scan outputs
+dpdpa-*.csv
+dpdpa-*.md
+dpdpa-*.html
+dpdpa-*.json
+consent-demo-report.*
+svikruti-full-report.*
+examples-report.*
+examples-*.csv
+examples-*.md

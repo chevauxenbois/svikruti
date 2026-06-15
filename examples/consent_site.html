@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Svikruti Consent Demo</title>
+  <script>
+    function loadAnalytics() {
+      var script = document.createElement("script");
+      script.src = "https://www.googletagmanager.com/gtag/js?id=G-SVIKRUTI";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    function acceptCookies() {
+      localStorage.setItem("svikruti_demo_consent", "accepted");
+      loadAnalytics();
+      document.getElementById("banner").hidden = true;
+    }
+
+    function rejectCookies() {
+      localStorage.setItem("svikruti_demo_consent", "rejected");
+      document.getElementById("banner").hidden = true;
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Account signup</h1>
+    <form>
+      <label>Full name <input name="full_name"></label>
+      <label>Email <input name="email" type="email"></label>
+      <label>Mobile <input name="phone" type="tel"></label>
+      <label>Location <input name="city"></label>
+    </form>
+    <a href="/privacy">Privacy policy</a>
+    <a href="#cookie-settings">Cookie settings</a>
+  </main>
+  <section id="banner" role="dialog" aria-label="Cookie consent">
+    <p>We use analytics cookies to improve the signup experience.</p>
+    <button onclick="rejectCookies()">Reject</button>
+    <button onclick="acceptCookies()">Accept all</button>
+  </section>
+</body>
+</html>

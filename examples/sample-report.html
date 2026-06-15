@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Svikruti PrivacyOps Evidence Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182235;
+      --muted: #667085;
+      --line: #d7dee8;
+      --panel: #f7f9fc;
+      --panel-strong: #eef4f8;
+      --accent: #047a78;
+      --accent-2: #17324d;
+      --amber: #b7791f;
+      --rose: #b42318;
+      --green: #18794e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #f8fafc;
+      line-height: 1.5;
+    }
+    header {
+      padding: 34px 56px 28px;
+      background:
+        linear-gradient(135deg, rgba(5, 122, 120, 0.22), rgba(23, 50, 77, 0.92)),
+        #14283c;
+      color: white;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #9ee0da;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+    header h1 { margin: 0 0 8px; font-size: 36px; letter-spacing: 0; }
+    header p { margin: 0; color: #c7d5df; max-width: 860px; }
+    .header-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: end;
+    }
+    .header-stat {
+      min-width: 178px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.08);
+    }
+    .header-stat span {
+      display: block;
+      color: #b8c9d6;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .header-stat strong {
+      display: block;
+      font-size: 25px;
+      margin-top: 4px;
+    }
+    main { padding: 34px 56px 56px; }
+    section { margin: 0 0 34px; }
+    h2 { margin: 0 0 16px; font-size: 22px; }
+    h3 { margin: 20px 0 10px; font-size: 16px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 56px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+    .tab-btn, button {
+      border: 1px solid #b8c5d3;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 11px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .tab-btn.active, button.primary {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+      color: white;
+    }
+    .workspace-section { display: none; }
+    .workspace-section.active { display: block; }
+    .workflow-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .workflow-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 12px;
+      min-width: 0;
+    }
+    .workflow-step span {
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #e7f5f3;
+      color: #075c5a;
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+    .workflow-step strong, .workflow-step small {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+    .workflow-step small {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--panel);
+    }
+    .metric .label { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }
+    .metric .value { font-size: 26px; font-weight: 750; margin-top: 6px; }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .hero-summary {
+      border: 1px solid #b8d8d5;
+      background: linear-gradient(135deg, #f0fbfa, #fff);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      font-size: 16px;
+    }
+    .brief-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1.2fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .brief {
+      border: 1px solid #bfd0df;
+      border-radius: 8px;
+      background: #fff;
+      padding: 15px 16px;
+      min-width: 0;
+    }
+    .brief span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .brief strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .brief p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .ai-brief {
+      border-color: #cbbce8;
+      background: #fbf8ff;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: var(--panel); font-size: 12px; text-transform: uppercase; color: var(--muted); }
+    td div { color: var(--muted); margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      color: white;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: #eef8f7;
+      padding: 14px 16px;
+      border-radius: 6px;
+    }
+    .action {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .action-priority {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: var(--accent-2);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .action p { margin: 5px 0; }
+    .action.done {
+      opacity: 0.62;
+      background: #f7faf8;
+    }
+    .action-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 760;
+      margin-bottom: 7px;
+    }
+    .artifact-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .control-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+      min-width: 0;
+    }
+    .control-card span, .issue-card span {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+    .control-card.ready span { background: #e8f6ef; color: #12633d; }
+    .control-card.review span { background: #fff4dc; color: #7b4e00; }
+    .control-card.missing span,
+    .control-card.needs-work span { background: #fee4df; color: #9f1f16; }
+    .control-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+    .control-card p { margin: 6px 0; color: var(--muted); font-size: 13px; }
+    .issue-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .issue-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+      min-width: 0;
+    }
+    .issue-card span { background: #eef2f6; color: #243246; }
+    .issue-card strong { display: block; margin-bottom: 8px; }
+    .issue-card p { color: var(--muted); font-size: 13px; }
+    .issue-card textarea {
+      width: 100%;
+      min-height: 190px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #263244;
+      background: #fbfcfe;
+      margin-bottom: 10px;
+    }
+    .ai-header, .ai-empty {
+      border: 1px solid #b9d9d6;
+      border-radius: 8px;
+      padding: 18px;
+      background: #f0fbfa;
+      margin-bottom: 20px;
+    }
+    .ai-header span, .ai-empty span {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 850;
+      background: #dff3f1;
+      color: #075c5a;
+      margin-bottom: 10px;
+    }
+    .ai-header strong, .ai-empty strong {
+      display: block;
+      font-size: 19px;
+      margin-bottom: 8px;
+    }
+    .ai-priority-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .ai-priority {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+      min-width: 0;
+    }
+    .ai-priority strong { display: block; margin-bottom: 8px; }
+    .ai-priority p { margin: 6px 0; color: var(--muted); font-size: 13px; }
+    .artifact {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+      min-width: 0;
+    }
+    .artifact span {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #e8f2f1;
+      color: #075c5a;
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+    .artifact strong { display: block; margin-bottom: 6px; }
+    .artifact p { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 78px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      margin: 9px 0;
+      font-size: 13px;
+    }
+    .bar-track {
+      height: 10px;
+      background: #eef2f6;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; border-radius: 999px; }
+    .bar-fill.critical { background: #7a271a; }
+    .bar-fill.high { background: #b42318; }
+    .bar-fill.medium { background: #946200; }
+    .bar-fill.low { background: #18794e; }
+    .flow-graph {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 14px;
+    }
+    .flow-lane {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.1fr) 24px minmax(120px, 0.8fr) 24px minmax(115px, 0.75fr) 24px minmax(150px, 1fr) 24px minmax(260px, 1.65fr);
+      align-items: stretch;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e6ebf2;
+    }
+    .flow-lane:last-child { border-bottom: none; }
+    .flow-node {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: white;
+      min-width: 0;
+    }
+    .flow-node span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 760;
+      margin-bottom: 5px;
+    }
+    .flow-node strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+    .flow-node.source { background: #f0f6fb; border-color: #9ab4ca; }
+    .flow-node.data { background: #eef8f7; border-color: #82c5c0; }
+    .flow-node.notice.ok { background: #effaf3; border-color: #9fd7b4; }
+    .flow-node.notice.missing { background: #fff1f0; border-color: #e5a19b; }
+    .flow-node.obligation { background: #f7f1ff; border-color: #b9a0de; }
+    .flow-node.action-node { background: #fff8e8; border-color: #e2bd6f; }
+    .arrow {
+      color: #8a96a6;
+      font-weight: 800;
+      text-align: center;
+      align-self: center;
+    }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      background: #fff;
+    }
+    summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      font-weight: 760;
+      background: var(--panel);
+      border-radius: 8px;
+    }
+    details[open] summary {
+      border-bottom: 1px solid var(--line);
+      border-radius: 8px 8px 0 0;
+    }
+    .details-body { padding: 16px; }
+    .details-body table { margin-top: 0; }
+    .compact-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .small { color: var(--muted); font-size: 12px; }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    input[type="search"], select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      font: inherit;
+      min-width: 220px;
+    }
+    code { background: #eef2f6; padding: 2px 5px; border-radius: 4px; }
+    @media (max-width: 900px) {
+      header, main, .topbar { padding-left: 22px; padding-right: 22px; }
+      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .issue-grid, .ai-priority-grid, .workflow-strip { grid-template-columns: 1fr; }
+      .flow-lane { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-grid">
+      <div>
+        <div class="eyebrow">India-first PrivacyOps evidence workbench</div>
+        <h1>Svikruti Evidence Workbench</h1>
+        <p>Engineering evidence for DPDPA readiness: code, website, consent, controls, artifacts, tickets, and optional AI synthesis. Generated 2026-06-15T10:51:00.648012+00:00.</p>
+      </div>
+      <div class="header-stat"><span>Risk level</span><strong>CRITICAL</strong></div>
+    </div>
+  </header>
+  <nav class="topbar" aria-label="Report views">
+    <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+    <button type="button" class="tab-btn" data-tab="controls">Control Board</button>
+    <button type="button" class="tab-btn" data-tab="actions">Actions</button>
+    <button type="button" class="tab-btn" data-tab="flows">Evidence Flow</button>
+    <button type="button" class="tab-btn" data-tab="artifacts">Artifacts</button>
+    <button type="button" class="tab-btn" data-tab="ai">AI Co-pilot</button>
+    <button type="button" class="tab-btn" data-tab="fixpack">Fix Pack</button>
+    <button type="button" class="tab-btn" data-tab="evidence">Evidence</button>
+  </nav>
+  <main>
+    <section class="workspace-section active" data-section="overview">
+      <div class="hero-summary">Svikruti found 5 personal-data categories, 1 third parties, and 9 proof-pack actions. Start with the decision brief and top actions.</div>
+      <section class="workflow-strip"><div class="workflow-step"><span>1</span><strong>Scan</strong><small>4 sources</small></div>
+<div class="workflow-step"><span>2</span><strong>Map</strong><small>5 flows</small></div>
+<div class="workflow-step"><span>3</span><strong>Control</strong><small>8 controls</small></div>
+<div class="workflow-step"><span>4</span><strong>Fix</strong><small>9 actions</small></div>
+<div class="workflow-step"><span>5</span><strong>AI</strong><small>not configured</small></div>
+<div class="workflow-step"><span>6</span><strong>Gate</strong><small>SARIF / CI</small></div></section>
+      <section class="brief-grid"><div class="brief"><span>Launch posture</span><strong>Do not treat this as launch-ready until the P0/P1 actions are reviewed.</strong></div><div class="brief"><span>Evidence coverage</span><strong>4 files scanned | 0 website pages scanned | 5 data categories | 1 third parties</strong></div><div class="brief ai-brief"><span>AI co-pilot</span><strong>Not Configured</strong><p>gemini | gemini-3.5-flash</p></div><div class="brief"><span>What matters now</span><strong>3 data flows are not clearly covered by the privacy notice. 18 high/critical evidence items need owner assignment.</strong></div></section>
+      <section class="grid">
+        <div class="metric"><div class="label">Risk level</div><div class="value">CRITICAL</div></div>
+        <div class="metric"><div class="label">Risk score</div><div class="value">100/100</div></div>
+        <div class="metric"><div class="label">Files scanned</div><div class="value">4</div></div>
+        <div class="metric"><div class="label">Website pages</div><div class="value">0</div></div>
+      </section>
+      <section class="split">
+        <div class="box">
+          <h2>Detected Personal Data</h2>
+          <ul><li>Contact</li>
+<li>Device</li>
+<li>Government ID</li>
+<li>Identity</li>
+<li>Location</li></ul>
+        </div>
+        <div class="box">
+          <h2>Detected Third Parties</h2>
+          <ul><li>Google Analytics</li></ul>
+        </div>
+      </section>
+      <section class="split">
+        <div class="box">
+          <h2>Severity Mix</h2>
+          <div class="bar-row"><span>CRITICAL</span><div class="bar-track"><div class="bar-fill critical" style="width:12%"></div></div><strong>2</strong></div>
+<div class="bar-row"><span>HIGH</span><div class="bar-track"><div class="bar-fill high" style="width:100%"></div></div><strong>16</strong></div>
+<div class="bar-row"><span>MEDIUM</span><div class="bar-track"><div class="bar-fill medium" style="width:56%"></div></div><strong>9</strong></div>
+<div class="bar-row"><span>LOW</span><div class="bar-track"><div class="bar-fill low" style="width:18%"></div></div><strong>3</strong></div>
+        </div>
+        <div class="box">
+          <h2>Notice Gaps</h2>
+          <ul class="compact-list"><li>Detected Device data, but the privacy notice does not clearly mention that category.</li>
+<li>Detected Government ID data, but the privacy notice does not clearly mention that category.</li>
+<li>Detected Location data, but the privacy notice does not clearly mention that category.</li>
+<li>Detected third party &#x27;Google Analytics&#x27;, but the privacy notice does not clearly mention it or its category.</li>
+<li>Privacy notice does not clearly mention consent withdrawal.</li></ul>
+        </div>
+      </section>
+    </section>
+
+    <section class="workspace-section" data-section="controls">
+      <h2>DPDPA Control Board</h2>
+      <p class="small">A launch-readiness view that maps scanner evidence to practical DPDPA control areas.</p>
+      <div class="control-grid"><div class="control-card needs-work"><span>Needs work</span><strong>Notice coverage</strong><p>5 notice gaps</p><p class="small">Owner: Legal / Privacy</p><p class="small">Next: Patch the privacy notice so detected data and vendors are disclosed.</p></div>
+<div class="control-card needs-work"><span>Needs work</span><strong>Consent and withdrawal</strong><p>Withdrawal gap detected</p><p class="small">Owner: Product / Legal</p><p class="small">Next: Verify reject, accept, and withdrawal paths with browser consent mode.</p></div>
+<div class="control-card needs-work"><span>Needs work</span><strong>Data minimization</strong><p>Government ID</p><p class="small">Owner: Engineering / Privacy</p><p class="small">Next: Confirm strict purpose, retention, and access controls for sensitive data.</p></div>
+<div class="control-card needs-work"><span>Needs work</span><strong>Vendor governance</strong><p>1 vendors/tools detected</p><p class="small">Owner: Procurement / Legal</p><p class="small">Next: Confirm DPA status, purpose, transfer location, and notice disclosure.</p></div>
+<div class="control-card review"><span>Review</span><strong>RoPA readiness</strong><p>5 RoPA starter rows</p><p class="small">Owner: Privacy Ops</p><p class="small">Next: Export RoPA CSV and complete retention, lawful basis, and owners.</p></div>
+<div class="control-card needs-work"><span>Needs work</span><strong>Tracking controls</strong><p>Device/tracking signals detected</p><p class="small">Owner: Product / Engineering</p><p class="small">Next: Gate non-essential tracking and make preference changes discoverable.</p></div>
+<div class="control-card ready"><span>Ready</span><strong>Logging and security</strong><p>0 logging risks</p><p class="small">Owner: Engineering / Security</p><p class="small">Next: Mask or remove personal data from logs and define retention.</p></div>
+<div class="control-card ready"><span>Ready</span><strong>Children data</strong><p>No children data signal</p><p class="small">Owner: Legal / Product</p><p class="small">Next: If children data exists, verify guardian consent and age-gating controls.</p></div></div>
+    </section>
+
+    <section class="workspace-section" data-section="actions">
+      <h2>Action Workbench</h2>
+      <p class="small">Checkboxes are stored in this browser so you can use the report as a lightweight review tracker.</p>
+      <div class="action" data-action-id="0"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="0"><span>Mark reviewed</span></label><strong>Update privacy notice for Device</strong><p>Svikruti detected Device data in engineering evidence, but not in the notice text.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: consent_site.html</p></div></div>
+<div class="action" data-action-id="1"><div class="action-priority">P0</div><div><label class="action-check"><input type="checkbox" data-action-check="1"><span>Mark reviewed</span></label><strong>Update privacy notice for Government ID</strong><p>Svikruti detected Government ID data in engineering evidence, but not in the notice text.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: sample_app.py</p></div></div>
+<div class="action" data-action-id="2"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="2"><span>Mark reviewed</span></label><strong>Update privacy notice for Location</strong><p>Svikruti detected Location data in engineering evidence, but not in the notice text.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: consent_site.html, sample_site.html</p></div></div>
+<div class="action" data-action-id="3"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="3"><span>Mark reviewed</span></label><strong>Add withdrawal language to privacy notice</strong><p>The notice does not clearly include DPDPA-relevant withdrawal terms.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: privacy notice text</p></div></div>
+<div class="action" data-action-id="4"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="4"><span>Mark reviewed</span></label><strong>Add rights language to privacy notice</strong><p>The notice does not clearly include DPDPA-relevant rights terms.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: privacy notice text</p></div></div>
+<div class="action" data-action-id="5"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="5"><span>Mark reviewed</span></label><strong>Add children language to privacy notice</strong><p>The notice does not clearly include DPDPA-relevant children terms.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: privacy notice text</p></div></div>
+<div class="action" data-action-id="6"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="6"><span>Mark reviewed</span></label><strong>Add retention language to privacy notice</strong><p>The notice does not clearly include DPDPA-relevant retention terms.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: privacy notice text</p></div></div>
+<div class="action" data-action-id="7"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="7"><span>Mark reviewed</span></label><strong>Add third parties language to privacy notice</strong><p>The notice does not clearly include DPDPA-relevant third parties terms.</p><p class="small">Owner: Legal / Privacy | Artifact: Privacy notice change</p><p class="small">Evidence: privacy notice text</p></div></div>
+<div class="action" data-action-id="8"><div class="action-priority">P1</div><div><label class="action-check"><input type="checkbox" data-action-check="8"><span>Mark reviewed</span></label><strong>Disclose processor/vendor categories</strong><p>Third-party services were detected but processor/vendor disclosure language is missing or weak.</p><p class="small">Owner: Legal / Procurement | Artifact: Vendor register + notice update</p><p class="small">Evidence: Google Analytics</p></div></div>
+    </section>
+
+    <section class="workspace-section" data-section="flows">
+      <h2>Evidence Flow</h2>
+      <p class="small">Each lane shows how Svikruti connects engineering evidence to notice coverage, DPDPA concern, and action.</p>
+      <div class="flow-graph"><div class="flow-lane"><div class="flow-node source"><span>Source</span><strong>consent_site.html, sample_app.py, sample_site.html</strong></div><div class="arrow">-></div><div class="flow-node data"><span>Data</span><strong>Contact</strong></div><div class="arrow">-></div><div class="flow-node notice ok"><span>Notice</span><strong>Covered</strong></div><div class="arrow">-></div><div class="flow-node obligation"><span>DPDPA area</span><strong>Consent and notice, Notice transparency</strong></div><div class="arrow">-></div><div class="flow-node action-node"><span>Action</span><strong>No immediate action</strong></div></div>
+<div class="flow-lane"><div class="flow-node source"><span>Source</span><strong>sample_app.py</strong></div><div class="arrow">-></div><div class="flow-node data"><span>Data</span><strong>Government ID</strong></div><div class="arrow">-></div><div class="flow-node notice missing"><span>Notice</span><strong>Missing</strong></div><div class="arrow">-></div><div class="flow-node obligation"><span>DPDPA area</span><strong>Data minimization</strong></div><div class="arrow">-></div><div class="flow-node action-node"><span>Action</span><strong>Document strict purpose, retention, and access controls for Government ID.; Update privacy notice to disclose Government ID data.</strong></div></div>
+<div class="flow-lane"><div class="flow-node source"><span>Source</span><strong>consent_site.html, sample_site.html</strong></div><div class="arrow">-></div><div class="flow-node data"><span>Data</span><strong>Identity</strong></div><div class="arrow">-></div><div class="flow-node notice ok"><span>Notice</span><strong>Covered</strong></div><div class="arrow">-></div><div class="flow-node obligation"><span>DPDPA area</span><strong>Notice transparency</strong></div><div class="arrow">-></div><div class="flow-node action-node"><span>Action</span><strong>No immediate action</strong></div></div>
+<div class="flow-lane"><div class="flow-node source"><span>Source</span><strong>consent_site.html, sample_site.html</strong></div><div class="arrow">-></div><div class="flow-node data"><span>Data</span><strong>Location</strong></div><div class="arrow">-></div><div class="flow-node notice missing"><span>Notice</span><strong>Missing</strong></div><div class="arrow">-></div><div class="flow-node obligation"><span>DPDPA area</span><strong>Purpose limitation</strong></div><div class="arrow">-></div><div class="flow-node action-node"><span>Action</span><strong>Update privacy notice to disclose Location data.</strong></div></div>
+<div class="flow-lane"><div class="flow-node source"><span>Source</span><strong>consent_site.html</strong></div><div class="arrow">-></div><div class="flow-node data"><span>Data</span><strong>Device</strong></div><div class="arrow">-></div><div class="flow-node notice missing"><span>Notice</span><strong>Missing</strong></div><div class="arrow">-></div><div class="flow-node obligation"><span>DPDPA area</span><strong>Tracking and consent</strong></div><div class="arrow">-></div><div class="flow-node action-node"><span>Action</span><strong>Update privacy notice to disclose Device data.</strong></div></div></div>
+      <h3>Data flow table</h3>
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Collection</th><th>Storage</th><th>Logging</th><th>DPDPA Areas</th><th>Remediation</th></tr>
+        </thead>
+        <tbody><tr><td><strong>Contact</strong><div>Notice: covered</div></td><td>consent_site.html, sample_app.py, sample_site.html</td><td>Not detected</td><td>None detected</td><td>Consent and notice, Notice transparency</td><td>No immediate action</td></tr>
+<tr><td><strong>Government ID</strong><div>Notice: missing</div></td><td>sample_app.py</td><td>Not detected</td><td>None detected</td><td>Data minimization</td><td>Document strict purpose, retention, and access controls for Government ID.; Update privacy notice to disclose Government ID data.</td></tr>
+<tr><td><strong>Identity</strong><div>Notice: covered</div></td><td>consent_site.html, sample_site.html</td><td>Not detected</td><td>None detected</td><td>Notice transparency</td><td>No immediate action</td></tr>
+<tr><td><strong>Location</strong><div>Notice: missing</div></td><td>consent_site.html, sample_site.html</td><td>Not detected</td><td>None detected</td><td>Purpose limitation</td><td>Update privacy notice to disclose Location data.</td></tr>
+<tr><td><strong>Device</strong><div>Notice: missing</div></td><td>consent_site.html</td><td>Not detected</td><td>None detected</td><td>Tracking and consent</td><td>Update privacy notice to disclose Device data.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="workspace-section" data-section="artifacts">
+      <h2>Launch Artifacts</h2>
+      <div class="artifact-grid">
+  <div class="artifact"><span>1</span><strong>Assign actions</strong><p>Use the action checklist to assign owners before launch.</p></div>
+  <div class="artifact"><span>2</span><strong>Patch notice</strong><p>Copy the generated drafting aid for privacy/legal review.</p><button type="button" data-copy-notice>Copy notice draft</button></div>
+  <div class="artifact"><span>3</span><strong>Export artifacts</strong><p>Generate CSV/Markdown outputs from the CLI for RoPA, vendors, and remediation.</p><code>--ropa-out --actions-out --vendors-out --notice-patch-out</code></div>
+  <div class="artifact"><span>4</span><strong>AI co-pilot</strong><p>Generate evidence-grounded AI brief and rewritten fixes.</p><code>--ai --ai-provider gemini --ai-out ai-brief.md</code></div>
+  <div class="artifact"><span>5</span><strong>CI gate</strong><p>Install the PR workflow so privacy evidence changes are caught during engineering review.</p><code>svikruti init-github-action</code></div>
+</div>
+<p class="small">Scope: examples | URL: not scanned</p>
+      <textarea id="notice-draft" hidden>Privacy notice drafting aid
+
+Gaps to review:
+- Detected Device data, but the privacy notice does not clearly mention that category.
+- Detected Government ID data, but the privacy notice does not clearly mention that category.
+- Detected Location data, but the privacy notice does not clearly mention that category.
+- Detected third party &#x27;Google Analytics&#x27;, but the privacy notice does not clearly mention it or its category.
+- Privacy notice does not clearly mention consent withdrawal.
+
+Detected data categories:
+Contact, Device, Government ID, Identity, Location
+
+Detected third parties:
+Google Analytics
+
+Add or verify: consent withdrawal, data principal rights, retention, grievance handling, and vendor/processor disclosure.</textarea>
+      <textarea id="fix-pack-draft" hidden># Svikruti Fix Pack
+
+Copy these into GitHub/Jira/Linear. Generated from scanner evidence; review before assigning.
+
+## 1. [P1] Update privacy notice for Device
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+Svikruti detected Device data in engineering evidence, but not in the notice text.
+
+### Evidence
+consent_site.html
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 2. [P0] Update privacy notice for Government ID
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+Svikruti detected Government ID data in engineering evidence, but not in the notice text.
+
+### Evidence
+sample_app.py
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 3. [P1] Update privacy notice for Location
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+Svikruti detected Location data in engineering evidence, but not in the notice text.
+
+### Evidence
+consent_site.html; sample_site.html
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 4. [P1] Add withdrawal language to privacy notice
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+The notice does not clearly include DPDPA-relevant withdrawal terms.
+
+### Evidence
+privacy notice text
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 5. [P1] Add rights language to privacy notice
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+The notice does not clearly include DPDPA-relevant rights terms.
+
+### Evidence
+privacy notice text
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 6. [P1] Add children language to privacy notice
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+The notice does not clearly include DPDPA-relevant children terms.
+
+### Evidence
+privacy notice text
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 7. [P1] Add retention language to privacy notice
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+The notice does not clearly include DPDPA-relevant retention terms.
+
+### Evidence
+privacy notice text
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 8. [P1] Add third parties language to privacy notice
+
+**Owner:** Legal / Privacy
+**Artifact:** Privacy notice change
+
+### Why
+The notice does not clearly include DPDPA-relevant third parties terms.
+
+### Evidence
+privacy notice text
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+
+## 9. [P1] Disclose processor/vendor categories
+
+**Owner:** Legal / Procurement
+**Artifact:** Vendor register + notice update
+
+### Why
+Third-party services were detected but processor/vendor disclosure language is missing or weak.
+
+### Evidence
+Google Analytics
+
+### Acceptance Criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached
+</textarea>
+      <h3>RoPA starter</h3>
+      <table>
+        <thead>
+          <tr><th>Activity</th><th>Data Categories</th><th>Purposes</th><th>Sources</th><th>Third Parties</th><th>Retention</th></tr>
+        </thead>
+        <tbody><tr><td>Contact personal-data processing</td><td>Contact</td><td>Collection through product or website interface</td><td>consent_site.html, sample_app.py, sample_site.html</td><td>To be confirmed</td><td>To be defined</td></tr>
+<tr><td>Government ID personal-data processing</td><td>Government ID</td><td>Collection through product or website interface</td><td>sample_app.py</td><td>To be confirmed</td><td>To be defined</td></tr>
+<tr><td>Identity personal-data processing</td><td>Identity</td><td>Collection through product or website interface</td><td>consent_site.html, sample_site.html</td><td>To be confirmed</td><td>To be defined</td></tr>
+<tr><td>Location personal-data processing</td><td>Location</td><td>Collection through product or website interface</td><td>consent_site.html, sample_site.html</td><td>To be confirmed</td><td>To be defined</td></tr>
+<tr><td>Device personal-data processing</td><td>Device</td><td>Application processing, Collection through product or website interface</td><td>consent_site.html</td><td>To be confirmed</td><td>To be defined</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="workspace-section" data-section="fixpack">
+      <h2>Fix Pack</h2>
+      <p class="small">Copy-ready implementation tickets for GitHub, Jira, or Linear.</p>
+      <div class="issue-grid">
+        <div class="issue-card"><div><span>P1</span><strong>Update privacy notice for Device</strong></div><p>Svikruti detected Device data in engineering evidence, but not in the notice text.</p><textarea readonly>[P1] Update privacy notice for Device
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+Svikruti detected Device data in engineering evidence, but not in the notice text.
+
+Evidence
+consent_site.html
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P0</span><strong>Update privacy notice for Government ID</strong></div><p>Svikruti detected Government ID data in engineering evidence, but not in the notice text.</p><textarea readonly>[P0] Update privacy notice for Government ID
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+Svikruti detected Government ID data in engineering evidence, but not in the notice text.
+
+Evidence
+sample_app.py
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Update privacy notice for Location</strong></div><p>Svikruti detected Location data in engineering evidence, but not in the notice text.</p><textarea readonly>[P1] Update privacy notice for Location
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+Svikruti detected Location data in engineering evidence, but not in the notice text.
+
+Evidence
+consent_site.html; sample_site.html
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Add withdrawal language to privacy notice</strong></div><p>The notice does not clearly include DPDPA-relevant withdrawal terms.</p><textarea readonly>[P1] Add withdrawal language to privacy notice
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+The notice does not clearly include DPDPA-relevant withdrawal terms.
+
+Evidence
+privacy notice text
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Add rights language to privacy notice</strong></div><p>The notice does not clearly include DPDPA-relevant rights terms.</p><textarea readonly>[P1] Add rights language to privacy notice
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+The notice does not clearly include DPDPA-relevant rights terms.
+
+Evidence
+privacy notice text
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Add children language to privacy notice</strong></div><p>The notice does not clearly include DPDPA-relevant children terms.</p><textarea readonly>[P1] Add children language to privacy notice
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+The notice does not clearly include DPDPA-relevant children terms.
+
+Evidence
+privacy notice text
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Add retention language to privacy notice</strong></div><p>The notice does not clearly include DPDPA-relevant retention terms.</p><textarea readonly>[P1] Add retention language to privacy notice
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+The notice does not clearly include DPDPA-relevant retention terms.
+
+Evidence
+privacy notice text
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Add third parties language to privacy notice</strong></div><p>The notice does not clearly include DPDPA-relevant third parties terms.</p><textarea readonly>[P1] Add third parties language to privacy notice
+
+Owner: Legal / Privacy
+Artifact: Privacy notice change
+
+Why
+The notice does not clearly include DPDPA-relevant third parties terms.
+
+Evidence
+privacy notice text
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+<div class="issue-card"><div><span>P1</span><strong>Disclose processor/vendor categories</strong></div><p>Third-party services were detected but processor/vendor disclosure language is missing or weak.</p><textarea readonly>[P1] Disclose processor/vendor categories
+
+Owner: Legal / Procurement
+Artifact: Vendor register + notice update
+
+Why
+Third-party services were detected but processor/vendor disclosure language is missing or weak.
+
+Evidence
+Google Analytics
+
+Acceptance criteria
+- [ ] Owner confirmed
+- [ ] Evidence reviewed
+- [ ] Remediation implemented or risk accepted
+- [ ] Privacy notice / RoPA / vendor register updated where applicable
+- [ ] Svikruti scan rerun and result attached</textarea><button type="button" data-copy-issue>Copy issue</button></div>
+      </div>
+    </section>
+
+    <section class="workspace-section" data-section="ai">
+      <h2>AI Co-pilot</h2>
+      <p class="small">Optional AI-generated synthesis grounded in this scan result. It is drafting support, not legal advice.</p>
+      <div class="ai-empty not-configured"><span>Not Configured</span><strong>AI Co-pilot not generated</strong><p>Set GEMINI_API_KEY and rerun with --ai --ai-provider gemini to generate AI commentary.</p><code>GEMINI_API_KEY=... svikruti scan --ai --ai-provider gemini --ai-out ai-brief.md ...</code></div>
+    </section>
+
+    <section class="workspace-section" data-section="evidence">
+      <h2>Evidence Explorer</h2>
+      <div class="toolbar">
+        <input type="search" id="evidence-search" placeholder="Search evidence, files, recommendations">
+        <select id="severity-filter" aria-label="Filter by severity">
+          <option value="">All severities</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="LOW">Low</option>
+        </select>
+        <span class="small" id="evidence-count"></span>
+      </div>
+      <table id="evidence-table">
+        <thead>
+          <tr><th>Severity</th><th>Finding</th><th>Type</th><th>Location</th><th>Recommendation</th></tr>
+        </thead>
+        <tbody><tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms email in code context.</div><div class="small">Evidence #0</div></td><td>collection_point</td><td>sample_app.py:7</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms mobile in code context.</div><div class="small">Evidence #1</div></td><td>collection_point</td><td>sample_app.py:8</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="CRITICAL" data-kind="collection_point"><td><span class="badge" style="background:#7a271a">CRITICAL</span></td><td><strong>Government ID data signal</strong><div>Detected terms aadhaar in code context.</div><div class="small">Evidence #2</div></td><td>collection_point</td><td>sample_app.py:9</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms email in code context.</div><div class="small">Evidence #3</div></td><td>collection_point</td><td>sample_app.py:10</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms email, mobile in code context.</div><div class="small">Evidence #4</div></td><td>collection_point</td><td>sample_app.py:11</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="CRITICAL" data-kind="collection_point"><td><span class="badge" style="background:#7a271a">CRITICAL</span></td><td><strong>Government ID data signal</strong><div>Detected terms aadhaar in code context.</div><div class="small">Evidence #5</div></td><td>collection_point</td><td>sample_app.py:11</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="MEDIUM" data-kind="third_party"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Third-party service detected: Google Analytics</strong><div>Code references Google Analytics, which may receive personal data or tracking events.</div><div class="small">Evidence #6</div></td><td>third_party</td><td>sample_site.html</td><td>Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.</td></tr>
+<tr data-severity="MEDIUM" data-kind="collection_point"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Identity data signal</strong><div>Detected terms full_name in code context.</div><div class="small">Evidence #7</div></td><td>collection_point</td><td>sample_site.html:11</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="MEDIUM" data-kind="form_field"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Form field collects Identity</strong><div>Form field &#x27;full_name&#x27; appears to collect identity data.</div><div class="small">Evidence #8</div></td><td>form_field</td><td>sample_site.html:11</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="MEDIUM" data-kind="form_field"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Form field collects Identity</strong><div>Form field &#x27;Full name&#x27; appears to collect identity data.</div><div class="small">Evidence #9</div></td><td>form_field</td><td>sample_site.html:11</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms email in code context.</div><div class="small">Evidence #10</div></td><td>collection_point</td><td>sample_site.html:12</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Location data signal</strong><div>Detected terms address in code context.</div><div class="small">Evidence #11</div></td><td>collection_point</td><td>sample_site.html:12</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;email&#x27; appears to collect contact data.</div><div class="small">Evidence #12</div></td><td>form_field</td><td>sample_site.html:12</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;Email address&#x27; appears to collect contact data.</div><div class="small">Evidence #13</div></td><td>form_field</td><td>sample_site.html:12</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms mobile in code context.</div><div class="small">Evidence #14</div></td><td>collection_point</td><td>sample_site.html:13</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;mobile&#x27; appears to collect contact data.</div><div class="small">Evidence #15</div></td><td>form_field</td><td>sample_site.html:13</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;Mobile number&#x27; appears to collect contact data.</div><div class="small">Evidence #16</div></td><td>form_field</td><td>sample_site.html:13</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="LOW" data-kind="privacy_text"><td><span class="badge" style="background:#18794e">LOW</span></td><td><strong>Privacy/consent copy detected</strong><div>The repository contains privacy or consent-related copy.</div><div class="small">Evidence #17</div></td><td>privacy_text</td><td>sample_site.html</td><td>Compare this copy against detected personal-data flows and third-party services.</td></tr>
+<tr data-severity="LOW" data-kind="privacy_text"><td><span class="badge" style="background:#18794e">LOW</span></td><td><strong>Privacy/consent copy detected</strong><div>The repository contains privacy or consent-related copy.</div><div class="small">Evidence #18</div></td><td>privacy_text</td><td>privacy.html</td><td>Compare this copy against detected personal-data flows and third-party services.</td></tr>
+<tr data-severity="MEDIUM" data-kind="third_party"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Third-party service detected: Google Analytics</strong><div>Code references Google Analytics, which may receive personal data or tracking events.</div><div class="small">Evidence #19</div></td><td>third_party</td><td>consent_site.html</td><td>Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.</td></tr>
+<tr data-severity="MEDIUM" data-kind="collection_point"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Identity data signal</strong><div>Detected terms full_name in code context.</div><div class="small">Evidence #20</div></td><td>collection_point</td><td>consent_site.html:30</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="MEDIUM" data-kind="form_field"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Form field collects Identity</strong><div>Form field &#x27;full_name&#x27; appears to collect identity data.</div><div class="small">Evidence #21</div></td><td>form_field</td><td>consent_site.html:30</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms email in code context.</div><div class="small">Evidence #22</div></td><td>collection_point</td><td>consent_site.html:31</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;email&#x27; appears to collect contact data.</div><div class="small">Evidence #23</div></td><td>form_field</td><td>consent_site.html:31</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Contact data signal</strong><div>Detected terms mobile, phone in code context.</div><div class="small">Evidence #24</div></td><td>collection_point</td><td>consent_site.html:32</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="HIGH" data-kind="form_field"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Form field collects Contact</strong><div>Form field &#x27;phone&#x27; appears to collect contact data.</div><div class="small">Evidence #25</div></td><td>form_field</td><td>consent_site.html:32</td><td>Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.</td></tr>
+<tr data-severity="HIGH" data-kind="collection_point"><td><span class="badge" style="background:#b42318">HIGH</span></td><td><strong>Location data signal</strong><div>Detected terms location in code context.</div><div class="small">Evidence #26</div></td><td>collection_point</td><td>consent_site.html:33</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="MEDIUM" data-kind="personal_data_reference"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Device data signal</strong><div>Detected terms cookie in code context.</div><div class="small">Evidence #27</div></td><td>personal_data_reference</td><td>consent_site.html:36</td><td>Review purpose, notice coverage, retention, access controls, and minimization for this data element.</td></tr>
+<tr data-severity="MEDIUM" data-kind="collection_point"><td><span class="badge" style="background:#946200">MEDIUM</span></td><td><strong>Device data signal</strong><div>Detected terms cookie in code context.</div><div class="small">Evidence #28</div></td><td>collection_point</td><td>consent_site.html:38</td><td>Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.</td></tr>
+<tr data-severity="LOW" data-kind="privacy_text"><td><span class="badge" style="background:#18794e">LOW</span></td><td><strong>Privacy/consent copy detected</strong><div>The repository contains privacy or consent-related copy.</div><div class="small">Evidence #29</div></td><td>privacy_text</td><td>consent_site.html</td><td>Compare this copy against detected personal-data flows and third-party services.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Appendix</h2>
+      <details>
+        <summary>Graph edges</summary>
+        <div class="details-body">
+          <table>
+            <thead>
+              <tr><th>Source</th><th>Relationship</th><th>Target</th><th>Evidence refs</th></tr>
+            </thead>
+            <tbody><tr><td>Contact</td><td>triggers</td><td>Consent and notice</td><td>0, 1, 3, 4, 10, 14, 22, 24</td></tr>
+<tr><td>Contact</td><td>triggers</td><td>Notice transparency</td><td>12, 13, 15, 16, 23, 25</td></tr>
+<tr><td>Device</td><td>missing disclosure</td><td>Privacy notice</td><td>27, 28</td></tr>
+<tr><td>Device</td><td>triggers</td><td>Tracking and consent</td><td>27, 28</td></tr>
+<tr><td>Government ID</td><td>missing disclosure</td><td>Privacy notice</td><td>2, 5</td></tr>
+<tr><td>Government ID</td><td>triggers</td><td>Data minimization</td><td>2, 5</td></tr>
+<tr><td>Identity</td><td>triggers</td><td>Notice transparency</td><td>7, 8, 9, 20, 21</td></tr>
+<tr><td>Location</td><td>missing disclosure</td><td>Privacy notice</td><td>11, 26</td></tr>
+<tr><td>Location</td><td>triggers</td><td>Purpose limitation</td><td>11, 26</td></tr>
+<tr><td>Privacy notice</td><td>discloses</td><td>Contact</td><td>0, 1, 3, 4, 10, 12, 13, 14</td></tr>
+<tr><td>Privacy notice</td><td>discloses</td><td>Identity</td><td>7, 8, 9, 20, 21</td></tr>
+<tr><td>consent_site.html</td><td>contains</td><td>Contact</td><td>22, 23, 24, 25</td></tr>
+<tr><td>consent_site.html</td><td>contains</td><td>Device</td><td>27, 28</td></tr>
+<tr><td>consent_site.html</td><td>contains</td><td>Identity</td><td>20, 21</td></tr>
+<tr><td>consent_site.html</td><td>contains</td><td>Location</td><td>26</td></tr>
+<tr><td>consent_site.html</td><td>references</td><td>Google Analytics</td><td>19</td></tr>
+<tr><td>sample_app.py</td><td>contains</td><td>Contact</td><td>0, 1, 3, 4</td></tr>
+<tr><td>sample_app.py</td><td>contains</td><td>Government ID</td><td>2, 5</td></tr>
+<tr><td>sample_site.html</td><td>contains</td><td>Contact</td><td>10, 12, 13, 14, 15, 16</td></tr>
+<tr><td>sample_site.html</td><td>contains</td><td>Identity</td><td>7, 8, 9</td></tr>
+<tr><td>sample_site.html</td><td>contains</td><td>Location</td><td>11</td></tr>
+<tr><td>sample_site.html</td><td>references</td><td>Google Analytics</td><td>6</td></tr>
+<tr><td>Application / website</td><td>collects</td><td>Contact</td><td>0, 1, 3, 4, 10, 12, 13, 14</td></tr>
+<tr><td>Application / website</td><td>collects</td><td>Device</td><td>28</td></tr>
+<tr><td>Application / website</td><td>processes</td><td>Device</td><td>27</td></tr>
+<tr><td>Application / website</td><td>collects</td><td>Government ID</td><td>2, 5</td></tr>
+<tr><td>Application / website</td><td>collects</td><td>Identity</td><td>7, 8, 9, 20, 21</td></tr>
+<tr><td>Application / website</td><td>collects</td><td>Location</td><td>11, 26</td></tr>
+<tr><td>Application / website</td><td>shares or may share data</td><td>Google Analytics</td><td>6, 19</td></tr>
+<tr><td>Google Analytics</td><td>missing disclosure</td><td>Privacy notice</td><td>6, 19</td></tr></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <h2>Scope And Limitations</h2>
+      <ul><li>This report is engineering evidence for DPDPA readiness. It is not legal advice or a compliance certification.</li>
+<li>Static code scanning can miss runtime-only flows. Website scanning without browser execution can miss client-side behavior.</li></ul>
+      <p class="small">Repository: <code>examples</code> | URL: <code>not scanned</code></p>
+    </section>
+  </main>
+  <script type="application/json" id="svikruti-data">{"product": "Svikruti PrivacyOps Evidence Scanner", "generated_at": "2026-06-15T10:51:00.648012+00:00", "repo_path": "examples", "url": null, "summary": {"files_scanned": 4, "website_pages_scanned": 0, "personal_data_categories": ["Contact", "Device", "Government ID", "Identity", "Location"], "third_parties": ["Google Analytics"], "risk_score": 100, "risk_level": "CRITICAL"}, "evidence": [{"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms email in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 7, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["email"]}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms mobile in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 8, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["mobile"]}}, {"kind": "collection_point", "label": "Government ID data signal", "severity": "CRITICAL", "source": "code", "detail": "Detected terms aadhaar in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 9, "category": "Data minimization", "metadata": {"data_category": "Government ID", "matched_terms": ["aadhaar"]}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms email in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 10, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["email"]}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms email, mobile in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 11, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["email", "mobile"]}}, {"kind": "collection_point", "label": "Government ID data signal", "severity": "CRITICAL", "source": "code", "detail": "Detected terms aadhaar in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_app.py", "line": 11, "category": "Data minimization", "metadata": {"data_category": "Government ID", "matched_terms": ["aadhaar"]}}, {"kind": "third_party", "label": "Third-party service detected: Google Analytics", "severity": "MEDIUM", "source": "code", "detail": "Code references Google Analytics, which may receive personal data or tracking events.", "recommendation": "Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.", "file": "sample_site.html", "line": null, "category": "Third-party processors", "metadata": {"third_party": "Google Analytics"}}, {"kind": "collection_point", "label": "Identity data signal", "severity": "MEDIUM", "source": "code", "detail": "Detected terms full_name in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_site.html", "line": 11, "category": "Notice transparency", "metadata": {"data_category": "Identity", "matched_terms": ["full_name"]}}, {"kind": "form_field", "label": "Form field collects Identity", "severity": "MEDIUM", "source": "code", "detail": "Form field 'full_name' appears to collect identity data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 11, "category": "Notice transparency", "metadata": {"field": "full_name", "data_category": "Identity"}}, {"kind": "form_field", "label": "Form field collects Identity", "severity": "MEDIUM", "source": "code", "detail": "Form field 'Full name' appears to collect identity data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 11, "category": "Notice transparency", "metadata": {"field": "Full name", "data_category": "Identity"}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms email in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_site.html", "line": 12, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["email"]}}, {"kind": "collection_point", "label": "Location data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms address in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_site.html", "line": 12, "category": "Purpose limitation", "metadata": {"data_category": "Location", "matched_terms": ["address"]}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'email' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 12, "category": "Notice transparency", "metadata": {"field": "email", "data_category": "Contact"}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'Email address' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 12, "category": "Notice transparency", "metadata": {"field": "Email address", "data_category": "Contact"}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms mobile in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "sample_site.html", "line": 13, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["mobile"]}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'mobile' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 13, "category": "Notice transparency", "metadata": {"field": "mobile", "data_category": "Contact"}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'Mobile number' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "sample_site.html", "line": 13, "category": "Notice transparency", "metadata": {"field": "Mobile number", "data_category": "Contact"}}, {"kind": "privacy_text", "label": "Privacy/consent copy detected", "severity": "LOW", "source": "code", "detail": "The repository contains privacy or consent-related copy.", "recommendation": "Compare this copy against detected personal-data flows and third-party services.", "file": "sample_site.html", "line": null, "category": "Notice transparency", "metadata": {}}, {"kind": "privacy_text", "label": "Privacy/consent copy detected", "severity": "LOW", "source": "code", "detail": "The repository contains privacy or consent-related copy.", "recommendation": "Compare this copy against detected personal-data flows and third-party services.", "file": "privacy.html", "line": null, "category": "Notice transparency", "metadata": {}}, {"kind": "third_party", "label": "Third-party service detected: Google Analytics", "severity": "MEDIUM", "source": "code", "detail": "Code references Google Analytics, which may receive personal data or tracking events.", "recommendation": "Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.", "file": "consent_site.html", "line": null, "category": "Third-party processors", "metadata": {"third_party": "Google Analytics"}}, {"kind": "collection_point", "label": "Identity data signal", "severity": "MEDIUM", "source": "code", "detail": "Detected terms full_name in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "consent_site.html", "line": 30, "category": "Notice transparency", "metadata": {"data_category": "Identity", "matched_terms": ["full_name"]}}, {"kind": "form_field", "label": "Form field collects Identity", "severity": "MEDIUM", "source": "code", "detail": "Form field 'full_name' appears to collect identity data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "consent_site.html", "line": 30, "category": "Notice transparency", "metadata": {"field": "full_name", "data_category": "Identity"}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms email in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "consent_site.html", "line": 31, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["email"]}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'email' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "consent_site.html", "line": 31, "category": "Notice transparency", "metadata": {"field": "email", "data_category": "Contact"}}, {"kind": "collection_point", "label": "Contact data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms mobile, phone in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "consent_site.html", "line": 32, "category": "Consent and notice", "metadata": {"data_category": "Contact", "matched_terms": ["mobile", "phone"]}}, {"kind": "form_field", "label": "Form field collects Contact", "severity": "HIGH", "source": "code", "detail": "Form field 'phone' appears to collect contact data.", "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.", "file": "consent_site.html", "line": 32, "category": "Notice transparency", "metadata": {"field": "phone", "data_category": "Contact"}}, {"kind": "collection_point", "label": "Location data signal", "severity": "HIGH", "source": "code", "detail": "Detected terms location in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "consent_site.html", "line": 33, "category": "Purpose limitation", "metadata": {"data_category": "Location", "matched_terms": ["location"]}}, {"kind": "personal_data_reference", "label": "Device data signal", "severity": "MEDIUM", "source": "code", "detail": "Detected terms cookie in code context.", "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.", "file": "consent_site.html", "line": 36, "category": "Tracking and consent", "metadata": {"data_category": "Device", "matched_terms": ["cookie"]}}, {"kind": "collection_point", "label": "Device data signal", "severity": "MEDIUM", "source": "code", "detail": "Detected terms cookie in code context.", "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.", "file": "consent_site.html", "line": 38, "category": "Tracking and consent", "metadata": {"data_category": "Device", "matched_terms": ["cookie"]}}, {"kind": "privacy_text", "label": "Privacy/consent copy detected", "severity": "LOW", "source": "code", "detail": "The repository contains privacy or consent-related copy.", "recommendation": "Compare this copy against detected personal-data flows and third-party services.", "file": "consent_site.html", "line": null, "category": "Notice transparency", "metadata": {}}], "ropa_starter": [{"activity": "Contact personal-data processing", "data_categories": "Contact", "data_subjects": "Users / customers / website visitors", "purposes": ["Collection through product or website interface"], "systems_or_sources": ["consent_site.html", "sample_app.py", "sample_site.html"], "third_parties": [], "retention": "To be defined", "dpdpa_notes": ["Consent and notice", "Notice transparency"]}, {"activity": "Government ID personal-data processing", "data_categories": "Government ID", "data_subjects": "Users / customers / website visitors", "purposes": ["Collection through product or website interface"], "systems_or_sources": ["sample_app.py"], "third_parties": [], "retention": "To be defined", "dpdpa_notes": ["Data minimization"]}, {"activity": "Identity personal-data processing", "data_categories": "Identity", "data_subjects": "Users / customers / website visitors", "purposes": ["Collection through product or website interface"], "systems_or_sources": ["consent_site.html", "sample_site.html"], "third_parties": [], "retention": "To be defined", "dpdpa_notes": ["Notice transparency"]}, {"activity": "Location personal-data processing", "data_categories": "Location", "data_subjects": "Users / customers / website visitors", "purposes": ["Collection through product or website interface"], "systems_or_sources": ["consent_site.html", "sample_site.html"], "third_parties": [], "retention": "To be defined", "dpdpa_notes": ["Purpose limitation"]}, {"activity": "Device personal-data processing", "data_categories": "Device", "data_subjects": "Users / customers / website visitors", "purposes": ["Application processing", "Collection through product or website interface"], "systems_or_sources": ["consent_site.html"], "third_parties": [], "retention": "To be defined", "dpdpa_notes": ["Tracking and consent"]}], "notice_gaps": ["Detected Device data, but the privacy notice does not clearly mention that category.", "Detected Government ID data, but the privacy notice does not clearly mention that category.", "Detected Location data, but the privacy notice does not clearly mention that category.", "Detected third party 'Google Analytics', but the privacy notice does not clearly mention it or its category.", "Privacy notice does not clearly mention consent withdrawal."], "evidence_graph": {"nodes": [{"id": "data:Contact", "label": "Contact", "type": "data_category", "metadata": {}}, {"id": "data:Device", "label": "Device", "type": "data_category", "metadata": {}}, {"id": "data:Government ID", "label": "Government ID", "type": "data_category", "metadata": {}}, {"id": "data:Identity", "label": "Identity", "type": "data_category", "metadata": {}}, {"id": "data:Location", "label": "Location", "type": "data_category", "metadata": {}}, {"id": "obligation:Consent and notice", "label": "Consent and notice", "type": "dpdpa_obligation", "metadata": {"description": "Ensure consent/notice basis is clear, specific, and withdrawable where applicable."}}, {"id": "obligation:Data minimization", "label": "Data minimization", "type": "dpdpa_obligation", "metadata": {"description": "Collect only what is necessary for a stated purpose."}}, {"id": "obligation:Notice transparency", "label": "Notice transparency", "type": "dpdpa_obligation", "metadata": {"description": "Tell data principals what personal data is processed and for what purpose."}}, {"id": "obligation:Purpose limitation", "label": "Purpose limitation", "type": "dpdpa_obligation", "metadata": {"description": "Use personal data only for disclosed and lawful purposes."}}, {"id": "obligation:Tracking and consent", "label": "Tracking and consent", "type": "dpdpa_obligation", "metadata": {"description": "Gate non-essential tracking and make withdrawal discoverable."}}, {"id": "notice:privacy", "label": "Privacy notice", "type": "notice", "metadata": {"available": true}}, {"id": "source:consent_site.html", "label": "consent_site.html", "type": "source", "metadata": {"source": "code"}}, {"id": "source:privacy.html", "label": "privacy.html", "type": "source", "metadata": {"source": "code"}}, {"id": "source:sample_app.py", "label": "sample_app.py", "type": "source", "metadata": {"source": "code"}}, {"id": "source:sample_site.html", "label": "sample_site.html", "type": "source", "metadata": {"source": "code"}}, {"id": "system:application", "label": "Application / website", "type": "system", "metadata": {}}, {"id": "third_party:Google Analytics", "label": "Google Analytics", "type": "third_party", "metadata": {}}], "edges": [{"source": "data:Contact", "target": "obligation:Consent and notice", "label": "triggers", "evidence_refs": [0, 1, 3, 4, 10, 14, 22, 24]}, {"source": "data:Contact", "target": "obligation:Notice transparency", "label": "triggers", "evidence_refs": [12, 13, 15, 16, 23, 25]}, {"source": "data:Device", "target": "notice:privacy", "label": "missing disclosure", "evidence_refs": [27, 28]}, {"source": "data:Device", "target": "obligation:Tracking and consent", "label": "triggers", "evidence_refs": [27, 28]}, {"source": "data:Government ID", "target": "notice:privacy", "label": "missing disclosure", "evidence_refs": [2, 5]}, {"source": "data:Government ID", "target": "obligation:Data minimization", "label": "triggers", "evidence_refs": [2, 5]}, {"source": "data:Identity", "target": "obligation:Notice transparency", "label": "triggers", "evidence_refs": [7, 8, 9, 20, 21]}, {"source": "data:Location", "target": "notice:privacy", "label": "missing disclosure", "evidence_refs": [11, 26]}, {"source": "data:Location", "target": "obligation:Purpose limitation", "label": "triggers", "evidence_refs": [11, 26]}, {"source": "notice:privacy", "target": "data:Contact", "label": "discloses", "evidence_refs": [0, 1, 3, 4, 10, 12, 13, 14, 15, 16, 22, 23, 24, 25]}, {"source": "notice:privacy", "target": "data:Identity", "label": "discloses", "evidence_refs": [7, 8, 9, 20, 21]}, {"source": "source:consent_site.html", "target": "data:Contact", "label": "contains", "evidence_refs": [22, 23, 24, 25]}, {"source": "source:consent_site.html", "target": "data:Device", "label": "contains", "evidence_refs": [27, 28]}, {"source": "source:consent_site.html", "target": "data:Identity", "label": "contains", "evidence_refs": [20, 21]}, {"source": "source:consent_site.html", "target": "data:Location", "label": "contains", "evidence_refs": [26]}, {"source": "source:consent_site.html", "target": "third_party:Google Analytics", "label": "references", "evidence_refs": [19]}, {"source": "source:sample_app.py", "target": "data:Contact", "label": "contains", "evidence_refs": [0, 1, 3, 4]}, {"source": "source:sample_app.py", "target": "data:Government ID", "label": "contains", "evidence_refs": [2, 5]}, {"source": "source:sample_site.html", "target": "data:Contact", "label": "contains", "evidence_refs": [10, 12, 13, 14, 15, 16]}, {"source": "source:sample_site.html", "target": "data:Identity", "label": "contains", "evidence_refs": [7, 8, 9]}, {"source": "source:sample_site.html", "target": "data:Location", "label": "contains", "evidence_refs": [11]}, {"source": "source:sample_site.html", "target": "third_party:Google Analytics", "label": "references", "evidence_refs": [6]}, {"source": "system:application", "target": "data:Contact", "label": "collects", "evidence_refs": [0, 1, 3, 4, 10, 12, 13, 14, 15, 16, 22, 23, 24, 25]}, {"source": "system:application", "target": "data:Device", "label": "collects", "evidence_refs": [28]}, {"source": "system:application", "target": "data:Device", "label": "processes", "evidence_refs": [27]}, {"source": "system:application", "target": "data:Government ID", "label": "collects", "evidence_refs": [2, 5]}, {"source": "system:application", "target": "data:Identity", "label": "collects", "evidence_refs": [7, 8, 9, 20, 21]}, {"source": "system:application", "target": "data:Location", "label": "collects", "evidence_refs": [11, 26]}, {"source": "system:application", "target": "third_party:Google Analytics", "label": "shares or may share data", "evidence_refs": [6, 19]}, {"source": "third_party:Google Analytics", "target": "notice:privacy", "label": "missing disclosure", "evidence_refs": [6, 19]}], "data_flows": [{"data_category": "Contact", "collection_points": ["consent_site.html", "sample_app.py", "sample_site.html"], "storage_points": [], "logging_risks": [], "third_parties": [], "notice_status": "covered", "dpdpa_obligations": ["Consent and notice", "Notice transparency"], "remediation": []}, {"data_category": "Government ID", "collection_points": ["sample_app.py"], "storage_points": [], "logging_risks": [], "third_parties": [], "notice_status": "missing", "dpdpa_obligations": ["Data minimization"], "remediation": ["Document strict purpose, retention, and access controls for Government ID.", "Update privacy notice to disclose Government ID data."]}, {"data_category": "Identity", "collection_points": ["consent_site.html", "sample_site.html"], "storage_points": [], "logging_risks": [], "third_parties": [], "notice_status": "covered", "dpdpa_obligations": ["Notice transparency"], "remediation": []}, {"data_category": "Location", "collection_points": ["consent_site.html", "sample_site.html"], "storage_points": [], "logging_risks": [], "third_parties": [], "notice_status": "missing", "dpdpa_obligations": ["Purpose limitation"], "remediation": ["Update privacy notice to disclose Location data."]}, {"data_category": "Device", "collection_points": ["consent_site.html"], "storage_points": [], "logging_risks": [], "third_parties": [], "notice_status": "missing", "dpdpa_obligations": ["Tracking and consent"], "remediation": ["Update privacy notice to disclose Device data."]}], "proof_pack": [{"title": "Update privacy notice for Device", "owner": "Legal / Privacy", "why": "Svikruti detected Device data in engineering evidence, but not in the notice text.", "evidence": ["consent_site.html"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Update privacy notice for Government ID", "owner": "Legal / Privacy", "why": "Svikruti detected Government ID data in engineering evidence, but not in the notice text.", "evidence": ["sample_app.py"], "artifact": "Privacy notice change", "priority": "P0"}, {"title": "Update privacy notice for Location", "owner": "Legal / Privacy", "why": "Svikruti detected Location data in engineering evidence, but not in the notice text.", "evidence": ["consent_site.html", "sample_site.html"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Add withdrawal language to privacy notice", "owner": "Legal / Privacy", "why": "The notice does not clearly include DPDPA-relevant withdrawal terms.", "evidence": ["privacy notice text"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Add rights language to privacy notice", "owner": "Legal / Privacy", "why": "The notice does not clearly include DPDPA-relevant rights terms.", "evidence": ["privacy notice text"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Add children language to privacy notice", "owner": "Legal / Privacy", "why": "The notice does not clearly include DPDPA-relevant children terms.", "evidence": ["privacy notice text"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Add retention language to privacy notice", "owner": "Legal / Privacy", "why": "The notice does not clearly include DPDPA-relevant retention terms.", "evidence": ["privacy notice text"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Add third parties language to privacy notice", "owner": "Legal / Privacy", "why": "The notice does not clearly include DPDPA-relevant third parties terms.", "evidence": ["privacy notice text"], "artifact": "Privacy notice change", "priority": "P1"}, {"title": "Disclose processor/vendor categories", "owner": "Legal / Procurement", "why": "Third-party services were detected but processor/vendor disclosure language is missing or weak.", "evidence": ["Google Analytics"], "artifact": "Vendor register + notice update", "priority": "P1"}]}, "disclaimers": ["This report is engineering evidence for DPDPA readiness. It is not legal advice or a compliance certification.", "Static code scanning can miss runtime-only flows. Website scanning without browser execution can miss client-side behavior."], "ai_insights": {"status": "not_configured", "provider": "gemini", "model": "gemini-3.5-flash", "message": "Set GEMINI_API_KEY and rerun with --ai --ai-provider gemini to generate AI commentary."}}</script>
+  <script>
+    const reportData = JSON.parse(document.getElementById('svikruti-data').textContent);
+    const reportKey = 'svikruti:' + (reportData.generated_at || document.title);
+
+    function selectTab(name) {
+      document.querySelectorAll('[data-section]').forEach(section => section.classList.toggle('active', section.dataset.section === name));
+      document.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('active', button.dataset.tab === name));
+      window.location.hash = name;
+    }
+
+    document.querySelectorAll('[data-tab]').forEach(button => {
+      button.addEventListener('click', () => selectTab(button.dataset.tab));
+    });
+    if (window.location.hash) {
+      const target = window.location.hash.slice(1);
+      if (document.querySelector(`[data-section="${target}"]`)) selectTab(target);
+    }
+
+    function updateEvidenceFilter() {
+      const query = document.getElementById('evidence-search').value.toLowerCase();
+      const severity = document.getElementById('severity-filter').value;
+      let visible = 0;
+      document.querySelectorAll('#evidence-table tbody tr').forEach(row => {
+        const matchesQuery = !query || row.textContent.toLowerCase().includes(query);
+        const matchesSeverity = !severity || row.dataset.severity === severity;
+        const show = matchesQuery && matchesSeverity;
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+      document.getElementById('evidence-count').textContent = `${visible} visible / ${reportData.evidence.length} total`;
+    }
+
+    document.getElementById('evidence-search')?.addEventListener('input', updateEvidenceFilter);
+    document.getElementById('severity-filter')?.addEventListener('change', updateEvidenceFilter);
+    updateEvidenceFilter();
+
+    const reviewed = new Set(JSON.parse(localStorage.getItem(reportKey + ':reviewed') || '[]'));
+    document.querySelectorAll('[data-action-check]').forEach(check => {
+      const id = check.dataset.actionCheck;
+      check.checked = reviewed.has(id);
+      check.closest('.action')?.classList.toggle('done', check.checked);
+      check.addEventListener('change', () => {
+        if (check.checked) reviewed.add(id); else reviewed.delete(id);
+        check.closest('.action')?.classList.toggle('done', check.checked);
+        localStorage.setItem(reportKey + ':reviewed', JSON.stringify([...reviewed]));
+      });
+    });
+
+    document.querySelector('[data-copy-notice]')?.addEventListener('click', async event => {
+      const text = document.getElementById('notice-draft').value;
+      await navigator.clipboard.writeText(text);
+      event.currentTarget.textContent = 'Copied';
+      setTimeout(() => event.currentTarget.textContent = 'Copy notice draft', 1400);
+    });
+
+    document.querySelectorAll('[data-copy-issue]').forEach(button => {
+      button.addEventListener('click', async event => {
+        const text = event.currentTarget.closest('.issue-card').querySelector('textarea').value;
+        await navigator.clipboard.writeText(text);
+        event.currentTarget.textContent = 'Copied';
+        setTimeout(() => event.currentTarget.textContent = 'Copy issue', 1400);
+      });
+    });
+  </script>
+</body>
+</html>
