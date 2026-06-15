@@ -1,0 +1,1223 @@
+{
+  "product": "Svikruti PrivacyOps Evidence Scanner",
+  "generated_at": "2026-06-15T10:51:00.648012+00:00",
+  "repo_path": "examples",
+  "url": null,
+  "summary": {
+    "files_scanned": 4,
+    "website_pages_scanned": 0,
+    "personal_data_categories": [
+      "Contact",
+      "Device",
+      "Government ID",
+      "Identity",
+      "Location"
+    ],
+    "third_parties": [
+      "Google Analytics"
+    ],
+    "risk_score": 100,
+    "risk_level": "CRITICAL"
+  },
+  "evidence": [
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 7,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 8,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms aadhaar in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 9,
+      "category": "Data minimization",
+      "metadata": {
+        "data_category": "Government ID",
+        "matched_terms": [
+          "aadhaar"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 10,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, mobile in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 11,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "mobile"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms aadhaar in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_app.py",
+      "line": 11,
+      "category": "Data minimization",
+      "metadata": {
+        "data_category": "Government ID",
+        "matched_terms": [
+          "aadhaar"
+        ]
+      }
+    },
+    {
+      "kind": "third_party",
+      "label": "Third-party service detected: Google Analytics",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Code references Google Analytics, which may receive personal data or tracking events.",
+      "recommendation": "Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.",
+      "file": "sample_site.html",
+      "line": null,
+      "category": "Third-party processors",
+      "metadata": {
+        "third_party": "Google Analytics"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_site.html",
+      "line": 11,
+      "category": "Notice transparency",
+      "metadata": {
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'full_name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 11,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "full_name",
+        "data_category": "Identity"
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'Full name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 11,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "Full name",
+        "data_category": "Identity"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_site.html",
+      "line": 12,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_site.html",
+      "line": 12,
+      "category": "Purpose limitation",
+      "metadata": {
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'email' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 12,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "email",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'Email address' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 12,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "Email address",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_site.html",
+      "line": 13,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'mobile' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "mobile",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'Mobile number' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "Mobile number",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "privacy_text",
+      "label": "Privacy/consent copy detected",
+      "severity": "LOW",
+      "source": "code",
+      "detail": "The repository contains privacy or consent-related copy.",
+      "recommendation": "Compare this copy against detected personal-data flows and third-party services.",
+      "file": "sample_site.html",
+      "line": null,
+      "category": "Notice transparency",
+      "metadata": {}
+    },
+    {
+      "kind": "privacy_text",
+      "label": "Privacy/consent copy detected",
+      "severity": "LOW",
+      "source": "code",
+      "detail": "The repository contains privacy or consent-related copy.",
+      "recommendation": "Compare this copy against detected personal-data flows and third-party services.",
+      "file": "privacy.html",
+      "line": null,
+      "category": "Notice transparency",
+      "metadata": {}
+    },
+    {
+      "kind": "third_party",
+      "label": "Third-party service detected: Google Analytics",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Code references Google Analytics, which may receive personal data or tracking events.",
+      "recommendation": "Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.",
+      "file": "consent_site.html",
+      "line": null,
+      "category": "Third-party processors",
+      "metadata": {
+        "third_party": "Google Analytics"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "consent_site.html",
+      "line": 30,
+      "category": "Notice transparency",
+      "metadata": {
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'full_name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "consent_site.html",
+      "line": 30,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "full_name",
+        "data_category": "Identity"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "consent_site.html",
+      "line": 31,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'email' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "consent_site.html",
+      "line": 31,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "email",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile, phone in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "consent_site.html",
+      "line": 32,
+      "category": "Consent and notice",
+      "metadata": {
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "phone"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'phone' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "consent_site.html",
+      "line": 32,
+      "category": "Notice transparency",
+      "metadata": {
+        "field": "phone",
+        "data_category": "Contact"
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms location in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "consent_site.html",
+      "line": 33,
+      "category": "Purpose limitation",
+      "metadata": {
+        "data_category": "Location",
+        "matched_terms": [
+          "location"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms cookie in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "consent_site.html",
+      "line": 36,
+      "category": "Tracking and consent",
+      "metadata": {
+        "data_category": "Device",
+        "matched_terms": [
+          "cookie"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms cookie in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "consent_site.html",
+      "line": 38,
+      "category": "Tracking and consent",
+      "metadata": {
+        "data_category": "Device",
+        "matched_terms": [
+          "cookie"
+        ]
+      }
+    },
+    {
+      "kind": "privacy_text",
+      "label": "Privacy/consent copy detected",
+      "severity": "LOW",
+      "source": "code",
+      "detail": "The repository contains privacy or consent-related copy.",
+      "recommendation": "Compare this copy against detected personal-data flows and third-party services.",
+      "file": "consent_site.html",
+      "line": null,
+      "category": "Notice transparency",
+      "metadata": {}
+    }
+  ],
+  "ropa_starter": [
+    {
+      "activity": "Contact personal-data processing",
+      "data_categories": "Contact",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "consent_site.html",
+        "sample_app.py",
+        "sample_site.html"
+      ],
+      "third_parties": [],
+      "retention": "To be defined",
+      "dpdpa_notes": [
+        "Consent and notice",
+        "Notice transparency"
+      ]
+    },
+    {
+      "activity": "Government ID personal-data processing",
+      "data_categories": "Government ID",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "sample_app.py"
+      ],
+      "third_parties": [],
+      "retention": "To be defined",
+      "dpdpa_notes": [
+        "Data minimization"
+      ]
+    },
+    {
+      "activity": "Identity personal-data processing",
+      "data_categories": "Identity",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "consent_site.html",
+        "sample_site.html"
+      ],
+      "third_parties": [],
+      "retention": "To be defined",
+      "dpdpa_notes": [
+        "Notice transparency"
+      ]
+    },
+    {
+      "activity": "Location personal-data processing",
+      "data_categories": "Location",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "consent_site.html",
+        "sample_site.html"
+      ],
+      "third_parties": [],
+      "retention": "To be defined",
+      "dpdpa_notes": [
+        "Purpose limitation"
+      ]
+    },
+    {
+      "activity": "Device personal-data processing",
+      "data_categories": "Device",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Application processing",
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "consent_site.html"
+      ],
+      "third_parties": [],
+      "retention": "To be defined",
+      "dpdpa_notes": [
+        "Tracking and consent"
+      ]
+    }
+  ],
+  "notice_gaps": [
+    "Detected Device data, but the privacy notice does not clearly mention that category.",
+    "Detected Government ID data, but the privacy notice does not clearly mention that category.",
+    "Detected Location data, but the privacy notice does not clearly mention that category.",
+    "Detected third party 'Google Analytics', but the privacy notice does not clearly mention it or its category.",
+    "Privacy notice does not clearly mention consent withdrawal."
+  ],
+  "evidence_graph": {
+    "nodes": [
+      {
+        "id": "data:Contact",
+        "label": "Contact",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "data:Device",
+        "label": "Device",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "data:Government ID",
+        "label": "Government ID",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "data:Identity",
+        "label": "Identity",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "data:Location",
+        "label": "Location",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "obligation:Consent and notice",
+        "label": "Consent and notice",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Ensure consent/notice basis is clear, specific, and withdrawable where applicable."
+        }
+      },
+      {
+        "id": "obligation:Data minimization",
+        "label": "Data minimization",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Collect only what is necessary for a stated purpose."
+        }
+      },
+      {
+        "id": "obligation:Notice transparency",
+        "label": "Notice transparency",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Tell data principals what personal data is processed and for what purpose."
+        }
+      },
+      {
+        "id": "obligation:Purpose limitation",
+        "label": "Purpose limitation",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Use personal data only for disclosed and lawful purposes."
+        }
+      },
+      {
+        "id": "obligation:Tracking and consent",
+        "label": "Tracking and consent",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Gate non-essential tracking and make withdrawal discoverable."
+        }
+      },
+      {
+        "id": "notice:privacy",
+        "label": "Privacy notice",
+        "type": "notice",
+        "metadata": {
+          "available": true
+        }
+      },
+      {
+        "id": "source:consent_site.html",
+        "label": "consent_site.html",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:privacy.html",
+        "label": "privacy.html",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:sample_app.py",
+        "label": "sample_app.py",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:sample_site.html",
+        "label": "sample_site.html",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "system:application",
+        "label": "Application / website",
+        "type": "system",
+        "metadata": {}
+      },
+      {
+        "id": "third_party:Google Analytics",
+        "label": "Google Analytics",
+        "type": "third_party",
+        "metadata": {}
+      }
+    ],
+    "edges": [
+      {
+        "source": "data:Contact",
+        "target": "obligation:Consent and notice",
+        "label": "triggers",
+        "evidence_refs": [
+          0,
+          1,
+          3,
+          4,
+          10,
+          14,
+          22,
+          24
+        ]
+      },
+      {
+        "source": "data:Contact",
+        "target": "obligation:Notice transparency",
+        "label": "triggers",
+        "evidence_refs": [
+          12,
+          13,
+          15,
+          16,
+          23,
+          25
+        ]
+      },
+      {
+        "source": "data:Device",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          27,
+          28
+        ]
+      },
+      {
+        "source": "data:Device",
+        "target": "obligation:Tracking and consent",
+        "label": "triggers",
+        "evidence_refs": [
+          27,
+          28
+        ]
+      },
+      {
+        "source": "data:Government ID",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          2,
+          5
+        ]
+      },
+      {
+        "source": "data:Government ID",
+        "target": "obligation:Data minimization",
+        "label": "triggers",
+        "evidence_refs": [
+          2,
+          5
+        ]
+      },
+      {
+        "source": "data:Identity",
+        "target": "obligation:Notice transparency",
+        "label": "triggers",
+        "evidence_refs": [
+          7,
+          8,
+          9,
+          20,
+          21
+        ]
+      },
+      {
+        "source": "data:Location",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          11,
+          26
+        ]
+      },
+      {
+        "source": "data:Location",
+        "target": "obligation:Purpose limitation",
+        "label": "triggers",
+        "evidence_refs": [
+          11,
+          26
+        ]
+      },
+      {
+        "source": "notice:privacy",
+        "target": "data:Contact",
+        "label": "discloses",
+        "evidence_refs": [
+          0,
+          1,
+          3,
+          4,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          22,
+          23,
+          24,
+          25
+        ]
+      },
+      {
+        "source": "notice:privacy",
+        "target": "data:Identity",
+        "label": "discloses",
+        "evidence_refs": [
+          7,
+          8,
+          9,
+          20,
+          21
+        ]
+      },
+      {
+        "source": "source:consent_site.html",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          22,
+          23,
+          24,
+          25
+        ]
+      },
+      {
+        "source": "source:consent_site.html",
+        "target": "data:Device",
+        "label": "contains",
+        "evidence_refs": [
+          27,
+          28
+        ]
+      },
+      {
+        "source": "source:consent_site.html",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          20,
+          21
+        ]
+      },
+      {
+        "source": "source:consent_site.html",
+        "target": "data:Location",
+        "label": "contains",
+        "evidence_refs": [
+          26
+        ]
+      },
+      {
+        "source": "source:consent_site.html",
+        "target": "third_party:Google Analytics",
+        "label": "references",
+        "evidence_refs": [
+          19
+        ]
+      },
+      {
+        "source": "source:sample_app.py",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          0,
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "source": "source:sample_app.py",
+        "target": "data:Government ID",
+        "label": "contains",
+        "evidence_refs": [
+          2,
+          5
+        ]
+      },
+      {
+        "source": "source:sample_site.html",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          10,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      },
+      {
+        "source": "source:sample_site.html",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "source": "source:sample_site.html",
+        "target": "data:Location",
+        "label": "contains",
+        "evidence_refs": [
+          11
+        ]
+      },
+      {
+        "source": "source:sample_site.html",
+        "target": "third_party:Google Analytics",
+        "label": "references",
+        "evidence_refs": [
+          6
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Contact",
+        "label": "collects",
+        "evidence_refs": [
+          0,
+          1,
+          3,
+          4,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          22,
+          23,
+          24,
+          25
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Device",
+        "label": "collects",
+        "evidence_refs": [
+          28
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Device",
+        "label": "processes",
+        "evidence_refs": [
+          27
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Government ID",
+        "label": "collects",
+        "evidence_refs": [
+          2,
+          5
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Identity",
+        "label": "collects",
+        "evidence_refs": [
+          7,
+          8,
+          9,
+          20,
+          21
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Location",
+        "label": "collects",
+        "evidence_refs": [
+          11,
+          26
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "third_party:Google Analytics",
+        "label": "shares or may share data",
+        "evidence_refs": [
+          6,
+          19
+        ]
+      },
+      {
+        "source": "third_party:Google Analytics",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          6,
+          19
+        ]
+      }
+    ],
+    "data_flows": [
+      {
+        "data_category": "Contact",
+        "collection_points": [
+          "consent_site.html",
+          "sample_app.py",
+          "sample_site.html"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "covered",
+        "dpdpa_obligations": [
+          "Consent and notice",
+          "Notice transparency"
+        ],
+        "remediation": []
+      },
+      {
+        "data_category": "Government ID",
+        "collection_points": [
+          "sample_app.py"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Data minimization"
+        ],
+        "remediation": [
+          "Document strict purpose, retention, and access controls for Government ID.",
+          "Update privacy notice to disclose Government ID data."
+        ]
+      },
+      {
+        "data_category": "Identity",
+        "collection_points": [
+          "consent_site.html",
+          "sample_site.html"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "covered",
+        "dpdpa_obligations": [
+          "Notice transparency"
+        ],
+        "remediation": []
+      },
+      {
+        "data_category": "Location",
+        "collection_points": [
+          "consent_site.html",
+          "sample_site.html"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Purpose limitation"
+        ],
+        "remediation": [
+          "Update privacy notice to disclose Location data."
+        ]
+      },
+      {
+        "data_category": "Device",
+        "collection_points": [
+          "consent_site.html"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Tracking and consent"
+        ],
+        "remediation": [
+          "Update privacy notice to disclose Device data."
+        ]
+      }
+    ],
+    "proof_pack": [
+      {
+        "title": "Update privacy notice for Device",
+        "owner": "Legal / Privacy",
+        "why": "Svikruti detected Device data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "consent_site.html"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Update privacy notice for Government ID",
+        "owner": "Legal / Privacy",
+        "why": "Svikruti detected Government ID data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "sample_app.py"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P0"
+      },
+      {
+        "title": "Update privacy notice for Location",
+        "owner": "Legal / Privacy",
+        "why": "Svikruti detected Location data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "consent_site.html",
+          "sample_site.html"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Add withdrawal language to privacy notice",
+        "owner": "Legal / Privacy",
+        "why": "The notice does not clearly include DPDPA-relevant withdrawal terms.",
+        "evidence": [
+          "privacy notice text"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Add rights language to privacy notice",
+        "owner": "Legal / Privacy",
+        "why": "The notice does not clearly include DPDPA-relevant rights terms.",
+        "evidence": [
+          "privacy notice text"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Add children language to privacy notice",
+        "owner": "Legal / Privacy",
+        "why": "The notice does not clearly include DPDPA-relevant children terms.",
+        "evidence": [
+          "privacy notice text"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Add retention language to privacy notice",
+        "owner": "Legal / Privacy",
+        "why": "The notice does not clearly include DPDPA-relevant retention terms.",
+        "evidence": [
+          "privacy notice text"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Add third parties language to privacy notice",
+        "owner": "Legal / Privacy",
+        "why": "The notice does not clearly include DPDPA-relevant third parties terms.",
+        "evidence": [
+          "privacy notice text"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1"
+      },
+      {
+        "title": "Disclose processor/vendor categories",
+        "owner": "Legal / Procurement",
+        "why": "Third-party services were detected but processor/vendor disclosure language is missing or weak.",
+        "evidence": [
+          "Google Analytics"
+        ],
+        "artifact": "Vendor register + notice update",
+        "priority": "P1"
+      }
+    ]
+  },
+  "disclaimers": [
+    "This report is engineering evidence for DPDPA readiness. It is not legal advice or a compliance certification.",
+    "Static code scanning can miss runtime-only flows. Website scanning without browser execution can miss client-side behavior."
+  ],
+  "ai_insights": {
+    "status": "not_configured",
+    "provider": "gemini",
+    "model": "gemini-3.5-flash",
+    "message": "Set GEMINI_API_KEY and rerun with --ai --ai-provider gemini to generate AI commentary."
+  }
+}
