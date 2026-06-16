@@ -43,8 +43,10 @@ It produces:
 - Evidence graph: source file -> data category -> third party / notice /
   DPDPA obligation -> remediation artifact.
 - Proof pack: prioritized actions with owner, artifact, and evidence references.
-- Exportable artifacts: RoPA CSV, action tracker CSV, vendor register CSV, and
-  privacy notice patch draft.
+- Exportable artifacts: schema-versioned RoPA/privacy inventory CSV, action
+  tracker CSV, vendor/processor register CSV, and privacy notice patch draft.
+- Evidence references and detector confidence so reviewers can separate
+  scanner-inferred facts from fields that need legal/procurement confirmation.
 - Fix Pack: copy-ready GitHub/Jira/Linear issue bodies with acceptance criteria.
 - Optional AI Co-pilot: executive brief, launch risk, control commentary,
   buyer summary, notice patch, and improved fix wording grounded in scan output.

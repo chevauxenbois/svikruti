@@ -20,14 +20,14 @@ class DataPattern:
 
 
 PERSONAL_DATA_PATTERNS: List[DataPattern] = [
-    DataPattern("Identity", ["full_name", "first_name", "last_name", "username", "user_name", "customer_name", "display_name"], "MEDIUM", "Notice transparency"),
-    DataPattern("Contact", ["email", "phone", "mobile", "telephone", "whatsapp"], "HIGH", "Consent and notice"),
-    DataPattern("Government ID", ["aadhaar", "aadhar", "pan_number", "passport", "voter_id", "driving_license"], "CRITICAL", "Data minimization"),
-    DataPattern("Financial", ["card_number", "bank_account", "ifsc", "upi", "payment", "razorpay_order"], "HIGH", "Security safeguards"),
-    DataPattern("Location", ["latitude", "longitude", "geo", "gps", "location", "address", "pincode"], "HIGH", "Purpose limitation"),
-    DataPattern("Children", ["child", "minor", "guardian", "parent_consent", "school", "student_age"], "CRITICAL", "Children's data"),
-    DataPattern("Health", ["health", "diagnosis", "prescription", "medical", "blood_group"], "CRITICAL", "Data minimization"),
-    DataPattern("Device", ["ip_address", "device_id", "advertising_id", "cookie", "session_id"], "MEDIUM", "Tracking and consent"),
+    DataPattern("Identity", ["full_name", "first_name", "last_name", "username", "user_name", "customer_name", "display_name", "date_of_birth", "dob"], "MEDIUM", "Notice transparency"),
+    DataPattern("Contact", ["email", "email_address", "phone", "phone_number", "mobile", "mobile_number", "telephone", "whatsapp"], "HIGH", "Consent and notice"),
+    DataPattern("Government ID", ["aadhaar", "aadhar", "pan_number", "pan", "passport", "voter_id", "driving_license", "dl_number"], "CRITICAL", "Data minimization"),
+    DataPattern("Financial", ["card_number", "card_last4", "bank_account", "account_number", "ifsc", "upi", "upi_id", "payment", "payment_method", "razorpay_order"], "HIGH", "Security safeguards"),
+    DataPattern("Location", ["latitude", "longitude", "geo", "gps", "location", "address", "address_line", "city", "state", "postal_code", "pincode", "zip"], "HIGH", "Purpose limitation"),
+    DataPattern("Children", ["child", "minor", "guardian", "parent_consent", "school", "student", "student_age"], "CRITICAL", "Children's data"),
+    DataPattern("Health", ["health", "diagnosis", "prescription", "medical", "blood_group", "lab_report", "patient"], "CRITICAL", "Data minimization"),
+    DataPattern("Device", ["ip_address", "ip", "device_id", "device_identifier", "advertising_id", "cookie", "session_id", "user_agent"], "MEDIUM", "Tracking and consent"),
 ]
 
 THIRD_PARTY_PATTERNS: Dict[str, List[str]] = {
@@ -78,12 +78,17 @@ COLLECTION_HINTS = [
     "request.form",
     "request.json",
     "req.body",
+    "params.require",
+    "@requestbody",
     "bodyparser",
     "formdata",
     "st.text_input",
     "st.text_area",
     "input",
     "textarea",
+    "useState",
+    "app.post",
+    "router.post",
     "register",
     "signup",
     "sign_up",
@@ -95,9 +100,13 @@ STORAGE_HINTS = [
     "create table",
     "model",
     "schema",
+    "@entity",
+    "prisma.",
     "insert into",
     "update ",
     "db.",
+    "repository.save",
+    "objects.create",
     "collection(",
     "mongoose.schema",
 ]
@@ -141,6 +150,7 @@ FILE_EXTENSIONS = {
     ".yaml",
     ".toml",
     ".env",
+    ".sql",
 }
 
 IGNORED_FILE_PATTERNS = (

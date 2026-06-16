@@ -64,7 +64,7 @@ def run_scan(
 
 
 def _fetch_privacy_url(url: str) -> str:
-    request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.3 (+https://svikruti.ai)"})
+    request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.4 (+https://svikruti.ai)"})
     with urlopen(request, timeout=20) as response:
         body = response.read(2_500_001)
         if len(body) > 2_500_000:

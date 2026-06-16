@@ -107,16 +107,45 @@ class ScannerTests(unittest.TestCase):
             issue_text = issues.read_text(encoding="utf-8")
             ai_text = ai.read_text(encoding="utf-8")
 
-        self.assertEqual(ropa_rows[0][0], "Activity")
+        self.assertEqual(ropa_rows[0][0], "Schema Version")
+        self.assertIn("DPDPA Basis", ropa_rows[0])
+        self.assertIn("Evidence References", ropa_rows[0])
+        self.assertIn("Scanner Confidence", ropa_rows[0])
         self.assertGreater(len(ropa_rows), 1)
-        self.assertEqual(action_rows[0][0], "Priority")
+        self.assertEqual(action_rows[0][0], "Schema Version")
+        self.assertIn("Acceptance Criteria", action_rows[0])
+        self.assertIn("Control Area", action_rows[0])
         self.assertGreater(len(action_rows), 1)
-        self.assertEqual(vendor_rows[0][0], "Vendor")
+        self.assertEqual(vendor_rows[0][0], "Schema Version")
+        self.assertIn("DPA / Contract Status", vendor_rows[0])
+        self.assertIn("Data Categories Shared", vendor_rows[0])
         self.assertIn("Google Analytics", "\n".join(",".join(row) for row in vendor_rows))
         self.assertIn("Privacy Notice Patch Draft", notice_text)
         self.assertIn("Svikruti Fix Pack", issue_text)
         self.assertIn("Acceptance Criteria", issue_text)
         self.assertIn("Svikruti AI Co-pilot Brief", ai_text)
+
+    def test_realistic_multi_framework_examples_are_detected(self):
+        result = run_scan(repo="examples/realistic", url=None)
+        categories = set(result.summary.personal_data_categories)
+        languages = {item.metadata.get("language") for item in result.evidence}
+        detector_ids = {item.metadata.get("detector_id") for item in result.evidence}
+        confidence_values = {item.metadata.get("confidence") for item in result.evidence}
+
+        self.assertIn("Contact", categories)
+        self.assertIn("Government ID", categories)
+        self.assertIn("Health", categories)
+        self.assertIn("Children", categories)
+        self.assertIn("Financial", categories)
+        self.assertIn("SQL", languages)
+        self.assertIn("JavaScript", languages)
+        self.assertIn("React/TypeScript", languages)
+        self.assertIn("Python", languages)
+        self.assertIn("code.collection_point.contact", detector_ids)
+        self.assertIn("code.storage_point.health", detector_ids)
+        self.assertIn("code.logging_risk.government_id", detector_ids)
+        self.assertIn("high", confidence_values)
+        self.assertTrue(any("Razorpay" == item.metadata.get("third_party") for item in result.evidence))
 
     def test_ai_not_configured_does_not_call_network(self):
         result = run_scan(repo="examples", url=None, privacy_file="examples/privacy.html")

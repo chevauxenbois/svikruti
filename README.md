@@ -3,6 +3,17 @@
 India-first open-source PrivacyOps platform for DPDPA readiness, engineering
 evidence, consent governance, and audit artifacts.
 
+[![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
+[![DPDPA](https://img.shields.io/badge/India-DPDPA_2023-047a78)](https://www.meity.gov.in/)
+[![AI Optional](https://img.shields.io/badge/AI-optional_BYOK-6f42c1)](#ai-co-pilot)
+
+Svikruti helps teams answer one practical question:
+
+> What personal data does this product appear to process, where is the evidence,
+> what is missing from the privacy posture, and what should we fix before
+> launch?
+
 Svikruti combines two workflows that are usually separate:
 
 1. **Governance workbench**: a Streamlit app for gap assessment, RoPA, consent,
@@ -15,6 +26,8 @@ Svikruti combines two workflows that are usually separate:
 Most privacy tools start with questionnaires. Svikruti starts with both
 questionnaires and engineering evidence, so privacy, security, engineering, and
 legal teams can work from the same facts.
+
+## One Command, One Evidence Pack
 
 ```bash
 svikruti scan \
@@ -30,6 +43,20 @@ svikruti scan \
   --notice-patch-out notice-patch.md \
   --issues-out fix-pack.md
 ```
+
+That single command can generate:
+
+| Output | Who uses it | Why it matters |
+| --- | --- | --- |
+| HTML Evidence Workbench | Founder, privacy, security, engineering | Human review surface with risk, controls, evidence, actions, and flows |
+| JSON report | Product/API/hosted platform | Complete structured evidence for future dashboards or scan history |
+| SARIF | Developers/security | GitHub code scanning annotations and PR gates |
+| RoPA/privacy inventory CSV | Privacy/legal/GRC | Draft processing inventory with evidence references and fields to confirm |
+| Action CSV | Program manager/GRC | Owner-ready remediation tracker |
+| Vendor CSV | Procurement/legal/security | Processor register starter with DPA, transfer, and review fields |
+| Notice patch Markdown | Privacy/legal | Drafting aid for missing notice language |
+| Fix pack Markdown | Engineering | Copy-ready GitHub/Jira/Linear tickets |
+| AI brief Markdown | Leadership/privacy | Optional Gemini/OpenAI synthesis grounded in scan evidence |
 
 ## Why This Is Different
 
@@ -47,6 +74,48 @@ Svikruti is not another static compliance checklist.
   plans, privacy notice patch drafts, GitHub issues, and SARIF.
 - **Board-to-code coverage**: combines executive dashboarding with developer
   pull-request gates.
+- **Transparent evidence**: every finding can carry detector ID, confidence,
+  source file/line, language, framework hints, and evidence reference.
+
+## What It Looks For
+
+Svikruti v1 is built for the messy middle between legal checklists and code
+review. It does not claim to prove compliance. It creates a useful evidence
+pack that humans can verify quickly.
+
+It currently looks for:
+
+- personal-data categories such as identity, contact, government ID, financial,
+  location, children, health, device, and tracking data
+- Indian identifier patterns such as PAN, Aadhaar-like values, mobile numbers,
+  UPI IDs, and emails
+- collection points in forms, request bodies, checkout/signup/profile flows,
+  and website fields
+- storage points in schemas, models, SQL files, database writes, and ORM hints
+- logging exposure where personal data appears near `console.log`, `logger`,
+  `print`, or similar statements
+- India-relevant and global vendors, SDKs, scripts, and analytics/payment tools
+- privacy notice gaps for detected data categories, vendors, withdrawal,
+  grievance, rights, retention, and children-related language
+- optional browser consent journey evidence, including tracking before consent,
+  reject/accept paths, and withdrawal/preference discoverability
+
+The example suite includes Python, HTML, Express/Node, React/TypeScript,
+Django-style models, and SQL schema fixtures so the scanner is tested against
+more than a single toy file.
+
+## Review Philosophy
+
+Svikruti separates three things that are often mixed together:
+
+| Field type | Meaning |
+| --- | --- |
+| Scanner-inferred | The tool observed evidence and made a transparent inference |
+| To be confirmed | A human must confirm the business/legal fact, such as DPA status or transfer location |
+| Draft recommendation | Suggested wording, action, or control that should be reviewed before use |
+
+That is intentional. A useful privacy tool should not pretend to know your
+contracts, retention schedule, or final legal position from source code alone.
 
 ## Product Surfaces
 
@@ -138,12 +207,16 @@ Scanner outputs:
 - offline HTML evidence dashboard
 - structured JSON report
 - SARIF for GitHub code scanning
-- RoPA starter CSV
-- remediation action CSV
-- vendor register CSV
+- schema-versioned RoPA / privacy inventory CSV
+- schema-versioned remediation action CSV
+- schema-versioned vendor / processor register CSV
 - privacy notice patch Markdown
 - GitHub/Jira/Linear-ready fix-pack Markdown
 - optional AI brief Markdown
+
+CSV schemas are documented in [docs/OUTPUT_SCHEMAS.md](docs/OUTPUT_SCHEMAS.md).
+Each row includes evidence references and separates scanner-inferred fields
+from fields that privacy, legal, procurement, or engineering must confirm.
 
 ## AI Co-pilot
 

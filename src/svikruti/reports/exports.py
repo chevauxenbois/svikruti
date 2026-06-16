@@ -17,20 +17,83 @@ def _write_rows(output_path: str, headers: Iterable[str], rows: Iterable[Iterabl
             writer.writerow(["" if value is None else value for value in row])
 
 
+def _join(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, (list, tuple, set)):
+        return "; ".join(str(item) for item in value)
+    return str(value)
+
+
 def write_ropa_csv(result: ScanResult, output_path: str) -> None:
     _write_rows(
         output_path,
-        ["Activity", "Data Categories", "Data Subjects", "Purposes", "Sources", "Third Parties", "Retention", "DPDPA Notes"],
+        [
+            "Schema Version",
+            "Record ID",
+            "Processing Activity",
+            "Data Fiduciary / Controller",
+            "Business Function",
+            "Product / System",
+            "Data Subjects",
+            "Personal Data Categories",
+            "Special / High-Risk Category",
+            "Processing Purposes",
+            "DPDPA Basis",
+            "Consent Required",
+            "Source Systems",
+            "Collection Points",
+            "Storage Locations",
+            "Logging Locations",
+            "Processors / Recipients",
+            "International Transfer",
+            "Retention Period",
+            "Deletion Trigger",
+            "Security Measures",
+            "Privacy Notice Coverage",
+            "Data Principal Rights Impact",
+            "Risk Tier",
+            "Owner",
+            "Review Status",
+            "Evidence References",
+            "Scanner Confidence",
+            "Detected Languages",
+            "Detected Frameworks",
+            "DPDPA Notes",
+        ],
         (
             [
+                "svikruti-ropa-v1",
+                entry.get("record_id"),
                 entry.get("activity"),
-                entry.get("data_categories"),
+                "To be confirmed",
+                "To be confirmed",
+                _join(entry.get("systems_or_sources")),
                 entry.get("data_subjects"),
-                "; ".join(entry.get("purposes", [])),
-                "; ".join(entry.get("systems_or_sources", [])),
-                "; ".join(entry.get("third_parties", [])),
+                entry.get("data_categories"),
+                "Yes" if entry.get("risk_tier") == "High" else "No / review",
+                _join(entry.get("purposes")),
+                entry.get("dpdpa_basis"),
+                entry.get("consent_required"),
+                _join(entry.get("systems_or_sources")),
+                _join(entry.get("collection_points")),
+                _join(entry.get("storage_locations")),
+                _join(entry.get("logging_locations")),
+                _join(entry.get("third_parties")),
+                "To be confirmed",
                 entry.get("retention"),
-                "; ".join(entry.get("dpdpa_notes", [])),
+                entry.get("deletion_trigger"),
+                _join(entry.get("security_measures")),
+                entry.get("notice_coverage"),
+                entry.get("rights_impact"),
+                entry.get("risk_tier"),
+                entry.get("owner"),
+                entry.get("review_status"),
+                _join(entry.get("evidence_refs")),
+                _join(entry.get("confidence")),
+                _join(entry.get("languages")),
+                _join(entry.get("frameworks")),
+                _join(entry.get("dpdpa_notes")),
             ]
             for entry in result.ropa_starter
         ),
@@ -40,17 +103,38 @@ def write_ropa_csv(result: ScanResult, output_path: str) -> None:
 def write_actions_csv(result: ScanResult, output_path: str) -> None:
     _write_rows(
         output_path,
-        ["Priority", "Title", "Owner", "Artifact", "Why", "Evidence"],
+        [
+            "Schema Version",
+            "Action ID",
+            "Priority",
+            "Severity",
+            "Control Area",
+            "Title",
+            "Owner",
+            "Status",
+            "Due",
+            "Artifact",
+            "Why",
+            "Evidence References",
+            "Acceptance Criteria",
+        ],
         (
             [
+                "svikruti-actions-v1",
+                f"SVK-ACT-{index:03d}",
                 action.get("priority"),
+                action.get("severity", "HIGH" if action.get("priority") == "P1" else "CRITICAL"),
+                action.get("control_area", "Privacy control"),
                 action.get("title"),
                 action.get("owner"),
+                action.get("status", "Open"),
+                action.get("due", "Before launch / next release"),
                 action.get("artifact"),
                 action.get("why"),
-                "; ".join(str(item) for item in action.get("evidence", [])),
+                _join(action.get("evidence")),
+                _join(action.get("acceptance_criteria")),
             ]
-            for action in result.evidence_graph.proof_pack
+            for index, action in enumerate(result.evidence_graph.proof_pack, start=1)
         ),
     )
 
@@ -59,13 +143,56 @@ def write_vendor_csv(result: ScanResult, output_path: str) -> None:
     vendors = sorted(result.summary.third_parties)
     rows = []
     for vendor in vendors:
-        evidence_refs = [
-            item.file or item.source
+        matched = [
+            item
             for item in result.evidence
             if item.metadata.get("third_party") == vendor or item.metadata.get("domain") == vendor
         ]
-        rows.append([vendor, "To be confirmed", "To be confirmed", "To be confirmed", "; ".join(sorted(set(evidence_refs)))])
-    _write_rows(output_path, ["Vendor", "Purpose", "DPA Status", "Transfer Location", "Evidence"], rows)
+        evidence_refs = sorted(set(str(item.metadata.get("evidence_ref") or item.file or item.source) for item in matched))
+        data_categories = sorted(set(str(item.metadata.get("data_category")) for item in matched if item.metadata.get("data_category")))
+        detector_ids = sorted(set(str(item.metadata.get("detector_id")) for item in matched if item.metadata.get("detector_id")))
+        rows.append(
+            [
+                "svikruti-vendors-v1",
+                vendor,
+                "To be confirmed",
+                _join(data_categories) or "To be mapped",
+                "To be confirmed",
+                "To be confirmed",
+                "To be confirmed",
+                "To be confirmed",
+                "To be confirmed",
+                "To be confirmed",
+                "Medium" if matched else "Review",
+                "Procurement / Legal / Security",
+                "Open",
+                "To be scheduled",
+                _join(evidence_refs),
+                _join(detector_ids),
+            ]
+        )
+    _write_rows(
+        output_path,
+        [
+            "Schema Version",
+            "Vendor / Processor",
+            "Service Category",
+            "Data Categories Shared",
+            "Processing Purpose",
+            "DPA / Contract Status",
+            "Sub-processors",
+            "Transfer Location",
+            "Security Evidence",
+            "Retention / Deletion Commitment",
+            "Risk Tier",
+            "Owner",
+            "Review Status",
+            "Next Review Date",
+            "Evidence References",
+            "Detector IDs",
+        ],
+        rows,
+    )
 
 
 def write_notice_patch(result: ScanResult, output_path: str) -> None:
@@ -128,11 +255,22 @@ def issue_markdown(result: ScanResult) -> str:
 
     for index, action in enumerate(result.evidence_graph.proof_pack, start=1):
         evidence = "; ".join(str(item) for item in action.get("evidence", [])) or "None"
+        acceptance_criteria = action.get("acceptance_criteria") or [
+            "Owner confirmed",
+            "Evidence reviewed",
+            "Remediation implemented or risk accepted",
+            "Privacy notice / RoPA / vendor register updated where applicable",
+            "Svikruti scan rerun and result attached",
+        ]
         lines.extend(
             [
                 f"## {index}. [{action.get('priority', 'P1')}] {action.get('title', 'Untitled action')}",
                 "",
+                f"**Severity:** {action.get('severity', 'HIGH')}",
+                f"**Control Area:** {action.get('control_area', 'Privacy control')}",
                 f"**Owner:** {action.get('owner', 'To be assigned')}",
+                f"**Status:** {action.get('status', 'Open')}",
+                f"**Due:** {action.get('due', 'Before launch / next release')}",
                 f"**Artifact:** {action.get('artifact', 'To be confirmed')}",
                 "",
                 "### Why",
@@ -142,11 +280,7 @@ def issue_markdown(result: ScanResult) -> str:
                 evidence,
                 "",
                 "### Acceptance Criteria",
-                "- [ ] Owner confirmed",
-                "- [ ] Evidence reviewed",
-                "- [ ] Remediation implemented or risk accepted",
-                "- [ ] Privacy notice / RoPA / vendor register updated where applicable",
-                "- [ ] Svikruti scan rerun and result attached",
+                *[f"- [ ] {item}" for item in acceptance_criteria],
                 "",
             ]
         )
