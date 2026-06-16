@@ -48,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--vendors-out", help="Optional vendor/processor register CSV output path.")
     scan.add_argument("--notice-patch-out", help="Optional privacy notice patch draft Markdown output path.")
     scan.add_argument("--issues-out", help="Optional copy-ready GitHub/Jira issue pack Markdown output path.")
-    scan.add_argument("--ai", action="store_true", help="Generate optional AI co-pilot commentary using OPENAI_API_KEY.")
+    scan.add_argument("--ai", action="store_true", help="Generate optional AI co-pilot commentary using a configured provider key.")
     scan.add_argument("--ai-provider", default="gemini", choices=["gemini", "openai"], help="AI provider for --ai.")
     scan.add_argument("--ai-model", help="AI model for --ai. Defaults to SVIKRUTI_AI_MODEL or the package default.")
     scan.add_argument("--ai-out", help="Optional AI co-pilot brief Markdown output path.")

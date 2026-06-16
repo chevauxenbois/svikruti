@@ -429,19 +429,17 @@ def issue_markdown_for_action(action: dict[str, object], index: int) -> str:
 
 
 def _ai_panel(result: ScanResult) -> str:
-    insights = result.ai_insights or {"status": "not_generated", "message": "Run this scan with --ai and OPENAI_API_KEY to generate AI commentary."}
+    insights = result.ai_insights or {"status": "not_generated", "message": "Run this scan with --ai and a configured provider key to generate AI commentary."}
     status = str(insights.get("status", "not_generated"))
     status_class = status.lower().replace("_", "-")
 
     if status != "generated":
-        key_hint = "GEMINI_API_KEY" if insights.get("provider") == "gemini" else "OPENAI_API_KEY"
-        provider_hint = "--ai-provider gemini" if insights.get("provider") == "gemini" else "--ai-provider openai"
         return (
             f'<div class="ai-empty {escape(status_class)}">'
             f'<span>{escape(status.replace("_", " ").title())}</span>'
             '<strong>AI Co-pilot not generated</strong>'
             f'<p>{escape(str(insights.get("message", "Run with --ai to generate AI commentary.")))}</p>'
-            f'<code>{escape(key_hint)}=... svikruti scan --ai {escape(provider_hint)} --ai-out ai-brief.md ...</code>'
+            '<code>svikruti scan --ai --ai-out ai-brief.md ...</code>'
             '</div>'
         )
 
@@ -512,7 +510,7 @@ def _artifact_links(result: ScanResult) -> str:
         <div class="artifact"><span>1</span><strong>Assign actions</strong><p>Use the action checklist to assign owners before launch.</p></div>
         <div class="artifact"><span>2</span><strong>Patch notice</strong><p>Copy the generated drafting aid for privacy/legal review.</p><button type="button" data-copy-notice>Copy notice draft</button></div>
         <div class="artifact"><span>3</span><strong>Export artifacts</strong><p>Generate CSV/Markdown outputs from the CLI for RoPA, vendors, and remediation.</p><code>--ropa-out --actions-out --vendors-out --notice-patch-out</code></div>
-        <div class="artifact"><span>4</span><strong>AI co-pilot</strong><p>Generate evidence-grounded AI brief and rewritten fixes.</p><code>--ai --ai-provider gemini --ai-out ai-brief.md</code></div>
+        <div class="artifact"><span>4</span><strong>AI co-pilot</strong><p>Generate evidence-grounded AI brief and rewritten fixes.</p><code>--ai --ai-out ai-brief.md</code></div>
         <div class="artifact"><span>5</span><strong>CI gate</strong><p>Install the PR workflow so privacy evidence changes are caught during engineering review.</p><code>svikruti init-github-action</code></div>
       </div>
       <p class="small">Scope: {escape(str(result.repo_path or "not scanned"))} | URL: {escape(str(result.url or "not scanned"))}</p>
@@ -581,7 +579,7 @@ def _workflow_strip(result: ScanResult) -> str:
 def _ai_status_card(result: ScanResult) -> str:
     insights = result.ai_insights or {}
     status = str(insights.get("status", "not generated")).replace("_", " ")
-    model = str(insights.get("model", "Configure Gemini or OpenAI"))
+    model = str(insights.get("model", "Configure AI provider"))
     provider = str(insights.get("provider", "ai"))
     return (
         '<div class="brief ai-brief">'

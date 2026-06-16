@@ -153,7 +153,7 @@ class ScannerTests(unittest.TestCase):
         insights = generate_ai_insights(result, api_key="")
 
         self.assertEqual(insights["status"], "not_configured")
-        self.assertIn("OPENAI_API_KEY", insights["message"])
+        self.assertIn("configured AI provider", insights["message"])
 
     def test_gemini_not_configured_does_not_call_network(self):
         result = run_scan(repo="examples", url=None, privacy_file="examples/privacy.html")
@@ -161,7 +161,7 @@ class ScannerTests(unittest.TestCase):
         insights = generate_ai_insights(result, provider="gemini", api_key="")
 
         self.assertEqual(insights["status"], "not_configured")
-        self.assertIn("GEMINI_API_KEY", insights["message"])
+        self.assertIn("configured AI provider", insights["message"])
 
     def test_gemini_response_parsing_with_mocked_network(self):
         result = run_scan(repo="examples", url=None, privacy_file="examples/privacy.html")
@@ -174,7 +174,7 @@ class ScannerTests(unittest.TestCase):
                                 {
                                     "text": json.dumps(
                                         {
-                                            "executive_brief": "Gemini generated brief",
+                                            "executive_brief": "AI generated brief",
                                             "launch_risk": "Review before launch",
                                             "top_priorities": [],
                                             "control_commentary": [],
@@ -208,7 +208,7 @@ class ScannerTests(unittest.TestCase):
         self.assertEqual(insights["status"], "generated")
         self.assertEqual(insights["provider"], "gemini")
         self.assertEqual(insights["model"], "gemini-test")
-        self.assertIn("Gemini generated brief", insights["executive_brief"])
+        self.assertIn("AI generated brief", insights["executive_brief"])
         request = mocked_urlopen.call_args.args[0]
         self.assertEqual(request.headers["X-goog-api-key"], "test-key")
         self.assertIn("gemini-test:generateContent", request.full_url)
