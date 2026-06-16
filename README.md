@@ -121,8 +121,13 @@ contracts, retention schedule, or final legal position from source code alone.
 
 ### 0. Public Launch Site
 
-The repository includes a free static launch website under `site/`, intended for
-GitHub Pages while `svikruti.ai` is not purchased.
+The project site is published on GitHub Pages:
+
+```text
+https://chevauxenbois.github.io/svikruti/
+```
+
+The static source lives under `site/`.
 
 Local preview:
 

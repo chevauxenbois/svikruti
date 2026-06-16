@@ -26,23 +26,22 @@ http://127.0.0.1:8765/site/
 
 ## GitHub Pages Deployment
 
-The workflow is `.github/workflows/pages.yml`.
-
-After this lands on `main`, enable GitHub Pages in the repository settings:
-
-1. Go to repository Settings.
-2. Open Pages.
-3. Set Source to **GitHub Actions**.
-4. Run the `Svikruti Launch Site` workflow if it does not run automatically.
-
-The free URL should be:
+The site is currently published from the `gh-pages` branch:
 
 ```text
 https://chevauxenbois.github.io/svikruti/
 ```
 
-If you later buy a domain such as `svikruti.in` or `svikruti.dev`, point it to
-GitHub Pages and add a `CNAME` file under `site/`.
+The source files live under `site/` on `main`. To republish after changing the
+site, split and push the `site/` subtree:
+
+```text
+git subtree split --prefix site -b gh-pages-deploy
+git push origin gh-pages-deploy:gh-pages --force-with-lease
+```
+
+For a custom domain, point the domain or subdomain to GitHub Pages and add a
+`CNAME` file under `site/`.
 
 ## Contact Form
 
