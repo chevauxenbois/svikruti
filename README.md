@@ -56,7 +56,7 @@ That single command can generate:
 | Vendor CSV | Procurement/legal/security | Processor register starter with DPA, transfer, and review fields |
 | Notice patch Markdown | Privacy/legal | Drafting aid for missing notice language |
 | Fix pack Markdown | Engineering | Copy-ready GitHub/Jira/Linear tickets |
-| AI brief Markdown | Leadership/privacy | Optional Gemini/OpenAI synthesis grounded in scan evidence |
+| AI brief Markdown | Leadership/privacy | Optional AI-assisted synthesis grounded in scan evidence |
 
 ## Why This Is Different
 
@@ -118,6 +118,21 @@ That is intentional. A useful privacy tool should not pretend to know your
 contracts, retention schedule, or final legal position from source code alone.
 
 ## Product Surfaces
+
+### 0. Public Launch Site
+
+The repository includes a free static launch website under `site/`, intended for
+GitHub Pages while `svikruti.ai` is not purchased.
+
+Local preview:
+
+```bash
+python3 -m http.server 8765
+```
+
+Open `http://127.0.0.1:8765/site/`.
+
+Deployment notes are in [docs/WEBSITE.md](docs/WEBSITE.md).
 
 ### 1. Governance Workbench
 
@@ -191,7 +206,7 @@ The HTML output is an offline evidence workbench:
 | Actions | Prioritized proof-pack actions with local checkbox state |
 | Evidence Flow | Source -> data category -> notice coverage -> DPDPA area -> remediation |
 | Artifacts | RoPA starter, export guidance, notice patch, fix-pack copy actions |
-| AI Co-pilot | Optional Gemini/OpenAI synthesis grounded in scan evidence |
+| AI Co-pilot | Optional AI-assisted synthesis grounded in scan evidence |
 | Fix Pack | Copy-ready GitHub/Jira/Linear implementation tickets |
 | Evidence Explorer | Searchable, severity-filtered evidence table |
 
@@ -223,25 +238,15 @@ from fields that privacy, legal, procurement, or engineering must confirm.
 AI is opt-in. The CLI does not call an AI provider unless `--ai` is passed.
 The scanner sends a compact evidence packet, not full repository files.
 
-Gemini is the default CLI provider:
+Set the API key for your configured provider in the environment, then run:
 
 ```bash
-export GEMINI_API_KEY=...
-
 svikruti scan \
   --repo . \
   --privacy-url https://example.com/privacy \
   --ai \
-  --ai-provider gemini \
   --out ai-report.html \
   --ai-out ai-brief.md
-```
-
-OpenAI is also supported in the CLI:
-
-```bash
-export OPENAI_API_KEY=...
-svikruti scan --repo . --ai --ai-provider openai --ai-out ai-brief.md
 ```
 
 The Streamlit app also includes AI pages for assistant, drafting, compliance
@@ -335,7 +340,7 @@ svikruti/
   config.py               # Categories, questions, templates, settings
 
   src/svikruti/
-    ai.py                 # CLI Gemini/OpenAI evidence synthesis
+    ai.py                 # CLI AI evidence synthesis
     cli.py                # `svikruti` command line entry point
     models.py             # report/evidence dataclasses
     scanner/

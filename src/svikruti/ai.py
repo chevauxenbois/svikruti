@@ -42,7 +42,7 @@ def generate_ai_insights(
             "status": "not_configured",
             "provider": provider,
             "model": selected_model,
-            "message": "Set OPENAI_API_KEY and rerun with --ai to generate AI commentary.",
+            "message": "Set the API key for your configured AI provider and rerun with --ai to generate AI commentary.",
         }
 
     packet = _compact_packet(result)
@@ -150,7 +150,7 @@ def _generate_gemini_insights(
             "status": "not_configured",
             "provider": "gemini",
             "model": selected_model,
-            "message": "Set GEMINI_API_KEY and rerun with --ai --ai-provider gemini to generate AI commentary.",
+            "message": "Set the API key for your configured AI provider and rerun with --ai to generate AI commentary.",
         }
 
     packet = _compact_packet(result)

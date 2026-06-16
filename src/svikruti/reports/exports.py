@@ -301,7 +301,7 @@ def ai_markdown(result: ScanResult) -> str:
     lines.append("")
 
     if status != "generated":
-        lines.append(str(insights.get("message", "Run `svikruti scan --ai` with OPENAI_API_KEY configured.")))
+        lines.append(str(insights.get("message", "Run `svikruti scan --ai` with a configured provider key.")))
         lines.append("")
         return "\n".join(lines)
 
@@ -380,15 +380,13 @@ jobs:
             --issues-out svikruti-fix-pack.md \\
             --fail-on critical
 
-      # Optional AI co-pilot. Add GEMINI_API_KEY as a repository secret before enabling.
+      # Optional AI co-pilot. Configure the API key for your selected provider
+      # as a repository secret before enabling.
       # - name: Generate AI co-pilot brief
-      #   env:
-      #     GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       #   run: |
       #     svikruti scan \\
       #       --repo . \\
       #       --ai \\
-      #       --ai-provider gemini \\
       #       --out svikruti-ai-report.html \\
       #       --json-out svikruti-ai-report.json \\
       #       --ai-out svikruti-ai-brief.md

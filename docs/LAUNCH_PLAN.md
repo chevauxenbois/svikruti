@@ -93,9 +93,7 @@ svikruti scan \
 - RoPA, vendor, action, and notice-patch exports.
 - Copy-ready fix-pack issue export.
 - GitHub Action / SARIF.
-- BYOK AI explanations.
-  For v1, Gemini can be used via `--ai --ai-provider gemini` with `GEMINI_API_KEY`;
-  OpenAI remains available with `--ai-provider openai`.
+- Optional BYOK AI explanations grounded in scan evidence.
 
 ### Hosted Free Tier
 
