@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Svikruti is an India-first open-source PrivacyOps evidence scanner for DPDPA readiness. Scan code, websites, privacy notices, and consent journeys.">
+  <meta property="og:title" content="Svikruti.ai - India-first PrivacyOps evidence scanner">
+  <meta property="og:description" content="Open-source DPDPA evidence workbench for code, cloud, websites, privacy notices, consent journeys, RoPA starters, vendor registers, and remediation tickets.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#17324d">
+  <title>Svikruti.ai - India-first PrivacyOps evidence scanner</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #607086;
+      --line: #d7e0ea;
+      --panel: #f7fafc;
+      --teal: #047a78;
+      --teal-soft: #dff3f1;
+      --navy: #17324d;
+      --navy-2: #0f253a;
+      --amber: #b7791f;
+      --rose: #b42318;
+      --green: #18794e;
+      --white: #ffffff;
+      --shadow: 0 18px 55px rgba(15, 37, 58, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #f8fafc;
+      line-height: 1.55;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 6vw;
+      border-bottom: 1px solid rgba(215, 224, 234, 0.82);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 850;
+      color: var(--navy);
+    }
+
+    .mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--navy);
+      color: #9ee0da;
+      font-weight: 900;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: #42536a;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav a:hover {
+      color: var(--navy);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 1px solid var(--navy);
+      border-radius: 8px;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 8px 22px rgba(23, 50, 77, 0.18);
+    }
+
+    .button.secondary {
+      background: #fff;
+      color: var(--navy);
+      box-shadow: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.82fr) minmax(420px, 1fr);
+      gap: 44px;
+      align-items: center;
+      min-height: calc(100vh - 70px);
+      padding: 56px 6vw 44px;
+      background:
+        linear-gradient(135deg, rgba(223, 243, 241, 0.86), rgba(248, 250, 252, 0.96) 38%, rgba(233, 239, 248, 0.78)),
+        #f8fafc;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: #075c5a;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--green);
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      max-width: 780px;
+      color: var(--navy-2);
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 680px;
+      color: #405168;
+      font-size: 20px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 28px 0 18px;
+    }
+
+    .launch-note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .command {
+      max-width: 690px;
+      margin-top: 24px;
+      border: 1px solid rgba(23, 50, 77, 0.18);
+      border-radius: 8px;
+      background: #0e2237;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .command-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 14px;
+      color: #aebfd0;
+      background: #0a1929;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      color: #dff3f1;
+      font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+    }
+
+    .product-shot {
+      border: 1px solid rgba(23, 50, 77, 0.16);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .shot-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #17324d, #1e445f);
+      color: #fff;
+    }
+
+    .shot-top span {
+      display: block;
+      color: #9ee0da;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .shot-top strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 23px;
+      line-height: 1.1;
+    }
+
+    .risk {
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: right;
+      min-width: 120px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .shot-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .shot-tabs span {
+      flex: 0 0 auto;
+      border: 1px solid #c6d1dd;
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: #26364a;
+      font-size: 12px;
+      font-weight: 800;
+      background: #fff;
+    }
+
+    .shot-tabs span:first-child {
+      color: #fff;
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+
+    .shot-body {
+      padding: 18px;
+    }
+
+    .summary-box {
+      border: 1px solid #b9d9d6;
+      border-radius: 8px;
+      padding: 14px;
+      background: #f0fbfa;
+      font-weight: 750;
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .step {
+      border: 1px solid #d8e0ea;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 96px;
+      background: #fff;
+    }
+
+    .step b {
+      display: inline-grid;
+      width: 24px;
+      height: 24px;
+      place-items: center;
+      margin-bottom: 8px;
+      border-radius: 999px;
+      color: #075c5a;
+      background: var(--teal-soft);
+      font-size: 12px;
+    }
+
+    .step strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .step small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .action-preview {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 14px;
+      border: 1px solid #b9d9d6;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .action-preview h3 {
+      margin: 0 0 7px;
+      color: var(--navy);
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .action-card {
+      border: 1px solid #d8e0ea;
+      border-radius: 8px;
+      padding: 11px;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    section {
+      padding: 74px 6vw;
+    }
+
+    .section-head {
+      max-width: 830px;
+      margin-bottom: 28px;
+    }
+
+    .section-head span {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--navy-2);
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      background: #fff;
+      min-width: 0;
+    }
+
+    .card .icon {
+      display: inline-grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      color: #075c5a;
+      background: var(--teal-soft);
+      font-weight: 900;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      line-height: 1.25;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 34px;
+      align-items: start;
+    }
+
+    .artifact-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .artifact-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 18px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+    }
+
+    .artifact-item strong {
+      color: var(--navy);
+    }
+
+    .artifact-item p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .workflow-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: #fff;
+      min-height: 165px;
+    }
+
+    .workflow-card span {
+      display: inline-grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--navy);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .workflow-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .workflow-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pricing {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .price-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 26px;
+      background: #fff;
+    }
+
+    .price-card.featured {
+      border-color: #95cbc5;
+      background: #f0fbfa;
+    }
+
+    .price-card h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .price-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #43536a;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    .cta {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      border-radius: 12px;
+      padding: 34px;
+      color: #fff;
+      background: linear-gradient(135deg, #17324d, #0f253a);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.85fr) minmax(360px, 1.15fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .contact-panel,
+    .founder-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      background: #fff;
+    }
+
+    .founder-panel {
+      background: #f0fbfa;
+      border-color: #b9d9d6;
+    }
+
+    .founder-panel h3,
+    .contact-panel h3 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 23px;
+    }
+
+    .founder-panel p,
+    .contact-panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0 20px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .contact-list li {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #33445a;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .form-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .cta h2 {
+      color: #fff;
+    }
+
+    .cta p {
+      margin: 10px 0 0;
+      color: #c7d5df;
+      font-size: 18px;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 28px 6vw;
+      color: #617086;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      font-size: 14px;
+    }
+
+    footer a {
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    @media (max-width: 1060px) {
+      .hero,
+      .split,
+      .cta {
+        grid-template-columns: 1fr;
+      }
+
+      .cards,
+      .workflow,
+      .pricing,
+      .contact-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 42px;
+      }
+
+      .product-shot {
+        border-radius: 8px;
+      }
+
+      .shot-top,
+      .action-preview,
+      .artifact-item,
+      .cta,
+      footer {
+        grid-template-columns: 1fr;
+      }
+
+      .step-grid,
+      .cards,
+      .workflow,
+      .pricing,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 54px 6vw;
+      }
+
+      .artifact-item {
+        gap: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Svikruti home">
+      <span class="mark">S</span>
+      <span>Svikruti.ai</span>
+    </a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="#evidence">Evidence</a>
+      <a href="#artifacts">Artifacts</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#pricing">Open source</a>
+      <a href="#contact">Contact</a>
+      <a href="https://github.com/chevauxenbois/svikruti">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Open source now · India-first · DPDPA-focused</div>
+        <h1>Privacy evidence for DPDPA, from code to launch.</h1>
+        <p class="lead">Svikruti scans repositories, cloud-facing product surfaces, websites, privacy notices, and consent journeys, then turns engineering evidence into RoPA starters, vendor registers, fix tickets, SARIF, and an offline evidence workbench.</p>
+        <div class="hero-actions">
+          <a class="button" href="https://github.com/chevauxenbois/svikruti">View on GitHub</a>
+          <a class="button secondary" href="#demo">See what it generates</a>
+        </div>
+        <div class="launch-note">The open-source scanner is available now. A hosted edition is being explored with the privacy community.</div>
+        <div class="command" aria-label="Svikruti scan command">
+          <div class="command-head">
+            <span>Run locally</span>
+            <span>No account required</span>
+          </div>
+          <pre>pipx run svikruti scan \
+  --repo . \
+  --url https://example.com \
+  --privacy-url https://example.com/privacy \
+  --out svikruti-report.html \
+  --sarif-out svikruti.sarif \
+  --ropa-out ropa.csv \
+  --actions-out actions.csv \
+  --vendors-out vendors.csv</pre>
+        </div>
+      </div>
+
+      <div class="product-shot" aria-label="Svikruti evidence workbench preview">
+        <div class="shot-top">
+          <div>
+            <span>Evidence Workbench</span>
+            <strong>Svikruti scan result</strong>
+          </div>
+          <div class="risk">
+            <span>Risk level</span>
+            <strong>Critical</strong>
+          </div>
+        </div>
+        <div class="shot-tabs">
+          <span>Overview</span>
+          <span>Controls</span>
+          <span>Actions</span>
+          <span>Evidence Flow</span>
+          <span>Artifacts</span>
+        </div>
+        <div class="shot-body">
+          <div class="summary-box">8 personal-data categories · 2 third parties · 15 proof-pack actions</div>
+          <div class="step-grid">
+            <div class="step"><b>1</b><strong>Scan</strong><small>Code, site, notice, consent</small></div>
+            <div class="step"><b>2</b><strong>Map</strong><small>Data categories to controls</small></div>
+            <div class="step"><b>3</b><strong>Fix</strong><small>Owner-ready tickets</small></div>
+          </div>
+          <div class="action-preview">
+            <div>
+              <h3>Start with owner assignment, not more analysis.</h3>
+              <p>Notice gaps, sensitive data, logging exposure, vendor review, and CI evidence in one place.</p>
+            </div>
+            <div class="artifact-list">
+              <div class="action-card"><strong>P0</strong> Update privacy notice for children data</div>
+              <div class="action-card"><strong>P1</strong> Reduce contact logging exposure</div>
+              <div class="action-card"><strong>P1</strong> Complete processor register review</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="section-head">
+        <span>Evidence-first PrivacyOps</span>
+        <h2>Built for the gap between legal checklists and real technical controls.</h2>
+        <p>Svikruti does not pretend to certify compliance. It creates a transparent evidence pack that privacy, security, engineering, cloud, and legal teams can verify quickly.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <span class="icon">01</span>
+          <h3>Code, cloud, and website evidence</h3>
+          <p>Detect personal-data signals, form fields, request bodies, storage hints, logging exposure, cookies, scripts, and third-party tools.</p>
+        </article>
+        <article class="card">
+          <span class="icon">02</span>
+          <h3>DPDPA-oriented control mapping</h3>
+          <p>Connect findings to notice coverage, consent and withdrawal, data minimization, vendor governance, RoPA readiness, and children-data review.</p>
+        </article>
+        <article class="card">
+          <span class="icon">03</span>
+          <h3>Transparent review model</h3>
+          <p>Each finding can carry detector ID, confidence, file or URL evidence, language, framework hints, and fields that require human confirmation.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span>For privacy, legal, and GRC teams</span>
+        <h2>Useful because it turns product evidence into review work.</h2>
+        <p>DPDPA teams need more than a questionnaire. They need proof of what is collected, where notices are weak, which processors appear, and what engineering can fix before launch.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <span class="icon">A</span>
+          <h3>Notice and purpose proof</h3>
+          <p>Compare detected data categories, vendors, cookies, forms, and consent copy against privacy notice coverage and missing purpose language.</p>
+        </article>
+        <article class="card">
+          <span class="icon">B</span>
+          <h3>RoPA and processor starters</h3>
+          <p>Export structured inventories with evidence references, review fields, and confirmation gaps for legal, procurement, and security teams.</p>
+        </article>
+        <article class="card">
+          <span class="icon">C</span>
+          <h3>Owner-ready remediation</h3>
+          <p>Turn findings into prioritized actions and copy-ready tickets with acceptance criteria, so review ends with fixes instead of screenshots.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="demo">
+      <div class="split">
+        <div class="section-head">
+          <span>Launch artifact pack</span>
+          <h2>One scan produces review-ready outputs.</h2>
+          <p>The HTML workbench is for humans. The JSON, SARIF, CSV, and Markdown files are for CI, GRC, procurement, legal review, and engineering tickets.</p>
+        </div>
+        <div class="artifact-list" id="artifacts">
+          <div class="artifact-item"><strong>HTML Workbench</strong><p>Executive posture, control board, evidence explorer, action tracker, and flow map.</p></div>
+          <div class="artifact-item"><strong>SARIF</strong><p>GitHub code scanning output for pull-request review.</p></div>
+          <div class="artifact-item"><strong>RoPA CSV</strong><p>Schema-versioned privacy inventory starter with evidence references.</p></div>
+          <div class="artifact-item"><strong>Vendor CSV</strong><p>Processor register starter with DPA, transfer, security, and review fields.</p></div>
+          <div class="artifact-item"><strong>Fix Pack</strong><p>Copy-ready GitHub, Jira, or Linear issue bodies with acceptance criteria.</p></div>
+          <div class="artifact-item"><strong>AI Brief</strong><p>Optional AI-assisted synthesis grounded in scanner evidence.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="section-head">
+        <span>How it works</span>
+        <h2>From repository to privacy evidence in minutes.</h2>
+        <p>Run it locally, attach it to CI, or use it as the evidence layer for a future hosted PrivacyOps workflow.</p>
+      </div>
+      <div class="workflow">
+        <div class="workflow-card"><span>1</span><strong>Scan</strong><p>Repository, website URL, privacy notice, and optional browser consent journey.</p></div>
+        <div class="workflow-card"><span>2</span><strong>Classify</strong><p>Personal-data categories, vendors, logging, storage, forms, cookies, and notices.</p></div>
+        <div class="workflow-card"><span>3</span><strong>Map</strong><p>Evidence to DPDPA control areas and launch-readiness concerns.</p></div>
+        <div class="workflow-card"><span>4</span><strong>Export</strong><p>RoPA, action tracker, vendor register, notice patch, SARIF, JSON, and fix pack.</p></div>
+        <div class="workflow-card"><span>5</span><strong>Gate</strong><p>Use GitHub Actions to block risky privacy changes before release.</p></div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="section-head">
+        <span>Open-source now, hosted edition being explored</span>
+        <h2>Start with a free scanner. Help shape what comes next.</h2>
+        <p>The priority is a useful open-source tool for India's privacy community. If teams need continuous PrivacyOps across products and releases, the hosted direction will be shaped with early users.</p>
+      </div>
+      <div class="pricing">
+        <article class="price-card featured">
+          <h3>Free open source</h3>
+          <p>For founders, privacy practitioners, and engineering teams that want DPDPA evidence quickly.</p>
+          <ul>
+            <li>Local CLI scanner</li>
+            <li>Offline evidence workbench</li>
+            <li>Optional BYOK AI co-pilot</li>
+            <li>GitHub Action and SARIF output</li>
+            <li>Schema-versioned CSV and Markdown artifacts</li>
+          </ul>
+        </article>
+        <article class="price-card">
+          <h3>Hosted edition under consideration</h3>
+          <p>For teams that need continuous PrivacyOps across products and releases, if there is enough demand.</p>
+          <ul>
+            <li>Hosted evidence vault and scan history</li>
+            <li>Org dashboards across many products</li>
+            <li>Jira, Linear, and GRC integrations</li>
+            <li>SSO, RBAC, audit logs, and approvals</li>
+            <li>BFSI, healthcare, ecommerce, SaaS, and fintech packs</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="cta">
+        <div>
+          <h2>Open-source now. Hosted workflows are being explored.</h2>
+          <p>Use the GitHub repo today, follow the build, and help shape India-first PrivacyOps tooling for DPDPA.</p>
+        </div>
+        <a class="button" href="https://github.com/chevauxenbois/svikruti">Open GitHub</a>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-head">
+        <span>Get in touch</span>
+        <h2>Built with love for India's privacy community.</h2>
+        <p>The vision is to simplify DPDPA compliance through code, cloud evidence, technical controls, open-source workflows, and practical artifacts that teams can actually use.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="founder-panel">
+          <h3>Created by Harsh Kahate</h3>
+          <p>Svikruti is an independent open-source effort to make DPDPA readiness more practical for Indian startups, security teams, privacy teams, and engineers.</p>
+          <p>It is not legal advice and it does not replace counsel. It is a technical evidence layer that helps teams find, discuss, and fix privacy gaps faster.</p>
+          <div class="contact-actions">
+            <a class="button" href="https://linkedin.com/in/hkahate">Connect on LinkedIn</a>
+            <a class="button secondary" href="https://github.com/chevauxenbois/svikruti">View GitHub</a>
+          </div>
+        </div>
+
+        <div class="contact-panel">
+          <h3>Need help with your DPDPA journey?</h3>
+          <p>If you are figuring out DPDPA readiness for a product, cloud setup, website, consent flow, vendor process, or engineering release, reach out. I am happy to have a practical conversation and see where Svikruti or hands-on assistance can help.</p>
+          <ul class="contact-list">
+            <li>DPDPA readiness conversations</li>
+            <li>Product, code, cloud, and website evidence review</li>
+            <li>Privacy notice, consent, vendor, and remediation planning</li>
+            <li>Open-source feedback or hosted edition interest</li>
+          </ul>
+          <a class="button" href="https://forms.gle/TaBLyFdXdmP1XMek8" target="_blank" rel="noopener noreferrer">Open contact form</a>
+          <div class="form-note">The form opens in Google Forms so inquiries stay private and easy to respond to.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Svikruti.ai · India-first open-source PrivacyOps evidence scanner · Created by Harsh Kahate</span>
+    <span><a href="https://github.com/chevauxenbois/svikruti">GitHub</a> · <a href="https://github.com/chevauxenbois/svikruti/blob/main/README.md">Docs</a></span>
+  </footer>
+</body>
+</html>
