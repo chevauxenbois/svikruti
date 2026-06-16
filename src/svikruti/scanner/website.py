@@ -77,7 +77,7 @@ def _fetch(url: str) -> tuple[str, Dict[str, str]]:
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         raise ValueError("Only http and https URLs are supported for website scans.")
-    request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.3 (+https://svikruti.ai)"})
+    request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.4 (+https://svikruti.ai)"})
     with urlopen(request, timeout=20) as response:
         body = response.read(MAX_RESPONSE_BYTES + 1)
         if len(body) > MAX_RESPONSE_BYTES:
@@ -112,6 +112,27 @@ def _cookie_names(headers: Dict[str, str]) -> List[str]:
     return list(cookie.keys())
 
 
+def _matched_terms(normalized_value: str, terms: List[str]) -> List[str]:
+    tokens = normalized_value.split("_")
+    matches: List[str] = []
+    for term in terms:
+        term_tokens = normalize_text(term).split("_")
+        width = len(term_tokens)
+        if width and any(tokens[index : index + width] == term_tokens for index in range(0, len(tokens) - width + 1)):
+            matches.append(term)
+    return matches
+
+
+def _metadata(detector_id: str, confidence: str, evidence_ref: str, **extra: object) -> Dict[str, object]:
+    metadata: Dict[str, object] = {
+        "detector_id": detector_id,
+        "confidence": confidence,
+        "evidence_ref": evidence_ref,
+    }
+    metadata.update(extra)
+    return metadata
+
+
 def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
     html, headers = _fetch(url)
     parser = PageParser(url)
@@ -127,7 +148,8 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
     for field in parser.forms:
         field_blob = normalize_text(" ".join(value for value in field.values() if value))
         for pattern in PERSONAL_DATA_PATTERNS:
-            if any(term in field_blob for term in pattern.terms):
+            matched_terms = _matched_terms(field_blob, pattern.terms)
+            if matched_terms:
                 detected_categories.add(pattern.category)
                 evidence.append(
                     Evidence(
@@ -138,7 +160,15 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                         detail=f"Live page field {field} appears to collect {pattern.category.lower()} data.",
                         recommendation="Confirm this collection is covered by notice text, purpose, retention, and consent/withdrawal workflow.",
                         category="Notice transparency",
-                        metadata={"field": field, "data_category": pattern.category},
+                        metadata=_metadata(
+                            f"website.form_field.{normalize_text(pattern.category)}",
+                            "high",
+                            f"{url}:form:{field.get('name') or field.get('id') or field.get('placeholder') or pattern.category}",
+                            field=field,
+                            data_category=pattern.category,
+                            matched_terms=sorted(set(matched_terms)),
+                            context_type="website_form_field",
+                        ),
                     )
                 )
 
@@ -155,7 +185,13 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                     detail=f"The live page loads script {script}.",
                     recommendation="Confirm the third party is disclosed, contractually controlled, and only receives data for declared purposes.",
                     category="Third-party processors",
-                    metadata={"domain": script_domain, "script": script},
+                    metadata=_metadata(
+                        "website.third_party_script",
+                        "high",
+                        f"{url}:script:{script_domain}",
+                        domain=script_domain,
+                        script=script,
+                    ),
                 )
             )
 
@@ -171,7 +207,12 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                     detail=f"The live HTML references {name}.",
                     recommendation="Map this processor/tool to data categories, purposes, transfer location, and notice text.",
                     category="Third-party processors",
-                    metadata={"third_party": name},
+                    metadata=_metadata(
+                        "website.third_party_known_tool",
+                        "medium",
+                        f"{url}:third_party:{normalize_text(name)}",
+                        third_party=name,
+                    ),
                 )
             )
 
@@ -186,7 +227,7 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                 detail=f"The server sets cookies before an explicit consent interaction: {', '.join(cookies)}.",
                 recommendation="Classify cookies as necessary or non-necessary; ensure non-necessary cookies are gated by consent.",
                 category="Tracking and consent",
-                metadata={"cookies": cookies},
+                metadata=_metadata("website.cookie.first_response", "medium", f"{url}:cookies:first_response", cookies=cookies),
             )
         )
 
@@ -202,6 +243,7 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                 detail="The scanner could not identify a privacy notice link from the page anchors.",
                 recommendation="Add a clear privacy notice link and ensure it explains personal data categories, purposes, rights, grievance contact, and consent withdrawal.",
                 category="Notice transparency",
+                metadata=_metadata("website.privacy_notice.missing_link", "high", f"{url}:privacy_link"),
             )
         )
     elif fetch_notice:
@@ -219,7 +261,12 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                     detail=f"Privacy notice detected at {privacy_url}.",
                     recommendation="Compare notice language against detected collection points and third-party services.",
                     category="Notice transparency",
-                    metadata={"privacy_url": privacy_url},
+                    metadata=_metadata(
+                        "website.privacy_notice.found",
+                        "high",
+                        f"{url}:privacy_link",
+                        privacy_url=privacy_url,
+                    ),
                 )
             )
         except Exception as exc:
@@ -232,7 +279,12 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                     detail=f"Privacy notice link was detected at {privacy_url}, but fetching failed: {exc}",
                     recommendation="Ensure the privacy notice is publicly reachable and crawlable.",
                     category="Notice transparency",
-                    metadata={"privacy_url": privacy_url},
+                    metadata=_metadata(
+                        "website.privacy_notice.fetch_failed",
+                        "medium",
+                        f"{url}:privacy_link",
+                        privacy_url=privacy_url,
+                    ),
                 )
             )
 
@@ -246,6 +298,7 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                 detail="The page mentions consent but does not obviously mention withdrawal.",
                 recommendation="Make withdrawal of consent as discoverable as giving consent, where consent is the basis.",
                 category="Consent and withdrawal",
+                metadata=_metadata("website.consent.withdrawal_copy_missing", "medium", f"{url}:consent_copy"),
             )
         )
 

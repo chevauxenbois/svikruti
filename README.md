@@ -138,12 +138,16 @@ Scanner outputs:
 - offline HTML evidence dashboard
 - structured JSON report
 - SARIF for GitHub code scanning
-- RoPA starter CSV
-- remediation action CSV
-- vendor register CSV
+- schema-versioned RoPA / privacy inventory CSV
+- schema-versioned remediation action CSV
+- schema-versioned vendor / processor register CSV
 - privacy notice patch Markdown
 - GitHub/Jira/Linear-ready fix-pack Markdown
 - optional AI brief Markdown
+
+CSV schemas are documented in [docs/OUTPUT_SCHEMAS.md](docs/OUTPUT_SCHEMAS.md).
+Each row includes evidence references and separates scanner-inferred fields
+from fields that privacy, legal, procurement, or engineering must confirm.
 
 ## AI Co-pilot
 

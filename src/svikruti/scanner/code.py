@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Dict, Iterable, List, Optional, Set
 
 from svikruti.models import Evidence
 from svikruti.scanner.patterns import (
@@ -23,6 +23,42 @@ from svikruti.scanner.patterns import (
 
 
 MAX_FILE_BYTES = 1_000_000
+
+LANGUAGE_BY_EXTENSION = {
+    ".py": "Python",
+    ".js": "JavaScript",
+    ".jsx": "React/JavaScript",
+    ".ts": "TypeScript",
+    ".tsx": "React/TypeScript",
+    ".java": "Java",
+    ".go": "Go",
+    ".rb": "Ruby",
+    ".php": "PHP",
+    ".cs": "C#",
+    ".html": "HTML",
+    ".htm": "HTML",
+    ".vue": "Vue",
+    ".svelte": "Svelte",
+    ".json": "JSON",
+    ".yml": "YAML",
+    ".yaml": "YAML",
+    ".toml": "TOML",
+    ".env": "Environment",
+    ".sql": "SQL",
+}
+
+FRAMEWORK_HINTS = {
+    "Django": ["django", "models.model", "forms.form"],
+    "FastAPI": ["fastapi", "pydantic", "basemodel"],
+    "Flask": ["flask", "request.form", "request.json"],
+    "Express": ["express", "req.body", "router.post"],
+    "Next.js": ["next/server", "nextresponse", "getserversideprops"],
+    "React": ["react", "usestate", "formcontrolname"],
+    "Prisma": ["prisma", "prisma/client"],
+    "Mongoose": ["mongoose.schema", "mongoose.model"],
+    "Spring": ["@restcontroller", "@entity", "@requestbody"],
+    "Rails": ["activerecord", "applicationrecord", "params.require"],
+}
 
 
 class CodeScanResult:
@@ -105,6 +141,50 @@ def _is_fixture_file(root: Path, rel_path: str) -> bool:
     return root.name != "examples" and rel_path.lower().startswith("examples/")
 
 
+def _language_for(path: Path) -> str:
+    return LANGUAGE_BY_EXTENSION.get(path.suffix.lower(), "Unknown")
+
+
+def _frameworks_for(rel_path: str, text: str) -> List[str]:
+    blob = f"{rel_path}\n{text[:12000]}".lower()
+    return sorted(name for name, hints in FRAMEWORK_HINTS.items() if any(hint in blob for hint in hints))
+
+
+def _confidence(kind: str, file_context: str, matched_terms: Optional[List[str]] = None) -> str:
+    if file_context == "reference":
+        return "low"
+    if kind in {"literal_personal_data", "form_field", "website_form_field", "logging_risk"}:
+        return "high"
+    if kind in {"collection_point", "storage_point", "third_party"}:
+        return "medium"
+    if matched_terms and len(matched_terms) > 1:
+        return "medium"
+    return "low"
+
+
+def _metadata(
+    *,
+    detector_id: str,
+    rel: str,
+    path: Path,
+    file_context: str,
+    line: Optional[int] = None,
+    confidence: str = "medium",
+    extra: Optional[Dict[str, object]] = None,
+) -> Dict[str, object]:
+    evidence_ref = f"{rel}:{line}:{detector_id}" if line else f"{rel}:{detector_id}"
+    metadata: Dict[str, object] = {
+        "detector_id": detector_id,
+        "confidence": confidence,
+        "evidence_ref": evidence_ref,
+        "file_context": file_context,
+        "language": _language_for(path),
+    }
+    if extra:
+        metadata.update(extra)
+    return metadata
+
+
 def scan_repo(repo_path: str) -> CodeScanResult:
     root = Path(repo_path).resolve()
     if not root.exists() or not root.is_dir():
@@ -127,6 +207,7 @@ def scan_repo(repo_path: str) -> CodeScanResult:
         lowered_text = text.lower()
         lines = text.splitlines()
         file_context = _file_context(rel, text)
+        frameworks = _frameworks_for(rel, text)
 
         for name, needles in THIRD_PARTY_PATTERNS.items():
             if file_context == "reference":
@@ -145,7 +226,14 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                             detail=f"Code references {name}, which may receive personal data or tracking events.",
                             recommendation="Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.",
                             category="Third-party processors",
-                            metadata={"third_party": name},
+                            metadata=_metadata(
+                                detector_id="third_party.reference",
+                                rel=rel,
+                                path=path,
+                                file_context=file_context,
+                                confidence="medium",
+                                extra={"third_party": name, "frameworks": frameworks},
+                            ),
                         )
                     )
 
@@ -175,7 +263,19 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                         detail=f"Detected a hard-coded {literal_label.lower()} pattern in source text.",
                         recommendation="Remove real personal data from source control, replace samples with safe fixtures, and rotate any exposed credentials if applicable.",
                         category="Data minimization",
-                        metadata={"data_category": _literal_category(literal_label), "sample_count": len(matches)},
+                        metadata=_metadata(
+                            detector_id=f"literal.{normalize_text(literal_label)}",
+                            rel=rel,
+                            path=path,
+                            file_context=file_context,
+                            line=index + 1,
+                            confidence="high",
+                            extra={
+                                "data_category": _literal_category(literal_label),
+                                "sample_count": len(matches),
+                                "frameworks": frameworks,
+                            },
+                        ),
                     )
                 )
 
@@ -188,7 +288,10 @@ def scan_repo(repo_path: str) -> CodeScanResult:
 
                 context_type = "personal_data_reference"
                 recommendation = "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-                if _is_collection_context(context):
+                if _is_logging_context(line):
+                    context_type = "logging_risk"
+                    recommendation = "Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+                elif _is_collection_context(context):
                     context_type = "collection_point"
                     recommendation = "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
                 elif _is_storage_context(context):
@@ -213,7 +316,20 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                         detail=f"Detected terms {', '.join(sorted(set(matched_terms)))} in code context.",
                         recommendation=recommendation,
                         category=pattern.dpdpa_area,
-                        metadata={"data_category": pattern.category, "matched_terms": sorted(set(matched_terms))},
+                        metadata=_metadata(
+                            detector_id=f"code.{context_type}.{normalize_text(pattern.category)}",
+                            rel=rel,
+                            path=path,
+                            file_context=file_context,
+                            line=index + 1,
+                            confidence=_confidence(context_type, file_context, matched_terms),
+                            extra={
+                                "data_category": pattern.category,
+                                "matched_terms": sorted(set(matched_terms)),
+                                "context_type": context_type,
+                                "frameworks": frameworks,
+                            },
+                        ),
                     )
                 )
 
@@ -221,7 +337,8 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                 for field in FORM_FIELD_RE.findall(line):
                     normalized_field = normalize_text(field)
                     for pattern in PERSONAL_DATA_PATTERNS:
-                        if any(term in normalized_field for term in pattern.terms):
+                        matched_terms = _matched_terms(normalized_field, pattern.terms)
+                        if matched_terms:
                             key = f"form_field:{rel}:{index + 1}:{field}"
                             if key in seen:
                                 continue
@@ -237,7 +354,21 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                                     detail=f"Form field '{field}' appears to collect {pattern.category.lower()} data.",
                                     recommendation="Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
                                     category="Notice transparency",
-                                    metadata={"field": field, "data_category": pattern.category},
+                                    metadata=_metadata(
+                                        detector_id=f"code.form_field.{normalize_text(pattern.category)}",
+                                        rel=rel,
+                                        path=path,
+                                        file_context=file_context,
+                                        line=index + 1,
+                                        confidence="high",
+                                        extra={
+                                            "field": field,
+                                            "data_category": pattern.category,
+                                            "matched_terms": sorted(set(matched_terms)),
+                                            "context_type": "form_field",
+                                            "frameworks": frameworks,
+                                        },
+                                    ),
                                 )
                             )
 
@@ -252,6 +383,14 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                     detail="The repository contains privacy or consent-related copy.",
                     recommendation="Compare this copy against detected personal-data flows and third-party services.",
                     category="Notice transparency",
+                    metadata=_metadata(
+                        detector_id="code.privacy_text",
+                        rel=rel,
+                        path=path,
+                        file_context=file_context,
+                        confidence="low",
+                        extra={"frameworks": frameworks},
+                    ),
                 )
             )
 

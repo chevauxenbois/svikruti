@@ -1,20 +1,24 @@
 {
   "product": "Svikruti PrivacyOps Evidence Scanner",
-  "generated_at": "2026-06-15T10:51:00.648012+00:00",
+  "generated_at": "2026-06-16T07:03:53.216182+00:00",
   "repo_path": "examples",
   "url": null,
   "summary": {
-    "files_scanned": 4,
+    "files_scanned": 8,
     "website_pages_scanned": 0,
     "personal_data_categories": [
+      "Children",
       "Contact",
       "Device",
+      "Financial",
       "Government ID",
+      "Health",
       "Identity",
       "Location"
     ],
     "third_parties": [
-      "Google Analytics"
+      "Google Analytics",
+      "Razorpay"
     ],
     "risk_score": 100,
     "risk_level": "CRITICAL"
@@ -31,9 +35,18 @@
       "line": 7,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "sample_app.py:7:code.collection_point.contact",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Contact",
         "matched_terms": [
           "email"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
@@ -48,9 +61,18 @@
       "line": 8,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "sample_app.py:8:code.collection_point.contact",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Contact",
         "matched_terms": [
           "mobile"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
@@ -65,26 +87,44 @@
       "line": 9,
       "category": "Data minimization",
       "metadata": {
+        "detector_id": "code.collection_point.government_id",
+        "confidence": "medium",
+        "evidence_ref": "sample_app.py:9:code.collection_point.government_id",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Government ID",
         "matched_terms": [
           "aadhaar"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
     {
-      "kind": "collection_point",
+      "kind": "logging_risk",
       "label": "Contact data signal",
       "severity": "HIGH",
       "source": "code",
       "detail": "Detected terms email in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
       "file": "sample_app.py",
       "line": 10,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.logging_risk.contact",
+        "confidence": "high",
+        "evidence_ref": "sample_app.py:10:code.logging_risk.contact",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Contact",
         "matched_terms": [
           "email"
+        ],
+        "context_type": "logging_risk",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
@@ -99,10 +139,19 @@
       "line": 11,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "sample_app.py:11:code.collection_point.contact",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Contact",
         "matched_terms": [
           "email",
           "mobile"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
@@ -117,9 +166,18 @@
       "line": 11,
       "category": "Data minimization",
       "metadata": {
+        "detector_id": "code.collection_point.government_id",
+        "confidence": "medium",
+        "evidence_ref": "sample_app.py:11:code.collection_point.government_id",
+        "file_context": "application",
+        "language": "Python",
         "data_category": "Government ID",
         "matched_terms": [
           "aadhaar"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Flask"
         ]
       }
     },
@@ -134,7 +192,13 @@
       "line": null,
       "category": "Third-party processors",
       "metadata": {
-        "third_party": "Google Analytics"
+        "detector_id": "third_party.reference",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:third_party.reference",
+        "file_context": "application",
+        "language": "HTML",
+        "third_party": "Google Analytics",
+        "frameworks": []
       }
     },
     {
@@ -148,10 +212,17 @@
       "line": 11,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.collection_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:11:code.collection_point.identity",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Identity",
         "matched_terms": [
           "full_name"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -165,8 +236,18 @@
       "line": 11,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:11:code.form_field.identity",
+        "file_context": "application",
+        "language": "HTML",
         "field": "full_name",
-        "data_category": "Identity"
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -180,8 +261,18 @@
       "line": 11,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:11:code.form_field.identity",
+        "file_context": "application",
+        "language": "HTML",
         "field": "Full name",
-        "data_category": "Identity"
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -189,16 +280,24 @@
       "label": "Contact data signal",
       "severity": "HIGH",
       "source": "code",
-      "detail": "Detected terms email in code context.",
+      "detail": "Detected terms email, email_address in code context.",
       "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
       "file": "sample_site.html",
       "line": 12,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:12:code.collection_point.contact",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Contact",
         "matched_terms": [
-          "email"
-        ]
+          "email",
+          "email_address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -212,10 +311,17 @@
       "line": 12,
       "category": "Purpose limitation",
       "metadata": {
+        "detector_id": "code.collection_point.location",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:12:code.collection_point.location",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Location",
         "matched_terms": [
           "address"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -229,8 +335,18 @@
       "line": 12,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:12:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "email",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -244,8 +360,19 @@
       "line": 12,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:12:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "Email address",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -253,16 +380,24 @@
       "label": "Contact data signal",
       "severity": "HIGH",
       "source": "code",
-      "detail": "Detected terms mobile in code context.",
+      "detail": "Detected terms mobile, mobile_number in code context.",
       "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
       "file": "sample_site.html",
       "line": 13,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:13:code.collection_point.contact",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Contact",
         "matched_terms": [
-          "mobile"
-        ]
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -276,8 +411,18 @@
       "line": 13,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:13:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "mobile",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -291,8 +436,93 @@
       "line": 13,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:13:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "Mobile number",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms date_of_birth in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "sample_site.html",
+      "line": 14,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.collection_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "sample_site.html:14:code.collection_point.identity",
+        "file_context": "application",
+        "language": "HTML",
+        "data_category": "Identity",
+        "matched_terms": [
+          "date_of_birth"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'date_of_birth' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 14,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:14:code.form_field.identity",
+        "file_context": "application",
+        "language": "HTML",
+        "field": "date_of_birth",
+        "data_category": "Identity",
+        "matched_terms": [
+          "date_of_birth"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'Date of birth' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "sample_site.html",
+      "line": 14,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "sample_site.html:14:code.form_field.identity",
+        "file_context": "application",
+        "language": "HTML",
+        "field": "Date of birth",
+        "data_category": "Identity",
+        "matched_terms": [
+          "date_of_birth"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -305,7 +535,14 @@
       "file": "sample_site.html",
       "line": null,
       "category": "Notice transparency",
-      "metadata": {}
+      "metadata": {
+        "detector_id": "code.privacy_text",
+        "confidence": "low",
+        "evidence_ref": "sample_site.html:code.privacy_text",
+        "file_context": "application",
+        "language": "HTML",
+        "frameworks": []
+      }
     },
     {
       "kind": "privacy_text",
@@ -317,7 +554,14 @@
       "file": "privacy.html",
       "line": null,
       "category": "Notice transparency",
-      "metadata": {}
+      "metadata": {
+        "detector_id": "code.privacy_text",
+        "confidence": "low",
+        "evidence_ref": "privacy.html:code.privacy_text",
+        "file_context": "application",
+        "language": "HTML",
+        "frameworks": []
+      }
     },
     {
       "kind": "third_party",
@@ -330,7 +574,13 @@
       "line": null,
       "category": "Third-party processors",
       "metadata": {
-        "third_party": "Google Analytics"
+        "detector_id": "third_party.reference",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:third_party.reference",
+        "file_context": "application",
+        "language": "HTML",
+        "third_party": "Google Analytics",
+        "frameworks": []
       }
     },
     {
@@ -344,10 +594,17 @@
       "line": 30,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.collection_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:30:code.collection_point.identity",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Identity",
         "matched_terms": [
           "full_name"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -361,8 +618,18 @@
       "line": 30,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "consent_site.html:30:code.form_field.identity",
+        "file_context": "application",
+        "language": "HTML",
         "field": "full_name",
-        "data_category": "Identity"
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -376,10 +643,17 @@
       "line": 31,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:31:code.collection_point.contact",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Contact",
         "matched_terms": [
           "email"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -393,8 +667,18 @@
       "line": 31,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "consent_site.html:31:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "email",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -408,11 +692,18 @@
       "line": 32,
       "category": "Consent and notice",
       "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:32:code.collection_point.contact",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Contact",
         "matched_terms": [
           "mobile",
           "phone"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -426,8 +717,18 @@
       "line": 32,
       "category": "Notice transparency",
       "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "consent_site.html:32:code.form_field.contact",
+        "file_context": "application",
+        "language": "HTML",
         "field": "phone",
-        "data_category": "Contact"
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -435,16 +736,49 @@
       "label": "Location data signal",
       "severity": "HIGH",
       "source": "code",
-      "detail": "Detected terms location in code context.",
+      "detail": "Detected terms city, location in code context.",
       "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
       "file": "consent_site.html",
       "line": 33,
       "category": "Purpose limitation",
       "metadata": {
+        "detector_id": "code.collection_point.location",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:33:code.collection_point.location",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Location",
         "matched_terms": [
+          "city",
           "location"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Location",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'city' appears to collect location data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "consent_site.html",
+      "line": 33,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.location",
+        "confidence": "high",
+        "evidence_ref": "consent_site.html:33:code.form_field.location",
+        "file_context": "application",
+        "language": "HTML",
+        "field": "city",
+        "data_category": "Location",
+        "matched_terms": [
+          "city"
+        ],
+        "context_type": "form_field",
+        "frameworks": []
       }
     },
     {
@@ -458,10 +792,17 @@
       "line": 36,
       "category": "Tracking and consent",
       "metadata": {
+        "detector_id": "code.personal_data_reference.device",
+        "confidence": "low",
+        "evidence_ref": "consent_site.html:36:code.personal_data_reference.device",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Device",
         "matched_terms": [
           "cookie"
-        ]
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
       }
     },
     {
@@ -475,10 +816,17 @@
       "line": 38,
       "category": "Tracking and consent",
       "metadata": {
+        "detector_id": "code.collection_point.device",
+        "confidence": "medium",
+        "evidence_ref": "consent_site.html:38:code.collection_point.device",
+        "file_context": "application",
+        "language": "HTML",
         "data_category": "Device",
         "matched_terms": [
           "cookie"
-        ]
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
       }
     },
     {
@@ -491,80 +839,1992 @@
       "file": "consent_site.html",
       "line": null,
       "category": "Notice transparency",
-      "metadata": {}
+      "metadata": {
+        "detector_id": "code.privacy_text",
+        "confidence": "low",
+        "evidence_ref": "consent_site.html:code.privacy_text",
+        "file_context": "application",
+        "language": "HTML",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 4,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:4:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 5,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:5:code.storage_point.identity",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 6,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.storage_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:6:code.storage_point.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms phone, phone_number in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 7,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.storage_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:7:code.storage_point.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone",
+          "phone_number"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms diagnosis in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 8,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:8:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "diagnosis"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms prescription in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 9,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:9:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "prescription"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms blood_group in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 10,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:10:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "blood_group"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/django_patient.py",
+      "line": 13,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.collection_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:13:code.collection_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/django_patient.py",
+      "line": 15,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.collection_point.health",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:15:code.collection_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/django_patient.py",
+      "line": 16,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:16:code.storage_point.identity",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/django_patient.py",
+      "line": 17,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "low",
+        "evidence_ref": "realistic/django_patient.py:17:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms phone, phone_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/django_patient.py",
+      "line": 18,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/django_patient.py:18:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone",
+          "phone_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms diagnosis in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/django_patient.py",
+      "line": 19,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "realistic/django_patient.py:19:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "diagnosis"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms prescription in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/django_patient.py",
+      "line": 20,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "realistic/django_patient.py:20:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "prescription"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms blood_group in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/django_patient.py",
+      "line": 21,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "realistic/django_patient.py:21:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "blood_group"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "third_party",
+      "label": "Third-party service detected: Razorpay",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Code references Razorpay, which may receive personal data or tracking events.",
+      "recommendation": "Confirm purpose, contract/DPA status, transfer location, retention, and whether the privacy notice names this recipient category.",
+      "file": "realistic/express_checkout.js",
+      "line": null,
+      "category": "Third-party processors",
+      "metadata": {
+        "detector_id": "third_party.reference",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:third_party.reference",
+        "file_context": "application",
+        "language": "JavaScript",
+        "third_party": "Razorpay",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 7,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.identity",
+        "confidence": "low",
+        "evidence_ref": "realistic/express_checkout.js:7:code.personal_data_reference.identity",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 8,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:8:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 8,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/express_checkout.js:8:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile, mobile_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 9,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:9:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address, address_line in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 10,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:10:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address",
+          "address_line"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms pincode in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 11,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/express_checkout.js:11:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "pincode"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms pan, pan_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 12,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.government_id",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:12:code.personal_data_reference.government_id",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "pan",
+          "pan_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Financial data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms upi, upi_id in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/express_checkout.js",
+      "line": 13,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "code.collection_point.financial",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:13:code.collection_point.financial",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Financial",
+        "matched_terms": [
+          "upi",
+          "upi_id"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "logging_risk",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address, mobile, mobile_number in code context.",
+      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "file": "realistic/express_checkout.js",
+      "line": 16,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.logging_risk.contact",
+        "confidence": "high",
+        "evidence_ref": "realistic/express_checkout.js:16:code.logging_risk.contact",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address",
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "logging_risk",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "logging_risk",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms pan, pan_number in code context.",
+      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "file": "realistic/express_checkout.js",
+      "line": 16,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.logging_risk.government_id",
+        "confidence": "high",
+        "evidence_ref": "realistic/express_checkout.js:16:code.logging_risk.government_id",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "pan",
+          "pan_number"
+        ],
+        "context_type": "logging_risk",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "logging_risk",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "file": "realistic/express_checkout.js",
+      "line": 16,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.logging_risk.location",
+        "confidence": "high",
+        "evidence_ref": "realistic/express_checkout.js:16:code.logging_risk.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "logging_risk",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "realistic/express_checkout.js",
+      "line": 19,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:19:code.storage_point.identity",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 20,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:20:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 20,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/express_checkout.js:20:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile, mobile_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 21,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:21:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address, address_line in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 22,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:22:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address",
+          "address_line"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms pincode in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 23,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/express_checkout.js:23:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "pincode"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms pan, pan_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 24,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.government_id",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:24:code.personal_data_reference.government_id",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "pan",
+          "pan_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Financial data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms upi, upi_id in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/express_checkout.js",
+      "line": 25,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.financial",
+        "confidence": "medium",
+        "evidence_ref": "realistic/express_checkout.js:25:code.personal_data_reference.financial",
+        "file_context": "application",
+        "language": "JavaScript",
+        "data_category": "Financial",
+        "matched_terms": [
+          "upi",
+          "upi_id"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Express"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms first_name in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 8,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.collection_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:8:code.collection_point.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Identity",
+        "matched_terms": [
+          "first_name"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'first_name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 8,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:8:code.form_field.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "first_name",
+        "data_category": "Identity",
+        "matched_terms": [
+          "first_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'First name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 8,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:8:code.form_field.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "First name",
+        "data_category": "Identity",
+        "matched_terms": [
+          "first_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms last_name in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 9,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.collection_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:9:code.collection_point.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Identity",
+        "matched_terms": [
+          "last_name"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'last_name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 9,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:9:code.form_field.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "last_name",
+        "data_category": "Identity",
+        "matched_terms": [
+          "last_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Identity",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Form field 'Last name' appears to collect identity data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 9,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.identity",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:9:code.form_field.identity",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "Last name",
+        "data_category": "Identity",
+        "matched_terms": [
+          "last_name"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms phone in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 10,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:10:code.collection_point.contact",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Children data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms guardian in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 10,
+      "category": "Children's data",
+      "metadata": {
+        "detector_id": "code.collection_point.children",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:10:code.collection_point.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Children",
+        "matched_terms": [
+          "guardian"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'guardian_phone' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 10,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:10:code.form_field.contact",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "guardian_phone",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Contact",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'Guardian phone' appears to collect contact data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 10,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.contact",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:10:code.form_field.contact",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "Guardian phone",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Children data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms school in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 11,
+      "category": "Children's data",
+      "metadata": {
+        "detector_id": "code.collection_point.children",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:11:code.collection_point.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Children",
+        "matched_terms": [
+          "school"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Children",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Form field 'school' appears to collect children data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 11,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.children",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:11:code.form_field.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "school",
+        "data_category": "Children",
+        "matched_terms": [
+          "school"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Children",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Form field 'School' appears to collect children data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 11,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.children",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:11:code.form_field.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "School",
+        "data_category": "Children",
+        "matched_terms": [
+          "school"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Children data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms student, student_age in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 12,
+      "category": "Children's data",
+      "metadata": {
+        "detector_id": "code.collection_point.children",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:12:code.collection_point.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Children",
+        "matched_terms": [
+          "student",
+          "student_age"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Children",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Form field 'student_age' appears to collect children data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 12,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.children",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:12:code.form_field.children",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "student_age",
+        "data_category": "Children",
+        "matched_terms": [
+          "student",
+          "student_age"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 13,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.collection_point.location",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:13:code.collection_point.location",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms ip, ip_address in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "realistic/react_signup.tsx",
+      "line": 13,
+      "category": "Tracking and consent",
+      "metadata": {
+        "detector_id": "code.collection_point.device",
+        "confidence": "medium",
+        "evidence_ref": "realistic/react_signup.tsx:13:code.collection_point.device",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "data_category": "Device",
+        "matched_terms": [
+          "ip",
+          "ip_address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "form_field",
+      "label": "Form field collects Location",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Form field 'ip_address' appears to collect location data.",
+      "recommendation": "Map this field to a purpose, notice text, retention rule, and withdrawal/deletion workflow.",
+      "file": "realistic/react_signup.tsx",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.form_field.location",
+        "confidence": "high",
+        "evidence_ref": "realistic/react_signup.tsx:13:code.form_field.location",
+        "file_context": "application",
+        "language": "React/TypeScript",
+        "field": "ip_address",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "form_field",
+        "frameworks": [
+          "React"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 3,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.identity",
+        "confidence": "low",
+        "evidence_ref": "realistic/customer_schema.sql:3:code.personal_data_reference.identity",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 4,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/customer_schema.sql:4:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 4,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/customer_schema.sql:4:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms mobile, mobile_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 5,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "realistic/customer_schema.sql:5:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms aadhaar in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 6,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.government_id",
+        "confidence": "low",
+        "evidence_ref": "realistic/customer_schema.sql:6:code.personal_data_reference.government_id",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "aadhaar"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms pan, pan_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 7,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.government_id",
+        "confidence": "medium",
+        "evidence_ref": "realistic/customer_schema.sql:7:code.personal_data_reference.government_id",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "pan",
+          "pan_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms address, address_line in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 8,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "medium",
+        "evidence_ref": "realistic/customer_schema.sql:8:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "address",
+          "address_line"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms pincode in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 9,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "realistic/customer_schema.sql:9:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "pincode"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms device_id in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "realistic/customer_schema.sql",
+      "line": 10,
+      "category": "Tracking and consent",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.device",
+        "confidence": "low",
+        "evidence_ref": "realistic/customer_schema.sql:10:code.personal_data_reference.device",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Device",
+        "matched_terms": [
+          "device_id"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
     }
   ],
   "ropa_starter": [
     {
+      "record_id": "ROPA-001",
       "activity": "Contact personal-data processing",
       "data_categories": "Contact",
       "data_subjects": "Users / customers / website visitors",
       "purposes": [
-        "Collection through product or website interface"
+        "Application processing",
+        "Collection through product or website interface",
+        "Operational logging or debugging",
+        "Storage in application data store"
       ],
       "systems_or_sources": [
         "consent_site.html",
+        "realistic/customer_schema.sql",
+        "realistic/django_patient.py",
+        "realistic/express_checkout.js",
+        "realistic/react_signup.tsx",
         "sample_app.py",
         "sample_site.html"
       ],
+      "collection_points": [
+        "consent_site.html:31:code.collection_point.contact",
+        "consent_site.html:31:code.form_field.contact",
+        "consent_site.html:32:code.collection_point.contact",
+        "consent_site.html:32:code.form_field.contact",
+        "realistic/react_signup.tsx:10:code.collection_point.contact",
+        "realistic/react_signup.tsx:10:code.form_field.contact",
+        "sample_app.py:11:code.collection_point.contact",
+        "sample_app.py:7:code.collection_point.contact",
+        "sample_app.py:8:code.collection_point.contact",
+        "sample_site.html:12:code.collection_point.contact",
+        "sample_site.html:12:code.form_field.contact",
+        "sample_site.html:13:code.collection_point.contact",
+        "sample_site.html:13:code.form_field.contact"
+      ],
+      "storage_locations": [
+        "realistic/django_patient.py:6:code.storage_point.contact",
+        "realistic/django_patient.py:7:code.storage_point.contact"
+      ],
+      "logging_locations": [
+        "realistic/express_checkout.js:16:code.logging_risk.contact",
+        "sample_app.py:10:code.logging_risk.contact"
+      ],
       "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
       "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Access control, retention control, and purpose review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "Medium",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
       "dpdpa_notes": [
         "Consent and notice",
         "Notice transparency"
+      ],
+      "evidence_refs": [
+        "consent_site.html:31:code.collection_point.contact",
+        "consent_site.html:31:code.form_field.contact",
+        "consent_site.html:32:code.collection_point.contact",
+        "consent_site.html:32:code.form_field.contact",
+        "realistic/customer_schema.sql:4:code.personal_data_reference.contact",
+        "realistic/customer_schema.sql:5:code.personal_data_reference.contact",
+        "realistic/django_patient.py:17:code.personal_data_reference.contact",
+        "realistic/django_patient.py:18:code.personal_data_reference.contact",
+        "realistic/django_patient.py:6:code.storage_point.contact",
+        "realistic/django_patient.py:7:code.storage_point.contact",
+        "realistic/express_checkout.js:16:code.logging_risk.contact",
+        "realistic/express_checkout.js:20:code.personal_data_reference.contact",
+        "realistic/express_checkout.js:21:code.personal_data_reference.contact",
+        "realistic/express_checkout.js:8:code.personal_data_reference.contact",
+        "realistic/express_checkout.js:9:code.personal_data_reference.contact",
+        "realistic/react_signup.tsx:10:code.collection_point.contact",
+        "realistic/react_signup.tsx:10:code.form_field.contact",
+        "sample_app.py:10:code.logging_risk.contact",
+        "sample_app.py:11:code.collection_point.contact",
+        "sample_app.py:7:code.collection_point.contact",
+        "sample_app.py:8:code.collection_point.contact",
+        "sample_site.html:12:code.collection_point.contact",
+        "sample_site.html:12:code.form_field.contact",
+        "sample_site.html:13:code.collection_point.contact",
+        "sample_site.html:13:code.form_field.contact"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "HTML",
+        "JavaScript",
+        "Python",
+        "React/TypeScript",
+        "SQL"
+      ],
+      "frameworks": [
+        "Django",
+        "Express",
+        "Flask",
+        "React"
       ]
     },
     {
+      "record_id": "ROPA-002",
       "activity": "Government ID personal-data processing",
       "data_categories": "Government ID",
       "data_subjects": "Users / customers / website visitors",
       "purposes": [
-        "Collection through product or website interface"
+        "Application processing",
+        "Collection through product or website interface",
+        "Operational logging or debugging"
       ],
       "systems_or_sources": [
+        "realistic/customer_schema.sql",
+        "realistic/express_checkout.js",
         "sample_app.py"
       ],
+      "collection_points": [
+        "sample_app.py:11:code.collection_point.government_id",
+        "sample_app.py:9:code.collection_point.government_id"
+      ],
+      "storage_locations": [],
+      "logging_locations": [
+        "realistic/express_checkout.js:16:code.logging_risk.government_id"
+      ],
       "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
       "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Strict access control, encryption, audit logging, and minimization review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
       "dpdpa_notes": [
         "Data minimization"
+      ],
+      "evidence_refs": [
+        "realistic/customer_schema.sql:6:code.personal_data_reference.government_id",
+        "realistic/customer_schema.sql:7:code.personal_data_reference.government_id",
+        "realistic/express_checkout.js:12:code.personal_data_reference.government_id",
+        "realistic/express_checkout.js:16:code.logging_risk.government_id",
+        "realistic/express_checkout.js:24:code.personal_data_reference.government_id",
+        "sample_app.py:11:code.collection_point.government_id",
+        "sample_app.py:9:code.collection_point.government_id"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "JavaScript",
+        "Python",
+        "SQL"
+      ],
+      "frameworks": [
+        "Express",
+        "Flask"
       ]
     },
     {
+      "record_id": "ROPA-003",
       "activity": "Identity personal-data processing",
       "data_categories": "Identity",
       "data_subjects": "Users / customers / website visitors",
       "purposes": [
-        "Collection through product or website interface"
+        "Application processing",
+        "Collection through product or website interface",
+        "Storage in application data store"
       ],
       "systems_or_sources": [
         "consent_site.html",
+        "realistic/customer_schema.sql",
+        "realistic/django_patient.py",
+        "realistic/express_checkout.js",
+        "realistic/react_signup.tsx",
         "sample_site.html"
       ],
+      "collection_points": [
+        "consent_site.html:30:code.collection_point.identity",
+        "consent_site.html:30:code.form_field.identity",
+        "realistic/react_signup.tsx:8:code.collection_point.identity",
+        "realistic/react_signup.tsx:8:code.form_field.identity",
+        "realistic/react_signup.tsx:9:code.collection_point.identity",
+        "realistic/react_signup.tsx:9:code.form_field.identity",
+        "sample_site.html:11:code.collection_point.identity",
+        "sample_site.html:11:code.form_field.identity",
+        "sample_site.html:14:code.collection_point.identity",
+        "sample_site.html:14:code.form_field.identity"
+      ],
+      "storage_locations": [
+        "realistic/django_patient.py:16:code.storage_point.identity",
+        "realistic/django_patient.py:5:code.storage_point.identity",
+        "realistic/express_checkout.js:19:code.storage_point.identity"
+      ],
+      "logging_locations": [],
       "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
       "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Standard application access control and retention review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "Medium",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
       "dpdpa_notes": [
         "Notice transparency"
+      ],
+      "evidence_refs": [
+        "consent_site.html:30:code.collection_point.identity",
+        "consent_site.html:30:code.form_field.identity",
+        "realistic/customer_schema.sql:3:code.personal_data_reference.identity",
+        "realistic/django_patient.py:16:code.storage_point.identity",
+        "realistic/django_patient.py:5:code.storage_point.identity",
+        "realistic/express_checkout.js:19:code.storage_point.identity",
+        "realistic/express_checkout.js:7:code.personal_data_reference.identity",
+        "realistic/react_signup.tsx:8:code.collection_point.identity",
+        "realistic/react_signup.tsx:8:code.form_field.identity",
+        "realistic/react_signup.tsx:9:code.collection_point.identity",
+        "realistic/react_signup.tsx:9:code.form_field.identity",
+        "sample_site.html:11:code.collection_point.identity",
+        "sample_site.html:11:code.form_field.identity",
+        "sample_site.html:14:code.collection_point.identity",
+        "sample_site.html:14:code.form_field.identity"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "HTML",
+        "JavaScript",
+        "Python",
+        "React/TypeScript",
+        "SQL"
+      ],
+      "frameworks": [
+        "Django",
+        "Express",
+        "Flask",
+        "React"
       ]
     },
     {
+      "record_id": "ROPA-004",
       "activity": "Location personal-data processing",
       "data_categories": "Location",
       "data_subjects": "Users / customers / website visitors",
       "purposes": [
-        "Collection through product or website interface"
+        "Application processing",
+        "Collection through product or website interface",
+        "Operational logging or debugging"
       ],
       "systems_or_sources": [
         "consent_site.html",
+        "realistic/customer_schema.sql",
+        "realistic/express_checkout.js",
+        "realistic/react_signup.tsx",
         "sample_site.html"
       ],
+      "collection_points": [
+        "consent_site.html:33:code.collection_point.location",
+        "consent_site.html:33:code.form_field.location",
+        "realistic/react_signup.tsx:13:code.collection_point.location",
+        "realistic/react_signup.tsx:13:code.form_field.location",
+        "sample_site.html:12:code.collection_point.location"
+      ],
+      "storage_locations": [],
+      "logging_locations": [
+        "realistic/express_checkout.js:16:code.logging_risk.location"
+      ],
       "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
       "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Access control, retention control, and purpose review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "Medium",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
       "dpdpa_notes": [
+        "Notice transparency",
         "Purpose limitation"
+      ],
+      "evidence_refs": [
+        "consent_site.html:33:code.collection_point.location",
+        "consent_site.html:33:code.form_field.location",
+        "realistic/customer_schema.sql:4:code.personal_data_reference.location",
+        "realistic/customer_schema.sql:8:code.personal_data_reference.location",
+        "realistic/customer_schema.sql:9:code.personal_data_reference.location",
+        "realistic/express_checkout.js:10:code.personal_data_reference.location",
+        "realistic/express_checkout.js:11:code.personal_data_reference.location",
+        "realistic/express_checkout.js:16:code.logging_risk.location",
+        "realistic/express_checkout.js:20:code.personal_data_reference.location",
+        "realistic/express_checkout.js:22:code.personal_data_reference.location",
+        "realistic/express_checkout.js:23:code.personal_data_reference.location",
+        "realistic/express_checkout.js:8:code.personal_data_reference.location",
+        "realistic/react_signup.tsx:13:code.collection_point.location",
+        "realistic/react_signup.tsx:13:code.form_field.location",
+        "sample_site.html:12:code.collection_point.location"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "HTML",
+        "JavaScript",
+        "React/TypeScript",
+        "SQL"
+      ],
+      "frameworks": [
+        "Express",
+        "React"
       ]
     },
     {
+      "record_id": "ROPA-005",
       "activity": "Device personal-data processing",
       "data_categories": "Device",
       "data_subjects": "Users / customers / website visitors",
@@ -573,24 +2833,236 @@
         "Collection through product or website interface"
       ],
       "systems_or_sources": [
-        "consent_site.html"
+        "consent_site.html",
+        "realistic/customer_schema.sql",
+        "realistic/react_signup.tsx"
       ],
+      "collection_points": [
+        "consent_site.html:38:code.collection_point.device",
+        "realistic/react_signup.tsx:13:code.collection_point.device"
+      ],
+      "storage_locations": [],
+      "logging_locations": [],
       "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
       "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Standard application access control and retention review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "Medium",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
       "dpdpa_notes": [
         "Tracking and consent"
+      ],
+      "evidence_refs": [
+        "consent_site.html:36:code.personal_data_reference.device",
+        "consent_site.html:38:code.collection_point.device",
+        "realistic/customer_schema.sql:10:code.personal_data_reference.device",
+        "realistic/react_signup.tsx:13:code.collection_point.device"
+      ],
+      "confidence": [
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "HTML",
+        "React/TypeScript",
+        "SQL"
+      ],
+      "frameworks": [
+        "React"
+      ]
+    },
+    {
+      "record_id": "ROPA-006",
+      "activity": "Health personal-data processing",
+      "data_categories": "Health",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Application processing",
+        "Collection through product or website interface",
+        "Storage in application data store"
+      ],
+      "systems_or_sources": [
+        "realistic/django_patient.py"
+      ],
+      "collection_points": [
+        "realistic/django_patient.py:13:code.collection_point.health",
+        "realistic/django_patient.py:15:code.collection_point.health"
+      ],
+      "storage_locations": [
+        "realistic/django_patient.py:10:code.storage_point.health",
+        "realistic/django_patient.py:4:code.storage_point.health",
+        "realistic/django_patient.py:8:code.storage_point.health",
+        "realistic/django_patient.py:9:code.storage_point.health"
+      ],
+      "logging_locations": [],
+      "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
+      "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Strict access control, encryption, audit logging, and minimization review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
+      "dpdpa_notes": [
+        "Data minimization"
+      ],
+      "evidence_refs": [
+        "realistic/django_patient.py:10:code.storage_point.health",
+        "realistic/django_patient.py:13:code.collection_point.health",
+        "realistic/django_patient.py:15:code.collection_point.health",
+        "realistic/django_patient.py:19:code.personal_data_reference.health",
+        "realistic/django_patient.py:20:code.personal_data_reference.health",
+        "realistic/django_patient.py:21:code.personal_data_reference.health",
+        "realistic/django_patient.py:4:code.storage_point.health",
+        "realistic/django_patient.py:8:code.storage_point.health",
+        "realistic/django_patient.py:9:code.storage_point.health"
+      ],
+      "confidence": [
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "Django",
+        "Flask"
+      ]
+    },
+    {
+      "record_id": "ROPA-007",
+      "activity": "Financial personal-data processing",
+      "data_categories": "Financial",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Application processing",
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "realistic/express_checkout.js"
+      ],
+      "collection_points": [
+        "realistic/express_checkout.js:13:code.collection_point.financial"
+      ],
+      "storage_locations": [],
+      "logging_locations": [],
+      "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
+      "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Access control, retention control, and purpose review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
+      "dpdpa_notes": [
+        "Security safeguards"
+      ],
+      "evidence_refs": [
+        "realistic/express_checkout.js:13:code.collection_point.financial",
+        "realistic/express_checkout.js:25:code.personal_data_reference.financial"
+      ],
+      "confidence": [
+        "medium"
+      ],
+      "languages": [
+        "JavaScript"
+      ],
+      "frameworks": [
+        "Express"
+      ]
+    },
+    {
+      "record_id": "ROPA-008",
+      "activity": "Children personal-data processing",
+      "data_categories": "Children",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Collection through product or website interface"
+      ],
+      "systems_or_sources": [
+        "realistic/react_signup.tsx"
+      ],
+      "collection_points": [
+        "realistic/react_signup.tsx:10:code.collection_point.children",
+        "realistic/react_signup.tsx:11:code.collection_point.children",
+        "realistic/react_signup.tsx:11:code.form_field.children",
+        "realistic/react_signup.tsx:12:code.collection_point.children",
+        "realistic/react_signup.tsx:12:code.form_field.children"
+      ],
+      "storage_locations": [],
+      "logging_locations": [],
+      "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
+      "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Strict access control, encryption, audit logging, and minimization review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
+      "dpdpa_notes": [
+        "Children's data",
+        "Notice transparency"
+      ],
+      "evidence_refs": [
+        "realistic/react_signup.tsx:10:code.collection_point.children",
+        "realistic/react_signup.tsx:11:code.collection_point.children",
+        "realistic/react_signup.tsx:11:code.form_field.children",
+        "realistic/react_signup.tsx:12:code.collection_point.children",
+        "realistic/react_signup.tsx:12:code.form_field.children"
+      ],
+      "confidence": [
+        "high",
+        "medium"
+      ],
+      "languages": [
+        "React/TypeScript"
+      ],
+      "frameworks": [
+        "React"
       ]
     }
   ],
   "notice_gaps": [
+    "Detected Children data, but the privacy notice does not clearly mention that category.",
     "Detected Device data, but the privacy notice does not clearly mention that category.",
+    "Detected Financial data, but the privacy notice does not clearly mention that category.",
     "Detected Government ID data, but the privacy notice does not clearly mention that category.",
+    "Detected Health data, but the privacy notice does not clearly mention that category.",
     "Detected Location data, but the privacy notice does not clearly mention that category.",
     "Detected third party 'Google Analytics', but the privacy notice does not clearly mention it or its category.",
+    "Detected third party 'Razorpay', but the privacy notice does not clearly mention it or its category.",
     "Privacy notice does not clearly mention consent withdrawal."
   ],
   "evidence_graph": {
     "nodes": [
+      {
+        "id": "data:Children",
+        "label": "Children",
+        "type": "data_category",
+        "metadata": {}
+      },
       {
         "id": "data:Contact",
         "label": "Contact",
@@ -604,8 +3076,20 @@
         "metadata": {}
       },
       {
+        "id": "data:Financial",
+        "label": "Financial",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
         "id": "data:Government ID",
         "label": "Government ID",
+        "type": "data_category",
+        "metadata": {}
+      },
+      {
+        "id": "data:Health",
+        "label": "Health",
         "type": "data_category",
         "metadata": {}
       },
@@ -620,6 +3104,14 @@
         "label": "Location",
         "type": "data_category",
         "metadata": {}
+      },
+      {
+        "id": "obligation:Children's data",
+        "label": "Children's data",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Apply heightened checks for children or guardian-linked processing."
+        }
       },
       {
         "id": "obligation:Consent and notice",
@@ -651,6 +3143,14 @@
         "type": "dpdpa_obligation",
         "metadata": {
           "description": "Use personal data only for disclosed and lawful purposes."
+        }
+      },
+      {
+        "id": "obligation:Security safeguards",
+        "label": "Security safeguards",
+        "type": "dpdpa_obligation",
+        "metadata": {
+          "description": "Protect personal data against breach and unauthorized access."
         }
       },
       {
@@ -686,6 +3186,38 @@
         }
       },
       {
+        "id": "source:realistic/customer_schema.sql",
+        "label": "realistic/customer_schema.sql",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:realistic/django_patient.py",
+        "label": "realistic/django_patient.py",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:realistic/express_checkout.js",
+        "label": "realistic/express_checkout.js",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
+        "id": "source:realistic/react_signup.tsx",
+        "label": "realistic/react_signup.tsx",
+        "type": "source",
+        "metadata": {
+          "source": "code"
+        }
+      },
+      {
         "id": "source:sample_app.py",
         "label": "sample_app.py",
         "type": "source",
@@ -712,9 +3244,48 @@
         "label": "Google Analytics",
         "type": "third_party",
         "metadata": {}
+      },
+      {
+        "id": "third_party:Razorpay",
+        "label": "Razorpay",
+        "type": "third_party",
+        "metadata": {}
       }
     ],
     "edges": [
+      {
+        "source": "data:Children",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          76,
+          79,
+          80,
+          81,
+          82,
+          83
+        ]
+      },
+      {
+        "source": "data:Children",
+        "target": "obligation:Children's data",
+        "label": "triggers",
+        "evidence_refs": [
+          76,
+          79,
+          82
+        ]
+      },
+      {
+        "source": "data:Children",
+        "target": "obligation:Notice transparency",
+        "label": "triggers",
+        "evidence_refs": [
+          80,
+          81,
+          83
+        ]
+      },
       {
         "source": "data:Contact",
         "target": "obligation:Consent and notice",
@@ -726,8 +3297,20 @@
           4,
           10,
           14,
-          22,
-          24
+          25,
+          27,
+          36,
+          37,
+          44,
+          45,
+          51,
+          53,
+          58,
+          62,
+          64,
+          75,
+          88,
+          90
         ]
       },
       {
@@ -739,8 +3322,10 @@
           13,
           15,
           16,
-          23,
-          25
+          26,
+          28,
+          77,
+          78
         ]
       },
       {
@@ -748,8 +3333,10 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          27,
-          28
+          31,
+          32,
+          85,
+          95
         ]
       },
       {
@@ -757,8 +3344,28 @@
         "target": "obligation:Tracking and consent",
         "label": "triggers",
         "evidence_refs": [
-          27,
-          28
+          31,
+          32,
+          85,
+          95
+        ]
+      },
+      {
+        "source": "data:Financial",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          57,
+          68
+        ]
+      },
+      {
+        "source": "data:Financial",
+        "target": "obligation:Security safeguards",
+        "label": "triggers",
+        "evidence_refs": [
+          57,
+          68
         ]
       },
       {
@@ -767,7 +3374,12 @@
         "label": "missing disclosure",
         "evidence_refs": [
           2,
-          5
+          5,
+          56,
+          59,
+          67,
+          91,
+          92
         ]
       },
       {
@@ -776,7 +3388,44 @@
         "label": "triggers",
         "evidence_refs": [
           2,
-          5
+          5,
+          56,
+          59,
+          67,
+          91,
+          92
+        ]
+      },
+      {
+        "source": "data:Health",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          34,
+          38,
+          39,
+          40,
+          41,
+          42,
+          46,
+          47,
+          48
+        ]
+      },
+      {
+        "source": "data:Health",
+        "target": "obligation:Data minimization",
+        "label": "triggers",
+        "evidence_refs": [
+          34,
+          38,
+          39,
+          40,
+          41,
+          42,
+          46,
+          47,
+          48
         ]
       },
       {
@@ -787,8 +3436,22 @@
           7,
           8,
           9,
-          20,
-          21
+          17,
+          18,
+          19,
+          23,
+          24,
+          35,
+          43,
+          50,
+          61,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          87
         ]
       },
       {
@@ -797,7 +3460,29 @@
         "label": "missing disclosure",
         "evidence_refs": [
           11,
-          26
+          29,
+          30,
+          52,
+          54,
+          55,
+          60,
+          63,
+          65,
+          66,
+          84,
+          86,
+          89,
+          93,
+          94
+        ]
+      },
+      {
+        "source": "data:Location",
+        "target": "obligation:Notice transparency",
+        "label": "triggers",
+        "evidence_refs": [
+          30,
+          86
         ]
       },
       {
@@ -806,7 +3491,18 @@
         "label": "triggers",
         "evidence_refs": [
           11,
-          26
+          29,
+          52,
+          54,
+          55,
+          60,
+          63,
+          65,
+          66,
+          84,
+          89,
+          93,
+          94
         ]
       },
       {
@@ -824,10 +3520,24 @@
           14,
           15,
           16,
-          22,
-          23,
-          24,
-          25
+          25,
+          26,
+          27,
+          28,
+          36,
+          37,
+          44,
+          45,
+          51,
+          53,
+          58,
+          62,
+          64,
+          75,
+          77,
+          78,
+          88,
+          90
         ]
       },
       {
@@ -838,8 +3548,22 @@
           7,
           8,
           9,
-          20,
-          21
+          17,
+          18,
+          19,
+          23,
+          24,
+          35,
+          43,
+          50,
+          61,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          87
         ]
       },
       {
@@ -847,10 +3571,10 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          22,
-          23,
-          24,
-          25
+          25,
+          26,
+          27,
+          28
         ]
       },
       {
@@ -858,8 +3582,8 @@
         "target": "data:Device",
         "label": "contains",
         "evidence_refs": [
-          27,
-          28
+          31,
+          32
         ]
       },
       {
@@ -867,8 +3591,8 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          20,
-          21
+          23,
+          24
         ]
       },
       {
@@ -876,7 +3600,8 @@
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          26
+          29,
+          30
         ]
       },
       {
@@ -884,7 +3609,202 @@
         "target": "third_party:Google Analytics",
         "label": "references",
         "evidence_refs": [
-          19
+          22
+        ]
+      },
+      {
+        "source": "source:realistic/customer_schema.sql",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          88,
+          90
+        ]
+      },
+      {
+        "source": "source:realistic/customer_schema.sql",
+        "target": "data:Device",
+        "label": "contains",
+        "evidence_refs": [
+          95
+        ]
+      },
+      {
+        "source": "source:realistic/customer_schema.sql",
+        "target": "data:Government ID",
+        "label": "contains",
+        "evidence_refs": [
+          91,
+          92
+        ]
+      },
+      {
+        "source": "source:realistic/customer_schema.sql",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          87
+        ]
+      },
+      {
+        "source": "source:realistic/customer_schema.sql",
+        "target": "data:Location",
+        "label": "contains",
+        "evidence_refs": [
+          89,
+          93,
+          94
+        ]
+      },
+      {
+        "source": "source:realistic/django_patient.py",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          36,
+          37,
+          44,
+          45
+        ]
+      },
+      {
+        "source": "source:realistic/django_patient.py",
+        "target": "data:Health",
+        "label": "contains",
+        "evidence_refs": [
+          34,
+          38,
+          39,
+          40,
+          41,
+          42,
+          46,
+          47,
+          48
+        ]
+      },
+      {
+        "source": "source:realistic/django_patient.py",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          35,
+          43
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          51,
+          53,
+          58,
+          62,
+          64
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "data:Financial",
+        "label": "contains",
+        "evidence_refs": [
+          57,
+          68
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "data:Government ID",
+        "label": "contains",
+        "evidence_refs": [
+          56,
+          59,
+          67
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          50,
+          61
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "data:Location",
+        "label": "contains",
+        "evidence_refs": [
+          52,
+          54,
+          55,
+          60,
+          63,
+          65,
+          66
+        ]
+      },
+      {
+        "source": "source:realistic/express_checkout.js",
+        "target": "third_party:Razorpay",
+        "label": "references",
+        "evidence_refs": [
+          49
+        ]
+      },
+      {
+        "source": "source:realistic/react_signup.tsx",
+        "target": "data:Children",
+        "label": "contains",
+        "evidence_refs": [
+          76,
+          79,
+          80,
+          81,
+          82,
+          83
+        ]
+      },
+      {
+        "source": "source:realistic/react_signup.tsx",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          75,
+          77,
+          78
+        ]
+      },
+      {
+        "source": "source:realistic/react_signup.tsx",
+        "target": "data:Device",
+        "label": "contains",
+        "evidence_refs": [
+          85
+        ]
+      },
+      {
+        "source": "source:realistic/react_signup.tsx",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          69,
+          70,
+          71,
+          72,
+          73,
+          74
+        ]
+      },
+      {
+        "source": "source:realistic/react_signup.tsx",
+        "target": "data:Location",
+        "label": "contains",
+        "evidence_refs": [
+          84,
+          86
         ]
       },
       {
@@ -927,7 +3847,10 @@
         "evidence_refs": [
           7,
           8,
-          9
+          9,
+          17,
+          18,
+          19
         ]
       },
       {
@@ -948,12 +3871,24 @@
       },
       {
         "source": "system:application",
+        "target": "data:Children",
+        "label": "collects",
+        "evidence_refs": [
+          76,
+          79,
+          80,
+          81,
+          82,
+          83
+        ]
+      },
+      {
+        "source": "system:application",
         "target": "data:Contact",
         "label": "collects",
         "evidence_refs": [
           0,
           1,
-          3,
           4,
           10,
           12,
@@ -961,10 +3896,46 @@
           14,
           15,
           16,
-          22,
-          23,
-          24,
-          25
+          25,
+          26,
+          27,
+          28,
+          75,
+          77,
+          78
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Contact",
+        "label": "logs",
+        "evidence_refs": [
+          3,
+          58
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Contact",
+        "label": "processes",
+        "evidence_refs": [
+          44,
+          45,
+          51,
+          53,
+          62,
+          64,
+          88,
+          90
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Contact",
+        "label": "stores",
+        "evidence_refs": [
+          36,
+          37
         ]
       },
       {
@@ -972,7 +3943,8 @@
         "target": "data:Device",
         "label": "collects",
         "evidence_refs": [
-          28
+          32,
+          85
         ]
       },
       {
@@ -980,7 +3952,24 @@
         "target": "data:Device",
         "label": "processes",
         "evidence_refs": [
-          27
+          31,
+          95
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Financial",
+        "label": "collects",
+        "evidence_refs": [
+          57
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Financial",
+        "label": "processes",
+        "evidence_refs": [
+          68
         ]
       },
       {
@@ -994,14 +3983,91 @@
       },
       {
         "source": "system:application",
+        "target": "data:Government ID",
+        "label": "logs",
+        "evidence_refs": [
+          59
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Government ID",
+        "label": "processes",
+        "evidence_refs": [
+          56,
+          67,
+          91,
+          92
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Health",
+        "label": "collects",
+        "evidence_refs": [
+          41,
+          42
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Health",
+        "label": "processes",
+        "evidence_refs": [
+          46,
+          47,
+          48
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Health",
+        "label": "stores",
+        "evidence_refs": [
+          34,
+          38,
+          39,
+          40
+        ]
+      },
+      {
+        "source": "system:application",
         "target": "data:Identity",
         "label": "collects",
         "evidence_refs": [
           7,
           8,
           9,
-          20,
-          21
+          17,
+          18,
+          19,
+          23,
+          24,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Identity",
+        "label": "processes",
+        "evidence_refs": [
+          50,
+          87
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Identity",
+        "label": "stores",
+        "evidence_refs": [
+          35,
+          43,
+          61
         ]
       },
       {
@@ -1010,7 +4076,34 @@
         "label": "collects",
         "evidence_refs": [
           11,
-          26
+          29,
+          30,
+          84,
+          86
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Location",
+        "label": "logs",
+        "evidence_refs": [
+          60
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Location",
+        "label": "processes",
+        "evidence_refs": [
+          52,
+          54,
+          55,
+          63,
+          65,
+          66,
+          89,
+          93,
+          94
         ]
       },
       {
@@ -1019,7 +4112,15 @@
         "label": "shares or may share data",
         "evidence_refs": [
           6,
-          19
+          22
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "third_party:Razorpay",
+        "label": "shares or may share data",
+        "evidence_refs": [
+          49
         ]
       },
       {
@@ -1028,7 +4129,15 @@
         "label": "missing disclosure",
         "evidence_refs": [
           6,
-          19
+          22
+        ]
+      },
+      {
+        "source": "third_party:Razorpay",
+        "target": "notice:privacy",
+        "label": "missing disclosure",
+        "evidence_refs": [
+          49
         ]
       }
     ],
@@ -1037,18 +4146,27 @@
         "data_category": "Contact",
         "collection_points": [
           "consent_site.html",
+          "realistic/react_signup.tsx",
           "sample_app.py",
           "sample_site.html"
         ],
-        "storage_points": [],
-        "logging_risks": [],
+        "storage_points": [
+          "realistic/django_patient.py"
+        ],
+        "logging_risks": [
+          "realistic/express_checkout.js",
+          "sample_app.py"
+        ],
         "third_parties": [],
         "notice_status": "covered",
         "dpdpa_obligations": [
           "Consent and notice",
           "Notice transparency"
         ],
-        "remediation": []
+        "remediation": [
+          "Mask or remove Contact data from logs in realistic/express_checkout.js.",
+          "Mask or remove Contact data from logs in sample_app.py."
+        ]
       },
       {
         "data_category": "Government ID",
@@ -1056,7 +4174,9 @@
           "sample_app.py"
         ],
         "storage_points": [],
-        "logging_risks": [],
+        "logging_risks": [
+          "realistic/express_checkout.js"
+        ],
         "third_parties": [],
         "notice_status": "missing",
         "dpdpa_obligations": [
@@ -1064,6 +4184,7 @@
         ],
         "remediation": [
           "Document strict purpose, retention, and access controls for Government ID.",
+          "Mask or remove Government ID data from logs in realistic/express_checkout.js.",
           "Update privacy notice to disclose Government ID data."
         ]
       },
@@ -1071,9 +4192,13 @@
         "data_category": "Identity",
         "collection_points": [
           "consent_site.html",
+          "realistic/react_signup.tsx",
           "sample_site.html"
         ],
-        "storage_points": [],
+        "storage_points": [
+          "realistic/django_patient.py",
+          "realistic/express_checkout.js"
+        ],
         "logging_risks": [],
         "third_parties": [],
         "notice_status": "covered",
@@ -1086,23 +4211,29 @@
         "data_category": "Location",
         "collection_points": [
           "consent_site.html",
+          "realistic/react_signup.tsx",
           "sample_site.html"
         ],
         "storage_points": [],
-        "logging_risks": [],
+        "logging_risks": [
+          "realistic/express_checkout.js"
+        ],
         "third_parties": [],
         "notice_status": "missing",
         "dpdpa_obligations": [
+          "Notice transparency",
           "Purpose limitation"
         ],
         "remediation": [
+          "Mask or remove Location data from logs in realistic/express_checkout.js.",
           "Update privacy notice to disclose Location data."
         ]
       },
       {
         "data_category": "Device",
         "collection_points": [
-          "consent_site.html"
+          "consent_site.html",
+          "realistic/react_signup.tsx"
         ],
         "storage_points": [],
         "logging_risks": [],
@@ -1114,99 +4245,348 @@
         "remediation": [
           "Update privacy notice to disclose Device data."
         ]
+      },
+      {
+        "data_category": "Health",
+        "collection_points": [
+          "realistic/django_patient.py"
+        ],
+        "storage_points": [
+          "realistic/django_patient.py"
+        ],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Data minimization"
+        ],
+        "remediation": [
+          "Document strict purpose, retention, and access controls for Health.",
+          "Update privacy notice to disclose Health data."
+        ]
+      },
+      {
+        "data_category": "Financial",
+        "collection_points": [
+          "realistic/express_checkout.js"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Security safeguards"
+        ],
+        "remediation": [
+          "Update privacy notice to disclose Financial data."
+        ]
+      },
+      {
+        "data_category": "Children",
+        "collection_points": [
+          "realistic/react_signup.tsx"
+        ],
+        "storage_points": [],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Children's data",
+          "Notice transparency"
+        ],
+        "remediation": [
+          "Document strict purpose, retention, and access controls for Children.",
+          "Update privacy notice to disclose Children data."
+        ]
       }
     ],
     "proof_pack": [
       {
-        "title": "Update privacy notice for Device",
+        "title": "Update privacy notice for Children",
+        "control_area": "Notice transparency",
+        "severity": "CRITICAL",
         "owner": "Legal / Privacy",
-        "why": "Svikruti detected Device data in engineering evidence, but not in the notice text.",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Svikruti detected Children data in engineering evidence, but not in the notice text.",
         "evidence": [
-          "consent_site.html"
+          "realistic/react_signup.tsx"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P0",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Children data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
+      },
+      {
+        "title": "Reduce Contact logging exposure",
+        "control_area": "Security safeguards",
+        "severity": "HIGH",
+        "owner": "Engineering / Security",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Personal data appears near logging statements.",
+        "evidence": [
+          "realistic/express_checkout.js",
+          "sample_app.py"
+        ],
+        "artifact": "Logging redaction control",
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Personal data is masked, hashed, removed, or justified in logs.",
+          "Log retention is documented.",
+          "Regression test or code review evidence is attached."
+        ]
+      },
+      {
+        "title": "Update privacy notice for Device",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
+        "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Svikruti detected Device data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "consent_site.html",
+          "realistic/react_signup.tsx"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Device data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
+      },
+      {
+        "title": "Update privacy notice for Financial",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
+        "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Svikruti detected Financial data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "realistic/express_checkout.js"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Financial data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
       },
       {
         "title": "Update privacy notice for Government ID",
+        "control_area": "Notice transparency",
+        "severity": "CRITICAL",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "Svikruti detected Government ID data in engineering evidence, but not in the notice text.",
         "evidence": [
+          "realistic/express_checkout.js",
           "sample_app.py"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P0"
+        "priority": "P0",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Government ID data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
+      },
+      {
+        "title": "Reduce Government ID logging exposure",
+        "control_area": "Security safeguards",
+        "severity": "CRITICAL",
+        "owner": "Engineering / Security",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Personal data appears near logging statements.",
+        "evidence": [
+          "realistic/express_checkout.js"
+        ],
+        "artifact": "Logging redaction control",
+        "priority": "P0",
+        "acceptance_criteria": [
+          "Personal data is masked, hashed, removed, or justified in logs.",
+          "Log retention is documented.",
+          "Regression test or code review evidence is attached."
+        ]
+      },
+      {
+        "title": "Update privacy notice for Health",
+        "control_area": "Notice transparency",
+        "severity": "CRITICAL",
+        "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Svikruti detected Health data in engineering evidence, but not in the notice text.",
+        "evidence": [
+          "realistic/django_patient.py"
+        ],
+        "artifact": "Privacy notice change",
+        "priority": "P0",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Health data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
       },
       {
         "title": "Update privacy notice for Location",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "Svikruti detected Location data in engineering evidence, but not in the notice text.",
         "evidence": [
           "consent_site.html",
+          "realistic/express_checkout.js",
+          "realistic/react_signup.tsx",
           "sample_site.html"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Privacy notice explicitly covers Location data or documents why it is out of scope.",
+          "Purpose, retention, rights path, and withdrawal/complaint path are reviewed.",
+          "Svikruti scan is rerun and attached to the ticket."
+        ]
+      },
+      {
+        "title": "Reduce Location logging exposure",
+        "control_area": "Security safeguards",
+        "severity": "HIGH",
+        "owner": "Engineering / Security",
+        "status": "Open",
+        "due": "Before launch / next release",
+        "why": "Personal data appears near logging statements.",
+        "evidence": [
+          "realistic/express_checkout.js"
+        ],
+        "artifact": "Logging redaction control",
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Personal data is masked, hashed, removed, or justified in logs.",
+          "Log retention is documented.",
+          "Regression test or code review evidence is attached."
+        ]
       },
       {
         "title": "Add withdrawal language to privacy notice",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "The notice does not clearly include DPDPA-relevant withdrawal terms.",
         "evidence": [
           "privacy notice text"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Notice includes reviewed withdrawal language.",
+          "Language is understandable and reachable from product/privacy paths."
+        ]
       },
       {
         "title": "Add rights language to privacy notice",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "The notice does not clearly include DPDPA-relevant rights terms.",
         "evidence": [
           "privacy notice text"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Notice includes reviewed rights language.",
+          "Language is understandable and reachable from product/privacy paths."
+        ]
       },
       {
         "title": "Add children language to privacy notice",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "The notice does not clearly include DPDPA-relevant children terms.",
         "evidence": [
           "privacy notice text"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Notice includes reviewed children language.",
+          "Language is understandable and reachable from product/privacy paths."
+        ]
       },
       {
         "title": "Add retention language to privacy notice",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "The notice does not clearly include DPDPA-relevant retention terms.",
         "evidence": [
           "privacy notice text"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Notice includes reviewed retention language.",
+          "Language is understandable and reachable from product/privacy paths."
+        ]
       },
       {
         "title": "Add third parties language to privacy notice",
+        "control_area": "Notice transparency",
+        "severity": "HIGH",
         "owner": "Legal / Privacy",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "The notice does not clearly include DPDPA-relevant third parties terms.",
         "evidence": [
           "privacy notice text"
         ],
         "artifact": "Privacy notice change",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Notice includes reviewed third parties language.",
+          "Language is understandable and reachable from product/privacy paths."
+        ]
       },
       {
         "title": "Disclose processor/vendor categories",
+        "control_area": "Vendor governance",
+        "severity": "HIGH",
         "owner": "Legal / Procurement",
+        "status": "Open",
+        "due": "Before launch / next release",
         "why": "Third-party services were detected but processor/vendor disclosure language is missing or weak.",
         "evidence": [
-          "Google Analytics"
+          "Google Analytics",
+          "Razorpay"
         ],
         "artifact": "Vendor register + notice update",
-        "priority": "P1"
+        "priority": "P1",
+        "acceptance_criteria": [
+          "Vendor register includes detected processors/tools.",
+          "DPA/contract status and transfer location are confirmed.",
+          "Privacy notice discloses recipient/vendor categories where applicable."
+        ]
       }
     ]
   },

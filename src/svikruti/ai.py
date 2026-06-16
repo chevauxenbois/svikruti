@@ -88,7 +88,7 @@ def generate_ai_insights(
             headers={
                 "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json",
-                "User-Agent": "SvikrutiPrivacyOps/0.3",
+                "User-Agent": "SvikrutiPrivacyOps/0.4",
             },
             method="POST",
         )
@@ -180,7 +180,7 @@ def _generate_gemini_insights(
             headers={
                 "x-goog-api-key": token,
                 "Content-Type": "application/json",
-                "User-Agent": "SvikrutiPrivacyOps/0.3",
+                "User-Agent": "SvikrutiPrivacyOps/0.4",
             },
             method="POST",
         )
