@@ -28,12 +28,16 @@ def _evidence_rows(items: Iterable[Evidence]) -> str:
         location = item.file or item.source
         if item.line:
             location = f"{location}:{item.line}"
+        confidence = str(item.metadata.get("confidence", "unknown")).title()
+        detector = str(item.metadata.get("detector_id", item.kind))
+        evidence_ref = str(item.metadata.get("evidence_ref", location))
+        language = str(item.metadata.get("language", ""))
         rows.append(
             f'<tr data-severity="{escape(item.severity)}" data-kind="{escape(item.kind)}">'
             f"<td>{_badge(item.severity)}</td>"
-            f"<td><strong>{escape(item.label)}</strong><div>{escape(item.detail)}</div><div class=\"small\">Evidence #{index}</div></td>"
-            f"<td>{escape(item.kind)}</td>"
-            f"<td>{escape(location)}</td>"
+            f"<td><strong>{escape(item.label)}</strong><div>{escape(item.detail)}</div><div class=\"meta-row\"><span>{escape(confidence)} confidence</span><span>{escape(detector)}</span></div></td>"
+            f"<td>{escape(item.kind)}{f'<div class=\"small\">{escape(language)}</div>' if language else ''}</td>"
+            f"<td>{escape(location)}<div class=\"small\">{escape(evidence_ref)}</div></td>"
             f"<td>{escape(item.recommendation)}</td>"
             "</tr>"
         )
@@ -47,17 +51,27 @@ def _list(items: Iterable[str]) -> str:
     return "\n".join(f"<li>{escape(str(item))}</li>" for item in values)
 
 
+def _join(value: object, fallback: str = "To be confirmed") -> str:
+    if value is None:
+        return fallback
+    if isinstance(value, (list, tuple, set)):
+        values = [str(item) for item in value if str(item)]
+        return ", ".join(values) if values else fallback
+    text = str(value)
+    return text if text else fallback
+
+
 def _ropa_rows(result: ScanResult) -> str:
     rows = []
     for entry in result.ropa_starter:
         rows.append(
             "<tr>"
-            f"<td>{escape(str(entry['activity']))}</td>"
-            f"<td>{escape(str(entry['data_categories']))}</td>"
-            f"<td>{escape(', '.join(entry['purposes']))}</td>"
-            f"<td>{escape(', '.join(entry['systems_or_sources']))}</td>"
-            f"<td>{escape(', '.join(entry['third_parties']) or 'To be confirmed')}</td>"
-            f"<td>{escape(str(entry['retention']))}</td>"
+            f"<td><strong>{escape(str(entry.get('record_id', '')))}</strong><div>{escape(str(entry.get('activity', '')))}</div></td>"
+            f"<td>{escape(str(entry.get('data_categories', '')))}<div class=\"small\">Risk: {escape(str(entry.get('risk_tier', 'Review')))}</div></td>"
+            f"<td>{escape(_join(entry.get('purposes')))}<div class=\"small\">Basis: {escape(str(entry.get('dpdpa_basis', 'To confirm')))}</div></td>"
+            f"<td>{escape(_join(entry.get('systems_or_sources')))}<div class=\"small\">Languages: {escape(_join(entry.get('languages'), 'Unknown'))}</div></td>"
+            f"<td>{escape(_join(entry.get('third_parties')))}<div class=\"small\">Transfer: To be confirmed</div></td>"
+            f"<td>{escape(str(entry.get('review_status', 'Draft')))}<div class=\"small\">Owner: {escape(str(entry.get('owner', 'To assign')))}</div></td>"
             "</tr>"
         )
     if not rows:
@@ -96,9 +110,10 @@ def _proof_pack(result: ScanResult, limit: int | None = 8) -> str:
             f'<input type="checkbox" data-action-check="{index}">'
             '<span>Mark reviewed</span>'
             '</label>'
+            f'<div class="action-meta"><span>{escape(str(action.get("severity", "HIGH")))}</span><span>{escape(str(action.get("control_area", "Privacy control")))}</span></div>'
             f'<strong>{escape(str(action.get("title", "")))}</strong>'
             f'<p>{escape(str(action.get("why", "")))}</p>'
-            f'<p class="small">Owner: {escape(str(action.get("owner", "")))} | Artifact: {escape(str(action.get("artifact", "")))}</p>'
+            f'<p class="small">Owner: {escape(str(action.get("owner", "")))} | Due: {escape(str(action.get("due", "Before launch / next release")))} | Artifact: {escape(str(action.get("artifact", "")))}</p>'
             f'<p class="small">Evidence: {escape(", ".join(str(item) for item in evidence) or "None")}</p>'
             "</div></div>"
         )
@@ -112,6 +127,22 @@ def _proof_count_note(result: ScanResult) -> str:
     if remaining <= 0:
         return ""
     return f'<p class="small">{remaining} additional actions are available in the JSON report.</p>'
+
+
+def _top_actions(result: ScanResult) -> str:
+    actions = result.evidence_graph.proof_pack[:4]
+    if not actions:
+        return '<div class="top-action empty"><strong>No immediate scanner actions</strong><p>Review evidence and limitations before external claims.</p></div>'
+    cards = []
+    for index, action in enumerate(actions, start=1):
+        cards.append(
+            '<div class="top-action">'
+            f'<span>{escape(str(index))}</span>'
+            f'<strong>{escape(str(action.get("title", "Review action")))}</strong>'
+            f'<p>{escape(str(action.get("owner", "To assign")))} | {escape(str(action.get("priority", "P1")))} | {escape(str(action.get("control_area", "Privacy control")))}</p>'
+            '</div>'
+        )
+    return '<div class="top-action-grid">' + "\n".join(cards) + "</div>"
 
 
 def _decision_brief(result: ScanResult) -> str:
@@ -156,6 +187,19 @@ def _decision_brief(result: ScanResult) -> str:
         f'{_ai_status_card(result)}'
         '<div class="brief"><span>What matters now</span>'
         f'<strong>{escape(" ".join(signals))}</strong></div>'
+        '</section>'
+    )
+
+
+def _executive_command_center(result: ScanResult) -> str:
+    return (
+        '<section class="command-center">'
+        '<div class="command-copy">'
+        '<span>Executive command center</span>'
+        '<h2>Start with owner assignment, not more analysis.</h2>'
+        '<p>The report is organized around what must be reviewed before launch: notice gaps, sensitive data, logging exposure, processor review, and CI evidence.</p>'
+        '</div>'
+        f'{_top_actions(result)}'
         '</section>'
     )
 
@@ -344,11 +388,21 @@ def _fix_pack(result: ScanResult) -> str:
 
 def issue_markdown_for_action(action: dict[str, object], index: int) -> str:
     evidence = "; ".join(str(item) for item in action.get("evidence", [])) or "None"
+    criteria = action.get("acceptance_criteria") or [
+        "Owner confirmed",
+        "Evidence reviewed",
+        "Remediation implemented or risk accepted",
+        "Privacy notice / RoPA / vendor register updated where applicable",
+        "Svikruti scan rerun and result attached",
+    ]
     return "\n".join(
         [
             f"[{action.get('priority', 'P1')}] {action.get('title', 'Untitled action')}",
             "",
+            f"Severity: {action.get('severity', 'HIGH')}",
+            f"Control area: {action.get('control_area', 'Privacy control')}",
             f"Owner: {action.get('owner', 'To be assigned')}",
+            f"Due: {action.get('due', 'Before launch / next release')}",
             f"Artifact: {action.get('artifact', 'To be confirmed')}",
             "",
             "Why",
@@ -358,11 +412,7 @@ def issue_markdown_for_action(action: dict[str, object], index: int) -> str:
             evidence,
             "",
             "Acceptance criteria",
-            "- [ ] Owner confirmed",
-            "- [ ] Evidence reviewed",
-            "- [ ] Remediation implemented or risk accepted",
-            "- [ ] Privacy notice / RoPA / vendor register updated where applicable",
-            "- [ ] Svikruti scan rerun and result attached",
+            *[f"- [ ] {item}" for item in criteria],
         ]
     )
 
@@ -443,6 +493,10 @@ def _ai_panel(result: ScanResult) -> str:
 
 def _artifact_links(result: ScanResult) -> str:
     return dedent(f"""
+      <div class="schema-callout">
+        <strong>Schema-versioned exports</strong>
+        <p>RoPA, action, and vendor CSVs include schema versions, evidence references, confidence, and clear fields for human confirmation. See <code>docs/OUTPUT_SCHEMAS.md</code>.</p>
+      </div>
       <div class="artifact-grid">
         <div class="artifact"><span>1</span><strong>Assign actions</strong><p>Use the action checklist to assign owners before launch.</p></div>
         <div class="artifact"><span>2</span><strong>Patch notice</strong><p>Copy the generated drafting aid for privacy/legal review.</p><button type="button" data-copy-notice>Copy notice draft</button></div>
@@ -703,6 +757,74 @@ def render_html(result: ScanResult) -> str:
       gap: 14px;
       margin-bottom: 28px;
     }}
+    .command-center {{
+      display: grid;
+      grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+      gap: 18px;
+      border: 1px solid #bed5d2;
+      border-radius: 8px;
+      padding: 18px;
+      background: #ffffff;
+      margin-bottom: 24px;
+    }}
+    .command-copy {{
+      border-right: 1px solid var(--line);
+      padding-right: 18px;
+    }}
+    .command-copy span {{
+      display: block;
+      color: #075c5a;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }}
+    .command-copy h2 {{
+      margin: 0 0 8px;
+      font-size: 24px;
+      line-height: 1.18;
+    }}
+    .command-copy p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }}
+    .top-action-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .top-action {{
+      border: 1px solid #d3dbe6;
+      border-radius: 8px;
+      padding: 12px;
+      background: #f8fafc;
+      min-width: 0;
+    }}
+    .top-action span {{
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--accent-2);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }}
+    .top-action strong {{
+      display: block;
+      font-size: 13px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }}
+    .top-action p {{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }}
     .brief {{
       border: 1px solid #bfd0df;
       border-radius: 8px;
@@ -791,6 +913,29 @@ def render_html(result: ScanResult) -> str:
       font-size: 13px;
     }}
     .action p {{ margin: 5px 0; }}
+    .action strong {{
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }}
+    .action-meta, .meta-row {{
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 0 0 8px;
+    }}
+    .action-meta span, .meta-row span {{
+      display: inline-flex;
+      border: 1px solid #c9d3df;
+      border-radius: 999px;
+      padding: 2px 7px;
+      color: #415064;
+      background: #f7f9fc;
+      font-size: 11px;
+      font-weight: 760;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }}
     .action.done {{
       opacity: 0.62;
       background: #f7faf8;
@@ -808,6 +953,26 @@ def render_html(result: ScanResult) -> str:
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 14px;
+    }}
+    .schema-callout {{
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      border: 1px solid #b9d9d6;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #f0fbfa;
+      margin-bottom: 14px;
+    }}
+    .schema-callout strong {{
+      min-width: 190px;
+      font-size: 15px;
+    }}
+    .schema-callout p {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
     }}
     .control-grid {{
       display: grid;
@@ -1033,7 +1198,10 @@ def render_html(result: ScanResult) -> str:
     code {{ background: #eef2f6; padding: 2px 5px; border-radius: 4px; }}
     @media (max-width: 900px) {{
       header, main, .topbar {{ padding-left: 22px; padding-right: 22px; }}
-      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .issue-grid, .ai-priority-grid, .workflow-strip {{ grid-template-columns: 1fr; }}
+      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .issue-grid, .ai-priority-grid, .workflow-strip, .command-center, .top-action-grid {{ grid-template-columns: 1fr; }}
+      .command-copy {{ border-right: none; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 16px; }}
+      .schema-callout {{ display: block; }}
+      .schema-callout strong {{ display: block; margin-bottom: 6px; }}
       .flow-lane {{ grid-template-columns: 1fr; }}
       .arrow {{ transform: rotate(90deg); }}
       table {{ display: block; overflow-x: auto; white-space: nowrap; }}
@@ -1065,6 +1233,7 @@ def render_html(result: ScanResult) -> str:
     <section class="workspace-section active" data-section="overview">
       <div class="hero-summary">{_plain_summary(result)}</div>
       {_workflow_strip(result)}
+      {_executive_command_center(result)}
       {_decision_brief(result)}
       <section class="grid">
         <div class="metric"><div class="label">Risk level</div><div class="value">{escape(summary.risk_level)}</div></div>
@@ -1127,7 +1296,7 @@ def render_html(result: ScanResult) -> str:
       <h3>RoPA starter</h3>
       <table>
         <thead>
-          <tr><th>Activity</th><th>Data Categories</th><th>Purposes</th><th>Sources</th><th>Third Parties</th><th>Retention</th></tr>
+          <tr><th>Record</th><th>Data / Risk</th><th>Purpose / Basis</th><th>Systems</th><th>Processors</th><th>Status</th></tr>
         </thead>
         <tbody>{_ropa_rows(result)}</tbody>
       </table>

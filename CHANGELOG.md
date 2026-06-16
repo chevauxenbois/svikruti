@@ -30,6 +30,9 @@ Scanner and artifact hardening release.
 - Scanner patterns now cover more realistic names such as `email_address`,
   `phone_number`, `upi_id`, `address_line`, `student_age`, `diagnosis`, and
   SQL files.
+- HTML evidence report now includes an executive command center, top action
+  rail, schema-versioned export callout, richer RoPA preview, evidence
+  confidence metadata, and more complete ticket cards.
 
 ## 0.3.0 - 2026-06-15
 
