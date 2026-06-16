@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
-from textwrap import dedent
+from datetime import datetime
 from html import escape
 from pathlib import Path
+from textwrap import dedent
 from typing import Iterable
 
 from svikruti.models import Evidence, ScanResult
@@ -49,6 +50,16 @@ def _list(items: Iterable[str]) -> str:
     if not values:
         return "<li>None detected</li>"
     return "\n".join(f"<li>{escape(str(item))}</li>" for item in values)
+
+
+def _format_generated_at(value: str) -> str:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        local_time = parsed.astimezone()
+        timezone_name = local_time.tzname() or local_time.strftime("%z")
+        return local_time.strftime(f"%d %b %Y, %H:%M {timezone_name}")
+    except ValueError:
+        return value.replace("T", " ").replace("+00:00", " UTC")
 
 
 def _join(value: object, fallback: str = "To be confirmed") -> str:
@@ -586,6 +597,7 @@ def render_html(result: ScanResult) -> str:
     payload = _report_payload(result)
     notice_draft = _notice_draft_text(result)
     fix_pack_text = escape(issue_markdown(result))
+    generated_at = _format_generated_at(result.generated_at)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1214,7 +1226,7 @@ def render_html(result: ScanResult) -> str:
       <div>
         <div class="eyebrow">India-first PrivacyOps evidence workbench</div>
         <h1>Svikruti Evidence Workbench</h1>
-        <p>Engineering evidence for DPDPA readiness: code, website, consent, controls, artifacts, tickets, and optional AI synthesis. Generated {escape(result.generated_at)}.</p>
+        <p>Engineering evidence for DPDPA readiness: code, website, consent, controls, artifacts, tickets, and optional AI synthesis. Generated {escape(generated_at)}.</p>
       </div>
       <div class="header-stat"><span>Risk level</span><strong>{escape(summary.risk_level)}</strong></div>
     </div>
