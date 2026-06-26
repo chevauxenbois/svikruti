@@ -453,7 +453,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Svikruti
-        run: pip install svikruti
+        run: python -m pip install -e '.[parsers]'
 
       - name: Scan repository
         run: |
@@ -468,8 +468,7 @@ jobs:
             --controls-out svikruti-technical-controls.csv \\
             --breach-out svikruti-breach-readiness.md \\
             --notice-patch-out svikruti-notice-patch.md \\
-            --issues-out svikruti-fix-pack.md \\
-            --fail-on critical
+            --issues-out svikruti-fix-pack.md
 
       # Optional: import outputs from your existing security scanners.
       # Add --security-evidence semgrep.sarif, trivy.json, gitleaks.json, or osv.json

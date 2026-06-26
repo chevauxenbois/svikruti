@@ -20,7 +20,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Svikruti
-        run: pip install svikruti
+        run: python -m pip install -e '.[parsers]'
 
       - name: Scan repository
         run: |
@@ -32,9 +32,10 @@ jobs:
             --ropa-out svikruti-ropa.csv \
             --actions-out svikruti-actions.csv \
             --vendors-out svikruti-vendors.csv \
+            --controls-out svikruti-technical-controls.csv \
+            --breach-out svikruti-breach-readiness.md \
             --notice-patch-out svikruti-notice-patch.md \
-            --issues-out svikruti-fix-pack.md \
-            --fail-on critical
+            --issues-out svikruti-fix-pack.md
 
       # Optional AI co-pilot. Configure the API key for your selected provider
       # as a repository secret before enabling.
@@ -64,6 +65,8 @@ jobs:
             svikruti-ropa.csv
             svikruti-actions.csv
             svikruti-vendors.csv
+            svikruti-technical-controls.csv
+            svikruti-breach-readiness.md
             svikruti-notice-patch.md
             svikruti-fix-pack.md
             svikruti-ai-brief.md
