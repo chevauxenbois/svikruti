@@ -378,6 +378,7 @@ Dashboard views:
 | --- | --- |
 | Command Center | Release decision, top actions, severity/control posture |
 | Assurance | Verified, inferred, failing, and unknown production-readiness dimensions |
+| Scan Quality | Parser coverage, inspected scope, confidence mix, limitations, and manual-verification checklist |
 | Control Plane | Interactive technical-control cards, filters, evidence refs, AI prompts |
 | Evidence Flow | Sankey map and table from source evidence to DPDPA areas and actions |
 | Breach Readiness | Vulnerability, monitoring, endpoint/workload, incident, crypto, backup, and impact domains |
@@ -390,6 +391,7 @@ The HTML output is an offline evidence workbench:
 | View | What it shows |
 | --- | --- |
 | Overview | Launch posture, risk score, scan coverage, severity mix, next actions |
+| Scan Quality | What was inspected, what was not proven, parser engines, confidence mix, and how to improve scan quality |
 | Assurance Profile | JSON assurance layer showing what was verified, inferred, failing, or unknown |
 | Technical Controls | Evidence-backed technical control register for safeguards and breach readiness |
 | Breach Readiness | Domain readiness view for vulnerability management, monitoring, endpoint/workload detection, incident response, secrets, backup/recovery, and impact mapping |

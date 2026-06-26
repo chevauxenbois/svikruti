@@ -56,6 +56,10 @@ class ScannerTests(unittest.TestCase):
         self.assertIn("Fix Pack", html)
         self.assertIn("AI Co-pilot", html)
         self.assertIn("Evidence Explorer", html)
+        self.assertIn("Scan Quality & Limitations", html)
+        self.assertIn("Trust the evidence, not just the score.", html)
+        self.assertIn("Human verification before launch", html)
+        self.assertIn("Parser engines", html)
         self.assertIn("Launch Artifacts", html)
         self.assertIn("RoPA starter", html)
         self.assertIn("Launch posture", html)
@@ -209,6 +213,7 @@ class ScannerTests(unittest.TestCase):
         self.assertIn("php.laravel_heuristic", result.scan_quality["parser_engines"])
         self.assertIn("openapi.schema_heuristic", result.scan_quality["parser_engines"])
         self.assertIn("kubernetes.manifest_heuristic", result.scan_quality["parser_engines"])
+        self.assertIn("limitations", result.scan_quality)
         self.assertIn("Vulnerability Management", breach_markdown(result))
 
     def test_ai_not_configured_does_not_call_network(self):

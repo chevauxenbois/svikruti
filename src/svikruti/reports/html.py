@@ -684,6 +684,131 @@ def _ai_status_card(result: ScanResult) -> str:
     )
 
 
+def _confidence_counts(result: ScanResult) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for item in result.evidence:
+        confidence = str(item.metadata.get("confidence", "unknown")).lower() or "unknown"
+        counts[confidence] = counts.get(confidence, 0) + 1
+    return counts
+
+
+def _engine_rows(result: ScanResult) -> str:
+    engines = result.scan_quality.get("parser_engines", {}) if result.scan_quality else {}
+    if not engines:
+        return '<tr><td colspan="2">No semantic parser engines were reported for this scan.</td></tr>'
+    rows = []
+    for name, count in sorted(engines.items(), key=lambda item: str(item[0])):
+        rows.append(f"<tr><td>{escape(str(name))}</td><td>{escape(str(count))}</td></tr>")
+    return "\n".join(rows)
+
+
+def _confidence_rows(result: ScanResult) -> str:
+    counts = _confidence_counts(result)
+    if not counts:
+        return '<tr><td colspan="2">No evidence confidence metadata was available.</td></tr>'
+    rows = []
+    for confidence, count in sorted(counts.items(), key=lambda item: (-item[1], item[0])):
+        rows.append(f"<tr><td>{escape(confidence.title())}</td><td>{escape(str(count))}</td></tr>")
+    return "\n".join(rows)
+
+
+def _scan_quality_summary(result: ScanResult) -> str:
+    quality = result.scan_quality or {}
+    coverage = quality.get("parser_coverage_percent", 0)
+    parsed_files = quality.get("parsed_files", 0)
+    total_files = quality.get("total_files", result.summary.files_scanned)
+    parser_errors = quality.get("parser_errors") or []
+    confidence = _confidence_counts(result)
+    inferred = sum(count for name, count in confidence.items() if name not in {"direct", "verified", "high"})
+    return dedent(f"""
+      <section class="quality-banner">
+        <div>
+          <span>Scan quality and limitations</span>
+          <h2>Trust the evidence, not just the score.</h2>
+          <p>This scan inspected <strong>{escape(str(total_files))}</strong> files and semantically parsed <strong>{escape(str(parsed_files))}</strong>. Coverage is <strong>{escape(str(coverage))}%</strong>; {escape(str(len(parser_errors)))} parser issues were reported. Treat inferred evidence as review input, not final proof.</p>
+        </div>
+        <div class="quality-mini-grid">
+          <div><strong>{escape(str(coverage))}%</strong><span>parser coverage</span></div>
+          <div><strong>{escape(str(parsed_files))}/{escape(str(total_files))}</strong><span>parsed files</span></div>
+          <div><strong>{escape(str(confidence.get("direct", confidence.get("verified", 0))))}</strong><span>direct evidence</span></div>
+          <div><strong>{escape(str(inferred))}</strong><span>needs review</span></div>
+        </div>
+      </section>
+    """).strip()
+
+
+def _scan_quality_panel(result: ScanResult) -> str:
+    quality = result.scan_quality or {}
+    parser_errors = quality.get("parser_errors") or []
+    limitations = list(quality.get("limitations") or []) + list(result.disclaimers or [])
+    notice_items = sum(
+        1
+        for item in result.evidence
+        if "notice" in str(item.kind).lower() or "privacy" in str(item.source).lower()
+    )
+    inspected = [
+        ("Repository", str(result.repo_path or "Not provided")),
+        ("Website URL", str(result.url or "Not provided")),
+        ("Privacy notice evidence", f"{notice_items} item(s)" if notice_items else "Not detected"),
+        ("Files scanned", str(result.summary.files_scanned)),
+        ("Website pages scanned", str(result.summary.website_pages_scanned)),
+        ("Evidence items", str(len(result.evidence))),
+        ("Security imports", str(sum(1 for item in result.evidence if str(item.kind).startswith(("security_", "vulnerability", "secret_"))))),
+    ]
+    inspection_rows = "\n".join(
+        f"<tr><td>{escape(label)}</td><td>{escape(value)}</td></tr>" for label, value in inspected
+    )
+    errors = parser_errors[:10]
+    error_html = _list(errors) if errors else "<li>No parser errors reported.</li>"
+    checklist = [
+        "Confirm the scanned repository and branch match the production release candidate.",
+        "Attach runtime, cloud, SIEM, vulnerability-management, and incident-response evidence where the scan only found static signals.",
+        "Review inferred personal-data detections with engineering owners before making external compliance claims.",
+        "Validate privacy notice coverage, consent withdrawal, retention, children data, cross-border transfer, and grievance-handling language with legal/privacy owners.",
+        "Confirm vendor/processor contracts, DPA status, subprocessors, transfer position, and security review dates.",
+        "Rerun the scan in CI after material code, route, schema, vendor, notice, or control changes.",
+    ]
+    return dedent(f"""
+      {_scan_quality_summary(result)}
+      <div class="quality-grid">
+        <div class="quality-card">
+          <h3>What was inspected</h3>
+          <table class="quality-table"><tbody>{inspection_rows}</tbody></table>
+        </div>
+        <div class="quality-card">
+          <h3>Evidence confidence</h3>
+          <p class="small">Direct/verified evidence can support release review. Inferred and unknown evidence should be confirmed by an owner.</p>
+          <table class="quality-table"><thead><tr><th>Confidence</th><th>Items</th></tr></thead><tbody>{_confidence_rows(result)}</tbody></table>
+        </div>
+        <div class="quality-card">
+          <h3>Parser engines</h3>
+          <p class="small">Engines show how source files were interpreted. Heuristic engines are conservative and should be treated as review signals.</p>
+          <table class="quality-table"><thead><tr><th>Engine</th><th>Files/signals</th></tr></thead><tbody>{_engine_rows(result)}</tbody></table>
+        </div>
+        <div class="quality-card warning">
+          <h3>What this scan did not prove</h3>
+          <ul>{_list(limitations)}</ul>
+        </div>
+      </div>
+      <div class="quality-card">
+        <h3>Human verification before launch</h3>
+        <ul class="trust-checklist">{_list(checklist)}</ul>
+      </div>
+      <div class="quality-card">
+        <h3>Improve scan quality</h3>
+        <p class="small">For production repositories, run with parser packs, privacy notice input, browser consent capture, and security imports.</p>
+        <pre class="quality-code"><code>python -m pip install -e '.[parsers]'
+svikruti scan --repo . --privacy-url https://example.com/privacy \\
+  --security-evidence semgrep.sarif --security-evidence trivy.json \\
+  --browser-consent --out dpdpa-evidence.html --json-out dpdpa-evidence.json</code></pre>
+        <details>
+          <summary>Parser issues reported</summary>
+          <div class="details-body"><ul>{error_html}</ul></div>
+        </details>
+      </div>
+    """).strip()
+
+
 def render_html(result: ScanResult) -> str:
     summary = result.summary
     payload = _report_payload(result)
@@ -966,6 +1091,87 @@ def render_html(result: ScanResult) -> str:
       border-radius: 8px;
       padding: 16px 18px;
       background: #fff;
+    }}
+    .quality-banner {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 18px;
+      align-items: center;
+      border: 1px solid #b8d8d5;
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 18px;
+      background:
+        linear-gradient(135deg, rgba(4,122,120,0.10), rgba(255,255,255,0.96)),
+        #ffffff;
+    }}
+    .quality-banner span {{
+      display: block;
+      color: #075c5a;
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }}
+    .quality-banner h2 {{ margin: 0 0 6px; font-size: 22px; }}
+    .quality-banner p {{ margin: 0; color: var(--muted); }}
+    .quality-mini-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .quality-mini-grid div {{
+      border: 1px solid #c9d7e4;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.78);
+      padding: 12px;
+    }}
+    .quality-mini-grid strong {{
+      display: block;
+      font-size: 20px;
+      line-height: 1;
+    }}
+    .quality-mini-grid span {{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }}
+    .quality-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }}
+    .quality-card {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px 18px;
+      min-width: 0;
+    }}
+    .quality-card.warning {{
+      border-color: #f0c98c;
+      background: #fffaf0;
+    }}
+    .quality-table {{
+      margin-top: 10px;
+      table-layout: auto;
+    }}
+    .trust-checklist li {{
+      margin-bottom: 8px;
+    }}
+    .quality-code {{
+      white-space: pre-wrap;
+      overflow-x: auto;
+      background: #101828;
+      color: #e6edf6;
+      border-radius: 8px;
+      padding: 14px;
+    }}
+    .quality-code code {{
+      background: transparent;
+      color: inherit;
+      padding: 0;
     }}
     table {{
       width: 100%;
@@ -1392,7 +1598,7 @@ def render_html(result: ScanResult) -> str:
     code {{ background: #eef2f6; padding: 2px 5px; border-radius: 4px; }}
     @media (max-width: 900px) {{
       header, main, .topbar {{ padding-left: 22px; padding-right: 22px; }}
-      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .technical-grid, .control-facts, .breach-hero, .issue-grid, .ai-priority-grid, .workflow-strip, .command-center, .top-action-grid {{ grid-template-columns: 1fr; }}
+      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .technical-grid, .control-facts, .breach-hero, .issue-grid, .ai-priority-grid, .workflow-strip, .command-center, .top-action-grid, .quality-banner, .quality-grid {{ grid-template-columns: 1fr; }}
       .command-copy {{ border-right: none; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 16px; }}
       .schema-callout {{ display: block; }}
       .schema-callout strong {{ display: block; margin-bottom: 6px; }}
@@ -1415,6 +1621,7 @@ def render_html(result: ScanResult) -> str:
   </header>
   <nav class="topbar" aria-label="Report views">
     <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+    <button type="button" class="tab-btn" data-tab="quality">Scan Quality</button>
     <button type="button" class="tab-btn" data-tab="technical">Technical Controls</button>
     <button type="button" class="tab-btn" data-tab="breach">Breach Readiness</button>
     <button type="button" class="tab-btn" data-tab="controls">Control Board</button>
@@ -1428,6 +1635,7 @@ def render_html(result: ScanResult) -> str:
   <main>
     <section class="workspace-section active" data-section="overview">
       <div class="hero-summary">{_plain_summary(result)}</div>
+      {_scan_quality_summary(result)}
       {_workflow_strip(result)}
       {_executive_command_center(result)}
       {_decision_brief(result)}
@@ -1457,6 +1665,12 @@ def render_html(result: ScanResult) -> str:
           <ul class="compact-list">{_top_notice_gaps(result)}</ul>
         </div>
       </section>
+    </section>
+
+    <section class="workspace-section" data-section="quality">
+      <h2>Scan Quality & Limitations</h2>
+      <p class="small">Use this before sharing the report externally. It separates what Svikruti inspected from what still needs human or production-system proof.</p>
+      {_scan_quality_panel(result)}
     </section>
 
     <section class="workspace-section" data-section="technical">

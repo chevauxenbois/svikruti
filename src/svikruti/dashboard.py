@@ -95,6 +95,7 @@ def main() -> None:
         [
             "Command Center",
             "Assurance",
+            "Scan Quality",
             "Control Plane",
             "Evidence Flow",
             "Breach Readiness",
@@ -108,16 +109,18 @@ def main() -> None:
     with tabs[1]:
         _assurance(st, report, pd, go)
     with tabs[2]:
-        _control_plane(st, report, pd, go)
+        _scan_quality(st, report, pd)
     with tabs[3]:
-        _evidence_flow(st, report, pd, go)
+        _control_plane(st, report, pd, go)
     with tabs[4]:
-        _breach_readiness(st, report, pd, go)
+        _evidence_flow(st, report, pd, go)
     with tabs[5]:
-        _evidence_explorer(st, report, pd)
+        _breach_readiness(st, report, pd, go)
     with tabs[6]:
-        _ai_workbench(st, report)
+        _evidence_explorer(st, report, pd)
     with tabs[7]:
+        _ai_workbench(st, report)
+    with tabs[8]:
         _exports(st, report)
 
 
@@ -674,6 +677,41 @@ def _style(st: Any) -> None:
           background: linear-gradient(135deg, #ffffff, #f0faf8);
         }
         .sv-decision h2 { margin: 0 0 8px; font-size: 26px; }
+        .sv-limit-item {
+          border: 1px solid #f3d59b;
+          background: #fff8eb;
+          color: #613f09;
+          border-radius: 14px;
+          padding: 13px 14px;
+          margin-bottom: 10px;
+          font-weight: 700;
+          line-height: 1.5;
+        }
+        .sv-check-item {
+          display: grid;
+          grid-template-columns: 42px minmax(0, 1fr);
+          gap: 12px;
+          align-items: start;
+          border: 1px solid var(--sv-line);
+          border-radius: 14px;
+          background: #ffffff;
+          padding: 13px 14px;
+          margin-bottom: 10px;
+          box-shadow: 0 10px 24px rgba(15,23,42,0.045);
+        }
+        .sv-check-item span {
+          display: inline-grid;
+          place-items: center;
+          width: 34px;
+          height: 26px;
+          border-radius: 999px;
+          background: #f0fbf4;
+          color: #12643b;
+          border: 1px solid #b8e5c7;
+          font-size: 11px;
+          font-weight: 900;
+        }
+        .sv-check-item p { margin: 0; color: #344054; font-weight: 700; line-height: 1.5; }
         .sv-readiness-grid {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1085,6 +1123,122 @@ def _assurance(st: Any, report: Dict[str, Any], pd: Any, go: Any) -> None:
         )
 
 
+def _scan_quality(st: Any, report: Dict[str, Any], pd: Any) -> None:
+    quality = report.get("scan_quality") or {}
+    summary = report.get("summary") or {}
+    evidence = report.get("evidence") or []
+    parser_errors = quality.get("parser_errors") or []
+    limitations = _scan_limitations(report)
+    confidence_counts = _evidence_confidence_counts(report)
+    engines = quality.get("parser_engines") or {}
+    parsed_files = int(quality.get("parsed_files", 0) or 0)
+    total_files = int(quality.get("total_files", summary.get("files_scanned", 0)) or 0)
+    coverage = int(quality.get("parser_coverage_percent", 0) or 0)
+    direct_count = confidence_counts.get("direct", 0) + confidence_counts.get("verified", 0)
+    review_count = max(0, len(evidence) - direct_count)
+
+    st.markdown('<div class="sv-section-title">Scan Quality & Limitations</div>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class="sv-decision">
+          <div class="sv-label">Trust boundary</div>
+          <h2>Trust the evidence, not just the score.</h2>
+          <p>Svikruti can be very useful on production codebases, but the report is strongest when users understand scope, parser coverage, confidence, imported evidence, and what still requires human or runtime proof.</p>
+          <span class="sv-chip {_pill_tone('pass' if coverage >= 70 else 'missing')}">{coverage}% parser coverage</span>
+          <span class="sv-chip">{parsed_files}/{total_files} parsed files</span>
+          <span class="sv-chip {_pill_tone('pass')}">{direct_count} direct/verified</span>
+          <span class="sv-chip {_pill_tone('review')}">{review_count} review signals</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+    metric_items = [
+        (c1, "Parser coverage", f"{coverage}%", "semantic coverage", "pass" if coverage >= 70 else "missing"),
+        (c2, "Parsed files", f"{parsed_files}/{total_files}", "source files interpreted", "pass" if parsed_files else "missing"),
+        (c3, "Engines", len(engines), "parser/heuristic engines", "pass" if engines else "missing"),
+        (c4, "Parser issues", len(parser_errors), "reported parser errors", "fail" if parser_errors else "pass"),
+    ]
+    for col, label, value, help_text, tone in metric_items:
+        with col:
+            st.markdown(
+                f'<div class="sv-metric {_metric_tone(tone)}"><div class="sv-label">{_escape(label)}</div><div class="sv-big-number">{_escape(value)}</div><p>{_escape(help_text)}</p></div>',
+                unsafe_allow_html=True,
+            )
+
+    scope_rows = _scan_scope_rows(report)
+    confidence_rows = [
+        {"Confidence": key.title(), "Items": value}
+        for key, value in sorted(confidence_counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+    engine_rows = [{"Engine": key, "Files/signals": value} for key, value in sorted(engines.items())]
+
+    left, right = st.columns(2)
+    with left:
+        st.markdown(
+            """
+            <div class="sv-card">
+              <h3>What Svikruti inspected</h3>
+              <p>Use this to confirm the report was generated from the intended release scope.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        _render_simple_table(st, scope_rows, ["Surface", "Observed"])
+    with right:
+        st.markdown(
+            """
+            <div class="sv-card">
+              <h3>Evidence confidence mix</h3>
+              <p>Direct/verified evidence supports stronger claims. Inferred and unknown findings should be reviewed by an owner.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        _render_simple_table(st, confidence_rows, ["Confidence", "Items"])
+
+    left, right = st.columns(2)
+    with left:
+        st.markdown('<div class="sv-section-title">Parser Engines</div>', unsafe_allow_html=True)
+        _render_simple_table(st, engine_rows, ["Engine", "Files/signals"])
+    with right:
+        st.markdown('<div class="sv-section-title">What This Scan Did Not Prove</div>', unsafe_allow_html=True)
+        for item in limitations:
+            st.markdown(f'<div class="sv-limit-item">{_escape(item)}</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="sv-section-title">Human Verification Before Launch</div>', unsafe_allow_html=True)
+    for item in _verification_checklist():
+        st.markdown(f'<div class="sv-check-item"><span>OK</span><p>{_escape(item)}</p></div>', unsafe_allow_html=True)
+
+    if parser_errors:
+        st.markdown('<div class="sv-section-title">Parser Issues</div>', unsafe_allow_html=True)
+        _render_simple_table(
+            st,
+            [{"Parser issue": str(item)} for item in parser_errors[:50]],
+            ["Parser issue"],
+        )
+    else:
+        st.markdown('<div class="sv-card"><h3>Parser issues</h3><p>No parser errors were reported for this scan.</p></div>', unsafe_allow_html=True)
+
+    st.download_button(
+        "Download scan quality JSON",
+        data=json.dumps(
+            {
+                "scan_quality": quality,
+                "scope": scope_rows,
+                "confidence": confidence_counts,
+                "limitations": limitations,
+                "verification_checklist": _verification_checklist(),
+            },
+            indent=2,
+        ),
+        file_name="svikruti-scan-quality.json",
+        mime="application/json",
+        width="stretch",
+    )
+
+
 def _control_plane(st: Any, report: Dict[str, Any], pd: Any, go: Any) -> None:
     controls = report.get("technical_controls", [])
     st.markdown('<div class="sv-section-title">Technical Control Plane</div>', unsafe_allow_html=True)
@@ -1270,10 +1424,13 @@ def _evidence_explorer(st: Any, report: Dict[str, Any], pd: Any) -> None:
             "Severity": item.get("severity"),
             "Finding": item.get("label"),
             "Kind": item.get("kind"),
+            "Confidence": (item.get("metadata") or {}).get("confidence", "unknown"),
+            "Detector": (item.get("metadata") or {}).get("detector_id", item.get("kind")),
+            "Language": (item.get("metadata") or {}).get("language", ""),
             "File": f"{item.get('file') or item.get('source')}{':' + str(item.get('line')) if item.get('line') else ''}",
             "Detail": item.get("detail"),
             "Recommendation": item.get("recommendation"),
-            "Evidence ref": item.get("metadata", {}).get("evidence_ref"),
+            "Evidence ref": (item.get("metadata") or {}).get("evidence_ref"),
         }
         for item in evidence
         if (not severities or item.get("severity") in severities)
@@ -1418,11 +1575,73 @@ def _compact_ai_packet(report: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "summary": report.get("summary", {}),
         "notice_gaps": report.get("notice_gaps", [])[:20],
+        "scan_quality": report.get("scan_quality", {}),
+        "assurance_profile": report.get("assurance_profile", {}),
+        "limitations": _scan_limitations(report),
         "technical_controls": report.get("technical_controls", []),
         "breach_readiness": report.get("breach_readiness", {}),
         "data_flows": report.get("evidence_graph", {}).get("data_flows", [])[:20],
         "top_evidence": report.get("evidence", [])[:100],
     }
+
+
+def _scan_scope_rows(report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    summary = report.get("summary") or {}
+    evidence = report.get("evidence") or []
+    notice_items = sum(
+        1
+        for item in evidence
+        if "notice" in str(item.get("kind", "")).lower()
+        or "privacy" in str(item.get("source", "")).lower()
+    )
+    security_items = sum(
+        1
+        for item in evidence
+        if str(item.get("kind", "")).startswith(("security_", "vulnerability", "secret_"))
+    )
+    return [
+        {"Surface": "Repository", "Observed": report.get("repo_path") or "Not provided"},
+        {"Surface": "Website URL", "Observed": report.get("url") or "Not provided"},
+        {"Surface": "Generated", "Observed": _format_dt(str(report.get("generated_at", "")))},
+        {"Surface": "Files scanned", "Observed": summary.get("files_scanned", 0)},
+        {"Surface": "Website pages scanned", "Observed": summary.get("website_pages_scanned", 0)},
+        {"Surface": "Privacy notice evidence", "Observed": f"{notice_items} item(s)" if notice_items else "Not detected"},
+        {"Surface": "Security evidence imports", "Observed": f"{security_items} item(s)" if security_items else "Not detected"},
+        {"Surface": "Evidence records", "Observed": len(evidence)},
+    ]
+
+
+def _evidence_confidence_counts(report: Dict[str, Any]) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for item in report.get("evidence", []) or []:
+        metadata = item.get("metadata") or {}
+        confidence = str(metadata.get("confidence", "unknown")).lower() or "unknown"
+        counts[confidence] = counts.get(confidence, 0) + 1
+    return counts
+
+
+def _scan_limitations(report: Dict[str, Any]) -> List[str]:
+    values: List[str] = []
+    for item in (report.get("scan_quality") or {}).get("limitations") or []:
+        if str(item) not in values:
+            values.append(str(item))
+    for item in report.get("disclaimers") or []:
+        if str(item) not in values:
+            values.append(str(item))
+    if not values:
+        values.append("No scan limitations were provided by this report version; validate scope manually before relying on the results.")
+    return values
+
+
+def _verification_checklist() -> List[str]:
+    return [
+        "Confirm the scanned repository and branch match the production release candidate.",
+        "Attach runtime, cloud, SIEM, vulnerability-management, incident-response, and backup evidence where the scan only found static signals.",
+        "Review inferred personal-data detections with engineering owners before making external compliance claims.",
+        "Validate privacy notice coverage, consent withdrawal, retention, children data, cross-border transfer, and grievance-handling language with legal/privacy owners.",
+        "Confirm vendor/processor contracts, DPA status, subprocessors, transfer position, and security review dates.",
+        "Rerun the scan in CI after material code, route, schema, vendor, notice, or control changes.",
+    ]
 
 
 def _counts(values: Iterable[str]) -> Dict[str, int]:
@@ -1541,7 +1760,7 @@ def _render_evidence_table(st: Any, rows: List[Dict[str, Any]]) -> None:
     if not rows:
         st.info("No evidence matches the current filters.")
         return
-    columns = ["Severity", "Finding", "Kind", "File", "Detail", "Recommendation", "Evidence ref"]
+    columns = ["Severity", "Finding", "Kind", "Confidence", "Detector", "Language", "File", "Detail", "Recommendation", "Evidence ref"]
     header = "".join(f"<th>{_escape(column)}</th>" for column in columns)
     body = []
     for row in rows:
