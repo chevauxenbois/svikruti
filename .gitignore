@@ -2,6 +2,7 @@
 *.db
 *.db-wal
 *.db-shm
+.svikruti/
 
 # Python
 __pycache__/
@@ -59,3 +60,9 @@ svikruti-full-report.*
 examples-report.*
 examples-*.csv
 examples-*.md
+launch-demo-*
+svikruti-control-plane-*
+svikruti-dashboard-demo.*
+svikruti-dashboard-command-center.png
+svikruti-technical-controls.csv
+svikruti-breach-readiness.md

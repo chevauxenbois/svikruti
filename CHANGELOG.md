@@ -1,5 +1,81 @@
 # Changelog
 
+## Unreleased
+
+Production-assurance hardening.
+
+### Added
+
+- Assurance profile (`svikruti-assurance-v1`) that separates verified,
+  inferred, failing, and unknown production-readiness dimensions.
+- Scan quality profile (`svikruti-scan-quality-v1`) with parser coverage,
+  parser engines, parser errors, and limitations.
+- Semantic parser layer using Python AST and structured heuristics for
+  JavaScript/TypeScript, Java, Go, Ruby, PHP, SQL, Prisma, GraphQL, OpenAPI,
+  Postman, and Kubernetes evidence.
+- Optional `parsers` extra with `tree-sitter-language-pack` for AST-backed
+  JS/TS, Java, Go, Ruby, and PHP evidence.
+- Dashboard Assurance tab with production claim, score, dimension chart,
+  evidence counts, and unknowns to close before production claims.
+- Cloud/IaC guardrail detection for public storage, public databases, disabled
+  encryption, permissive IAM, wildcard CORS, audit logging, WAF/private network
+  evidence, and public-access blocking evidence.
+- `DPDPA-TECH-008` technical control for cloud and infrastructure guardrails.
+- Breach-readiness domain for cloud and IaC guardrails.
+
+## 0.6.0 - 2026-06-20
+
+Interactive dashboard and local evidence-store release.
+
+### Added
+
+- `svikruti dashboard` command for a scanner-native local Streamlit control
+  room.
+- Local SQLite evidence store at `.svikruti/evidence.db` for saved scan history.
+- `svikruti scan --save-history` and `--history-db` options.
+- Dashboard views for Command Center, Control Plane, Evidence Flow, Breach
+  Readiness, Evidence Explorer, AI Workbench, and Exports.
+- Interactive technical-control cards with filters, evidence references, and
+  AI prompts.
+- Evidence-flow Sankey visualization for source -> data -> notice -> DPDPA area
+  -> action.
+- Downloadable AI evidence packet from the dashboard.
+- Tests for scan-history storage and dashboard CLI registration.
+
+### Changed
+
+- Svikruti is now positioned as a local-first privacy engineering workbench,
+  with HTML/CSV/SARIF/Markdown as exports rather than the only product surface.
+
+## 0.5.0 - 2026-06-19
+
+Technical-control and breach-readiness release.
+
+### Added
+
+- Technical-control scanner for TLS/HTTPS, KMS or managed keys, secret-manager
+  usage, password hashing, storage encryption, backup/restore signals,
+  monitoring, endpoint/workload detection, and incident-response evidence.
+- Negative technical evidence for weak crypto, hard-coded secrets, insecure
+  HTTP endpoints, and imported high/critical scanner findings.
+- Security evidence import for SARIF, Trivy, Gitleaks, OSV, and compatible JSON
+  outputs through repeatable `--security-evidence` CLI arguments.
+- Schema-versioned technical controls CSV through `--controls-out`.
+- Breach-readiness Markdown pack through `--breach-out`.
+- HTML workbench tabs for Technical Controls and Breach Readiness.
+- AI evidence packet fields for technical controls and breach posture.
+- Realistic Terraform, CI security pipeline, insecure-control, Trivy, Gitleaks,
+  and SARIF fixtures.
+
+### Changed
+
+- GitHub Action template now emits technical-control and breach-readiness
+  artifacts.
+- README and output schema docs now frame Svikruti as a privacy-engineering
+  control plane, not only a DPDPA evidence scanner.
+- Source discovery now includes Terraform, HCL, config files, lockfiles,
+  Dockerfile, Containerfile, Jenkinsfile, and Procfile.
+
 ## 0.4.0 - 2026-06-16
 
 Scanner and artifact hardening release.

@@ -195,6 +195,95 @@ def write_vendor_csv(result: ScanResult, output_path: str) -> None:
     )
 
 
+def write_controls_csv(result: ScanResult, output_path: str) -> None:
+    _write_rows(
+        output_path,
+        [
+            "Schema Version",
+            "Control ID",
+            "Control",
+            "Area",
+            "Status",
+            "Severity",
+            "Score",
+            "Owner",
+            "Evidence Count",
+            "Evidence References",
+            "Gaps",
+            "Next Action",
+            "AI Prompt",
+        ],
+        (
+            [
+                "svikruti-technical-controls-v1",
+                control.get("id"),
+                control.get("title"),
+                control.get("area"),
+                control.get("status"),
+                control.get("severity"),
+                control.get("score"),
+                control.get("owner"),
+                control.get("evidence_count"),
+                _join(control.get("evidence_refs")),
+                _join(control.get("gaps")),
+                control.get("next_action"),
+                control.get("ai_prompt"),
+            ]
+            for control in result.technical_controls
+        ),
+    )
+
+
+def breach_markdown(result: ScanResult) -> str:
+    breach = result.breach_readiness or {}
+    lines = [
+        "# Svikruti Breach Readiness Pack",
+        "",
+        "Generated from repository, privacy, and imported security evidence. Review before treating this as production assurance.",
+        "",
+        f"Posture: {breach.get('posture', 'not_generated')}",
+        f"Score: {breach.get('score', 'n/a')}/100",
+        "",
+        "## Domains",
+        "",
+        "| Domain | Status | Score | Evidence |",
+        "| --- | --- | ---: | --- |",
+    ]
+    domains = breach.get("domains") or {}
+    for domain, detail in domains.items():
+        if not isinstance(detail, dict):
+            continue
+        lines.append(
+            f"| {domain.replace('_', ' ').title()} | {detail.get('status', '')} | "
+            f"{detail.get('score', '')} | {_join(detail.get('evidence_refs')) or 'None'} |"
+        )
+
+    actions = breach.get("priority_actions") or []
+    lines.extend(["", "## Priority Actions", ""])
+    if actions:
+        lines.extend(f"- [ ] {action}" for action in actions)
+    else:
+        lines.append("- [ ] Confirm production scope and retain this evidence pack with the release record.")
+
+    failed = breach.get("failed_controls") or []
+    missing = breach.get("missing_controls") or []
+    lines.extend(
+        [
+            "",
+            "## Control Exceptions",
+            "",
+            f"Failed controls: {_join(failed) or 'None'}",
+            f"Missing controls: {_join(missing) or 'None'}",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def write_breach_markdown(result: ScanResult, output_path: str) -> None:
+    Path(output_path).write_text(breach_markdown(result), encoding="utf-8")
+
+
 def write_notice_patch(result: ScanResult, output_path: str) -> None:
     lines = [
         "# Privacy Notice Patch Draft",
@@ -376,9 +465,15 @@ jobs:
             --ropa-out svikruti-ropa.csv \\
             --actions-out svikruti-actions.csv \\
             --vendors-out svikruti-vendors.csv \\
+            --controls-out svikruti-technical-controls.csv \\
+            --breach-out svikruti-breach-readiness.md \\
             --notice-patch-out svikruti-notice-patch.md \\
             --issues-out svikruti-fix-pack.md \\
             --fail-on critical
+
+      # Optional: import outputs from your existing security scanners.
+      # Add --security-evidence semgrep.sarif, trivy.json, gitleaks.json, or osv.json
+      # to the scan command above after those tools run in CI.
 
       # Optional AI co-pilot. Configure the API key for your selected provider
       # as a repository secret before enabling.
@@ -408,6 +503,8 @@ jobs:
             svikruti-ropa.csv
             svikruti-actions.csv
             svikruti-vendors.csv
+            svikruti-technical-controls.csv
+            svikruti-breach-readiness.md
             svikruti-notice-patch.md
             svikruti-fix-pack.md
             svikruti-ai-brief.md

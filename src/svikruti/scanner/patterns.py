@@ -25,7 +25,7 @@ PERSONAL_DATA_PATTERNS: List[DataPattern] = [
     DataPattern("Government ID", ["aadhaar", "aadhar", "pan_number", "pan", "passport", "voter_id", "driving_license", "dl_number"], "CRITICAL", "Data minimization"),
     DataPattern("Financial", ["card_number", "card_last4", "bank_account", "account_number", "ifsc", "upi", "upi_id", "payment", "payment_method", "razorpay_order"], "HIGH", "Security safeguards"),
     DataPattern("Location", ["latitude", "longitude", "geo", "gps", "location", "address", "address_line", "city", "state", "postal_code", "pincode", "zip"], "HIGH", "Purpose limitation"),
-    DataPattern("Children", ["child", "minor", "guardian", "parent_consent", "school", "student", "student_age"], "CRITICAL", "Children's data"),
+    DataPattern("Children", ["children", "child_age", "minor", "guardian", "parent_consent", "school", "student", "student_age"], "CRITICAL", "Children's data"),
     DataPattern("Health", ["health", "diagnosis", "prescription", "medical", "blood_group", "lab_report", "patient"], "CRITICAL", "Data minimization"),
     DataPattern("Device", ["ip_address", "ip", "device_id", "device_identifier", "advertising_id", "cookie", "session_id", "user_agent"], "MEDIUM", "Tracking and consent"),
 ]
@@ -151,6 +151,17 @@ FILE_EXTENSIONS = {
     ".toml",
     ".env",
     ".sql",
+    ".tf",
+    ".tfvars",
+    ".hcl",
+    ".conf",
+    ".ini",
+    ".properties",
+    ".gradle",
+    ".lock",
+    ".prisma",
+    ".graphql",
+    ".gql",
 }
 
 IGNORED_FILE_PATTERNS = (
@@ -190,4 +201,5 @@ FORM_FIELD_RE: Pattern[str] = re.compile(
 
 
 def normalize_text(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+    camel_split = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", value)
+    return re.sub(r"[^a-z0-9]+", "_", camel_split.lower()).strip("_")

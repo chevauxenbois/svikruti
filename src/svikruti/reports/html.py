@@ -33,11 +33,12 @@ def _evidence_rows(items: Iterable[Evidence]) -> str:
         detector = str(item.metadata.get("detector_id", item.kind))
         evidence_ref = str(item.metadata.get("evidence_ref", location))
         language = str(item.metadata.get("language", ""))
+        language_html = f'<div class="small">{escape(language)}</div>' if language else ""
         rows.append(
             f'<tr data-severity="{escape(item.severity)}" data-kind="{escape(item.kind)}">'
             f"<td>{_badge(item.severity)}</td>"
             f"<td><strong>{escape(item.label)}</strong><div>{escape(item.detail)}</div><div class=\"meta-row\"><span>{escape(confidence)} confidence</span><span>{escape(detector)}</span></div></td>"
-            f"<td>{escape(item.kind)}{f'<div class=\"small\">{escape(language)}</div>' if language else ''}</td>"
+            f"<td>{escape(item.kind)}{language_html}</td>"
             f"<td>{escape(location)}<div class=\"small\">{escape(evidence_ref)}</div></td>"
             f"<td>{escape(item.recommendation)}</td>"
             "</tr>"
@@ -175,15 +176,22 @@ def _decision_brief(result: ScanResult) -> str:
         f"{summary.website_pages_scanned} website pages scanned",
         f"{len(summary.personal_data_categories)} data categories",
         f"{len(summary.third_parties)} third parties",
+        f"{len(result.technical_controls)} technical controls",
     ]
     if browser_count:
         coverage.append("browser consent journey tested")
 
     signals = []
+    failed_controls = [item for item in result.technical_controls if item.get("status") == "fail"]
+    missing_controls = [item for item in result.technical_controls if item.get("status") == "missing"]
     if missing_notice_count:
         signals.append(f"{missing_notice_count} data flows are not clearly covered by the privacy notice.")
     if logging_count:
         signals.append(f"{logging_count} logging risks need engineering review.")
+    if failed_controls:
+        signals.append(f"{len(failed_controls)} technical controls are failing.")
+    if missing_controls:
+        signals.append(f"{len(missing_controls)} technical controls need evidence.")
     if high_count:
         signals.append(f"{high_count} high/critical evidence items need owner assignment.")
     if not signals:
@@ -207,8 +215,8 @@ def _executive_command_center(result: ScanResult) -> str:
         '<section class="command-center">'
         '<div class="command-copy">'
         '<span>Executive command center</span>'
-        '<h2>Start with owner assignment, not more analysis.</h2>'
-        '<p>The report is organized around what must be reviewed before launch: notice gaps, sensitive data, logging exposure, processor review, and CI evidence.</p>'
+        '<h2>Turn DPDPA into technical controls.</h2>'
+        '<p>The report is organized around evidence that can be assigned: notice gaps, sensitive data, logging exposure, processor review, encryption, monitoring, vulnerability management, and breach readiness.</p>'
         '</div>'
         f'{_top_actions(result)}'
         '</section>'
@@ -380,6 +388,79 @@ def _control_board(result: ScanResult) -> str:
     return '<div class="control-grid">' + "\n".join(cards) + "</div>"
 
 
+def _technical_control_board(result: ScanResult) -> str:
+    if not result.technical_controls:
+        return '<div class="box">No technical controls generated. Scan a repository or import security evidence.</div>'
+    cards = []
+    for control in result.technical_controls:
+        status = str(control.get("status", "missing"))
+        status_class = status.lower().replace("_", "-")
+        refs = control.get("evidence_refs") or []
+        gaps = control.get("gaps") or []
+        cards.append(
+            f'<article class="technical-control {escape(status_class)}">'
+            '<div class="control-topline">'
+            f'<span>{escape(str(control.get("id", "")))}</span>'
+            f'<strong>{escape(status.replace("_", " ").title())}</strong>'
+            '</div>'
+            f'<h3>{escape(str(control.get("title", "Control")))}</h3>'
+            f'<p>{escape(str(control.get("next_action", "")))}</p>'
+            '<div class="control-facts">'
+            f'<div><span>Area</span><strong>{escape(str(control.get("area", "")))}</strong></div>'
+            f'<div><span>Owner</span><strong>{escape(str(control.get("owner", "")))}</strong></div>'
+            f'<div><span>Score</span><strong>{escape(str(control.get("score", "")))}/100</strong></div>'
+            f'<div><span>Evidence</span><strong>{escape(str(control.get("evidence_count", 0)))}</strong></div>'
+            '</div>'
+            f'<p class="small">Gaps: {escape(", ".join(str(item) for item in gaps[:6]) or "None")}</p>'
+            f'<p class="small">Refs: {escape(", ".join(str(item) for item in refs[:6]) or "No evidence attached")}</p>'
+            '</article>'
+        )
+    return '<div class="technical-grid">' + "\n".join(cards) + "</div>"
+
+
+def _breach_readiness_panel(result: ScanResult) -> str:
+    breach = result.breach_readiness or {}
+    domains = breach.get("domains") or {}
+    posture = str(breach.get("posture", "not generated")).replace("_", " ")
+    score = breach.get("score", "n/a")
+    actions = breach.get("priority_actions") or []
+    rows = []
+    for domain, detail in domains.items():
+        if not isinstance(detail, dict):
+            continue
+        refs = detail.get("evidence_refs") or []
+        rows.append(
+            "<tr>"
+            f"<td><strong>{escape(str(domain).replace('_', ' ').title())}</strong></td>"
+            f"<td>{escape(str(detail.get('status', '')).replace('_', ' ').title())}</td>"
+            f"<td>{escape(str(detail.get('score', '')))}</td>"
+            f"<td>{escape(', '.join(str(item) for item in refs[:5]) or 'No evidence')}</td>"
+            "</tr>"
+        )
+    if not rows:
+        rows.append('<tr><td colspan="4">No breach readiness domains generated.</td></tr>')
+
+    return (
+        '<section class="breach-hero">'
+        '<div><span>Breach posture</span>'
+        f'<strong>{escape(posture.title())}</strong>'
+        f'<p>Score: {escape(str(score))}/100. This is an evidence-readiness view, not a breach certification.</p></div>'
+        '<div><span>Failed controls</span>'
+        f'<strong>{escape(str(len(breach.get("failed_controls") or [])))}</strong>'
+        f'<p>Missing controls: {escape(str(len(breach.get("missing_controls") or [])))}</p></div>'
+        '</section>'
+        '<section class="split">'
+        '<div class="box"><h2>Priority Actions</h2><ul class="compact-list">'
+        + (_list(actions) if actions else '<li>Confirm production scope and retain evidence with release record.</li>')
+        + '</ul></div>'
+        '<div class="box"><h2>What This Covers</h2><p>Vulnerability management, monitoring, endpoint or workload detection, incident response, secrets and crypto, backup/recovery, and personal-data impact mapping.</p></div>'
+        '</section>'
+        '<table><thead><tr><th>Domain</th><th>Status</th><th>Score</th><th>Evidence</th></tr></thead><tbody>'
+        + "\n".join(rows)
+        + '</tbody></table>'
+    )
+
+
 def _fix_pack(result: ScanResult) -> str:
     items = []
     for index, action in enumerate(result.evidence_graph.proof_pack[:10], start=1):
@@ -471,6 +552,9 @@ def _ai_panel(result: ScanResult) -> str:
     if not control_rows:
         control_rows.append('<tr><td colspan="3">No AI control commentary returned.</td></tr>')
 
+    technical_commentary = insights.get("technical_control_commentary") or ""
+    breach_commentary = insights.get("breach_readiness_commentary") or ""
+
     return (
         '<div class="ai-header">'
         '<span>Generated</span>'
@@ -489,6 +573,12 @@ def _ai_panel(result: ScanResult) -> str:
         '<section><h2>AI Control Commentary</h2><table><thead><tr><th>Control</th><th>Status</th><th>Comment</th></tr></thead><tbody>'
         + "\n".join(control_rows)
         + '</tbody></table></section>'
+        '<section class="split">'
+        '<div class="box"><h2>Technical Control Commentary</h2>'
+        f'<p>{escape(str(technical_commentary or "No technical-control commentary returned."))}</p></div>'
+        '<div class="box"><h2>Breach Readiness Commentary</h2>'
+        f'<p>{escape(str(breach_commentary or "No breach-readiness commentary returned."))}</p></div>'
+        '</section>'
         '<section class="split">'
         '<div class="box"><h2>AI Notice Patch</h2>'
         f'<p>{escape(str(insights.get("notice_patch", "")))}</p></div>'
@@ -510,8 +600,9 @@ def _artifact_links(result: ScanResult) -> str:
         <div class="artifact"><span>1</span><strong>Assign actions</strong><p>Use the action checklist to assign owners before launch.</p></div>
         <div class="artifact"><span>2</span><strong>Patch notice</strong><p>Copy the generated drafting aid for privacy/legal review.</p><button type="button" data-copy-notice>Copy notice draft</button></div>
         <div class="artifact"><span>3</span><strong>Export artifacts</strong><p>Generate CSV/Markdown outputs from the CLI for RoPA, vendors, and remediation.</p><code>--ropa-out --actions-out --vendors-out --notice-patch-out</code></div>
-        <div class="artifact"><span>4</span><strong>AI co-pilot</strong><p>Generate evidence-grounded AI brief and rewritten fixes.</p><code>--ai --ai-out ai-brief.md</code></div>
-        <div class="artifact"><span>5</span><strong>CI gate</strong><p>Install the PR workflow so privacy evidence changes are caught during engineering review.</p><code>svikruti init-github-action</code></div>
+        <div class="artifact"><span>4</span><strong>Control evidence</strong><p>Generate the technical-control register and breach-readiness pack.</p><code>--controls-out --breach-out --security-evidence</code></div>
+        <div class="artifact"><span>5</span><strong>AI co-pilot</strong><p>Generate evidence-grounded AI brief and rewritten fixes.</p><code>--ai --ai-out ai-brief.md</code></div>
+        <div class="artifact"><span>6</span><strong>CI gate</strong><p>Install the PR workflow so privacy and technical-control evidence changes are caught during engineering review.</p><code>svikruti init-github-action</code></div>
       </div>
       <p class="small">Scope: {escape(str(result.repo_path or "not scanned"))} | URL: {escape(str(result.url or "not scanned"))}</p>
     """).strip()
@@ -541,10 +632,13 @@ def _plain_summary(result: ScanResult) -> str:
     data_count = len(result.summary.personal_data_categories)
     vendor_count = len(result.summary.third_parties)
     action_count = len(result.evidence_graph.proof_pack)
+    failed_controls = sum(1 for item in result.technical_controls if item.get("status") == "fail")
+    missing_controls = sum(1 for item in result.technical_controls if item.get("status") == "missing")
     if action_count:
         return (
             f"Svikruti found {data_count} personal-data categories, {vendor_count} third parties, "
-            f"and {action_count} proof-pack actions. Start with the decision brief and top actions."
+            f"{len(result.technical_controls)} technical controls, and {action_count} proof-pack actions. "
+            f"{failed_controls} controls are failing and {missing_controls} need evidence."
         )
     return (
         f"Svikruti found {data_count} personal-data categories and {vendor_count} third parties. "
@@ -557,7 +651,7 @@ def _workflow_strip(result: ScanResult) -> str:
     steps = [
         ("Scan", f"{result.summary.files_scanned + result.summary.website_pages_scanned} sources"),
         ("Map", f"{len(result.evidence_graph.data_flows)} flows"),
-        ("Control", f"{len(_control_items(result))} controls"),
+        ("Control", f"{len(result.technical_controls)} technical controls"),
         ("Fix", f"{len(result.evidence_graph.proof_pack)} actions"),
         ("AI", str(ai_state).replace("_", " ")),
         ("Gate", "SARIF / CI"),
@@ -617,12 +711,14 @@ def render_html(result: ScanResult) -> str:
       --green: #18794e;
     }}
     * {{ box-sizing: border-box; }}
+    html {{ overflow-x: hidden; }}
     body {{
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
       background: #f8fafc;
       line-height: 1.5;
+      overflow-x: hidden;
     }}
     header {{
       padding: 34px 56px 28px;
@@ -876,12 +972,14 @@ def render_html(result: ScanResult) -> str:
       border-collapse: collapse;
       border: 1px solid var(--line);
       font-size: 13px;
+      table-layout: fixed;
     }}
     th, td {{
       border-bottom: 1px solid var(--line);
       padding: 10px 12px;
       vertical-align: top;
       text-align: left;
+      overflow-wrap: anywhere;
     }}
     th {{ background: var(--panel); font-size: 12px; text-transform: uppercase; color: var(--muted); }}
     td div {{ color: var(--muted); margin-top: 4px; }}
@@ -961,7 +1059,7 @@ def render_html(result: ScanResult) -> str:
     }}
     .artifact-grid {{
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
     }}
     .schema-callout {{
@@ -1014,6 +1112,92 @@ def render_html(result: ScanResult) -> str:
       font-size: 15px;
     }}
     .control-card p {{ margin: 6px 0; color: var(--muted); font-size: 13px; }}
+    .technical-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }}
+    .technical-control {{
+      border: 1px solid var(--line);
+      border-left: 5px solid #9aa8b8;
+      border-radius: 8px;
+      background: #fff;
+      padding: 16px;
+      min-width: 0;
+    }}
+    .technical-control.pass {{ border-left-color: var(--green); background: #fbfefd; }}
+    .technical-control.fail {{ border-left-color: var(--rose); background: #fffbfa; }}
+    .technical-control.missing {{ border-left-color: var(--amber); background: #fffdf7; }}
+    .control-topline {{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }}
+    .control-topline span, .control-topline strong {{
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 850;
+      background: #eef2f6;
+      color: #263244;
+    }}
+    .technical-control.pass .control-topline strong {{ background: #e8f6ef; color: #12633d; }}
+    .technical-control.fail .control-topline strong {{ background: #fee4df; color: #9f1f16; }}
+    .technical-control.missing .control-topline strong {{ background: #fff4dc; color: #7b4e00; }}
+    .technical-control h3 {{ margin: 0 0 7px; }}
+    .technical-control p {{ margin: 7px 0; color: var(--muted); }}
+    .control-facts {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }}
+    .control-facts div {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: var(--panel);
+      min-width: 0;
+    }}
+    .control-facts span {{
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 850;
+    }}
+    .control-facts strong {{
+      display: block;
+      font-size: 12px;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+    }}
+    .breach-hero {{
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      border: 1px solid #b9d9d6;
+      border-radius: 8px;
+      padding: 18px;
+      background: linear-gradient(135deg, #f0fbfa, #fff);
+      margin-bottom: 18px;
+    }}
+    .breach-hero span {{
+      display: block;
+      color: #075c5a;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 850;
+      margin-bottom: 6px;
+    }}
+    .breach-hero strong {{
+      display: block;
+      font-size: 25px;
+      margin-bottom: 5px;
+    }}
+    .breach-hero p {{ margin: 0; color: var(--muted); }}
     .issue-grid {{
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1208,13 +1392,13 @@ def render_html(result: ScanResult) -> str:
     code {{ background: #eef2f6; padding: 2px 5px; border-radius: 4px; }}
     @media (max-width: 900px) {{
       header, main, .topbar {{ padding-left: 22px; padding-right: 22px; }}
-      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .issue-grid, .ai-priority-grid, .workflow-strip, .command-center, .top-action-grid {{ grid-template-columns: 1fr; }}
+      .header-grid, .grid, .split, .brief-grid, .artifact-grid, .control-grid, .technical-grid, .control-facts, .breach-hero, .issue-grid, .ai-priority-grid, .workflow-strip, .command-center, .top-action-grid {{ grid-template-columns: 1fr; }}
       .command-copy {{ border-right: none; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 16px; }}
       .schema-callout {{ display: block; }}
       .schema-callout strong {{ display: block; margin-bottom: 6px; }}
       .flow-lane {{ grid-template-columns: 1fr; }}
       .arrow {{ transform: rotate(90deg); }}
-      table {{ display: block; overflow-x: auto; white-space: nowrap; }}
+      table {{ display: table; overflow-x: visible; white-space: normal; }}
     }}
   </style>
 </head>
@@ -1231,6 +1415,8 @@ def render_html(result: ScanResult) -> str:
   </header>
   <nav class="topbar" aria-label="Report views">
     <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+    <button type="button" class="tab-btn" data-tab="technical">Technical Controls</button>
+    <button type="button" class="tab-btn" data-tab="breach">Breach Readiness</button>
     <button type="button" class="tab-btn" data-tab="controls">Control Board</button>
     <button type="button" class="tab-btn" data-tab="actions">Actions</button>
     <button type="button" class="tab-btn" data-tab="flows">Evidence Flow</button>
@@ -1249,7 +1435,7 @@ def render_html(result: ScanResult) -> str:
         <div class="metric"><div class="label">Risk level</div><div class="value">{escape(summary.risk_level)}</div></div>
         <div class="metric"><div class="label">Risk score</div><div class="value">{summary.risk_score}/100</div></div>
         <div class="metric"><div class="label">Files scanned</div><div class="value">{summary.files_scanned}</div></div>
-        <div class="metric"><div class="label">Website pages</div><div class="value">{summary.website_pages_scanned}</div></div>
+        <div class="metric"><div class="label">Breach score</div><div class="value">{escape(str((result.breach_readiness or {}).get("score", "n/a")))}/100</div></div>
       </section>
       <section class="split">
         <div class="box">
@@ -1271,6 +1457,18 @@ def render_html(result: ScanResult) -> str:
           <ul class="compact-list">{_top_notice_gaps(result)}</ul>
         </div>
       </section>
+    </section>
+
+    <section class="workspace-section" data-section="technical">
+      <h2>Technical Control Plane</h2>
+      <p class="small">Evidence-backed technical controls for encryption, secrets, vulnerability management, monitoring, incident response, and recovery.</p>
+      {_technical_control_board(result)}
+    </section>
+
+    <section class="workspace-section" data-section="breach">
+      <h2>Breach Readiness</h2>
+      <p class="small">A technical-readiness register built from code/config evidence and imported scanner results.</p>
+      {_breach_readiness_panel(result)}
     </section>
 
     <section class="workspace-section" data-section="controls">

@@ -8,9 +8,17 @@ from urllib.request import Request, urlopen
 
 from svikruti.ai import generate_ai_insights
 from svikruti.models import ScanResult
+from svikruti.scanner.assurance import build_assurance_profile
 from svikruti.scanner.browser import scan_consent_journey
 from svikruti.scanner.code import scan_repo
 from svikruti.scanner.dpdpa import build_evidence_graph, build_ropa_starter, notice_gap_check, summarize
+from svikruti.scanner.semantic import scan_semantic_evidence
+from svikruti.scanner.technical import (
+    build_breach_readiness,
+    build_technical_controls,
+    ingest_security_findings,
+    scan_technical_evidence,
+)
 from svikruti.scanner.website import scan_website
 
 
@@ -21,6 +29,7 @@ def run_scan(
     privacy_url: Optional[str] = None,
     privacy_file: Optional[str] = None,
     browser_consent: bool = False,
+    security_evidence: Optional[list[str]] = None,
     ai_enabled: bool = False,
     ai_provider: str = "openai",
     ai_model: Optional[str] = None,
@@ -37,6 +46,22 @@ def run_scan(
         code_result = scan_repo(repo)
         files_scanned = code_result.files_scanned
         result.evidence.extend(code_result.evidence)
+        semantic_result = scan_semantic_evidence(repo)
+        result.evidence.extend(semantic_result.evidence)
+        result.scan_quality = semantic_result.quality_profile(files_scanned)
+        result.evidence.extend(scan_technical_evidence(repo))
+    else:
+        result.scan_quality = {
+            "schema_version": "svikruti-scan-quality-v1",
+            "parser_coverage_percent": 0,
+            "parsed_files": 0,
+            "total_files": 0,
+            "parser_engines": {},
+            "parser_errors": [],
+            "limitations": ["No repository was supplied, so parser coverage is unavailable."],
+        }
+
+    result.evidence.extend(ingest_security_findings(security_evidence))
 
     if url:
         website_result = scan_website(url, fetch_notice=fetch_notice)
@@ -58,6 +83,14 @@ def run_scan(
     result.ropa_starter = build_ropa_starter(result.evidence)
     result.notice_gaps = notice_gap_check(result, privacy_notice_text)
     result.evidence_graph = build_evidence_graph(result, privacy_notice_text)
+    result.technical_controls = build_technical_controls(result.evidence)
+    result.breach_readiness = build_breach_readiness(result.evidence, result.technical_controls)
+    result.assurance_profile = build_assurance_profile(
+        result,
+        privacy_notice_available=bool(privacy_notice_text),
+        security_evidence_paths=security_evidence,
+        browser_consent=browser_consent,
+    )
     if ai_enabled:
         result.ai_insights = generate_ai_insights(result, provider=ai_provider, model=ai_model)
     return result

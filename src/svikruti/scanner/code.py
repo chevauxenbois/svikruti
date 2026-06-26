@@ -45,6 +45,21 @@ LANGUAGE_BY_EXTENSION = {
     ".toml": "TOML",
     ".env": "Environment",
     ".sql": "SQL",
+    ".tf": "Terraform",
+    ".tfvars": "Terraform",
+    ".hcl": "HCL",
+    ".conf": "Config",
+    ".ini": "Config",
+    ".properties": "Config",
+    ".gradle": "Gradle",
+    ".lock": "Lockfile",
+}
+
+SPECIAL_SOURCE_FILENAMES = {
+    "Dockerfile",
+    "Containerfile",
+    "Jenkinsfile",
+    "Procfile",
 }
 
 FRAMEWORK_HINTS = {
@@ -73,7 +88,7 @@ def iter_source_files(repo_path: Path) -> Iterable[Path]:
             continue
         if any(part in IGNORED_DIRS or part.startswith(".venv") for part in path.parts):
             continue
-        if path.suffix.lower() not in FILE_EXTENSIONS:
+        if path.suffix.lower() not in FILE_EXTENSIONS and path.name not in SPECIAL_SOURCE_FILENAMES:
             continue
         if any(path.name.endswith(pattern) for pattern in IGNORED_FILE_PATTERNS):
             continue

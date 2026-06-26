@@ -1,0 +1,22 @@
+name: security-evidence
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/analyze@v3
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          format: sarif
+      - run: semgrep --config auto --sarif --output semgrep.sarif
+      - run: gitleaks detect --report-format json --report-path gitleaks.json
+      - run: echo "incident response runbook, breach escalation, pagerduty, postmortem"
+

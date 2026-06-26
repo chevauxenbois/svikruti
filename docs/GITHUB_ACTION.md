@@ -46,9 +46,16 @@ jobs:
             --ropa-out svikruti-ropa.csv \
             --actions-out svikruti-actions.csv \
             --vendors-out svikruti-vendors.csv \
+            --controls-out svikruti-technical-controls.csv \
+            --breach-out svikruti-breach-readiness.md \
             --notice-patch-out svikruti-notice-patch.md \
             --issues-out svikruti-fix-pack.md \
             --fail-on critical
+
+      # Optional: import existing security scanner outputs into the same
+      # privacy evidence pack by adding --security-evidence semgrep.sarif,
+      # --security-evidence trivy.json, --security-evidence gitleaks.json, or
+      # --security-evidence osv.json to the scan command above.
 
       # Optional AI co-pilot. Configure the API key for your selected provider
       # as a repository secret before enabling.
@@ -78,10 +85,17 @@ jobs:
             svikruti-ropa.csv
             svikruti-actions.csv
             svikruti-vendors.csv
+            svikruti-technical-controls.csv
+            svikruti-breach-readiness.md
             svikruti-notice-patch.md
             svikruti-fix-pack.md
             svikruti-ai-brief.md
 ```
+
+Use the technical-control CSV and breach-readiness Markdown when security,
+privacy, or legal reviewers ask whether the product has evidence for
+encryption, third-party processing, vulnerability management, endpoint/workload
+detection, monitoring, incident response, backup, and impact mapping.
 
 For private repositories, review the generated report before sharing it outside
 the organization because it may contain file names, line numbers, and inferred

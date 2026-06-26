@@ -1,0 +1,9 @@
+[
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Example leaked API key for scanner ingestion test",
+    "File": "examples/realistic/insecure_controls.js",
+    "StartLine": 5
+  }
+]
+

@@ -1,0 +1,7 @@
+model Customer {
+  id           String @id
+  full_name    String
+  email        String
+  pan_number   String
+  upi_id       String
+}

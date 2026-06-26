@@ -90,6 +90,10 @@ class ScanResult:
     evidence_graph: EvidenceGraph
     disclaimers: List[str]
     ai_insights: Dict[str, Any] = field(default_factory=dict)
+    technical_controls: List[Dict[str, Any]] = field(default_factory=list)
+    breach_readiness: Dict[str, Any] = field(default_factory=dict)
+    assurance_profile: Dict[str, Any] = field(default_factory=dict)
+    scan_quality: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def empty(cls, repo_path: Optional[str], url: Optional[str]) -> "ScanResult":
@@ -106,8 +110,13 @@ class ScanResult:
             disclaimers=[
                 "This report is engineering evidence for DPDPA readiness. It is not legal advice or a compliance certification.",
                 "Static code scanning can miss runtime-only flows. Website scanning without browser execution can miss client-side behavior.",
+                "Technical controls are inferred from repository/config/security-tool evidence and must be confirmed against production architecture.",
             ],
             ai_insights={},
+            technical_controls=[],
+            breach_readiness={},
+            assurance_profile={},
+            scan_quality={},
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -123,4 +132,8 @@ class ScanResult:
             "evidence_graph": self.evidence_graph.to_dict(),
             "disclaimers": self.disclaimers,
             "ai_insights": self.ai_insights,
+            "technical_controls": self.technical_controls,
+            "breach_readiness": self.breach_readiness,
+            "assurance_profile": self.assurance_profile,
+            "scan_quality": self.scan_quality,
         }

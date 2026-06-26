@@ -69,9 +69,13 @@ def generate_ai_insights(
                         "type": "input_text",
                         "text": (
                             "Create a concise AI co-pilot output with keys: executive_brief, launch_risk, "
-                            "top_priorities, control_commentary, buyer_summary, notice_patch, fix_pack_improvements, caveats. "
+                            "top_priorities, control_commentary, technical_control_commentary, breach_readiness_commentary, "
+                            "buyer_summary, notice_patch, fix_pack_improvements, caveats. "
                             "top_priorities must be an array of objects with title, why, owner, evidence. "
                             "control_commentary must be an array of objects with control, status, comment. "
+                            "technical_control_commentary must summarize encryption, vulnerability management, monitoring, "
+                            "endpoint/workload detection, secrets, backup, and incident evidence. "
+                            "breach_readiness_commentary must explain the breach posture using only supplied evidence. "
                             "Evidence packet:\n"
                             + json.dumps(packet, ensure_ascii=True)
                         ),
@@ -231,6 +235,8 @@ def _compact_packet(result: ScanResult) -> Dict[str, Any]:
         "data_flows": result.evidence_graph.data_flows[:10],
         "proof_pack": result.evidence_graph.proof_pack[:12],
         "ropa_starter": result.ropa_starter[:10],
+        "technical_controls": result.technical_controls[:12],
+        "breach_readiness": result.breach_readiness,
         "top_evidence": [
             {
                 "kind": item.kind,

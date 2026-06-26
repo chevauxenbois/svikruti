@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: checkout:latest
+          env:
+            - name: CUSTOMER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: checkout-secrets
+                  key: customer_email
+            - name: DEVICE_ID
+              value: "demo-device"
