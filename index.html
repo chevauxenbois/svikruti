@@ -715,7 +715,12 @@
             <span>Run locally</span>
             <span>No account required</span>
           </div>
-          <pre>pipx run svikruti scan \
+<pre>git clone https://github.com/chevauxenbois/svikruti.git
+cd svikruti
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[parsers]'
+svikruti scan \
   --repo . \
   --url https://example.com \
   --privacy-url https://example.com/privacy \
@@ -822,7 +827,11 @@
         <div class="section-head">
           <span>Launch artifact pack</span>
           <h2>One scan produces review-ready outputs.</h2>
-          <p>The HTML workbench is for humans. The JSON, SARIF, CSV, and Markdown files are for CI, GRC, procurement, legal review, and engineering tickets.</p>
+          <p>The HTML workbench is for humans. The JSON, SARIF, CSV, and Markdown files are for CI, GRC, procurement, legal review, and engineering tickets. The Scan Quality view shows what was inspected, what was not proven, and what humans should verify.</p>
+          <div class="hero-actions">
+            <a class="button" href="demo-report.html">Open demo report</a>
+            <a class="button secondary" href="https://github.com/chevauxenbois/svikruti/tree/main/examples">View sample exports</a>
+          </div>
         </div>
         <div class="artifact-list" id="artifacts">
           <div class="artifact-item"><strong>HTML Workbench</strong><p>Executive posture, control board, evidence explorer, action tracker, and flow map.</p></div>
