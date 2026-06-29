@@ -1,0 +1,52 @@
+name: False positive or false negative
+description: Report a finding Svikruti got wrong or missed.
+title: "[Detection]: "
+labels: ["detection", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for scanner accuracy issues. Please provide a minimal sanitized snippet when possible.
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Detection issue type
+      options:
+        - False positive
+        - False negative
+        - Wrong severity
+        - Wrong DPDPA mapping
+        - Wrong confidence
+        - Wrong vendor/processor detection
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Minimal code/config/notice snippet
+      description: Provide a sanitized snippet that reproduces the issue.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Current Svikruti finding
+      description: Include finding label, detector ID, evidence ref, severity, and recommendation if available.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: Explain what Svikruti should have reported.
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language/framework
+      placeholder: "React/TypeScript, Spring Java, Django, Terraform, etc."
+  - type: textarea
+    id: scan-quality
+    attributes:
+      label: Scan quality context
+      description: Paste parser coverage, parser engine, or limitation details if relevant.

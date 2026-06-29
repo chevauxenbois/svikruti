@@ -1,0 +1,39 @@
+name: Parser or language request
+description: Request deeper support for a language, framework, file type, or data-flow pattern.
+title: "[Parser]: "
+labels: ["parser", "enhancement"]
+body:
+  - type: input
+    id: ecosystem
+    attributes:
+      label: Language/framework/file type
+      placeholder: "Next.js, Spring Boot, Android/Kotlin, Swift, Terraform module, etc."
+    validations:
+      required: true
+  - type: textarea
+    id: patterns
+    attributes:
+      label: Privacy-relevant patterns to detect
+      description: Describe request sources, schemas, logging sinks, storage writes, vendors, or controls that matter.
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Sanitized examples
+      description: Add small code/config snippets if possible.
+      render: text
+  - type: textarea
+    id: expected-artifacts
+    attributes:
+      label: Expected Svikruti output
+      description: Which evidence, DPDPA area, control, confidence, or export should be generated?
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority for your use case
+      options:
+        - Launch blocker
+        - Important for production adoption
+        - Useful improvement
+        - Nice to have

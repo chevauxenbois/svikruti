@@ -66,3 +66,7 @@ svikruti-dashboard-demo.*
 svikruti-dashboard-command-center.png
 svikruti-technical-controls.csv
 svikruti-breach-readiness.md
+
+# Tracked launch screenshots
+!docs/assets/
+!docs/assets/*.png

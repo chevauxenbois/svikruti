@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Svikruti project page
+    url: https://chevauxenbois.com/projects/svikruti/
+    about: Read the project overview and launch positioning.
+  - name: GitHub repository
+    url: https://github.com/chevauxenbois/svikruti
+    about: Star, fork, and inspect the source.

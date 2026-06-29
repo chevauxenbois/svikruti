@@ -38,6 +38,31 @@ outputs, encryption signals, logging risks, vendors, consent journeys, and
 breach-readiness controls. The goal is simple: make DPDPA implementation
 visible in engineering systems, not just in policy documents.
 
+## Launch Demo
+
+- **Sample HTML report:** [examples/sample-report.html](examples/sample-report.html)
+- **Hosted demo report:** [chevauxenbois.github.io/svikruti/demo-report.html](https://chevauxenbois.github.io/svikruti/demo-report.html)
+- **Sample JSON report:** [examples/sample-report.json](examples/sample-report.json)
+- **Sample SARIF:** [examples/sample-report.sarif](examples/sample-report.sarif)
+- **Sample exports:** [RoPA](examples/sample-ropa.csv), [actions](examples/sample-actions.csv),
+  [vendors](examples/sample-vendors.csv), [technical controls](examples/sample-controls.csv),
+  [breach readiness](examples/sample-breach.md), [fix pack](examples/sample-fix-pack.md)
+
+![Svikruti dashboard command center](docs/assets/svikruti-dashboard-command-center.png)
+
+<details>
+<summary>More screenshots</summary>
+
+![Svikruti control plane overview](docs/assets/svikruti-control-plane-overview.png)
+
+![Svikruti technical control plane](docs/assets/svikruti-control-plane-technical.png)
+
+![Svikruti breach readiness](docs/assets/svikruti-control-plane-breach.png)
+
+![Svikruti mobile view](docs/assets/svikruti-control-plane-mobile.png)
+
+</details>
+
 ## Try It In 3 Minutes
 
 Use the source install while the project is moving quickly:
@@ -199,6 +224,31 @@ Svikruti is not another static compliance checklist.
 - **Transparent evidence**: every finding can carry detector ID, confidence,
   source file/line, language, framework hints, and evidence reference.
   JSON reports also include parser coverage and limitations.
+
+## What This Is And Is Not
+
+Svikruti is:
+
+- an open-source privacy engineering workbench for DPDPA readiness review
+- a local-first scanner that turns source, web, notice, vendor, and security
+  signals into evidence artifacts
+- a way to make privacy, security, legal, product, and engineering teams review
+  the same evidence
+- a starting point for technical controls, release gates, RoPA drafts, vendor
+  review, breach readiness, and AI-assisted summaries
+
+Svikruti is not:
+
+- legal advice
+- a DPDPA certification
+- a replacement for privacy counsel, security review, vendor diligence, or
+  production architecture review
+- a guarantee that every runtime data flow, vendor, consent path, or
+  contractual obligation has been discovered
+
+Use the **Scan Quality** view before making claims from a report. It shows
+parser coverage, inspected scope, confidence mix, limitations, and human
+verification steps.
 
 ## What It Looks For
 
@@ -558,7 +608,7 @@ svikruti/
 
   examples/               # sample app/site/privacy notice and generated report
   tests/                  # scanner tests
-  docs/                   # launch and GitHub Action docs
+  docs/                   # launch, GitHub Action docs, and screenshots
 ```
 
 ## Free And Enterprise Model
@@ -612,6 +662,8 @@ Suggested launch wedge:
 > to DPDPA readiness, and generate the first audit pack in minutes.
 
 ## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the launch roadmap and contribution areas.
 
 - richer privacy notice semantic comparison
 - secret and sensitive value redaction before report generation

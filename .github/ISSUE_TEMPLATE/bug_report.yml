@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a crash, broken output, or incorrect behavior.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a Svikruti bug. Please include enough detail to reproduce without sharing sensitive code.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or workflow
+      description: Paste the exact command, GitHub Action step, or dashboard action.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Error output
+      description: Paste stack traces or CLI output. Redact secrets.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Svikruti version or commit
+      placeholder: "0.7.0 or git commit SHA"
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Product surface
+      options:
+        - CLI scan
+        - HTML report
+        - Streamlit dashboard
+        - GitHub Action / SARIF
+        - CSV or Markdown export
+        - AI synthesis
+        - Other
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, install method, and whether parser/browser extras were installed.

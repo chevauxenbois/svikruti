@@ -1,0 +1,2 @@
+Schema Version,Vendor / Processor,Service Category,Data Categories Shared,Processing Purpose,DPA / Contract Status,Sub-processors,Transfer Location,Security Evidence,Retention / Deletion Commitment,Risk Tier,Owner,Review Status,Next Review Date,Evidence References,Detector IDs
+svikruti-vendors-v1,Razorpay,To be confirmed,To be mapped,To be confirmed,To be confirmed,To be confirmed,To be confirmed,To be confirmed,To be confirmed,Medium,Procurement / Legal / Security,Open,To be scheduled,express_checkout.js:third_party.reference,third_party.reference

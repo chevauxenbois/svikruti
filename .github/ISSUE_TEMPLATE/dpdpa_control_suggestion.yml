@@ -1,0 +1,34 @@
+name: DPDPA control suggestion
+description: Suggest a DPDPA area, control, artifact, or India-specific PrivacyOps improvement.
+title: "[DPDPA Control]: "
+labels: ["dpdpa", "controls", "enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: PrivacyOps problem
+      description: What DPDPA readiness or privacy engineering problem should Svikruti help with?
+    validations:
+      required: true
+  - type: textarea
+    id: control
+    attributes:
+      label: Suggested control or artifact
+      description: Describe the control, evidence, export, report section, or workflow.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence source
+      description: What should Svikruti inspect to support this? Code, cloud config, scanner output, notice text, vendor register, consent journey, etc.
+  - type: textarea
+    id: users
+    attributes:
+      label: Who needs this?
+      description: Engineering, security, legal/privacy, GRC, product, procurement, leadership, etc.
+  - type: textarea
+    id: references
+    attributes:
+      label: References or examples
+      description: Add non-confidential references, examples, or expected report language.

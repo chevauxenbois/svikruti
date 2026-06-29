@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-Production-assurance hardening.
+No unreleased changes yet.
+
+## 0.7.0 - 2026-06-29
+
+Launch trust and production-assurance release.
 
 ### Added
 
@@ -10,6 +14,9 @@ Production-assurance hardening.
   inferred, failing, and unknown production-readiness dimensions.
 - Scan quality profile (`svikruti-scan-quality-v1`) with parser coverage,
   parser engines, parser errors, and limitations.
+- Dedicated Scan Quality views in the HTML report and dashboard that show
+  inspected scope, parser coverage, confidence mix, limitations, and manual
+  verification steps before teams rely on a scan.
 - Semantic parser layer using Python AST and structured heuristics for
   JavaScript/TypeScript, Java, Go, Ruby, PHP, SQL, Prisma, GraphQL, OpenAPI,
   Postman, and Kubernetes evidence.
@@ -17,6 +24,10 @@ Production-assurance hardening.
   JS/TS, Java, Go, Ruby, and PHP evidence.
 - Dashboard Assurance tab with production claim, score, dimension chart,
   evidence counts, and unknowns to close before production claims.
+- Dashboard Evidence Explorer columns for confidence, detector ID, and language.
+- Launch demo artifacts generated from the realistic multi-language fixture.
+- GitHub issue templates for bugs, false positives/negatives, parser requests,
+  and DPDPA control suggestions.
 - Cloud/IaC guardrail detection for public storage, public databases, disabled
   encryption, permissive IAM, wildcard CORS, audit logging, WAF/private network
   evidence, and public-access blocking evidence.

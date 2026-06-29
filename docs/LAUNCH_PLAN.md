@@ -19,7 +19,12 @@ The first module is **Svikruti Evidence Workbench**:
 The day-1 launchable product is a local CLI plus offline workbench:
 
 ```bash
-pipx run svikruti scan --repo . --url https://example.com --out dpdpa-report.html
+git clone https://github.com/chevauxenbois/svikruti.git
+cd svikruti
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[parsers]'
+svikruti scan --repo . --url https://example.com --out dpdpa-report.html
 ```
 
 It produces:
@@ -196,7 +201,7 @@ Subheadline:
 Primary CTA:
 
 ```bash
-pipx run svikruti scan --repo . --url https://yourdomain.com
+git clone https://github.com/chevauxenbois/svikruti.git && cd svikruti && python3 -m venv .venv && source .venv/bin/activate && python -m pip install -e '.[parsers]'
 ```
 
 Launch claim:
