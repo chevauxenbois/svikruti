@@ -9,12 +9,34 @@ from typing import Iterable
 from svikruti.models import ScanResult
 
 
+# Cell prefixes that spreadsheet applications may interpret as formulas.
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_safe(value: object) -> object:
+    """Guard against CSV formula injection (CWE-1236).
+
+    Any text cell starting with =, +, -, @, tab, or CR is prefixed with a
+    single quote so spreadsheet apps treat it as text, not a formula.
+    Numeric/bool cells pass through unchanged. Used by every CSV writer in
+    this module via _write_rows.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, (int, float, bool)):
+        return value
+    text = str(value)
+    if text.startswith(_FORMULA_PREFIXES):
+        return "'" + text
+    return text
+
+
 def _write_rows(output_path: str, headers: Iterable[str], rows: Iterable[Iterable[object]]) -> None:
     with Path(output_path).open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(list(headers))
+        writer.writerow([_csv_safe(header) for header in headers])
         for row in rows:
-            writer.writerow(["" if value is None else value for value in row])
+            writer.writerow([_csv_safe(value) for value in row])
 
 
 def _join(value: object) -> str:

@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from svikruti.ai import generate_ai_insights
-from svikruti.models import ScanResult
+from svikruti.models import Evidence, ScanResult
 from svikruti.scanner.assurance import build_assurance_profile
 from svikruti.scanner.browser import scan_consent_journey
-from svikruti.scanner.code import scan_repo
+from svikruti.scanner.code import MAX_FILE_BYTES, scan_repo
 from svikruti.scanner.dpdpa import build_evidence_graph, build_ropa_starter, notice_gap_check, summarize
 from svikruti.scanner.semantic import scan_semantic_evidence
 from svikruti.scanner.technical import (
@@ -49,6 +50,17 @@ def run_scan(
         semantic_result = scan_semantic_evidence(repo)
         result.evidence.extend(semantic_result.evidence)
         result.scan_quality = semantic_result.quality_profile(files_scanned)
+        # Surface size-based skips so coverage claims stay honest.
+        result.scan_quality["skipped_large_files"] = code_result.skipped_large_files
+        if code_result.skipped_large_files:
+            result.scan_quality.setdefault("limitations", []).append(
+                f"{code_result.skipped_large_files} file(s) larger than {MAX_FILE_BYTES} bytes were skipped and not scanned."
+            )
+        result.scan_quality["skipped_vendored_files"] = code_result.skipped_vendored_files
+        if code_result.skipped_vendored_files:
+            result.scan_quality.setdefault("limitations", []).append(
+                f"{code_result.skipped_vendored_files} vendored/minified third-party file(s) (node_modules, vendor/, *.min.js, ...) were skipped; first-party code only."
+            )
         result.evidence.extend(scan_technical_evidence(repo))
     else:
         result.scan_quality = {
@@ -77,7 +89,27 @@ def run_scan(
         privacy_notice_text = Path(privacy_file).read_text(encoding="utf-8", errors="ignore")
 
     if privacy_url:
-        privacy_notice_text = _fetch_privacy_url(privacy_url)
+        try:
+            privacy_notice_text = _fetch_privacy_url(privacy_url)
+        except ValueError as exc:
+            # Rejected (e.g. non-http(s) scheme): record honest error
+            # evidence instead of silently proceeding or crashing.
+            result.evidence.append(
+                Evidence(
+                    kind="privacy_notice_fetch_failed",
+                    label="Privacy notice URL rejected",
+                    severity="MEDIUM",
+                    source="website",
+                    detail=str(exc),
+                    recommendation="Provide a publicly reachable http(s) URL for the privacy notice.",
+                    category="Notice transparency",
+                    metadata={
+                        "detector_id": "runner.privacy_url.rejected",
+                        "confidence": "high",
+                        "evidence_ref": f"{privacy_url}:privacy_url",
+                    },
+                )
+            )
 
     result.summary = summarize(result.evidence, files_scanned, pages_scanned)
     result.ropa_starter = build_ropa_starter(result.evidence)
@@ -97,6 +129,12 @@ def run_scan(
 
 
 def _fetch_privacy_url(url: str) -> str:
+    # SSRF hardening: never fetch non-http(s) URLs (file://, ftp://, ...).
+    scheme = urlparse(url).scheme.lower()
+    if scheme not in {"http", "https"}:
+        raise ValueError(
+            f"Privacy notice URL must use http or https; refusing to fetch scheme '{scheme or 'none'}' ({url})."
+        )
     request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.4 (+https://svikruti.ai)"})
     with urlopen(request, timeout=20) as response:
         body = response.read(2_500_001)

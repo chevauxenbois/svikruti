@@ -45,7 +45,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Use Playwright to test consent behavior before/after reject/accept. Requires svikruti[browser].",
     )
-    scan.add_argument("--out", default="svikruti-report.html", help="HTML report output path.")
+    scan.add_argument(
+        "--out",
+        help="HTML report output path (default: svikruti-report.html, or report.html inside --evidence-pack).",
+    )
     scan.add_argument("--json-out", help="Optional JSON report output path.")
     scan.add_argument("--sarif-out", help="Optional SARIF report output path for GitHub code scanning.")
     scan.add_argument("--ropa-out", help="Optional RoPA starter CSV output path.")
@@ -56,14 +59,27 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--notice-patch-out", help="Optional privacy notice patch draft Markdown output path.")
     scan.add_argument("--issues-out", help="Optional copy-ready GitHub/Jira issue pack Markdown output path.")
     scan.add_argument(
+        "--evidence-pack",
+        metavar="DIR",
+        help=(
+            "Write the full artifact set into DIR with default names (report.html, report.json, "
+            "report.sarif, ropa.csv, actions.csv, vendors.csv, controls.csv, breach-readiness.md, "
+            "notice-patch.md, fix-pack.md). Explicit individual output flags override the matching pack file. "
+            "DIR is created if missing."
+        ),
+    )
+    scan.add_argument(
         "--security-evidence",
         action="append",
         default=[],
         help="Import SARIF, Trivy, Gitleaks, OSV, or compatible JSON security scanner output. Repeat for multiple files.",
     )
     scan.add_argument("--ai", action="store_true", help="Generate optional AI co-pilot commentary using a configured provider key.")
-    scan.add_argument("--ai-provider", default="gemini", choices=["gemini", "openai"], help="AI provider for --ai.")
-    scan.add_argument("--ai-model", help="AI model for --ai. Defaults to SVIKRUTI_AI_MODEL or the package default.")
+    scan.add_argument("--ai-provider", default="gemini", choices=["gemini", "openai"], help="AI provider for --ai (default: gemini).")
+    scan.add_argument(
+        "--ai-model",
+        help="AI model for --ai. Defaults to SVIKRUTI_AI_MODEL or the package default (gemini-2.5-flash for gemini, gpt-4.1-mini for openai).",
+    )
     scan.add_argument("--ai-out", help="Optional AI co-pilot brief Markdown output path.")
     scan.add_argument(
         "--save-history",
@@ -75,7 +91,12 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument(
         "--fail-on",
         choices=["low", "medium", "high", "critical"],
-        help="Exit with code 3 when the scan reaches this risk level or higher.",
+        help=(
+            "Exit with code 3 when the scan reaches this risk level or higher. "
+            "Risk-score bands: LOW 0-24, MEDIUM 25-49, HIGH 50-74, CRITICAL 75-100 "
+            "(severity-tiered model; ~3 critical + 5 high findings land in HIGH; "
+            "the CRITICAL band requires sustained critical evidence)."
+        ),
     )
 
     init = subparsers.add_parser("init-github-action", help="Create a Svikruti GitHub Actions workflow.")
@@ -108,6 +129,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command != "scan":
         parser.print_help()
         return 2
+
+    pack_files = _apply_evidence_pack(args)
+    if args.out is None:
+        args.out = "svikruti-report.html"
 
     try:
         result = run_scan(
@@ -152,6 +177,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print(f"Svikruti report written: {output_path.resolve()}")
+    if args.evidence_pack:
+        pack_summary = ", ".join(pack_files) if pack_files else "none (all outputs overridden by explicit flags)"
+        print(f"Svikruti evidence pack written: {Path(args.evidence_pack).resolve()} [{pack_summary}]")
     print(
         f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100), "
         f"evidence items: {len(result.evidence)}, files scanned: {result.summary.files_scanned}"
@@ -160,6 +188,34 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Risk gate failed: {result.summary.risk_level} >= {args.fail_on.upper()}", file=sys.stderr)
         return 3
     return 0
+
+
+_EVIDENCE_PACK_DEFAULTS = (
+    ("out", "report.html"),
+    ("json_out", "report.json"),
+    ("sarif_out", "report.sarif"),
+    ("ropa_out", "ropa.csv"),
+    ("actions_out", "actions.csv"),
+    ("vendors_out", "vendors.csv"),
+    ("controls_out", "controls.csv"),
+    ("breach_out", "breach-readiness.md"),
+    ("notice_patch_out", "notice-patch.md"),
+    ("issues_out", "fix-pack.md"),
+)
+
+
+def _apply_evidence_pack(args: argparse.Namespace) -> list[str]:
+    """Fill unset output paths from --evidence-pack DIR. Explicit flags win."""
+    if not getattr(args, "evidence_pack", None):
+        return []
+    pack_dir = Path(args.evidence_pack)
+    pack_dir.mkdir(parents=True, exist_ok=True)
+    written: list[str] = []
+    for attr, filename in _EVIDENCE_PACK_DEFAULTS:
+        if getattr(args, attr) is None:
+            setattr(args, attr, str(pack_dir / filename))
+            written.append(filename)
+    return written
 
 
 def _launch_dashboard(db_path: str, report_path: str | None, port: int, host: str) -> int:

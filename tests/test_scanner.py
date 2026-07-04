@@ -189,7 +189,10 @@ class ScannerTests(unittest.TestCase):
         self.assertIn("semantic.js.request_body.government_id", detector_ids)
         self.assertIn("semantic.java.field.government_id", detector_ids)
         self.assertIn("semantic.go.field.health", detector_ids)
-        self.assertIn("semantic.ruby.request_source.children", detector_ids)
+        # The route line "post /students" alone is ambiguous (students ->
+        # student needs corroboration); the permit() line carries the real
+        # children signal through unambiguous student_age/guardian tokens.
+        self.assertIn("semantic.ruby.storage_sink.children", detector_ids)
         self.assertIn("semantic.php.request_source.financial", detector_ids)
         self.assertIn("semantic.prisma.schema_field.government_id", detector_ids)
         self.assertIn("semantic.openapi.request_source.government_id", detector_ids)

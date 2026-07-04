@@ -7,6 +7,7 @@ Multi-user, multi-tenant with role-based access control and comprehensive error 
 Enhanced UX with styled containers, clean typography, and dark theme consistency.
 """
 
+import html
 import streamlit as st
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List
@@ -158,7 +159,9 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
 
                 with col1:
                     if st.button("Edit Entry", key="ropa_edit_btn", use_container_width=True):
-                        st.info("Edit functionality: Database integration ready.")
+                        matching = [e for e in ropa_entries if e.get("activity_name") == selected_activity]
+                        if matching:
+                            st.session_state["ropa_edit_id"] = matching[0].get("id")
 
                 with col2:
                     if st.button("Delete Entry", key="ropa_delete_btn", use_container_width=True):
@@ -166,10 +169,110 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                             matching = [e for e in ropa_entries if e.get("activity_name") == selected_activity]
                             if matching:
                                 _safe_db_call(db.delete_ropa_entry, matching[0].get("id"))
+                                st.session_state.pop("ropa_edit_id", None)
                                 st.success("Entry deleted successfully.")
                                 st.rerun()
                         except Exception as e:
                             st.error("Unable to delete entry. Please try again.")
+
+                # Inline edit form for the selected entry
+                edit_id = st.session_state.get("ropa_edit_id")
+                if edit_id is not None:
+                    entry = next((e for e in ropa_entries if e.get("id") == edit_id), None)
+                    if entry is None:
+                        st.session_state.pop("ropa_edit_id", None)
+                    else:
+                        st.markdown(
+                            '<h3 style="color: #E2E8F0; margin-top: 24px; margin-bottom: 16px;">Edit Entry</h3>',
+                            unsafe_allow_html=True
+                        )
+                        lawful_basis_options = [
+                            "Consent - Section 6", "Voluntary Provision - Section 7(a)",
+                            "Employment - Section 7(b)", "State Functions - Section 7(c)",
+                            "Legal Obligation - Section 7(d)", "Medical Emergency - Section 7(e)"
+                        ]
+                        current_basis = entry.get("lawful_basis", "")
+                        basis_index = (
+                            lawful_basis_options.index(current_basis)
+                            if current_basis in lawful_basis_options else 0
+                        )
+
+                        with st.form("ropa_edit_form"):
+                            ecol1, ecol2 = st.columns(2)
+
+                            with ecol1:
+                                edit_activity_name = st.text_input(
+                                    "Activity Name *", value=entry.get("activity_name", "")
+                                )
+                                edit_department = st.text_input(
+                                    "Department", value=entry.get("department", "") or ""
+                                )
+                                edit_lawful_basis = st.selectbox(
+                                    "Lawful Basis *", lawful_basis_options, index=basis_index
+                                )
+                                edit_retention = st.text_input(
+                                    "Retention Period", value=entry.get("retention_period", "") or ""
+                                )
+
+                            with ecol2:
+                                edit_data_categories = st.text_area(
+                                    "Data Categories * (comma-separated)",
+                                    value=entry.get("data_categories", ""), height=68
+                                )
+                                edit_data_subjects = st.text_area(
+                                    "Data Subjects * (comma-separated)",
+                                    value=entry.get("data_subjects", ""), height=68
+                                )
+                                edit_processor = st.text_input(
+                                    "Data Processor", value=entry.get("data_processor", "") or ""
+                                )
+                                edit_location = st.text_input(
+                                    "Processing Location", value=entry.get("processing_location", "") or ""
+                                )
+
+                            edit_purpose = st.text_area(
+                                "Purpose *", value=entry.get("purpose", ""), height=80
+                            )
+                            edit_security = st.text_area(
+                                "Security Measures", value=entry.get("security_measures", "") or "", height=68
+                            )
+                            edit_cross_border = st.checkbox(
+                                "Cross-border Data Transfer", value=bool(entry.get("cross_border"))
+                            )
+
+                            scol1, scol2 = st.columns(2)
+                            save_edit = scol1.form_submit_button("Save Changes", use_container_width=True)
+                            cancel_edit = scol2.form_submit_button("Cancel", use_container_width=True)
+
+                        if save_edit:
+                            if not (edit_activity_name and edit_data_categories and edit_data_subjects and edit_purpose):
+                                st.error("Activity name, data categories, data subjects and purpose are required.")
+                            else:
+                                updated = _safe_db_call(
+                                    db.update_ropa_entry,
+                                    edit_id,
+                                    activity_name=edit_activity_name,
+                                    department=edit_department,
+                                    data_categories=edit_data_categories,
+                                    data_subjects=edit_data_subjects,
+                                    purpose=edit_purpose,
+                                    lawful_basis=edit_lawful_basis,
+                                    retention_period=edit_retention,
+                                    data_processor=edit_processor,
+                                    processing_location=edit_location,
+                                    security_measures=edit_security,
+                                    cross_border=1 if edit_cross_border else 0,
+                                )
+                                if updated:
+                                    st.session_state.pop("ropa_edit_id", None)
+                                    st.success("Entry updated successfully.")
+                                    st.rerun()
+                                else:
+                                    st.error("Unable to update entry. Please try again.")
+
+                        if cancel_edit:
+                            st.session_state.pop("ropa_edit_id", None)
+                            st.rerun()
         else:
             _render_empty_state(
                 "No processing activities recorded yet.",
@@ -772,7 +875,7 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
                         unsafe_allow_html=True
                     )
 
-                    st.markdown(f'<h2 style="color: #14B8A6; margin-bottom: 12px;">{notice.get("title", "Privacy Notice")}</h2>', unsafe_allow_html=True)
+                    st.markdown(f'<h2 style="color: #14B8A6; margin-bottom: 12px;">{html.escape(str(notice.get("title", "Privacy Notice")))}</h2>', unsafe_allow_html=True)
                     st.caption(f"Version {notice.get('version', '1.0')} | Last updated {notice.get('last_updated', 'N/A')}")
 
                     st.markdown('---')
@@ -1018,8 +1121,8 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                         'border-radius: 8px; padding: 16px; margin-bottom: 16px;">',
                         unsafe_allow_html=True
                     )
-                    st.markdown(f'<p><strong>Requester:</strong> {req.get("requester_name", "")} ({req.get("requester_email", "")})</p>', unsafe_allow_html=True)
-                    st.markdown(f'<p><strong>Type:</strong> {req.get("request_type", "")}</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p><strong>Requester:</strong> {html.escape(str(req.get("requester_name", "")))} ({html.escape(str(req.get("requester_email", "")))})</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p><strong>Type:</strong> {html.escape(str(req.get("request_type", "")))}</p>', unsafe_allow_html=True)
                     st.markdown(f'<p><strong>Identity Verified:</strong> {"Yes" if req.get("identity_verified") else "No"}</p>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
 

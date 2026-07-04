@@ -92,6 +92,21 @@ jobs:
             svikruti-ai-brief.md
 ```
 
+`--fail-on` gates on the overall risk level. Risk-score bands are LOW 0-24,
+MEDIUM 25-49, HIGH 50-74, and CRITICAL 75-100, computed with a saturating
+model, so `--fail-on critical` requires substantial deduplicated negative
+evidence rather than a single finding.
+
+Uploaded SARIF severity notes: imported security evidence honors the
+`security-severity` property, and findings without an explicit `level` are
+treated as MEDIUM. Imported scanner messages are truncated and secret values
+from secret-scanner runs are redacted before they reach artifacts.
+
+If you install the optional `svikruti[parsers]` extra in CI, note that the
+tree-sitter language pack may download grammars on first use. Pre-provision
+or cache the grammars for offline runners and supply-chain-sensitive
+pipelines.
+
 Use the technical-control CSV and breach-readiness Markdown when security,
 privacy, or legal reviewers ask whether the product has evidence for
 encryption, third-party processing, vulnerability management, endpoint/workload

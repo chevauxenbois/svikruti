@@ -37,9 +37,9 @@ COMPLIANCE_CATEGORIES = {
         "weight": 0.12,
         "description": "Publishing comprehensive data protection policies"
     },
-    "Data Subject Rights": {
+    "Data Principal Rights": {
         "weight": 0.15,
-        "description": "Enabling rights like access, correction, deletion"
+        "description": "Enabling rights like access, correction, erasure and nomination"
     },
     "Breach Notification": {
         "weight": 0.12,
@@ -116,7 +116,7 @@ SDF_STATUSES = [status.value for status in SDFStatus]
 COMPLIANCE_DEADLINES = {
     "DPDP Rules Compliance": {
         "date": datetime(2025, 11, 13),
-        "description": "Deadline for compliance with DPDP Rules 2024",
+        "description": "DPDP Rules, 2025 notified (November 13, 2025); initial provisions take effect",
         "priority": "HIGH"
     },
     "Consent Manager Implementation": {
@@ -132,16 +132,20 @@ COMPLIANCE_DEADLINES = {
 }
 
 # ==================== PENALTY AMOUNTS ====================
-# As per DPDPA sections 25 & 26
+# Maximum penalties as per the Schedule to the DPDPA, imposed by the
+# Data Protection Board of India under Section 33
 PENALTY_AMOUNTS = {
-    "violation": 50000000,           # Up to Rs. 5 crore
-    "severe_violation": 200000000,   # Up to Rs. 20 crore
-    "right_denial": 100000000,       # Up to Rs. 10 crore
+    "security_safeguards_breach": 2500000000,    # Up to Rs. 250 crore - Section 8(5)
+    "breach_notification_failure": 2000000000,   # Up to Rs. 200 crore - Section 8(6)
+    "children_obligations_breach": 2000000000,   # Up to Rs. 200 crore - Section 9
+    "sdf_obligations_breach": 1500000000,        # Up to Rs. 150 crore - Section 10
+    "data_principal_duties_breach": 10000,       # Up to Rs. 10,000 - Section 15
+    "residual_breach": 500000000,                # Up to Rs. 50 crore - any other breach of the Act/Rules
 }
 
 # ==================== CONSENT MANAGER REQUIREMENTS ====================
 CONSENT_MANAGER_RULES = {
-    "data_controller_onboarding": "SDFs and other controllers must onboard",
+    "data_fiduciary_onboarding": "Data Fiduciaries may integrate with Consent Managers registered with the Data Protection Board of India",
     "user_preference_storage": "Store and manage user preferences",
     "audit_trail": "Maintain comprehensive audit logs",
     "transparency_framework": "Provide clear consent information",
@@ -191,24 +195,24 @@ GAP_ASSESSMENT_QUESTIONS: Dict[str, List[Dict]] = {
             "hint": "Be transparent about data transfers"
         }
     ],
-    "Data Subject Rights": [
+    "Data Principal Rights": [
         {
             "id": "dsr_1",
             "question": "Can users request access to their personal data?",
             "options": ["Yes", "No", "Partially"],
-            "hint": "Right to access is mandatory"
+            "hint": "Right to access is mandatory (Section 11)"
         },
         {
             "id": "dsr_2",
-            "question": "Can users request correction/deletion of their data?",
+            "question": "Can users request correction/erasure of their data?",
             "options": ["Yes", "No", "Partially"],
-            "hint": "Rights to rectification and erasure are required"
+            "hint": "Rights to correction, completion, updating and erasure are required (Section 12)"
         },
         {
             "id": "dsr_3",
-            "question": "Do you respond to data subject requests within 30 days?",
+            "question": "Do you respond to Data Principal requests within your published response time?",
             "options": ["Yes", "No", "Partially"],
-            "hint": "Response deadline is 30 days from receipt"
+            "hint": "Respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)"
         }
     ],
     "Breach Notification": [
@@ -220,9 +224,9 @@ GAP_ASSESSMENT_QUESTIONS: Dict[str, List[Dict]] = {
         },
         {
             "id": "bn_2",
-            "question": "Do you notify authorities within 72 hours of a breach?",
+            "question": "Do you intimate the Data Protection Board of India immediately, with a detailed report within 72 hours of a breach?",
             "options": ["Yes", "No", "Partially"],
-            "hint": "Authority notification deadline is 72 hours"
+            "hint": "Immediate intimation plus a detailed 72-hour report to the Board (Section 8(6); Rule 7, DPDP Rules 2025); affected Data Principals must also be intimated"
         },
         {
             "id": "bn_3",
@@ -320,9 +324,9 @@ GAP_ASSESSMENT_QUESTIONS: Dict[str, List[Dict]] = {
         },
         {
             "id": "gr_2",
-            "question": "Do you respond to grievances within 30 days?",
+            "question": "Do you respond to grievances within your published response time?",
             "options": ["Yes", "No", "Partially"],
-            "hint": "Response deadline is 30 days"
+            "hint": "Respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules) - Section 13"
         },
         {
             "id": "gr_3",
@@ -357,7 +361,7 @@ DOCUMENT_TYPES = {
             "Parties and Scope",
             "Processing Instructions",
             "Sub-processor Authorization",
-            "Data Subject Rights",
+            "Data Principal Rights",
             "Security Measures",
             "Audit Rights",
             "Liability",
@@ -382,7 +386,7 @@ DOCUMENT_TYPES = {
         "name": "Consent Form",
         "description": "User consent form for personal data collection",
         "sections": [
-            "Data Controller Info",
+            "Data Fiduciary Info",
             "Data Collection Purpose",
             "Data Categories",
             "Processing Duration",

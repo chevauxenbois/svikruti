@@ -63,10 +63,29 @@ STRONG_CRYPTO_PATTERNS = {
 
 WEAK_CRYPTO_REGEXES = {
     "MD5 hashing": re.compile(r"\b(md5|createHash\([\"']md5[\"']|hashlib\.md5)\b", re.IGNORECASE),
-    "SHA1 hashing": re.compile(r"\b(sha1|createHash\([\"']sha1[\"']|hashlib\.sha1)\b", re.IGNORECASE),
-    "DES / RC4": re.compile(r"\b(des|3des|rc4)\b", re.IGNORECASE),
-    "ECB mode": re.compile(r"\b(ecb|MODE_ECB|AES/ECB)\b", re.IGNORECASE),
-    "Non-crypto randomness": re.compile(r"\b(Math\.random|random\.random\(\))\b", re.IGNORECASE),
+    # SHA1 only in an actual crypto/hash call context (sha1(, getInstance("SHA-1"),
+    # hashlib.sha1, createHash('sha1')), never as a bare word (git SHAs, docs).
+    "SHA1 hashing": re.compile(
+        r"(?i)(hashlib\.sha1|createHash\(\s*[\"']sha-?1[\"']|getInstance\(\s*[\"']sha-?1[\"']|\bsha-?1\s*\()"
+    ),
+    "DES / RC4": re.compile(r"(?i)\b(3des|des|rc4)\b"),
+    "ECB mode": re.compile(r"(?i)(MODE_ECB|AES/ECB|/ECB[/\"'\s)]|\becb\b)"),
+    # Fixed dead regex: the old trailing \b after ')' could never match.
+    # Now both the JS (Math.random() and Python (random.random()) branches fire.
+    "Non-crypto randomness": re.compile(r"(?i)(Math\.random\s*\(|(?<![\w.])random\.random\s*\()"),
+}
+
+# Math.random()/random.random() is only a security problem when the value
+# feeds tokens/secrets/session IDs - most uses (jitter, sampling, UI) are
+# fine. It is therefore reported at MEDIUM ("verify usage"), not HIGH.
+WEAK_CRYPTO_SEVERITY_OVERRIDES = {"Non-crypto randomness": "MEDIUM"}
+
+# Ambiguous weak-crypto tokens (des, rc4, ecb) also occur as ordinary
+# identifiers/prose, so those subtypes additionally require a crypto-context
+# term on the SAME line before they count as evidence.
+WEAK_CRYPTO_CONTEXT_REGEXES = {
+    "DES / RC4": re.compile(r"(?i)(cipher|crypt|encrypt|decrypt|algorithm|getinstance|commoncrypto|openssl)"),
+    "ECB mode": re.compile(r"(?i)(cipher|crypt|aes|\bdes\b|\bmode\b|mode_ecb|getinstance|openssl)"),
 }
 
 SECRET_REGEXES = {
@@ -77,7 +96,47 @@ SECRET_REGEXES = {
     ),
 }
 
-INSECURE_HTTP_RE = re.compile(r"http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0|example\.com|schemas\.|www\.w3\.org)", re.IGNORECASE)
+INSECURE_HTTP_RE = re.compile(r"http://([^\s\"'<>()\[\]]+)", re.IGNORECASE)
+
+# Non-risk http:// destinations: local/loopback, documentation placeholders,
+# XML namespaces and schema/license URLs. Matched against the URL remainder.
+HTTP_URL_ALLOWLIST = (
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "example.com",
+    "example.org",
+    "schemas.",
+    "www.w3.org",
+    "w3.org/",
+    "apache.org/licenses",
+    "opensource.org",
+    # License/attribution URLs common in font and asset headers.
+    "scripts.sil.org",
+    "creativecommons.org",
+    "gnu.org/licenses",
+)
+
+# Lines that are clearly comments should not raise insecure-transport findings.
+COMMENT_LINE_PREFIXES = ("//", "#", "*", "<!--", "/*")
+
+# Keep HIGH severity only when the http:// URL appears in a fetch/request/
+# endpoint/config-value context; other mentions are downgraded to MEDIUM.
+HTTP_RISK_CONTEXT_RE = re.compile(
+    r"(?i)(fetch|axios|request|urlopen|urllib|httpx|http\.get|curl|wget|endpoint|base_?url|api[_-]?url|"
+    r"url\s*[:=]|uri\s*[:=]|host\s*[:=]|server\s*[:=]|proxy|webhook)"
+)
+
+
+def _skip_insecure_http(line: str, url_rest: str) -> bool:
+    stripped = line.lstrip()
+    if stripped.startswith(COMMENT_LINE_PREFIXES):
+        return True
+    if "xmlns" in line.lower():
+        return True
+    lowered_url = url_rest.lower()
+    return any(token in lowered_url for token in HTTP_URL_ALLOWLIST)
+
 
 CLOUD_MISCONFIG_REGEXES = {
     "Public storage ACL": re.compile(r"\bacl\s*=\s*[\"']public-(read|write|read-write)[\"']", re.IGNORECASE),
@@ -228,25 +287,38 @@ def scan_technical_evidence(repo_path: str) -> List[Evidence]:
         file_context = _file_context(rel, text)
         if file_context == "reference":
             continue
+        # Test/fixture code: weak-crypto, insecure-HTTP, and cloud-misconfig
+        # patterns there are fixtures/assertions, not production posture
+        # (benchmark: 19 of 21 wildcard-CORS findings on a real Django app
+        # were test assertions). Secret detection still runs on tests -
+        # committed real credentials in test configs are a classic leak.
+        is_test_context = file_context == "test"
         lowered = text.lower()
         lines = text.splitlines()
 
         for index, line in enumerate(lines, start=1):
-            _append_regex_evidence(
-                evidence,
-                seen,
-                rel,
-                path,
-                file_context,
-                index,
-                line,
-                WEAK_CRYPTO_REGEXES,
-                kind="weak_crypto",
-                severity="HIGH",
-                category="Security safeguards",
-                detail_prefix="Weak or legacy cryptography pattern detected",
-                recommendation="Use modern, reviewed cryptography and document the control protecting personal data.",
-            )
+            if not is_test_context:
+                _append_regex_evidence(
+                    evidence,
+                    seen,
+                    rel,
+                    path,
+                    file_context,
+                    index,
+                    line,
+                    WEAK_CRYPTO_REGEXES,
+                    kind="weak_crypto",
+                    severity="HIGH",
+                    category="Security safeguards",
+                    detail_prefix="Weak or legacy cryptography pattern detected",
+                    recommendation="Use modern, reviewed cryptography and document the control protecting personal data.",
+                    context_regexes=WEAK_CRYPTO_CONTEXT_REGEXES,
+                    severity_overrides=WEAK_CRYPTO_SEVERITY_OVERRIDES,
+                )
+            # Secrets are scanned in test files too (committed real
+            # credentials in test configs are a classic leak), but at MEDIUM:
+            # benchmark showed all 31 secret hits on a real ecommerce repo
+            # were intentional fake keys in payment-gateway tests.
             _append_regex_evidence(
                 evidence,
                 seen,
@@ -257,20 +329,26 @@ def scan_technical_evidence(repo_path: str) -> List[Evidence]:
                 line,
                 SECRET_REGEXES,
                 kind="secret_exposure",
-                severity="CRITICAL",
+                severity="MEDIUM" if is_test_context else "CRITICAL",
                 category="Security safeguards",
-                detail_prefix="Potential hard-coded secret or credential detected",
+                detail_prefix=(
+                    "Potential hard-coded credential in TEST code (verify it is not a real key)"
+                    if is_test_context
+                    else "Potential hard-coded secret or credential detected"
+                ),
                 recommendation="Remove the secret, rotate it, and use a managed secret store.",
             )
-            if INSECURE_HTTP_RE.search(line):
+            http_match = None if is_test_context else INSECURE_HTTP_RE.search(line)
+            if http_match and not _skip_insecure_http(line, http_match.group(1)):
                 key = f"insecure_transport:{rel}:{index}"
                 if key not in seen:
                     seen.add(key)
+                    http_severity = "HIGH" if HTTP_RISK_CONTEXT_RE.search(line) else "MEDIUM"
                     evidence.append(
                         _evidence(
                             kind="insecure_transport",
                             label="Insecure HTTP endpoint detected",
-                            severity="HIGH",
+                            severity=http_severity,
                             rel=rel,
                             path=path,
                             line=index,
@@ -281,21 +359,22 @@ def scan_technical_evidence(repo_path: str) -> List[Evidence]:
                             extra={"control_id": "DPDPA-TECH-001", "subtype": "HTTP endpoint"},
                         )
                     )
-            _append_regex_evidence(
-                evidence,
-                seen,
-                rel,
-                path,
-                file_context,
-                index,
-                line,
-                CLOUD_MISCONFIG_REGEXES,
-                kind="cloud_misconfiguration",
-                severity="HIGH",
-                category="Security safeguards",
-                detail_prefix="Cloud or infrastructure misconfiguration pattern detected",
-                recommendation="Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
-            )
+            if not is_test_context:
+                _append_regex_evidence(
+                    evidence,
+                    seen,
+                    rel,
+                    path,
+                    file_context,
+                    index,
+                    line,
+                    CLOUD_MISCONFIG_REGEXES,
+                    kind="cloud_misconfiguration",
+                    severity="HIGH",
+                    category="Security safeguards",
+                    detail_prefix="Cloud or infrastructure misconfiguration pattern detected",
+                    recommendation="Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
+                )
 
         for subtype, needles in STRONG_CRYPTO_PATTERNS.items():
             if any(needle.lower() in lowered for needle in needles):
@@ -448,7 +527,13 @@ def build_technical_controls(evidence: Iterable[Evidence]) -> List[Dict[str, Any
     controls: List[Dict[str, Any]] = []
     for spec in CONTROL_CATALOG:
         positive = _matching_evidence(items, spec["positive_kinds"], spec["positive_subtypes"])
-        negative = [item for item in items if item.kind in spec["negative_kinds"]]
+        # A control flips to "failing" (and thus breach posture "not_ready")
+        # only on CRITICAL/HIGH findings; MEDIUM/LOW findings do not fail it.
+        negative = [
+            item
+            for item in items
+            if item.kind in spec["negative_kinds"] and item.severity in {"HIGH", "CRITICAL"}
+        ]
         imported_high = [
             item
             for item in positive
@@ -578,9 +663,14 @@ def _append_regex_evidence(
     category: str,
     detail_prefix: str,
     recommendation: str,
+    context_regexes: Optional[Dict[str, re.Pattern[str]]] = None,
+    severity_overrides: Optional[Dict[str, str]] = None,
 ) -> None:
     for subtype, regex in regexes.items():
         if not regex.search(line):
+            continue
+        context_regex = (context_regexes or {}).get(subtype)
+        if context_regex is not None and not context_regex.search(line):
             continue
         key = f"{kind}:{subtype}:{rel}:{line_number}"
         if key in seen:
@@ -590,7 +680,7 @@ def _append_regex_evidence(
             _evidence(
                 kind=kind,
                 label=subtype,
-                severity=severity,
+                severity=(severity_overrides or {}).get(subtype, severity),
                 rel=rel,
                 path=path,
                 line=line_number,
@@ -680,24 +770,55 @@ def _parse_security_payload(path: Path, data: Any) -> List[Evidence]:
     if isinstance(data, dict) and "Results" in data:
         return _parse_trivy(path, data)
     if isinstance(data, dict) and "vulns" in data:
+        # OSV API response shape: {"vulns": [...]}.
         return _parse_osv(path, data)
+    if isinstance(data, dict) and _looks_like_osv_scanner(data):
+        # `osv-scanner --json` shape: {"results": [{"source": ..., "packages":
+        # [{"package": ..., "vulnerabilities": [...]}]}]}.
+        return _parse_osv_scanner(path, data)
     if isinstance(data, dict) and ("leaks" in data or "Leaks" in data):
         return _parse_gitleaks(path, data.get("leaks") or data.get("Leaks") or [])
     if isinstance(data, list):
-        return _parse_gitleaks(path, data)
-    return [
-        Evidence(
-            kind="import_error",
-            label="Unknown security scan format",
-            severity="LOW",
-            source="security-import",
-            file=str(path),
-            detail="Security JSON did not match SARIF, Trivy, Gitleaks, or OSV shapes.",
-            recommendation="Use --security-evidence with supported scanner outputs.",
-            category="Breach readiness",
-            metadata={"detector_id": "security_import.unknown_format", "evidence_ref": str(path), "confidence": "low"},
-        )
-    ]
+        # A bare JSON list is only Gitleaks when items actually look like
+        # Gitleaks findings; otherwise emit an unrecognized-format note.
+        if _looks_like_gitleaks(data):
+            return _parse_gitleaks(path, data)
+        return [_unknown_format_evidence(path, "Bare JSON list did not look like Gitleaks findings (no RuleID/Description/File keys).")]
+    return [_unknown_format_evidence(path, "Security JSON did not match SARIF, Trivy, Gitleaks, osv-scanner, or OSV-API shapes.")]
+
+
+def _looks_like_osv_scanner(data: Dict[str, Any]) -> bool:
+    results = data.get("results")
+    if not isinstance(results, list):
+        return False
+    return any(isinstance(result, dict) and isinstance(result.get("packages"), list) for result in results)
+
+
+def _looks_like_gitleaks(items: Sequence[Any]) -> bool:
+    dict_items = [item for item in items if isinstance(item, dict)]
+    if not items:
+        # An empty list is a valid empty Gitleaks report.
+        return True
+    if not dict_items:
+        return False
+    return all(
+        any(key in item for key in ("RuleID", "Description", "File", "rule"))
+        for item in dict_items[:20]
+    )
+
+
+def _unknown_format_evidence(path: Path, reason: str) -> Evidence:
+    return Evidence(
+        kind="import_error",
+        label="Unknown security scan format",
+        severity="LOW",
+        source="security-import",
+        file=str(path),
+        detail=reason,
+        recommendation="Use --security-evidence with supported scanner outputs.",
+        category="Breach readiness",
+        metadata={"detector_id": "security_import.unknown_format", "evidence_ref": str(path), "confidence": "low"},
+    )
 
 
 def _parse_sarif(path: Path, data: Dict[str, Any]) -> List[Evidence]:
@@ -711,8 +832,7 @@ def _parse_sarif(path: Path, data: Dict[str, Any]) -> List[Evidence]:
         for result_index, result in enumerate(run.get("results", []) or []):
             rule_id = str(result.get("ruleId") or "sarif-result")
             rule = rules.get(rule_id, {})
-            level = str(result.get("level") or "warning").lower()
-            severity = "CRITICAL" if level == "error" else "HIGH" if level == "warning" else "MEDIUM"
+            severity = _sarif_severity(result, rule)
             location = _sarif_location(result)
             evidence.append(
                 Evidence(
@@ -722,7 +842,11 @@ def _parse_sarif(path: Path, data: Dict[str, Any]) -> List[Evidence]:
                     source="security-import",
                     file=location.get("file") or str(path),
                     line=location.get("line"),
-                    detail=str((result.get("message") or {}).get("text") or rule.get("shortDescription", {}).get("text") or "Imported SARIF security finding."),
+                    detail=_sanitize_import_text(
+                        (result.get("message") or {}).get("text")
+                        or rule.get("shortDescription", {}).get("text")
+                        or "Imported SARIF security finding."
+                    ),
                     recommendation="Triage this scanner result and attach remediation/acceptance evidence to breach readiness.",
                     category="Breach readiness",
                     metadata={
@@ -751,7 +875,7 @@ def _parse_trivy(path: Path, data: Dict[str, Any]) -> List[Evidence]:
                     severity=severity,
                     source="security-import",
                     file=target,
-                    detail=str(vuln.get("Title") or vuln.get("Description") or "Imported Trivy vulnerability."),
+                    detail=_sanitize_import_text(vuln.get("Title") or vuln.get("Description") or "Imported Trivy vulnerability."),
                     recommendation="Patch, upgrade, suppress with justification, or document risk acceptance before launch.",
                     category="Breach readiness",
                     metadata={
@@ -779,7 +903,7 @@ def _parse_osv(path: Path, data: Dict[str, Any]) -> List[Evidence]:
                 severity="HIGH",
                 source="security-import",
                 file=str(path),
-                detail=str(vuln.get("summary") or "Imported OSV vulnerability."),
+                detail=_sanitize_import_text(vuln.get("summary") or "Imported OSV vulnerability."),
                 recommendation="Patch, upgrade, suppress with justification, or document risk acceptance before launch.",
                 category="Breach readiness",
                 metadata={
@@ -790,6 +914,50 @@ def _parse_osv(path: Path, data: Dict[str, Any]) -> List[Evidence]:
                 },
             )
         )
+    return evidence
+
+
+def _parse_osv_scanner(path: Path, data: Dict[str, Any]) -> List[Evidence]:
+    """Parse real `osv-scanner --json` output: results[].packages[].vulnerabilities[]."""
+    evidence: List[Evidence] = []
+    for result in data.get("results", []) or []:
+        if not isinstance(result, dict):
+            continue
+        source = (result.get("source") or {})
+        source_path = str(source.get("path") or path)
+        for package in result.get("packages", []) or []:
+            if not isinstance(package, dict):
+                continue
+            package_info = package.get("package") or {}
+            package_name = package_info.get("name")
+            package_version = package_info.get("version")
+            for vuln in package.get("vulnerabilities", []) or []:
+                if not isinstance(vuln, dict):
+                    continue
+                vuln_id = str(vuln.get("id") or "osv-vulnerability")
+                database_specific = vuln.get("database_specific") or {}
+                raw_severity = database_specific.get("severity")
+                severity = _normalize_import_severity(raw_severity) if raw_severity else "HIGH"
+                evidence.append(
+                    Evidence(
+                        kind="imported_security_finding",
+                        label=f"OSV vulnerability: {vuln_id}",
+                        severity=severity,
+                        source="security-import",
+                        file=source_path,
+                        detail=_sanitize_import_text(vuln.get("summary") or "Imported osv-scanner vulnerability."),
+                        recommendation="Patch, upgrade, suppress with justification, or document risk acceptance before launch.",
+                        category="Breach readiness",
+                        metadata={
+                            "detector_id": f"security_import.osv.{normalize_text(vuln_id)}",
+                            "confidence": "high",
+                            "evidence_ref": f"{path.name}:osv-scanner:{vuln_id}",
+                            "scanner": "osv-scanner",
+                            "package": package_name,
+                            "installed_version": package_version,
+                        },
+                    )
+                )
     return evidence
 
 
@@ -807,7 +975,7 @@ def _parse_gitleaks(path: Path, leaks: Sequence[Any]) -> List[Evidence]:
                 source="security-import",
                 file=str(leak.get("File") or path),
                 line=_safe_int(leak.get("StartLine")),
-                detail=str(leak.get("Description") or "Imported Gitleaks secret finding."),
+                detail=_sanitize_import_text(leak.get("Description") or "Imported Gitleaks secret finding."),
                 recommendation="Remove the secret, rotate it, and prove the secret is now managed outside source control.",
                 category="Security safeguards",
                 metadata={
@@ -821,6 +989,60 @@ def _parse_gitleaks(path: Path, leaks: Sequence[Any]) -> List[Evidence]:
             )
         )
     return evidence
+
+
+def _sarif_severity(result: Dict[str, Any], rule: Dict[str, Any]) -> str:
+    """Map a SARIF result to severity.
+
+    Honors properties."security-severity" (CVSS-style score) when present:
+    >=9 CRITICAL, >=7 HIGH, >=4 MEDIUM, else LOW. Otherwise maps SARIF level:
+    error -> HIGH, warning -> MEDIUM, note/none -> LOW, absent -> MEDIUM.
+    """
+    merged_properties: Dict[str, Any] = {}
+    for source in (rule.get("properties"), result.get("properties")):
+        if isinstance(source, dict):
+            merged_properties.update(source)
+    raw_score = merged_properties.get("security-severity")
+    if raw_score is not None:
+        try:
+            cvss = float(raw_score)
+        except (TypeError, ValueError):
+            cvss = None
+        if cvss is not None:
+            if cvss >= 9.0:
+                return "CRITICAL"
+            if cvss >= 7.0:
+                return "HIGH"
+            if cvss >= 4.0:
+                return "MEDIUM"
+            return "LOW"
+    level = result.get("level")
+    if level is None:
+        return "MEDIUM"
+    level_text = str(level).lower()
+    if level_text == "error":
+        return "HIGH"
+    if level_text == "warning":
+        return "MEDIUM"
+    return "LOW"
+
+
+# Cap and redact imported scanner text before it enters evidence details so
+# scanner messages cannot leak secrets into reports or AI packets.
+IMPORT_DETAIL_MAX_CHARS = 300
+_SECRET_RUN_RE = re.compile(r"[A-Za-z0-9+/=_-]{21,}")
+
+
+def _redact_secret_runs(text: str) -> str:
+    return _SECRET_RUN_RE.sub(lambda match: f"{match.group(0)[:6]}…REDACTED…{match.group(0)[-4:]}", text)
+
+
+def _sanitize_import_text(value: Any, limit: int = IMPORT_DETAIL_MAX_CHARS) -> str:
+    text = " ".join(str(value or "").split())
+    text = _redact_secret_runs(text)
+    if len(text) > limit:
+        text = text[: limit - 1] + "…"
+    return text
 
 
 def _sarif_location(result: Dict[str, Any]) -> Dict[str, Any]:

@@ -18,7 +18,12 @@ from typing import Dict, Iterable, List, Optional, Set
 
 from svikruti.models import Evidence
 from svikruti.scanner.code import _file_context, _language_for, iter_source_files
-from svikruti.scanner.patterns import PERSONAL_DATA_PATTERNS, normalize_text
+from svikruti.scanner.patterns import (
+    AMBIGUOUS_SENSITIVE_TERMS,
+    CATEGORY_SEVERITY,
+    PERSONAL_DATA_PATTERNS,
+    normalize_text,
+)
 from svikruti.scanner.tree_sitter_backend import scan_tree_sitter_evidence
 
 
@@ -102,7 +107,12 @@ def scan_semantic_evidence(repo_path: str) -> SemanticScanResult:
             continue
         rel = str(path.relative_to(root))
         file_context = _file_context(rel, text)
-        if file_context == "reference":
+        # Prose (.md/.txt) is "reference" context: it is scanned only for
+        # literal identifiers by code.py; semantic parsing does not apply.
+        # Test/fixture code is skipped too: its request/db/log flows exercise
+        # production paths with fake data (benchmark: the majority of
+        # semantic contact-sink findings on a real Django app were tests).
+        if file_context in ("reference", "test"):
             continue
 
         suffix = path.suffix.lower()
@@ -963,7 +973,14 @@ def _categories_for_text(text: str) -> List[str]:
     found: Set[str] = set()
     normalized = normalize_text(text)
     for pattern in PERSONAL_DATA_PATTERNS:
-        if _pattern_matches(normalized, pattern.terms):
+        # Ambiguous tokens (minor/school/patient/address/mobile/health/...)
+        # are excluded here: semantic matching runs over whole function-body
+        # text, which is far too coarse for corroboration checks. code.py
+        # still covers those terms line-by-line with corroboration.
+        # Benchmark: "amount in minor units" in payment code produced
+        # CRITICAL Children findings via this path.
+        unambiguous = [t for t in pattern.terms if t not in AMBIGUOUS_SENSITIVE_TERMS]
+        if unambiguous and _pattern_matches(normalized, unambiguous):
             found.add(pattern.category)
     return sorted(found)
 
@@ -988,11 +1005,11 @@ def _pattern_matches(normalized_text: str, terms: List[str]) -> bool:
 
 
 def _severity_for_category(category: str) -> str:
-    if category in {"Government ID", "Health", "Children", "Financial"}:
-        return "HIGH"
-    if category in {"Location", "Device"}:
-        return "MEDIUM"
-    return "LOW"
+    # Single source of truth: the category -> severity table lives in
+    # patterns.py (CATEGORY_SEVERITY). This module previously kept its own
+    # divergent copy (Contact/Identity=LOW, Location=MEDIUM), which
+    # contradicted the patterns.py table in reports.
+    return CATEGORY_SEVERITY.get(category, "LOW")
 
 
 def _severity_rank(severity: str) -> int:
@@ -1042,6 +1059,11 @@ def _evidence(
     extra: Dict[str, object],
 ) -> Evidence:
     evidence_ref = f"{rel}:{line}:{detector_id}" if line else f"{rel}:{detector_id}"
+    parser = _parser_for_path(path)
+    # Confidence honesty: only the stdlib Python AST engine performs real
+    # structural parsing. Every *_heuristic engine is regex/substring based
+    # and reports "medium" so downstream consumers do not over-trust it.
+    confidence = "high" if parser == "python.ast" else "medium"
     return Evidence(
         kind=kind,
         label=label,
@@ -1054,11 +1076,11 @@ def _evidence(
         category=category,
         metadata={
             "detector_id": detector_id,
-            "confidence": "high",
+            "confidence": confidence,
             "evidence_ref": evidence_ref,
             "file_context": file_context,
             "language": _language_for(path),
-            "parser": _parser_for_path(path),
+            "parser": parser,
             **extra,
         },
     )

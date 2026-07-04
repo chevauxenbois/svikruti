@@ -75,7 +75,22 @@ source .venv/bin/activate
 python -m pip install -e '.[parsers]'
 ```
 
-Generate a realistic evidence pack:
+Generate a full evidence pack with one flag:
+
+```bash
+svikruti scan \
+  --repo examples/realistic \
+  --privacy-file examples/privacy.html \
+  --security-evidence examples/security/trivy.json \
+  --evidence-pack svikruti-pack
+```
+
+That writes `report.html`, `report.json`, `report.sarif`, RoPA/actions/vendors/
+controls CSVs, breach-readiness, notice-patch, and fix-pack Markdown into
+`svikruti-pack/`. Explicit individual output flags override the matching pack
+file.
+
+Or pick every output path yourself:
 
 ```bash
 svikruti scan \
@@ -112,7 +127,10 @@ svikruti dashboard
 
 ## One Command, One Evidence Pack
 
-Install the optional parser pack for stronger AST-backed production scans:
+The base scanner uses Python AST plus validated pattern heuristics. Install the
+optional parser pack to add a tree-sitter AST backend for JS/TS, Java, Go,
+Ruby, and PHP (the language pack may download grammars on first use, so
+pre-provision the environment for offline or air-gapped CI runs):
 
 ```bash
 python -m pip install -e '.[parsers]'
@@ -134,6 +152,9 @@ svikruti scan \
   --notice-patch-out notice-patch.md \
   --issues-out fix-pack.md
 ```
+
+Prefer one flag? `--evidence-pack DIR` writes the same artifact set into `DIR`
+with default names; explicit individual flags override the matching pack file.
 
 Save scan history and open the interactive dashboard:
 
@@ -200,7 +221,8 @@ Svikruti is not another static compliance checklist.
   storage writes, with scan-quality reporting.
 - **Optional tree-sitter backend**: install `svikruti[parsers]` to add
   tree-sitter AST evidence for JS/TS, Java, Go, Ruby, and PHP while keeping the
-  base scanner dependency-light.
+  base scanner dependency-light. Note: the language pack may download grammars
+  on first use, so pre-provision it for offline or supply-chain-sensitive CI.
 - **Technical-control native**: treats encryption, key management, secrets,
   vulnerability management, monitoring, endpoint/workload detection, backups,
   and incident response as DPDPA evidence.
@@ -250,6 +272,39 @@ Use the **Scan Quality** view before making claims from a report. It shows
 parser coverage, inspected scope, confidence mix, limitations, and human
 verification steps.
 
+## Real-Repository Benchmark
+
+Svikruti's detectors are calibrated against real open-source repositories,
+not just its own fixtures. Numbers below are from scanning three well-known
+OSS projects (July 2026, default install, no AI):
+
+| Repository | Type | Files | Risk score | CRITICAL+HIGH findings | Manually verified precision |
+| --- | --- | --- | --- | --- | --- |
+| [excalidraw](https://github.com/excalidraw/excalidraw) | Drawing tool (almost no PII) | 750 | 37 MEDIUM | 6 | 1/6 (all 6 human-reviewed) |
+| [healthchecks](https://github.com/healthchecks/healthchecks) | Uptime alerting (real contact data) | 952 | 42 MEDIUM | 141 | ~84% (44 sampled) |
+| [saleor](https://github.com/saleor/saleor) | E-commerce platform (heavy PII) | 4,528 | 60 HIGH | 678 | ~80% (41 sampled) |
+
+How to read this:
+
+- A repo with almost no personal data (excalidraw) produces a handful of
+  findings, not hundreds - before this calibration pass it produced 221
+  CRITICAL/HIGH findings and a 97/100 score; now it produces 6.
+- Repos that genuinely process contact, payment, and address data score in
+  the MEDIUM/HIGH bands with mostly-true findings (roughly 4 of 5
+  CRITICAL/HIGH findings on healthchecks and saleor point at real
+  personal-data flows or security-relevant patterns).
+- The CRITICAL band is reserved for repos with real critical evidence
+  (validated identifiers, live secrets, children-data signals) - volume of
+  lower-severity inventory findings can never reach it.
+
+Precision was judged by a manual review pass: every excalidraw finding was
+inspected; healthchecks and saleor were randomly sampled (44/141 and 41/678
+findings), so the extrapolated figures carry roughly +/-10 points of sampling
+error, and borderline categories (weak-crypto and logging-proximity findings)
+could swing either way under a stricter or looser rubric. Test/fixture code,
+vendored assets, and docs are automatically down-weighted or skipped; the
+Scan Quality panel in every report shows exactly what was excluded.
+
 ## What It Looks For
 
 Svikruti v1 is built for the messy middle between legal checklists and code
@@ -260,11 +315,13 @@ It currently looks for:
 
 - personal-data categories such as identity, contact, government ID, financial,
   location, children, health, device, and tracking data
-- Indian identifier patterns such as PAN, Aadhaar-like values, mobile numbers,
-  UPI IDs, and emails
+- Indian identifier patterns such as PAN (holder-type and context validated),
+  Aadhaar numbers (Verhoeff-checksum validated), mobile numbers
+  (boundary-safe matching), UPI IDs, and emails
 - collection points in forms, request bodies, checkout/signup/profile flows,
   and website fields
 - storage points in schemas, models, SQL files, database writes, and ORM hints
+- personal data and credentials in `.env` and `.env.*` configuration files
 - logging exposure where personal data appears near `console.log`, `logger`,
   `print`, or similar statements
 - India-relevant and global vendors, SDKs, scripts, and analytics/payment tools
@@ -370,6 +427,12 @@ Core modules:
 | Knowledge Base | DPDPA sections, definitions, checklist items, FAQs, and practical guidance |
 | Settings | Organization profile, user/org configuration, SDF-related setup |
 
+The knowledge base, assessment config, and document generator are aligned to
+the DPDP Act 2023 as enacted (44 sections plus the Schedule of penalties) and
+the DPDP Rules 2025. Legal content is a practitioner aid: always verify
+section text, penalty amounts, and timelines against the gazetted text and
+current rules before relying on them.
+
 AI app modules:
 
 | Module | What it does |
@@ -456,7 +519,7 @@ The HTML output is an offline evidence workbench:
 Scanner inputs:
 
 - repository source code
-- public website URL
+- public website URL (a single page is fetched and analyzed)
 - privacy notice URL or local privacy notice file
 - optional browser consent journey through Playwright
 - optional SARIF, Trivy, Gitleaks, OSV, or compatible JSON security evidence
@@ -483,7 +546,10 @@ from fields that privacy, legal, procurement, or engineering must confirm.
 ## AI Co-pilot
 
 AI is opt-in. The CLI does not call an AI provider unless `--ai` is passed.
-The scanner sends a compact evidence packet, not full repository files.
+The scanner sends a compact, redacted evidence packet, not full repository
+files, and evidence strings are marked as untrusted data in the prompt. The
+default provider is `gemini` with model `gemini-2.5-flash`; override with
+`--ai-provider` and `--ai-model`.
 
 Set the API key for your configured provider in the environment, then run:
 
@@ -526,6 +592,10 @@ Browser mode checks:
 - accept button presence
 - withdrawal/preferences discoverability
 
+The browser waits for network idle (6 seconds by default) before evaluating,
+and accept-button clicks are only counted when the control appears inside a
+consent context.
+
 ## GitHub Pull-Request Gate
 
 Generate a workflow:
@@ -561,17 +631,39 @@ Repository scan currently detects signals for:
 - logging near personal-data terms
 - India-relevant and global third-party tools
 
-Website scan currently detects:
+Website scan fetches a single page (the URL you pass) and currently detects:
 
 - visible form fields
-- third-party scripts
-- cookies on first response
+- third-party scripts (classified by script URL host)
+- cookies on the first response, including multiple `Set-Cookie` headers
 - privacy notice links
 - consent copy without obvious withdrawal copy
 
 Privacy notice comparison maps detected data categories and vendors against
 notice coverage to identify gaps such as "Location data detected but not clearly
 disclosed."
+
+### Detection Quality
+
+Recent accuracy work makes findings harder to fake and easier to trust:
+
+- Aadhaar candidates must pass Verhoeff checksum validation and start with a
+  digit 2-9; random 12-digit numbers no longer match.
+- PAN detection validates the holder-type character and requires supporting
+  context; standalone lookalike tokens are ignored.
+- Indian mobile numbers are matched with strict boundaries so digits inside
+  longer numbers, IDs, or hashes do not trigger findings.
+- Ambiguous standalone terms (for example `state`, `ip`, `zip`, `pan` on their
+  own) are no longer treated as personal-data evidence.
+- Children-data and health-data findings need corroborating evidence before
+  they can escalate a scan to CRITICAL.
+- Heuristic parser engines report `medium` confidence; only Python AST
+  evidence is reported as `high`.
+- The risk score is severity-tiered and bounded: each severity level saturates
+  independently, so volume of MEDIUM/LOW inventory findings can never push a
+  repository into the CRITICAL band - only real critical evidence can
+  and cross-layer deduplication, and excludes positive (passing) evidence.
+  Bands: LOW 0-24, MEDIUM 25-49, HIGH 50-74, CRITICAL 75-100.
 
 ## Project Structure
 
@@ -645,9 +737,18 @@ Enterprise/hosted direction:
 - Static scanner mode does not execute customer source code.
 - CLI scan runs locally by default.
 - AI is disabled unless explicitly enabled.
-- AI requests are compact evidence packets, not full repositories.
+- AI requests are compact evidence packets, not full repositories. The packet
+  is redacted before sending, and evidence strings are marked as untrusted
+  data in the prompt.
+- Messages imported from external scanners (SARIF, Trivy, Gitleaks, OSV) are
+  truncated, and secret values from secret-scanner runs are redacted before
+  they reach reports.
+- CSV exports are guarded against spreadsheet formula injection.
 - Reports may contain file paths, line numbers, inferred data categories, and
   vendor names; review before sharing externally.
+- The optional `parsers` extra (tree-sitter language pack) may download
+  grammars on first use; pre-provision it for offline or
+  supply-chain-sensitive environments.
 - Svikruti is an evidence and workflow tool, not legal advice or compliance
   certification.
 
@@ -666,7 +767,9 @@ Suggested launch wedge:
 See [ROADMAP.md](ROADMAP.md) for the launch roadmap and contribution areas.
 
 - richer privacy notice semantic comparison
-- secret and sensitive value redaction before report generation
+- full secret and sensitive value redaction before report generation
+  (partially done: imported secret-scanner runs are already redacted and
+  imported messages truncated)
 - authenticated app scanning
 - deeper framework-specific code analysis
 - hosted evidence vault

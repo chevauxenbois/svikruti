@@ -16,9 +16,16 @@ from svikruti.models import Evidence
 from svikruti.scanner.patterns import THIRD_PARTY_PATTERNS
 
 
-ACCEPT_TERMS = ["accept", "agree", "allow all", "yes", "i agree"]
+# Conservative consent-family terms only. "yes" was removed: it matched
+# arbitrary yes/no dialogs (newsletters, age gates, chat prompts) that have
+# nothing to do with consent.
+ACCEPT_TERMS = ["accept", "agree", "allow all", "i agree"]
 REJECT_TERMS = ["reject", "decline", "deny", "necessary only", "essential only"]
 WITHDRAW_TERMS = ["withdraw", "cookie settings", "privacy settings", "manage consent", "preferences"]
+
+# Default post-click observation window. 2.5s proved too short — many tag
+# managers batch/fire trackers several seconds after consent interaction.
+DEFAULT_IDLE_WAIT_MS = 6000
 
 
 @dataclass
@@ -27,7 +34,7 @@ class ConsentJourneyResult:
     phases: Dict[str, List[str]] = field(default_factory=dict)
 
 
-def scan_consent_journey(url: str, timeout_ms: int = 12000) -> ConsentJourneyResult:
+def scan_consent_journey(url: str, timeout_ms: int = 12000, idle_wait_ms: int = DEFAULT_IDLE_WAIT_MS) -> ConsentJourneyResult:
     try:
         from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
         from playwright.sync_api import sync_playwright
@@ -48,13 +55,18 @@ def scan_consent_journey(url: str, timeout_ms: int = 12000) -> ConsentJourneyRes
             initial_domains = _observe_phase(page, url, timeout_ms)
             phases["before_consent"] = sorted(initial_domains)
 
+            # Limitation: we only observe network traffic for a fixed idle
+            # window in the same page state after clicking reject. CMPs that
+            # apply the rejected state after a reload, persist it in storage,
+            # or queue tracker calls beyond the window are not fully
+            # captured — absence of traffic here is not proof of compliance.
             reject_clicked = _click_by_terms(page, REJECT_TERMS, timeout_ms)
-            reject_domains = _observe_idle(page, timeout_ms)
+            reject_domains = _observe_idle(page, timeout_ms, idle_wait_ms)
             phases["after_reject"] = sorted(reject_domains)
 
             page.goto(url, wait_until="networkidle", timeout=timeout_ms)
             accept_clicked = _click_by_terms(page, ACCEPT_TERMS, timeout_ms)
-            accept_domains = _observe_idle(page, timeout_ms)
+            accept_domains = _observe_idle(page, timeout_ms, idle_wait_ms)
             phases["after_accept"] = sorted(accept_domains)
 
             page_text = page.locator("body").inner_text(timeout=timeout_ms).lower()
@@ -189,12 +201,12 @@ def _observe_phase(page, url: str, timeout_ms: int) -> Set[str]:
     return {domain for domain in domains if domain}
 
 
-def _observe_idle(page, timeout_ms: int) -> Set[str]:
+def _observe_idle(page, timeout_ms: int, idle_wait_ms: int = DEFAULT_IDLE_WAIT_MS) -> Set[str]:
     domains: Set[str] = set()
     handler = lambda request: domains.add(_domain(request.url))
     page.on("request", handler)
     try:
-        page.wait_for_timeout(min(timeout_ms, 2500))
+        page.wait_for_timeout(min(timeout_ms, idle_wait_ms))
     finally:
         page.remove_listener("request", handler)
     return {domain for domain in domains if domain}
@@ -210,14 +222,20 @@ def _click_by_terms(page, terms: List[str], timeout_ms: int) -> bool:
                 return True
         except Exception:
             continue
-    for term in terms:
-        try:
-            locator = page.locator(f"text=/{re.escape(term)}/i").first
-            if locator.count() > 0:
-                locator.click(timeout=min(timeout_ms, 5000))
-                return True
-        except Exception:
-            continue
+    # Fallback: only click obvious clickable controls whose own text matches
+    # a consent-family term. The old fallback clicked ANY page text matching
+    # a term (e.g. the word "accept" in a paragraph), which could interact
+    # with unrelated UI.
+    try:
+        locator = page.locator(
+            "button, [role='button'], input[type='submit'], input[type='button'], a",
+            has_text=pattern,
+        ).first
+        if locator.count() > 0:
+            locator.click(timeout=min(timeout_ms, 5000))
+            return True
+    except Exception:
+        pass
     return False
 
 

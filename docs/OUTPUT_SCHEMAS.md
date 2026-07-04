@@ -6,7 +6,8 @@ files and machine-readable files.
 
 The CSV schemas are versioned through the first column. This lets downstream
 teams import Svikruti outputs into spreadsheets, GRC tools, Jira, Linear, or a
-future hosted Svikruti evidence vault without guessing the format.
+future hosted Svikruti evidence vault without guessing the format. CSV cell
+values are guarded against spreadsheet formula injection before export.
 
 ## Evidence Confidence
 
@@ -20,6 +21,10 @@ Confidence values:
 | high | Direct form field, literal personal-data pattern, logging exposure, or live website field evidence |
 | medium | Strong code context such as storage, collection, or known vendor/tool reference |
 | low | Weak contextual reference that needs human review |
+
+Parser-derived evidence follows the same scale with one hard rule: heuristic
+parser engines report at most `medium` confidence. Only the Python AST engine
+produces `high`-confidence parser evidence.
 
 ## Parser Coverage
 
@@ -43,7 +48,8 @@ Current parser strategy:
 - Python uses the standard-library AST to detect model/schema fields, request
   sources, logging sinks, and database writes.
 - JavaScript/TypeScript uses conservative endpoint/body/log/database heuristics
-  until an optional tree-sitter backend is added.
+  in the base install; the optional tree-sitter backend replaces them with AST
+  evidence when installed.
 - Java, Go, Ruby, and PHP use framework-aware heuristics for common controller,
   request, logging, and persistence patterns.
 - SQL, Prisma, GraphQL, OpenAPI, Postman, and Kubernetes manifests are scanned
@@ -51,6 +57,8 @@ Current parser strategy:
 - Optional `svikruti[parsers]` installs `tree-sitter-language-pack` and enables
   AST-backed evidence for JS/TS, Java, Go, Ruby, and PHP. Parser engines appear
   as values such as `tree_sitter.javascript` in `scan_quality.parser_engines`.
+  The language pack may download grammars on first use; pre-provision it for
+  offline or supply-chain-sensitive CI environments.
 - Regex scanning still runs as a fallback and coverage layer.
 
 Every evidence-backed row should include one or more `Evidence References`.
@@ -116,7 +124,7 @@ fields:
 - repository path and URL
 - risk level and score
 - evidence count
-- files/pages scanned
+- files scanned and the website page scanned (website scans fetch one page)
 - personal-data categories
 - third parties
 - technical controls
@@ -137,6 +145,20 @@ Use it for:
 - diffing scans over time
 - custom analytics
 - debugging scanner output
+
+### Risk Score
+
+The summary `risk_score` (0-100) is a severity-tiered bounded model: each
+severity tier saturates independently (CRITICAL cap 55, HIGH 35, MEDIUM 6,
+LOW 1), with cross-layer
+deduplication. Positive (passing) evidence does not increase the score.
+
+| Band | Level |
+| --- | --- |
+| 0-24 | LOW |
+| 25-49 | MEDIUM |
+| 50-74 | HIGH |
+| 75-100 | CRITICAL |
 
 ### Assurance Profile
 
@@ -191,6 +213,15 @@ Use it for:
 - PR annotations
 - GitHub Security / Code Scanning
 - CI gates
+
+Security-evidence import notes:
+
+- Imported SARIF severity honors the `security-severity` property; findings
+  without a `level` are treated as MEDIUM.
+- `osv-scanner --json` output is parsed in addition to the OSV-style formats.
+- Imported scanner messages are truncated, and secret values from
+  secret-scanner runs (for example Gitleaks) are redacted before they appear
+  in any report or export.
 
 ## RoPA CSV
 
@@ -400,7 +431,8 @@ Current scanner strengths:
 Current limits:
 
 - static analysis can miss runtime-only flows
-- unauthenticated website scans can miss logged-in products
+- website scans fetch a single page; unauthenticated scans can miss logged-in
+  products
 - framework-specific dataflow analysis is still shallow
 - vendor purpose, DPA status, transfers, and retention need human confirmation
 - cloud/security-tool coverage is inferred from repository/config/imported

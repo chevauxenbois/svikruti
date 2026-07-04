@@ -2,6 +2,13 @@
 
 This module is deliberately optional. If `tree-sitter-language-pack` is not
 installed, the scanner continues with dependency-free semantic heuristics.
+
+Supply-chain / network warning: `tree-sitter-language-pack` may download
+prebuilt grammar binaries on first use for some distributions. That is both a
+network dependency and a supply-chain consideration for a privacy/compliance
+tool. Offline or hardened environments should pre-provision the wheel (and
+its bundled grammars) from a vetted internal index rather than relying on
+first-use fetches.
 """
 
 from __future__ import annotations
@@ -11,7 +18,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
 from svikruti.scanner.code import _language_for
-from svikruti.scanner.patterns import PERSONAL_DATA_PATTERNS, normalize_text
+from svikruti.scanner.patterns import CATEGORY_SEVERITY, PERSONAL_DATA_PATTERNS, normalize_text
 
 
 LANGUAGE_BY_SUFFIX = {
@@ -63,6 +70,9 @@ def scan_tree_sitter_evidence(
     if not language:
         return [], None, None
     try:
+        # NOTE: importing/using the language pack can trigger a first-use
+        # download of prebuilt grammars (network + supply-chain concern);
+        # see the module docstring. Pre-provision grammars for offline use.
         from tree_sitter_language_pack import get_parser
     except ImportError:
         return [], None, None
@@ -92,6 +102,12 @@ def scan_tree_sitter_evidence(
         seen.add(key)
         kind, label_suffix, area = _role_shape(role)
         detector_id = f"semantic.treesitter.{language}.{role}.{normalize_text(category)}"
+        # Confidence policy (mirrors semantic.py): tree-sitter identifies the
+        # token structurally, but the role assignment below is partly
+        # heuristic. Only "storage_field" comes directly from structural
+        # ancestry (a model/schema field definition), so it earns "high";
+        # every other role is "medium".
+        confidence = "high" if role == "storage_field" else "medium"
         evidence.append(
             Evidence(
                 kind=kind,
@@ -105,7 +121,7 @@ def scan_tree_sitter_evidence(
                 category=area,
                 metadata={
                     "detector_id": detector_id,
-                    "confidence": "high",
+                    "confidence": confidence,
                     "evidence_ref": f"{rel}:{line}:{detector_id}",
                     "file_context": file_context,
                     "language": _language_for(path),
@@ -153,6 +169,12 @@ def _line_number(node: Any) -> int:
 
 
 def _role_for_node(text: str, lines: List[str], node: Any) -> Optional[str]:
+    # Honest limitation: only the "storage_field" role is derived from real
+    # tree structure (ancestor node kinds). The log/request/storage roles
+    # below sniff substrings on the surrounding source lines, which is why
+    # findings for those roles carry "medium" confidence. A future
+    # improvement is to classify by call-expression nodes instead of line
+    # text; kept as-is here to avoid risky behaviour changes.
     ancestor_kinds = set(_ancestor_kinds(node, limit=6))
     line_number = _line_number(node)
     line = lines[line_number - 1] if 0 <= line_number - 1 < len(lines) else ""
@@ -228,11 +250,9 @@ def _pattern_matches(normalized_text: str, terms: List[str]) -> bool:
 def _severity_for(category: str, role: str) -> str:
     if role == "log_sink" and category in {"Government ID", "Health", "Children"}:
         return "CRITICAL"
-    if category in {"Government ID", "Health", "Children", "Financial"}:
-        return "HIGH"
-    if category in {"Location", "Device"}:
-        return "MEDIUM"
-    return "LOW"
+    # Category severities come from the shared patterns.py table so all
+    # engines report consistently.
+    return CATEGORY_SEVERITY.get(category, "LOW")
 
 
 def _severity_rank(severity: str) -> int:

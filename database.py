@@ -40,14 +40,19 @@ class Database:
             db_path: Path to SQLite database file. If None, uses temp directory.
         """
         if db_path is None:
-            import os
-            # Use persistent volume on Railway/Docker, fallback to temp dir
+            # Use persistent volume on Railway/Docker, fallback to a
+            # user-private app directory (never a world-shared temp dir).
             data_dir = os.environ.get("DATA_DIR", "/data")
             if os.path.isdir(data_dir) and os.access(data_dir, os.W_OK):
                 self.db_path = str(Path(data_dir) / "svikruti_data.db")
             else:
-                import tempfile
-                self.db_path = str(Path(tempfile.gettempdir()) / "svikruti_data.db")
+                app_dir = Path.home() / ".svikruti"
+                app_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+                try:
+                    os.chmod(app_dir, 0o700)
+                except OSError:
+                    pass
+                self.db_path = str(app_dir / "svikruti_data.db")
         else:
             self.db_path = db_path
 
@@ -82,9 +87,21 @@ class Database:
                 is_active INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP,
+                failed_login_count INTEGER DEFAULT 0,
+                last_failed_login TIMESTAMP,
                 FOREIGN KEY(org_id) REFERENCES organizations(id)
             )
         """)
+
+        # Migration for databases created before login rate-limiting columns existed
+        for migration_stmt in (
+            "ALTER TABLE users ADD COLUMN failed_login_count INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN last_failed_login TIMESTAMP",
+        ):
+            try:
+                cursor.execute(migration_stmt)
+            except sqlite3.OperationalError:
+                pass  # Column already exists
 
         # ==================== ORGANIZATIONS TABLE ====================
         cursor.execute("""
@@ -409,9 +426,17 @@ class Database:
         finally:
             conn.close()
 
+    # Brute-force protection: lock the account for LOCKOUT_MINUTES after
+    # LOCKOUT_THRESHOLD consecutive failed login attempts.
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_MINUTES = 15
+
     def authenticate_user(self, email: str, password: str) -> Optional[Dict]:
         """
-        Authenticate user by email and password.
+        Authenticate user by email and password, with brute-force lockout.
+
+        After 5 consecutive failed attempts the account is locked for
+        15 minutes. The failure counter resets on successful login.
 
         Args:
             email: User email
@@ -422,27 +447,57 @@ class Database:
         """
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT * FROM users WHERE email = ? AND is_active = 1",
-            (email,)
-        )
-        row = cursor.fetchone()
-        conn.close()
+        try:
+            cursor.execute(
+                "SELECT * FROM users WHERE email = ? AND is_active = 1",
+                (email,)
+            )
+            row = cursor.fetchone()
 
-        if not row:
+            if not row:
+                return None
+
+            user_dict = dict(row)
+
+            # Check lockout window
+            failed_count = user_dict.get('failed_login_count') or 0
+            last_failed = user_dict.get('last_failed_login')
+            if failed_count >= self.LOCKOUT_THRESHOLD and last_failed:
+                try:
+                    last_failed_dt = datetime.fromisoformat(str(last_failed))
+                except ValueError:
+                    last_failed_dt = None
+                if last_failed_dt and (
+                    datetime.utcnow() - last_failed_dt
+                    < timedelta(minutes=self.LOCKOUT_MINUTES)
+                ):
+                    # Account temporarily locked — do not even verify password
+                    return None
+
+            stored_hash = user_dict['password_hash']
+            salt = user_dict['password_salt']
+            computed_hash, _ = self._hash_password(password, salt)
+
+            if computed_hash == stored_hash:
+                # Reset failure counter and update last login
+                cursor.execute(
+                    "UPDATE users SET failed_login_count = 0, last_failed_login = NULL WHERE id = ?",
+                    (user_dict['id'],)
+                )
+                conn.commit()
+                self.update_last_login(user_dict['id'])
+                return user_dict
+
+            # Record the failed attempt
+            cursor.execute(
+                "UPDATE users SET failed_login_count = COALESCE(failed_login_count, 0) + 1, "
+                "last_failed_login = ? WHERE id = ?",
+                (datetime.utcnow().isoformat(), user_dict['id'])
+            )
+            conn.commit()
             return None
-
-        user_dict = dict(row)
-        stored_hash = user_dict['password_hash']
-        salt = user_dict['password_salt']
-
-        computed_hash, _ = self._hash_password(password, salt)
-
-        if computed_hash == stored_hash:
-            # Update last login
-            self.update_last_login(user_dict['id'])
-            return user_dict
-        return None
+        finally:
+            conn.close()
 
     def get_user(self, user_id: int) -> Optional[Dict]:
         """
@@ -622,7 +677,7 @@ class Database:
         """
         allowed_fields = {
             'name', 'industry', 'size', 'sdf_status', 'compliance_level',
-            'subscription_tier', 'max_users'
+            'subscription_tier', 'max_users', 'created_by'
         }
         fields = {k: v for k, v in kwargs.items() if k in allowed_fields}
 
@@ -695,8 +750,8 @@ class Database:
         if role not in ('admin', 'member', 'viewer'):
             raise ValueError(f"Invalid role: {role}")
 
-        token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(days=7)
+        token = secrets.token_urlsafe(16)
+        expires_at = (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
 
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -711,6 +766,52 @@ class Database:
             return token
         finally:
             conn.close()
+
+    def get_invite_by_token(self, token: str) -> Optional[Dict]:
+        """
+        Look up a pending, unexpired invite by its token.
+
+        Args:
+            token: Invite token (the invite code)
+
+        Returns:
+            Invite dict if valid (pending and unexpired), None otherwise
+        """
+        if not token:
+            return None
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM invites
+            WHERE token = ? AND status = 'pending' AND expires_at > CURRENT_TIMESTAMP
+        """, (token,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+
+    def revoke_invite(self, org_id: int, invite_id: int) -> bool:
+        """
+        Revoke a pending invite (marks it expired so it can no longer be used).
+
+        Args:
+            org_id: Organization ID (for isolation)
+            invite_id: Invite ID
+
+        Returns:
+            True if the invite was revoked
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE invites SET status = 'expired' WHERE id = ? AND org_id = ? AND status = 'pending'",
+            (invite_id, org_id)
+        )
+        conn.commit()
+        success = cursor.rowcount > 0
+        conn.close()
+        if success:
+            self.log_activity(org_id, "INVITE_REVOKED", f"Invite #{invite_id} revoked")
+        return success
 
     def get_pending_invites(self, org_id: int) -> List[Dict]:
         """
@@ -1916,14 +2017,42 @@ class Database:
         """Alias for save_assessment"""
         return self.save_assessment(org_id)
 
+    # Allowlist of tables (and their updatable columns) usable via _generic_update.
+    # Prevents SQL injection through table/column name interpolation.
+    _GENERIC_UPDATE_ALLOWLIST = {
+        'ropa_entries': {
+            'activity_name', 'department', 'data_categories', 'data_subjects',
+            'purpose', 'lawful_basis', 'retention_period', 'data_processor',
+            'processing_location', 'security_measures', 'cross_border', 'status'
+        },
+        'consent_records': {
+            'purpose', 'data_categories', 'mechanism', 'consent_text',
+            'withdrawal_method', 'is_children', 'status'
+        },
+        'privacy_notices': {
+            'notice_type', 'title', 'data_categories', 'purposes', 'third_parties',
+            'retention_info', 'rights_info', 'grievance_info', 'version', 'status'
+        },
+        'rights_requests': {
+            'request_type', 'requester_name', 'requester_email', 'description',
+            'identity_verified', 'status', 'due_date', 'response_notes'
+        },
+    }
+
     def _generic_update(self, table: str, record_id: int, **kwargs) -> bool:
-        """Generic update method for any table"""
-        if not kwargs:
+        """Generic update method restricted to allowlisted tables and columns."""
+        allowed_columns = self._GENERIC_UPDATE_ALLOWLIST.get(table)
+        if allowed_columns is None:
+            raise ValueError(f"Table not allowed for generic update: {table}")
+
+        fields = {k: v for k, v in kwargs.items() if k in allowed_columns}
+        if not fields:
             return False
+
         conn = self.get_connection()
         cursor = conn.cursor()
-        set_clause = ", ".join([f"{k} = ?" for k in kwargs.keys()])
-        values = list(kwargs.values()) + [record_id]
+        set_clause = ", ".join([f"{k} = ?" for k in fields.keys()])
+        values = list(fields.values()) + [record_id]
         cursor.execute(f"UPDATE {table} SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?", values)
         conn.commit()
         success = cursor.rowcount > 0

@@ -215,7 +215,7 @@ go_patient.go
 Svikruti detected Location data in engineering evidence, but not in the notice text.
 
 ### Evidence
-SpringCustomerController.java; customer_schema.sql; express_checkout.js; go_patient.go; laravel_checkout.php; react_signup.tsx
+customer_schema.sql; express_checkout.js; laravel_checkout.php; react_signup.tsx
 
 ### Acceptance Criteria
 - [ ] Privacy notice explicitly covers Location data or documents why it is out of scope.

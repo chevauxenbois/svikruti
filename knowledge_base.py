@@ -6,8 +6,8 @@ This module stores all DPDPA 2023 and DPDP Rules 2025 knowledge in structured da
 for the Svikruti.ai compliance tool. Pure data structure - NO AI/LLM dependency.
 
 Covers:
-- DPDPA Sections (Act sections 1-33)
-- DPDP Rules (Rules 1-16)
+- DPDPA Sections (Act sections 1-44 across 9 chapters, plus the Schedule of penalties)
+- DPDP Rules, 2025 (topic-wise guidance; verify rule numbers against the gazetted Rules)
 - Key Definitions (25+ terms)
 - Compliance Checklist (50+ items)
 - FAQ (20+ questions)
@@ -21,762 +21,735 @@ DPDPA_SECTIONS = {
     1: {
         "number": 1,
         "title": "Short Title and Commencement",
-        "summary": "This Act may be called the Digital Personal Data Protection Act, 2023. Section 1 came into force on August 4, 2023, with specific sections coming into force on prescribed dates per Government notification.",
+        "summary": "This Act may be called the Digital Personal Data Protection Act, 2023. It comes into force on such date(s) as the Central Government may appoint by notification, and different dates may be appointed for different provisions (staged commencement).",
         "key_requirements": [
             "The Act applies to processing of digital personal data",
-            "Staggered commencement dates for different provisions"
+            "Provisions are brought into force in stages by Central Government notification"
         ],
-        "applies_to": "All data fiduciaries and data principals",
+        "applies_to": "All Data Fiduciaries and Data Principals",
         "penalties": "N/A - procedural provision"
     },
     2: {
         "number": 2,
         "title": "Definitions",
-        "summary": "Defines 25 key terms used throughout the Act including Personal Data, Data Fiduciary, Data Principal, Processing, Consent, Data Protection Board, and others. Establishes foundational concepts for the entire data protection framework.",
+        "summary": "Defines the key terms used throughout the Act, including Data Principal, Data Fiduciary, Data Processor, Consent Manager, personal data, processing, and child (an individual who has not completed eighteen years of age).",
         "key_requirements": [
-            "Personal Data: any data about an individual identifiable by or in relation to such data",
-            "Data Fiduciary: person who alone or in conjunction with others determines purpose and means of processing",
-            "Data Principal: individual to whom personal data relates",
-            "Processing: automated or partly automated operations on digital personal data",
-            "Consent: voluntary, specific, informed, and clear affirmative action",
-            "Significant Data Fiduciary (SDF): high-risk fiduciaries based on criteria in Section 5"
+            "Personal data: any data about an individual who is identifiable by or in relation to such data",
+            "Data Fiduciary: any person who alone or in conjunction with other persons determines the purpose and means of processing of personal data",
+            "Data Principal: the individual to whom the personal data relates",
+            "Data Processor: any person who processes personal data on behalf of a Data Fiduciary",
+            "Consent Manager: a person registered with the Data Protection Board of India who enables a Data Principal to give, manage, review and withdraw consent (see Section 6(7)-(9))",
+            "Processing: a wholly or partly automated operation or set of operations performed on digital personal data",
+            "Child: an individual who has not completed eighteen years of age"
         ],
-        "applies_to": "All data fiduciaries, data principals, and consent managers",
+        "applies_to": "All Data Fiduciaries, Data Principals, Data Processors and Consent Managers",
         "penalties": "N/A - definitional provision"
     },
     3: {
         "number": 3,
-        "title": "Application of Act",
-        "summary": "The Act applies to processing of personal data in digital form by data fiduciaries in the territory of India. It does not apply to personal data of government employees in official capacity or non-automated processing.",
+        "title": "Application of the Act",
+        "summary": "The Act applies to the processing of digital personal data within India, and to processing outside India if it is in connection with offering goods or services to Data Principals in India. It does not apply to personal data processed by an individual for personal or domestic purposes, or to personal data made publicly available by the Data Principal or by any other person under a legal obligation.",
         "key_requirements": [
-            "Applies to digital personal data processing in India",
-            "Excludes government employee data in official capacity",
-            "Excludes non-digital/manual processing",
-            "Applies regardless of where fiduciary or principal is located"
+            "Applies to digital personal data processed within India",
+            "Extraterritorial application: processing outside India in connection with offering goods or services to Data Principals in India",
+            "Excludes processing by an individual for personal or domestic purposes",
+            "Excludes personal data made publicly available by the Data Principal, or by another person under a legal obligation to do so"
         ],
-        "applies_to": "All data fiduciaries processing digital personal data in India",
+        "applies_to": "All Data Fiduciaries processing digital personal data within the Act's scope",
         "penalties": "N/A - scope provision"
     },
     4: {
         "number": 4,
-        "title": "Grounds for Processing",
-        "summary": "Personal data may be processed only with consent of data principal or for specified legitimate uses including voluntary provision, state functions, legal obligations, and other Government-prescribed uses.",
+        "title": "Grounds for Processing Personal Data",
+        "summary": "Personal data may be processed only in accordance with the provisions of the Act, for a lawful purpose, and only (a) with the consent of the Data Principal (Section 6), or (b) for certain legitimate uses specified in Section 7.",
         "key_requirements": [
-            "Consent must be obtained (with specific, informed, and affirmative action)",
-            "Legitimate uses available without consent: voluntary provision, state functions, legal obligations",
-            "No processing for behavioral manipulation or deceptive practices",
-            "Processing purpose must be disclosed before collection"
+            "Processing only for a lawful purpose",
+            "Legal basis must be either consent (Section 6) or a certain legitimate use (Section 7)",
+            "A request for consent must be accompanied or preceded by a notice under Section 5"
         ],
-        "applies_to": "All data fiduciaries",
-        "penalties": "Up to INR 50 crore for unauthorized processing"
+        "applies_to": "All Data Fiduciaries",
+        "penalties": "Schedule (residual): up to INR 50 crore for breaches of the Act or Rules not otherwise specified"
     },
     5: {
         "number": 5,
-        "title": "Legitimate Uses",
-        "summary": "Specifies when personal data can be processed without explicit consent: (1) voluntary provision by individual, (2) state functions (subsidies, benefits, services, licenses, certificates), (3) legal compliance with judgments/court orders, (4) employment-related processing, (5) other Government-prescribed purposes.",
+        "title": "Notice",
+        "summary": "Every request for consent must be accompanied or preceded by a notice informing the Data Principal of: the personal data sought and the purpose of processing; the manner in which rights may be exercised (including withdrawal of consent under Section 6(4) and grievance redressal under Section 13); and the manner in which a complaint may be made to the Data Protection Board of India. Where consent was obtained before commencement of the Act, notice must be given as soon as reasonably practicable.",
         "key_requirements": [
-            "Voluntary provision for stated purpose",
-            "Delivery of government services and subsidies",
-            "Compliance with court orders and legal obligations",
-            "Processing must be necessary for stated legitimate purpose",
-            "No secondary use beyond stated purpose"
+            "Notice must accompany or precede every request for consent",
+            "Describe the personal data sought and the purpose of processing",
+            "Explain how to exercise rights, including withdrawal of consent (Section 6(4)) and grievance redressal (Section 13)",
+            "Explain how to make a complaint to the Data Protection Board of India",
+            "For consent obtained before commencement of the Act, give notice as soon as reasonably practicable",
+            "Give the Data Principal the option to access the notice in English or any of the 22 languages in the Eighth Schedule of the Constitution"
         ],
-        "applies_to": "Data fiduciaries - applies when fiduciary is government entity or acting on behalf",
-        "penalties": "Up to INR 50 crore for violating legitimate use boundaries"
+        "applies_to": "All Data Fiduciaries relying on consent",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     6: {
         "number": 6,
-        "title": "Notice to Data Protection Board and Data Principal",
-        "summary": "Data Fiduciary must notify the Data Protection Board without delay upon becoming aware of a data breach. Within 72 hours, detailed report must be submitted. Data Principals must be notified without delay with breach details.",
+        "title": "Consent",
+        "summary": "Consent must be free, specific, informed, unconditional and unambiguous, given by a clear affirmative action. It signifies agreement to processing for the specified purpose only, and is limited to the personal data necessary for that purpose. Consent may be withdrawn at any time, with ease comparable to that with which it was given (Section 6(4)-(6)). Consent may be given, managed, reviewed or withdrawn through a Consent Manager registered with the Data Protection Board of India (Section 6(7)-(9)).",
         "key_requirements": [
-            "Notify DPBI immediately upon breach awareness",
-            "Provide detailed 72-hour report with remedial actions",
-            "Notify affected data principals without delay",
-            "Include nature, extent, timing, and location of breach",
-            "Describe mitigation and preventive measures taken",
-            "Extensions only with written request to Board"
+            "Consent must be free, specific, informed, unconditional and unambiguous",
+            "Given by a clear affirmative action (opt-in, not opt-out)",
+            "Limited to the specified purpose and to the personal data necessary for that purpose",
+            "Withdrawal must be as easy as giving consent (Section 6(4))",
+            "Withdrawal does not affect the lawfulness of processing done before withdrawal (Section 6(5))",
+            "On withdrawal, cease processing within a reasonable time unless processing is otherwise required by law (Section 6(6))",
+            "Consent Managers must be registered with the Board, be accountable to the Data Principal, and act through an interoperable platform (Section 6(7)-(9))"
         ],
-        "applies_to": "All data fiduciaries experiencing data breaches",
-        "penalties": "Up to INR 200 crore for breach notification failure"
+        "applies_to": "All Data Fiduciaries relying on consent, and Consent Managers",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     7: {
         "number": 7,
-        "title": "Data Protection Impact Assessment",
-        "summary": "DPIA required by Significant Data Fiduciaries. Assessment must examine likelihood of harm to data principals' rights, adequacy of safeguards, and risks. Results must be documented and reviewed periodically.",
+        "title": "Certain Legitimate Uses",
+        "summary": "Personal data may be processed without consent for certain legitimate uses: (a) voluntary provision of data by the Data Principal for a specified purpose, without any indication of non-consent; (b) provision by the State of subsidies, benefits, services, certificates, licences or permits; (c) performance of State functions or in the interests of sovereignty, integrity or security of the State; (d) fulfilling a legal obligation or disclosure to the State; (e) compliance with a judgment, decree or order; (f) responding to a medical emergency involving a threat to life or health; (g) measures during an epidemic or other threat to public health; (h) measures during a disaster or breakdown of public order; and (i) employment purposes or safeguarding the employer (e.g., protection from corporate espionage, trade secrets, provision of employee benefits).",
         "key_requirements": [
-            "Mandatory for Significant Data Fiduciaries",
-            "Assess processing likely to pose risk to data principal rights",
-            "Document safeguards and risk mitigation",
-            "Review annually or when processing changes significantly",
-            "Appoint independent auditor for SDF compliance",
-            "Consider automated decision-making impacts"
+            "Voluntary provision for a specified purpose, with no indication of non-consent (Section 7(a))",
+            "State provision of subsidies, benefits, services, certificates, licences and permits (Section 7(b))",
+            "State functions and sovereignty, integrity or security of the State (Section 7(c))",
+            "Compliance with legal obligations and disclosures to the State (Section 7(d))",
+            "Compliance with judgments, decrees or orders (Section 7(e))",
+            "Medical emergencies involving a threat to life or health (Section 7(f))",
+            "Epidemics and public health measures (Section 7(g))",
+            "Disasters and breakdown of public order (Section 7(h))",
+            "Employment purposes and safeguarding the employer, e.g., prevention of corporate espionage, protection of trade secrets, provision of employee benefits (Section 7(i))",
+            "Processing must remain limited to the relevant legitimate use"
         ],
-        "applies_to": "Significant Data Fiduciaries",
-        "penalties": "Up to INR 250 crore for failure to conduct DPIA"
+        "applies_to": "Data Fiduciaries relying on legitimate uses, including the State",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     8: {
         "number": 8,
-        "title": "Data Protection Officer",
-        "summary": "Significant Data Fiduciaries must appoint a Data Protection Officer. DPO must be Indian resident, point of contact for grievances, responsible to governing body, and act as compliance focal point.",
+        "title": "General Obligations of Data Fiduciary",
+        "summary": "The Data Fiduciary is responsible for compliance with the Act, including for processing undertaken on its behalf by Data Processors (Section 8(1)-(2)). Where personal data is used to make a decision affecting the Data Principal or is disclosed to another Data Fiduciary, it must be complete, accurate and consistent (Section 8(3)). Fiduciaries must implement appropriate technical and organisational measures (Section 8(4)) and reasonable security safeguards to prevent personal data breach (Section 8(5)). In the event of a breach, the Board and each affected Data Principal must be intimated in the prescribed form and manner (Section 8(6)). Personal data must be erased when consent is withdrawn or the purpose is no longer served, unless retention is required by law (Section 8(7)). Fiduciaries must publish contact details of a Data Protection Officer or a person able to answer questions (Section 8(9)) and maintain an effective grievance redressal mechanism (Section 8(10)).",
         "key_requirements": [
-            "Mandatory for Significant Data Fiduciaries only",
-            "Must be Indian resident",
-            "Reports to Board of Directors or Chief Executive Officer",
-            "Acts as point of contact for grievance redressal",
-            "Ensures compliance with DPDPA provisions",
-            "Maintains independence and organizational autonomy"
+            "Responsible for compliance with the Act, including for processing by Data Processors (Section 8(1)-(2))",
+            "Engage Data Processors only under a valid contract (Section 8(2))",
+            "Ensure completeness, accuracy and consistency where data is used for decisions affecting the Data Principal or is disclosed to another Data Fiduciary (Section 8(3))",
+            "Implement appropriate technical and organisational measures (Section 8(4))",
+            "Implement reasonable security safeguards to prevent personal data breach (Section 8(5))",
+            "On breach, intimate the Board and each affected Data Principal in the prescribed form and manner (Section 8(6))",
+            "Erase personal data when consent is withdrawn or the purpose is no longer served, and cause Data Processors to erase it, unless retention is required by law (Section 8(7))",
+            "Publish contact information of the Data Protection Officer or a person able to answer questions about processing (Section 8(9))",
+            "Establish an effective grievance redressal mechanism (Section 8(10))"
         ],
-        "applies_to": "Significant Data Fiduciaries",
-        "penalties": "Up to INR 250 crore for non-appointment or non-functional DPO"
+        "applies_to": "All Data Fiduciaries",
+        "penalties": "Schedule: up to INR 250 crore for failure of reasonable security safeguards (Section 8(5)); up to INR 200 crore for failure to notify the Board/Data Principals of a breach (Section 8(6)); up to INR 50 crore (residual) for other breaches"
     },
     9: {
         "number": 9,
-        "title": "Obligations of Data Fiduciary",
-        "summary": "Core obligations include ensuring accuracy, protecting data from unauthorized access, maintaining retention limits, preventing secondary use, and implementing reasonable security measures. Fiduciaries must handle data only for stated purposes.",
+        "title": "Processing of Personal Data of Children",
+        "summary": "Before processing the personal data of a child (an individual under 18) or of a person with disability who has a lawful guardian, the Data Fiduciary must obtain the verifiable consent of the parent or lawful guardian. Processing likely to cause any detrimental effect on the well-being of a child is prohibited, as are tracking, behavioural monitoring of children, and targeted advertising directed at children (Section 9(3)). The Central Government may exempt classes of Data Fiduciaries or purposes, or lower the applicable age, for fiduciaries verified as processing children's data in a safe manner.",
         "key_requirements": [
-            "Ensure accuracy and completeness of personal data",
-            "Protect data from unauthorized access and processing",
-            "Implement reasonable security safeguards",
-            "Provide unhindered access to data principals",
-            "Store personal data only while necessary for purpose",
-            "Delete data when no longer required",
-            "Process data only for stated purposes",
-            "Not process data if likely to cause detriment to principal"
+            "Obtain verifiable consent of the parent or lawful guardian before processing a child's data",
+            "Verifiable guardian consent also required for a person with disability who has a lawful guardian",
+            "No processing likely to cause a detrimental effect on the well-being of a child",
+            "No tracking or behavioural monitoring of children (Section 9(3))",
+            "No targeted advertising directed at children (Section 9(3))",
+            "Central Government may exempt classes/purposes or lower the age threshold for fiduciaries verified as safe"
         ],
-        "applies_to": "All data fiduciaries",
-        "penalties": "Up to INR 250 crore for security safeguards failure"
+        "applies_to": "All Data Fiduciaries processing children's data or data of persons with disability who have lawful guardians",
+        "penalties": "Schedule: up to INR 200 crore for breach of obligations in relation to children (Section 9)"
     },
     10: {
         "number": 10,
-        "title": "Obligations of Significant Data Fiduciary",
-        "summary": "Additional stringent obligations for SDFs: appoint DPO, conduct annual DPIA, perform independent audits, maintain reasonable security, track algorithmic decisions. SDFs face heightened accountability and oversight.",
+        "title": "Significant Data Fiduciary",
+        "summary": "The Central Government may, by notification, designate any Data Fiduciary or class of Data Fiduciaries as a Significant Data Fiduciary (SDF), based on an assessment of factors including the volume and sensitivity of personal data processed, risk to the rights of Data Principals, potential impact on the sovereignty and integrity of India, electoral democracy, security of the State, and public order. The Act contains no numeric or resident-count threshold. SDFs must appoint a Data Protection Officer based in India who is responsible to the board of directors (or similar governing body) and acts as the point of contact for grievance redressal, appoint an independent data auditor, and undertake periodic Data Protection Impact Assessments and periodic audits.",
         "key_requirements": [
-            "Appoint Data Protection Officer",
-            "Conduct annual Data Protection Impact Assessment",
-            "Undertake independent compliance audit annually",
-            "Maintain enhanced security measures",
-            "Monitor algorithmic software for bias/risk",
-            "Track automated decision-making systems",
-            "Report to Data Protection Board periodically",
-            "Implement additional safeguards beyond standard requirements"
+            "SDF status arises only by Central Government notification (no numeric threshold in the Act)",
+            "Notification factors: volume and sensitivity of data, risk to Data Principal rights, potential impact on sovereignty and integrity of India, electoral democracy, security of the State, and public order",
+            "Appoint a Data Protection Officer based in India, responsible to the board of directors and acting as point of contact for grievance redressal",
+            "Appoint an independent data auditor to evaluate compliance",
+            "Undertake periodic Data Protection Impact Assessment (DPIA)",
+            "Undertake periodic audit",
+            "Undertake such other measures as may be prescribed"
         ],
-        "applies_to": "Significant Data Fiduciaries",
-        "penalties": "Up to INR 250 crore for non-compliance with SDF obligations"
+        "applies_to": "Data Fiduciaries notified as Significant Data Fiduciaries",
+        "penalties": "Schedule: up to INR 150 crore for breach of additional SDF obligations (Section 10)"
     },
     11: {
         "number": 11,
-        "title": "Consent of Data Principal",
-        "summary": "Consent must be voluntary, specific, informed, clear, and affirmative action. Cannot be bundled with other terms. Fiduciary must demonstrate consent was obtained. Consent can be withdrawn anytime.",
+        "title": "Right to Access Information About Personal Data",
+        "summary": "The Data Principal has the right to obtain from the Data Fiduciary: a summary of the personal data being processed and the processing activities undertaken; the identities of all other Data Fiduciaries and Data Processors with whom the personal data has been shared, along with a description of the data shared; and any other information as may be prescribed.",
         "key_requirements": [
-            "Consent must be voluntary and free from coercion",
-            "Specific consent for each purpose (no blanket consent)",
-            "Informed - data principal understands what they consent to",
-            "Clear and unambiguous affirmative action (opt-in, not opt-out)",
-            "Cannot be bundled with service terms/conditions",
-            "Data fiduciary must maintain proof of consent",
-            "Consent record must be stored for verification",
-            "Data principal can withdraw consent anytime"
+            "Provide a summary of the personal data processed and the processing activities undertaken",
+            "Identify all other Data Fiduciaries and Data Processors with whom the data has been shared, with a description of the data shared",
+            "Provide any other information as may be prescribed",
+            "Respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)"
         ],
-        "applies_to": "All data fiduciaries obtaining consent",
-        "penalties": "Up to INR 50 crore for invalid or coerced consent"
+        "applies_to": "All Data Fiduciaries receiving access requests",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     12: {
         "number": 12,
-        "title": "Rights of Data Principal - Correction and Erasure",
-        "summary": "Data principals can request correction of inaccurate/misleading data, completion of incomplete data, or erasure of data. Fiduciary must comply within reasonable timeframe. Limited exceptions for legal retention or retention with disproportionate effort.",
+        "title": "Right to Correction, Completion, Updating and Erasure",
+        "summary": "The Data Principal has the right to correction of inaccurate or misleading personal data, completion of incomplete personal data, updating of personal data, and erasure of personal data. The Data Fiduciary must erase the data upon request unless retention is necessary for the specified purpose or for compliance with any law.",
         "key_requirements": [
-            "Right to correct inaccurate or misleading data",
-            "Right to complete incomplete data",
-            "Right to request data update when circumstances change",
-            "Right to erasure when data no longer needed",
-            "Data principal must provide evidence of inaccuracy",
-            "Fiduciary must comply within reasonable time",
-            "Exceptions: legal retention requirements, court orders, disproportionate effort"
+            "Correct inaccurate or misleading personal data",
+            "Complete incomplete personal data",
+            "Update personal data",
+            "Erase personal data on request, unless retention is necessary for the specified purpose or required for legal compliance"
         ],
-        "applies_to": "All data fiduciaries receiving data principal requests",
-        "penalties": "Up to INR 50 crore for denying valid correction/erasure requests"
+        "applies_to": "All Data Fiduciaries receiving Data Principal requests",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     13: {
         "number": 13,
-        "title": "Right of Data Principal to Information",
-        "summary": "Data principals have right to inquire about processing their personal data, categories of data processed, purposes, recipients, and retention period. Fiduciary must provide clear, accessible information.",
+        "title": "Right of Grievance Redressal",
+        "summary": "The Data Principal has the right to readily available means of grievance redressal provided by the Data Fiduciary or Consent Manager. The Data Fiduciary or Consent Manager must respond within the prescribed period. The Data Principal must exhaust this grievance redressal opportunity before approaching the Data Protection Board of India.",
         "key_requirements": [
-            "Right to inquire about data processing",
-            "Right to know categories of personal data held",
-            "Right to know processing purposes",
-            "Right to know data recipients and processors",
-            "Right to know data retention period",
-            "Information must be provided clearly and accessibly",
-            "Response required within reasonable timeframe"
+            "Provide readily available means of grievance redressal",
+            "Respond to grievances within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)",
+            "Data Principal must exhaust the fiduciary's grievance redressal mechanism before complaining to the Board"
         ],
-        "applies_to": "All data fiduciaries receiving information requests",
-        "penalties": "Up to INR 50 crore for denying information access"
+        "applies_to": "All Data Fiduciaries and Consent Managers",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     14: {
         "number": 14,
-        "title": "Rights of Data Principal - Grievance Redressal",
-        "summary": "Data principals have right to file grievances with Data Protection Board. Board may initiate inquiries into violations. Fiduciaries must maintain internal grievance redressal mechanism.",
+        "title": "Right to Nominate",
+        "summary": "The Data Principal has the right to nominate one or more individuals who may exercise the Data Principal's rights under the Act in the event of the Data Principal's death or incapacity.",
         "key_requirements": [
-            "Right to file grievance with Data Protection Board",
-            "Board has authority to initiate inquiries",
-            "Data fiduciary must maintain internal complaint mechanism",
-            "Grievances must be addressed in reasonable time",
-            "Data fiduciary must maintain grievance records",
-            "No retaliation against data principals filing complaints"
+            "Enable Data Principals to nominate individual(s) to exercise their rights",
+            "Nomination operates in the event of the death or incapacity of the Data Principal"
         ],
-        "applies_to": "Data Protection Board and all data fiduciaries",
-        "penalties": "Up to INR 50 crore for denying grievance rights"
+        "applies_to": "All Data Fiduciaries",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     15: {
         "number": 15,
-        "title": "Processing by Data Processor",
-        "summary": "Data Processor is agent acting on fiduciary's instructions. Processing contract must clearly define roles. Processor has limited obligations. Fiduciary remains responsible for processor's acts.",
+        "title": "Duties of Data Principals",
+        "summary": "Data Principals must: comply with applicable laws while exercising rights under the Act; not impersonate another person; not suppress material information when providing personal data for documents, identity proof or address proof issued by the State; not register false or frivolous grievances or complaints; and furnish only verifiably authentic information when exercising the rights to correction or erasure.",
         "key_requirements": [
-            "Processing must be on written instructions only",
-            "Contract must clearly define processor obligations",
-            "Processor cannot process data for own purposes",
-            "Fiduciary remains responsible for processor compliance",
-            "Processor must implement security safeguards",
-            "Sub-processor authorization requires fiduciary consent",
-            "Processor must maintain processing logs"
+            "Comply with all applicable laws when exercising rights under the Act",
+            "Do not impersonate another person while providing personal data",
+            "Do not suppress material information when providing personal data to the State",
+            "Do not register false or frivolous grievances or complaints",
+            "Furnish verifiably authentic information when seeking correction or erasure"
         ],
-        "applies_to": "Data fiduciaries and their processors",
-        "penalties": "Up to INR 50 crore for improper processor arrangement"
+        "applies_to": "All Data Principals",
+        "penalties": "Schedule: up to INR 10,000 for breach of duties by a Data Principal (Section 15)"
     },
     16: {
         "number": 16,
-        "title": "Consent Managers",
-        "summary": "Consent Managers are intermediaries managing consent on behalf of data principals. Must be registered with Data Protection Board. Have specific obligations regarding consent recording and data principal notification.",
+        "title": "Processing of Personal Data Outside India (Cross-Border Transfer)",
+        "summary": "The Act follows a negative-list model: personal data may be transferred to any country or territory outside India EXCEPT those restricted by the Central Government by notification. There is no adequacy requirement, no explicit-consent requirement, and no standard contractual clauses (SCC) mechanism under the Act. Stricter sectoral restrictions (e.g., RBI payment data localisation) continue to apply (Section 16(2)).",
         "key_requirements": [
-            "Must be incorporated in India",
-            "Must meet eligibility criteria and financial thresholds",
-            "Must register with Data Protection Board",
-            "Must maintain separate consent records",
-            "Must facilitate consent withdrawal",
-            "Must not process personal data itself",
-            "Must implement security safeguards",
-            "Registration effective November 13, 2026"
+            "Transfers permitted to any country except those restricted by Central Government notification (negative list)",
+            "No adequacy assessment, explicit-consent requirement or SCC mechanism under the Act",
+            "Monitor Central Government notifications restricting transfers to specific countries or territories",
+            "Continue to comply with stricter sectoral laws, e.g., RBI payment data localisation (Section 16(2))"
         ],
-        "applies_to": "Consent Manager entities",
-        "penalties": "Up to INR 50 crore for operating without registration or violating obligations"
+        "applies_to": "Data Fiduciaries transferring personal data outside India",
+        "penalties": "Schedule (residual): up to INR 50 crore"
     },
     17: {
         "number": 17,
-        "title": "Data Transfer Outside India",
-        "summary": "Personal data may be transferred outside India if reasonable safeguards exist and fiduciary ensures recipient country has adequate data protection. Transfer requires explicit consent unless for legitimate use.",
+        "title": "Exemptions",
+        "summary": "Certain provisions of the Act do not apply to specified processing, including: enforcement of legal rights or claims; processing by courts and tribunals; prevention, detection, investigation or prosecution of offences; processing in India of non-resident data under a foreign contract; schemes of merger or amalgamation approved by a tribunal; and assessment of financial position of loan defaulters. The Central Government may also, by notification, exempt State instrumentalities, processing for research or statistical purposes, and notified classes of Data Fiduciaries such as startups.",
         "key_requirements": [
-            "Transfer requires explicit consent (no bundled consent)",
-            "Exception for legitimate uses with notice",
-            "Recipient country/entity must have reasonable safeguards",
-            "Assessment of recipient's data protection adequacy",
-            "Fiduciary responsible for recipient's processing",
-            "Cannot transfer if would circumvent DPDPA",
-            "Documentation of transfer and safeguards required"
+            "Enforcement of legal rights and claims",
+            "Processing by courts, tribunals and other adjudicatory bodies",
+            "Prevention, detection, investigation and prosecution of offences",
+            "Processing in India of personal data of persons outside India under a contract with a person outside India",
+            "Tribunal-approved schemes of merger, amalgamation or restructuring",
+            "Ascertaining the financial position of loan defaulters",
+            "Central Government may exempt State instrumentalities, research/statistical purposes and notified classes (e.g., startups)"
         ],
-        "applies_to": "Data fiduciaries transferring data internationally",
-        "penalties": "Up to INR 250 crore for unauthorized international transfer"
+        "applies_to": "Specified processing activities and notified classes of Data Fiduciaries",
+        "penalties": "N/A - exemption provision"
     },
     18: {
         "number": 18,
-        "title": "Children's Data Protection",
-        "summary": "Special protections for individuals under 18. Verifiable parental/guardian consent required. Behavioral monitoring and targeted advertising strictly prohibited. Enhanced safeguards for children's data.",
+        "title": "Establishment of the Data Protection Board of India",
+        "summary": "Provides for the establishment of the Data Protection Board of India by the Central Government, the adjudicatory body under the Act.",
         "key_requirements": [
-            "Parental/guardian verifiable consent required for processing",
-            "Cannot track or monitor children's behavior",
-            "Cannot target advertising to children",
-            "Cannot process if likely to cause detriment to child",
-            "Enhanced privacy notices for parent/guardian",
-            "Age verification mechanisms required",
-            "No profiling of children without guardian consent"
+            "Board established by the Central Government by notification"
         ],
-        "applies_to": "All data fiduciaries processing children's data",
-        "penalties": "Up to INR 250 crore for children's data violations"
+        "applies_to": "Central Government",
+        "penalties": "N/A - institutional provision"
     },
     19: {
         "number": 19,
-        "title": "Data Protection Board - Constitution",
-        "summary": "Establishes Data Protection Board of India as fully digital regulator. Board comprises Chairperson, Member-Secretary, and Members. Headquartered in New Delhi with regional offices.",
+        "title": "Composition and Qualifications of the Board",
+        "summary": "Provides for the composition of the Data Protection Board of India (Chairperson and Members) and the qualifications for their appointment.",
         "key_requirements": [
-            "Board is apex regulatory authority",
-            "Reports to Ministry of Electronics and IT",
-            "Chairperson appointed by Central Government",
-            "Members selected through transparent process",
-            "Board operates fully digital infrastructure",
-            "Provides online grievance filing and tracking",
-            "Regional offices established across India"
+            "Chairperson and Members appointed in accordance with the Act and the Rules"
         ],
-        "applies_to": "Central Government and Board operations",
+        "applies_to": "Data Protection Board of India",
         "penalties": "N/A - institutional provision"
     },
     20: {
         "number": 20,
-        "title": "Data Protection Board - Powers and Functions",
-        "summary": "Board has extensive powers: receive and process grievances, investigate violations, conduct inquiries, issue orders, impose penalties, make rules, coordinate internationally, and maintain transparency.",
+        "title": "Salary, Allowances and Terms of Service",
+        "summary": "Provides for the salary, allowances and other terms and conditions of service of the Chairperson and Members of the Board.",
         "key_requirements": [
-            "Receive and process data principal grievances",
-            "Investigate alleged violations",
-            "Conduct own-motion inquiries",
-            "Issue directions and remedial orders",
-            "Impose monetary penalties",
-            "Maintain transparency through public registry",
-            "Coordinate with international authorities",
-            "Make rules within Board's scope"
+            "Terms of service of the Chairperson and Members as prescribed"
         ],
-        "applies_to": "Data Protection Board",
-        "penalties": "N/A - authority provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     21: {
         "number": 21,
-        "title": "Data Protection Board - Procedure",
-        "summary": "Board follows natural justice principles with opportunity to be heard. Inquiries conducted in camera unless otherwise directed. Digital proceedings for transparency. Orders published publicly.",
+        "title": "Disqualification of Chairperson and Members",
+        "summary": "Provides the grounds of disqualification for appointment and continuation in office of the Chairperson and Members of the Board.",
         "key_requirements": [
-            "Natural justice principles apply",
-            "Opportunity to be heard for accused",
-            "In camera inquiries (unless directed otherwise)",
-            "Digital proceedings and records",
-            "Written orders with reasoned findings",
-            "Orders published on public website",
-            "Appeal mechanisms available",
-            "Confidentiality of personal data maintained"
+            "Disqualification grounds apply to appointment and continuation in office"
         ],
-        "applies_to": "Data Protection Board proceedings",
-        "penalties": "N/A - procedural provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     22: {
         "number": 22,
-        "title": "Appeals",
-        "summary": "Data fiduciaries can appeal Board's orders to appellate authority (designated by Government). Appeal must be filed within 30 days of order. Appellate authority can confirm, modify, or reverse order.",
+        "title": "Removal and Vacancy",
+        "summary": "Provides for resignation and removal from office of the Chairperson and Members of the Board, and for the filling of vacancies.",
         "key_requirements": [
-            "Appeal to designated appellate authority within 30 days",
-            "Appellate authority reviews Board's findings",
-            "Can confirm, modify, or reverse order",
-            "Stay of Board's order can be requested",
-            "Natural justice applies to appeals",
-            "Appellate decision final"
+            "Removal and resignation of Chairperson and Members governed by the Act"
         ],
-        "applies_to": "Data fiduciaries appealing Board orders",
-        "penalties": "N/A - procedural provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     23: {
         "number": 23,
-        "title": "Rule-making",
-        "summary": "Government empowered to make rules to implement the Act. Rules prescribe procedures, forms, eligibility criteria, and operational details. DPDP Rules 2025 notified on November 14, 2025.",
+        "title": "Proceedings of the Board",
+        "summary": "Provides for the conduct and validity of the proceedings of the Board and the authentication of its orders. The Board is designed to function as a digital office (see also Section 28).",
         "key_requirements": [
-            "Government makes implementing rules",
-            "Rules prescribe details for Act's provisions",
-            "DPDP Rules 2025 effective from November 14, 2025",
-            "Staggered implementation of various rules",
-            "Rules subject to parliamentary procedure",
-            "Board also can make procedural rules"
+            "Proceedings conducted and orders authenticated as provided under the Act",
+            "Board designed to function by digital means"
         ],
-        "applies_to": "Government and Data Protection Board",
-        "penalties": "N/A - rule-making authority"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - procedural provision"
     },
     24: {
         "number": 24,
-        "title": "Jurisdiction",
-        "summary": "Board has jurisdiction over violations within India's territory. Can receive grievances from any data principal regarding data fiduciaries processing in India.",
+        "title": "Officers and Employees of the Board",
+        "summary": "The Board may appoint such officers and employees as it considers necessary for the efficient discharge of its functions.",
         "key_requirements": [
-            "Board jurisdiction over India territory",
-            "Applies to all fiduciaries processing in India",
-            "Data principal location irrelevant",
-            "Fiduciary location irrelevant if processing in India"
+            "Officers and employees appointed by the Board as needed"
         ],
-        "applies_to": "Data Protection Board",
-        "penalties": "N/A - jurisdictional provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     25: {
         "number": 25,
-        "title": "Representation of Fiduciaries and Data Principals",
-        "summary": "Parties can be represented before Board through authorized representatives, advocates, or others with Board's permission. Representation subject to natural justice.",
+        "title": "Members and Officers Deemed Public Servants",
+        "summary": "The Chairperson, Members, officers and employees of the Board are deemed to be public servants while acting under the Act.",
         "key_requirements": [
-            "Right to be represented before Board",
-            "Advocates, authorized representatives allowed",
-            "Board can permit other representatives",
-            "Representation at parties' own cost",
-            "Proceedings open unless confidentiality ordered"
+            "Public-servant status for Board personnel acting under the Act"
         ],
-        "applies_to": "Board proceedings and parties",
-        "penalties": "N/A - procedural provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     26: {
         "number": 26,
-        "title": "Protection of Members",
-        "summary": "Board members and officers have protection for actions taken in good faith during duties. Prevents frivolous litigation against Board officials.",
+        "title": "Powers of the Chairperson",
+        "summary": "Provides for the general superintendence and administrative powers of the Chairperson of the Board.",
         "key_requirements": [
-            "Members/officers protected for good faith acts",
-            "Protection extends to Board staff",
-            "Only applies to official duty actions"
+            "Chairperson exercises general superintendence over Board administration"
         ],
-        "applies_to": "Board members and officers",
-        "penalties": "N/A - protection provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - institutional provision"
     },
     27: {
         "number": 27,
-        "title": "Power to Remove Obstacles",
-        "summary": "Government can issue directions to remove obstacles to implementation. Can require Board cooperation with central/state bodies.",
+        "title": "Powers and Functions of the Board",
+        "summary": "On receiving an intimation of a personal data breach, the Board may direct urgent remedial or mitigation measures. It inquires into breaches of the Act on a complaint by an affected Data Principal or on a reference by the Central or a State Government, and may impose monetary penalties in accordance with Section 33 and the Schedule.",
         "key_requirements": [
-            "Government can issue implementation directions",
-            "Board must cooperate with Government bodies",
-            "Coordination between state and central authorities"
+            "Direct urgent remedial or mitigation measures upon breach intimation",
+            "Inquire into breaches on complaint by a Data Principal or on government reference",
+            "Impose monetary penalties in accordance with Section 33 and the Schedule"
         ],
-        "applies_to": "Government and Board",
-        "penalties": "N/A - administrative provision"
+        "applies_to": "Data Protection Board of India",
+        "penalties": "N/A - authority provision"
     },
     28: {
         "number": 28,
-        "title": "Confidentiality",
-        "summary": "Board members, staff must maintain confidentiality of information received during proceedings. Protects data principals' and fiduciaries' sensitive business information.",
+        "title": "Procedure to be Followed by the Board",
+        "summary": "The Board functions as a digital office: receipt of complaints, hearings and pronouncement of decisions adopt digital, techno-legal means. For the purposes of an inquiry, the Board has the powers of a civil court in respect of summoning and enforcing attendance, receiving evidence, and inspecting documents.",
         "key_requirements": [
-            "Maintain confidentiality of proceeding information",
-            "Protects data principal personal data",
-            "Protects fiduciary business confidential information",
-            "Applies to Board members and staff",
-            "Extends after service termination"
+            "Board functions as a digital office",
+            "Powers of a civil court for summoning, enforcing attendance, receiving evidence and inspecting documents",
+            "Principles of natural justice observed in inquiries"
         ],
-        "applies_to": "Board members, staff, and proceedings",
-        "penalties": "N/A - confidentiality provision"
+        "applies_to": "Data Protection Board of India proceedings",
+        "penalties": "N/A - procedural provision"
     },
     29: {
         "number": 29,
-        "title": "Immunity from Liability",
-        "summary": "Board and members have immunity for acts done in official capacity. Protects against frivolous claims while maintaining accountability through appellate mechanism.",
+        "title": "Appeal to the Appellate Tribunal (TDSAT)",
+        "summary": "Any person aggrieved by an order or direction of the Board may appeal to the Telecom Disputes Settlement and Appellate Tribunal (TDSAT) within 60 days of receipt of the order. The Appellate Tribunal may entertain an appeal after 60 days if satisfied there was sufficient cause. A further appeal lies to the Supreme Court.",
         "key_requirements": [
-            "Immunity for good faith official acts",
-            "No liability for Board decisions in official capacity",
-            "Appeal mechanism provides accountability",
-            "Protects Board independence"
+            "Appeals lie to the TDSAT (not a separately constituted appellate authority)",
+            "File the appeal within 60 days of the Board's order or direction",
+            "Late appeals may be admitted for sufficient cause",
+            "Further appeal lies to the Supreme Court"
         ],
-        "applies_to": "Board and members",
-        "penalties": "N/A - immunity provision"
+        "applies_to": "Persons aggrieved by orders or directions of the Data Protection Board of India",
+        "penalties": "N/A - procedural provision"
     },
     30: {
         "number": 30,
-        "title": "Penalty for Unauthorized Processing",
-        "summary": "Data fiduciaries must not process personal data without valid legal basis (consent or legitimate use). Unauthorized processing attracts up to INR 50 crore penalty.",
+        "title": "Orders Enforceable as Civil Court Decree",
+        "summary": "Orders passed under the Act are enforceable in the same manner as a decree of a civil court.",
         "key_requirements": [
-            "Processing must have valid legal basis",
-            "Unauthorized processing prohibited",
-            "Processing for undisclosed purposes prohibited",
-            "No secondary use for different purposes",
-            "Must document consent or legitimate use basis"
+            "Orders executable as a civil court decree"
         ],
-        "applies_to": "All data fiduciaries",
-        "penalties": "Up to INR 50 crore"
+        "applies_to": "Parties subject to orders under the Act",
+        "penalties": "N/A - enforcement provision"
     },
     31: {
         "number": 31,
-        "title": "Penalty for Failure to Discharge Obligations",
-        "summary": "Failure to discharge fiduciary obligations (accuracy, security, deletion, etc.) attracts penalties. Tiered structure based on violation severity.",
+        "title": "Voluntary Undertaking",
+        "summary": "The Board may accept a voluntary undertaking from a person at any stage of proceedings in respect of any matter relating to observance of the Act. Acceptance of a voluntary undertaking bars proceedings in respect of the matters it covers.",
         "key_requirements": [
-            "Maintain data accuracy",
-            "Protect from unauthorized access",
-            "Implement security safeguards",
-            "Delete data timely",
-            "Provide access to principals",
-            "Maintain retention limits"
+            "Board may accept a voluntary undertaking at any stage",
+            "Acceptance bars proceedings on the matters covered by the undertaking"
         ],
-        "applies_to": "All data fiduciaries",
-        "penalties": "Up to INR 250 crore depending on violation type"
+        "applies_to": "Persons in proceedings before the Data Protection Board of India",
+        "penalties": "See Section 32 for breach of an accepted undertaking"
     },
     32: {
         "number": 32,
-        "title": "Penalty for Failure to Comply with Orders",
-        "summary": "Failure to comply with Board orders, directions, or corrective measures attracts penalties. Board can impose progressive penalties for continued non-compliance.",
+        "title": "Breach of Voluntary Undertaking",
+        "summary": "Breach of an accepted voluntary undertaking is treated as a breach for the purposes of penalties under the Schedule; the penalty may extend up to the penalty applicable to the underlying breach.",
         "key_requirements": [
-            "Comply with Board orders",
-            "Comply with Board directions",
-            "Implement remedial measures",
-            "Provide information to Board when required",
-            "Meet Board deadlines"
+            "Comply with the terms of any accepted voluntary undertaking",
+            "Breach exposes the person to the penalty applicable to the underlying breach (Schedule)"
         ],
-        "applies_to": "All data fiduciaries and consent managers",
-        "penalties": "Up to INR 50 crore"
+        "applies_to": "Persons whose voluntary undertakings have been accepted by the Board",
+        "penalties": "Schedule: up to the penalty applicable to the underlying breach"
     },
     33: {
         "number": 33,
-        "title": "Penalty Imposition",
-        "summary": "Board considers breach nature, gravity, duration, data type, and affected individuals when determining penalties. Schedule appended to Act specifies maximum penalties for each violation category.",
+        "title": "Penalties",
+        "summary": "If the Board determines on inquiry that a significant breach has occurred, it may impose a monetary penalty as specified in the Schedule, after considering the nature, gravity and duration of the breach, the type and nature of the personal data affected, whether the breach is repetitive, whether any gain was realised or loss avoided, and mitigation actions taken.",
         "key_requirements": [
-            "Board imposes penalties based on Schedule",
-            "Consider breach nature and gravity",
-            "Consider duration of breach",
-            "Consider personal data types affected",
-            "Consider number of data principals affected",
-            "Consider harm potential and actual harm",
-            "Monetary penalties in absolute amounts (not revenue percentage)",
-            "Board can require remedial actions alongside penalties"
+            "Penalties determined by the Board in accordance with the Schedule",
+            "Factors: nature, gravity and duration of the breach; type of personal data affected; repetitive nature of the breach; gain realised or loss avoided; mitigation actions",
+            "Schedule maximums: INR 250 crore (security safeguards, Section 8(5)); INR 200 crore (breach notification, Section 8(6)); INR 200 crore (children, Section 9); INR 150 crore (SDF obligations, Section 10); INR 10,000 (Data Principal duties, Section 15); breach of voluntary undertaking - up to the penalty applicable to the underlying breach; INR 50 crore (residual, any other breach of the Act or Rules)",
+            "Monetary penalties are absolute amounts (not a percentage of turnover)"
         ],
-        "applies_to": "Data Protection Board enforcement",
-        "penalties": "INR 50 crore to INR 250 crore based on violation type"
+        "applies_to": "Data Protection Board of India enforcement",
+        "penalties": "Per the Schedule: from up to INR 10,000 (Data Principal duties) up to INR 250 crore (security safeguards)"
+    },
+    34: {
+        "number": 34,
+        "title": "Penalties Credited to Consolidated Fund of India",
+        "summary": "All sums realised by way of penalties imposed by the Board under the Act are credited to the Consolidated Fund of India.",
+        "key_requirements": [
+            "Penalty amounts credited to the Consolidated Fund of India"
+        ],
+        "applies_to": "Data Protection Board of India / Central Government",
+        "penalties": "N/A - fiscal provision"
+    },
+    35: {
+        "number": 35,
+        "title": "Protection of Action Taken in Good Faith",
+        "summary": "No suit, prosecution or other legal proceeding lies against the Central Government, the Board, its Chairperson, Members, officers or employees for anything done or intended to be done in good faith under the Act or the Rules.",
+        "key_requirements": [
+            "Good-faith protection for the Central Government and Board personnel"
+        ],
+        "applies_to": "Central Government and the Data Protection Board of India",
+        "penalties": "N/A - protection provision"
+    },
+    36: {
+        "number": 36,
+        "title": "Power to Call for Information",
+        "summary": "The Central Government may require the Board and any Data Fiduciary or intermediary to furnish such information as it may call for.",
+        "key_requirements": [
+            "Furnish information called for by the Central Government"
+        ],
+        "applies_to": "The Board, Data Fiduciaries and intermediaries",
+        "penalties": "N/A - administrative provision"
+    },
+    37: {
+        "number": 37,
+        "title": "Power to Issue Directions (Including Blocking)",
+        "summary": "Empowers the Central Government to issue directions in the circumstances specified in the Act, including directions for blocking public access to information, on reference from the Board and in the interests of the general public.",
+        "key_requirements": [
+            "Comply with directions issued by the Central Government",
+            "Blocking directions may be issued in the specified circumstances"
+        ],
+        "applies_to": "Data Fiduciaries and intermediaries",
+        "penalties": "N/A - administrative provision"
+    },
+    38: {
+        "number": 38,
+        "title": "Consistency with Other Laws",
+        "summary": "Addresses the relationship between the Act and other laws in force: the Act is in addition to, and not in derogation of, other laws, and prevails to the extent of any conflict.",
+        "key_requirements": [
+            "Comply with the Act alongside other applicable laws; the Act prevails to the extent of conflict"
+        ],
+        "applies_to": "All persons subject to the Act",
+        "penalties": "N/A - interpretive provision"
+    },
+    39: {
+        "number": 39,
+        "title": "Bar of Jurisdiction of Civil Courts",
+        "summary": "No civil court has jurisdiction to entertain any suit or proceeding in respect of any matter which the Board is empowered to determine under the Act, and no injunction may be granted in respect of action taken under the Act.",
+        "key_requirements": [
+            "Disputes within the Board's competence cannot be taken to civil courts"
+        ],
+        "applies_to": "All persons subject to the Act",
+        "penalties": "N/A - jurisdictional provision"
+    },
+    40: {
+        "number": 40,
+        "title": "Power to Make Rules",
+        "summary": "The Central Government may, by notification, make rules to carry out the purposes of the Act. The Digital Personal Data Protection Rules, 2025 were notified on November 13, 2025 (G.S.R. 846(E)). Per Rule 1: Rules 1, 2 and 17-21 took effect on publication; Rule 4 (Consent Manager registration) takes effect November 13, 2026; Rules 3, 5-16, 22 and 23 (notice, security safeguards, breach intimation, erasure, children, SDF, rights, cross-border) take effect May 13, 2027.",
+        "key_requirements": [
+            "Central Government makes implementing rules by notification",
+            "DPDP Rules, 2025 notified on November 13, 2025 with staged effectiveness"
+        ],
+        "applies_to": "Central Government",
+        "penalties": "N/A - rule-making authority"
+    },
+    41: {
+        "number": 41,
+        "title": "Power to Amend Schedule",
+        "summary": "Enables the Central Government to amend the Schedule (of penalties) by notification.",
+        "key_requirements": [
+            "Schedule may be amended by Central Government notification"
+        ],
+        "applies_to": "Central Government",
+        "penalties": "N/A - amendment provision"
+    },
+    42: {
+        "number": 42,
+        "title": "Laying Before Parliament",
+        "summary": "Rules made and specified notifications issued under the Act are to be laid before each House of Parliament.",
+        "key_requirements": [
+            "Rules and specified notifications laid before Parliament"
+        ],
+        "applies_to": "Central Government",
+        "penalties": "N/A - procedural provision"
+    },
+    43: {
+        "number": 43,
+        "title": "Power to Remove Difficulties",
+        "summary": "Enables the Central Government to make provisions, by order, for removing difficulties in giving effect to the provisions of the Act.",
+        "key_requirements": [
+            "Difficulty-removal orders may be made by the Central Government"
+        ],
+        "applies_to": "Central Government",
+        "penalties": "N/A - transitional provision"
+    },
+    44: {
+        "number": 44,
+        "title": "Amendments to Other Laws",
+        "summary": "Amends certain other enactments, including Section 8(1)(j) of the Right to Information Act, 2005 (the exemption relating to personal information).",
+        "key_requirements": [
+            "Consequential amendments to other laws, including the RTI Act, 2005 (Section 8(1)(j))"
+        ],
+        "applies_to": "Other enactments amended by the Act",
+        "penalties": "N/A - consequential amendment provision"
     }
 }
 
 
 # 2. DPDP_RULES - Comprehensive rules reference
 DPDP_RULES = {
-    1: {
-        "number": 1,
-        "title": "Definitions and Interpretation",
-        "summary": "Defines terms used in rules including Consent Manager, Data Protection Officer, processing logs, sensitive personal data indicators, and other operational terms.",
-        "requirements": [
-            "Clarifies terms specific to Rules implementation",
-            "Provides examples for key concepts",
-            "Establishes standards for operational definitions"
-        ],
-        "deadline": "Effective November 14, 2025",
-        "applies_to": "All implementing authorities"
-    },
-    2: {
-        "number": 2,
+    "notice": {
+        "number": "DPDP Rules, 2025",
         "title": "Notice to Data Principal",
-        "summary": "Data Fiduciaries must provide clear, standalone notices to data principals. Notice must include personal data categories, processing purposes, recipients, retention period, and principal's rights.",
+        "summary": "Data Fiduciaries must provide clear, standalone notices to Data Principals (Section 5 of the Act read with the DPDP Rules, 2025). The notice must describe the personal data sought and the purpose of processing, explain how to exercise rights (including consent withdrawal and grievance redressal) and how to complain to the Data Protection Board of India, and be available in English or any of the 22 languages in the Eighth Schedule of the Constitution.",
         "requirements": [
-            "Standalone notice (not buried in T&Cs)",
+            "Standalone notice (not buried in T&Cs), understandable independently",
             "Clear language and accessible format",
-            "Itemized list of personal data collected",
+            "Itemized description of the personal data sought",
             "Specific purposes of processing",
-            "Retention period or deletion policy",
-            "Links to withdraw consent and exercise rights",
-            "Information about grievance redressal mechanism"
+            "How to withdraw consent (Section 6(4)) and exercise other rights",
+            "Information about the grievance redressal mechanism (Section 13)",
+            "How to complain to the Data Protection Board of India",
+            "Option to access the notice in English or any of the 22 Eighth Schedule languages"
         ],
-        "deadline": "Must be provided before or at data collection",
-        "applies_to": "All data fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027; must accompany or precede every request for consent",
+        "applies_to": "All Data Fiduciaries"
     },
-    3: {
-        "number": 3,
-        "title": "Consent",
-        "summary": "Prescribes detailed consent requirements and procedures. Consent must be documented, specific, informed, and voluntary. Fiduciary must maintain proof of consent.",
+    "consent": {
+        "number": "DPDP Rules, 2025",
+        "title": "Consent Standards",
+        "summary": "Operationalises Section 6 of the Act: consent must be free, specific, informed, unconditional and unambiguous, given by a clear affirmative action, limited to the specified purpose and to the data necessary for that purpose. Withdrawal must be as easy as giving consent.",
         "requirements": [
             "Clear affirmative action (checkbox, button click, etc.)",
-            "Specific consent for each purpose",
-            "Cannot be bundled with service terms",
-            "Fiduciary maintains consent records",
-            "Easy withdrawal mechanism",
-            "Consent scope clearly defined",
-            "Cannot be condition for unrelated service"
+            "Specific consent limited to the specified purpose",
+            "Cannot be bundled with unrelated service terms (must be unconditional)",
+            "Data limited to what is necessary for the specified purpose",
+            "Easy withdrawal mechanism, as easy as giving consent (Section 6(4))",
+            "Maintain records evidencing notice and consent",
+            "Cease processing within a reasonable time after withdrawal unless required by law"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries obtaining consent"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "All Data Fiduciaries relying on consent"
     },
-    4: {
-        "number": 4,
-        "title": "Registration and Obligations of Consent Manager",
-        "summary": "Consent Managers must be registered with Board. Specifies eligibility criteria, registration process, obligations, and compliance requirements.",
+    "consent_managers": {
+        "number": "DPDP Rules, 2025",
+        "title": "Registration and Obligations of Consent Managers",
+        "summary": "Consent Managers must be registered with the Data Protection Board of India (Section 6(7)-(9) of the Act read with the DPDP Rules, 2025). The Rules specify eligibility criteria, registration and obligations. Consent Managers are accountable to the Data Principal and act through an interoperable platform.",
         "requirements": [
-            "Incorporated in India (company, society, or trust)",
+            "Incorporated in India",
             "Minimum net worth of INR 2 crore",
             "Sound financial condition and management",
             "Technical, operational, and financial capacity",
-            "Maintain separate consent records",
-            "Implement robust security safeguards",
-            "Facilitate consent withdrawal easily",
-            "Not process personal data itself",
-            "Submit annual compliance reports to Board"
+            "Registered with the Data Protection Board of India",
+            "Accountable to the Data Principal (Section 6(8))",
+            "Interoperable platform enabling giving, managing, reviewing and withdrawing consent",
+            "Maintain records and implement robust security safeguards",
+            "Must not use personal data for its own purposes"
         ],
-        "deadline": "Registration effective November 13, 2026",
+        "deadline": "Registration with the Board opens November 13, 2026",
         "applies_to": "Entities operating as Consent Managers"
     },
-    5: {
-        "number": 5,
-        "title": "Data Retention and Deletion",
-        "summary": "Data Fiduciaries must retain personal data only while necessary. Must establish retention schedules and timely delete data when no longer required.",
+    "retention_and_erasure": {
+        "number": "DPDP Rules, 2025",
+        "title": "Data Retention and Erasure",
+        "summary": "Personal data must be erased when the Data Principal withdraws consent or when the specified purpose is no longer being served, unless retention is required by law (Section 8(7) of the Act read with the DPDP Rules, 2025).",
         "requirements": [
-            "Establish data retention policy",
-            "Delete data when purpose fulfilled",
-            "Maintain retention schedule",
-            "Document deletion procedures",
-            "Cannot indefinitely retain data",
-            "Log retention and deletion activities",
-            "Exception: legal retention requirements"
+            "Establish a data retention policy tied to the specified purpose",
+            "Erase data when consent is withdrawn or the purpose is no longer served",
+            "Cause Data Processors to erase data likewise",
+            "Document erasure procedures and retention schedules",
+            "Cannot retain data indefinitely",
+            "Exception: retention required for compliance with law"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "All Data Fiduciaries"
     },
-    6: {
-        "number": 6,
-        "title": "Security Safeguards",
-        "summary": "Prescribes security measures to protect personal data from unauthorized access, disclosure, modification, or deletion. Includes technical and organizational safeguards.",
+    "security_safeguards": {
+        "number": "DPDP Rules, 2025",
+        "title": "Reasonable Security Safeguards",
+        "summary": "Prescribes minimum reasonable security safeguards to prevent personal data breach (Section 8(5) of the Act read with the DPDP Rules, 2025), including technical and organisational measures.",
         "requirements": [
-            "Implement reasonable security safeguards",
-            "Encryption for personal data at rest and in transit",
+            "Implement reasonable security safeguards to prevent personal data breach",
+            "Encryption, obfuscation or masking of personal data as appropriate",
             "Access controls and authentication",
-            "Regular security testing and penetration testing",
+            "Logs and monitoring to detect unauthorised access",
+            "Data backups to ensure continuity",
             "Incident response procedures",
-            "Employee training and awareness",
-            "Vulnerability assessment and patch management",
-            "Audit trails and logging",
-            "Data minimization principles"
+            "Contractual security obligations on Data Processors",
+            "Appropriate technical and organisational measures (Section 8(4))"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "All Data Fiduciaries"
     },
-    7: {
-        "number": 7,
-        "title": "Data Breach Notification",
-        "summary": "Specifies procedures for data breach notification to Board and affected principals. Requires 72-hour reporting with detailed information.",
+    "breach_intimation": {
+        "number": "Rule 7, DPDP Rules, 2025",
+        "title": "Intimation of Personal Data Breach",
+        "summary": "Operationalises Section 8(6) of the Act: on becoming aware of a personal data breach, the Data Fiduciary must intimate the Data Protection Board of India immediately (without delay) and submit a detailed report to the Board within 72 hours, and must intimate each affected Data Principal without delay.",
         "requirements": [
-            "Notify Board immediately upon breach discovery",
-            "Provide detailed 72-hour report",
-            "Notify affected principals without delay",
-            "Describe breach nature, extent, and impact",
-            "Include mitigation and remedial measures",
+            "Intimate the Board immediately upon becoming aware of a breach",
+            "Submit a detailed report to the Board within 72 hours (extendable only with Board approval)",
+            "Intimate each affected Data Principal without delay, in the prescribed form and manner",
+            "Describe the nature, extent and impact of the breach",
+            "Include mitigation and remedial measures taken",
             "Maintain breach documentation",
-            "Extensions only with Board approval",
-            "No materiality threshold - all breaches reportable"
+            "No materiality threshold - all personal data breaches are reportable"
         ],
-        "deadline": "72 hours for detailed report (effective May 13, 2027)",
-        "applies_to": "All data fiduciaries experiencing breaches"
+        "deadline": "72 hours for the detailed report to the Board (Rule 7)",
+        "applies_to": "All Data Fiduciaries experiencing personal data breaches"
     },
-    8: {
-        "number": 8,
-        "title": "Data Principal Rights - Access, Correction, Deletion",
-        "summary": "Establishes mechanisms for data principals to exercise rights: access information about their data, correct inaccuracies, and request deletion.",
+    "data_principal_rights": {
+        "number": "DPDP Rules, 2025",
+        "title": "Exercise of Data Principal Rights",
+        "summary": "Establishes mechanisms for Data Principals to exercise their rights: access information about personal data (Section 11), correction, completion, updating and erasure (Section 12), grievance redressal (Section 13) and nomination (Section 14).",
         "requirements": [
-            "Respond to access requests within 30 days",
-            "Provide information in clear, accessible format",
-            "Respond to correction requests promptly",
-            "Respond to deletion requests if no legal hold",
-            "Maintain records of requests and responses",
-            "Cannot charge unreasonable fees",
-            "Support data principal understanding"
+            "Publish the means by which Data Principals can make rights requests",
+            "Respond to access requests within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)",
+            "Provide information in a clear, accessible format",
+            "Act on correction, completion, updating and erasure requests",
+            "Enable nomination of individual(s) to exercise rights on death or incapacity (Section 14)",
+            "Maintain records of requests and responses"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "All Data Fiduciaries"
     },
-    9: {
-        "number": 9,
+    "grievance_redressal": {
+        "number": "DPDP Rules, 2025",
         "title": "Grievance Redressal",
-        "summary": "Data Fiduciaries must establish grievance mechanisms. Board provides centralized grievance portal for data principals.",
+        "summary": "Data Fiduciaries and Consent Managers must provide readily available means of grievance redressal (Section 13 of the Act read with the DPDP Rules, 2025). The Data Principal must exhaust this mechanism before approaching the Data Protection Board of India.",
         "requirements": [
-            "Maintain internal grievance mechanism",
-            "Respond to grievances within 30 days",
-            "Escalate to DPO if SDF",
-            "No retaliation against complainants",
+            "Maintain a readily available grievance redressal mechanism",
+            "Respond to grievances within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)",
+            "Publish contact details of the DPO or a person able to answer questions (Section 8(9))",
             "Maintain grievance records",
-            "Board provides online portal for filing",
-            "Track and report grievance resolution"
+            "Data Principals must exhaust this mechanism before complaining to the Board"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "All Data Fiduciaries and Consent Managers"
     },
-    10: {
-        "number": 10,
+    "children": {
+        "number": "DPDP Rules, 2025",
         "title": "Processing of Personal Data of Children",
-        "summary": "Establishes special protections for children (under 18). Requires verifiable parental/guardian consent, prohibits behavioral tracking and targeted advertising.",
+        "summary": "Operationalises Section 9 of the Act: verifiable consent of the parent or lawful guardian is required before processing a child's (under 18) personal data. Tracking, behavioural monitoring of children and targeted advertising directed at children are prohibited (Section 9(3)).",
         "requirements": [
-            "Obtain verifiable parental/guardian consent",
-            "Age verification mechanisms",
-            "Prohibit behavioral tracking/monitoring",
-            "Prohibit targeted advertising to children",
-            "Enhanced privacy notices",
-            "Cannot profile children",
-            "Consider best interests of child",
-            "No processing if likely to cause detriment"
+            "Obtain verifiable consent of the parent or lawful guardian",
+            "Exercise due diligence to verify that the person giving consent is an adult identifiable as the parent/guardian",
+            "No tracking or behavioural monitoring of children (Section 9(3))",
+            "No targeted advertising directed at children (Section 9(3))",
+            "No processing likely to cause a detrimental effect on the well-being of a child",
+            "Exemptions or a lower age threshold may be notified by the Central Government for fiduciaries verified as safe"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "Data fiduciaries processing children's data"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "Data Fiduciaries processing children's data"
     },
-    11: {
-        "number": 11,
+    "persons_with_disability": {
+        "number": "DPDP Rules, 2025",
         "title": "Processing of Personal Data of Persons with Disability",
-        "summary": "Establishes safeguards for processing data of persons with disabilities. Requires accessibility in all processes and special consideration of their needs.",
+        "summary": "Where a person with disability has a lawful guardian, the Data Fiduciary must obtain the verifiable consent of the lawful guardian before processing (Section 9 of the Act read with the DPDP Rules, 2025). Accessibility of notices and rights mechanisms supports valid, informed consent.",
         "requirements": [
+            "Obtain verifiable consent of the lawful guardian where one exists",
             "Accessible notice mechanisms",
-            "Support for exercising data rights",
+            "Support for exercising Data Principal rights",
             "Accessible grievance mechanisms",
-            "Consider dignity and autonomy",
-            "Reasonable accommodations provided",
-            "Informed consent with support if needed"
+            "Consider dignity and autonomy"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "Data fiduciaries processing data of persons with disabilities"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "Data Fiduciaries processing data of persons with disability who have lawful guardians"
     },
-    12: {
-        "number": 12,
+    "data_processors": {
+        "number": "DPDP Rules, 2025",
         "title": "Data Processors",
-        "summary": "Establishes obligations for data processors acting on fiduciary's instructions. Processor must implement safeguards and assist fiduciary in compliance.",
+        "summary": "The Data Fiduciary may engage a Data Processor only under a valid contract, and remains responsible for compliance with the Act in respect of processing undertaken on its behalf (Section 8(1)-(2) of the Act).",
         "requirements": [
-            "Written processing contract required",
-            "Processor acts on fiduciary instructions only",
-            "Cannot process for own purposes",
-            "Implement security safeguards",
-            "Maintain processing logs",
-            "Assist in data principal rights exercise",
-            "Assist in breach notification",
-            "Sub-processor authorization required"
+            "Engage Data Processors only under a valid contract (Section 8(2))",
+            "Data Fiduciary remains responsible for the processor's compliance (Section 8(1))",
+            "Processor must not process data for its own purposes",
+            "Impose security safeguard obligations on processors",
+            "Cause processors to erase data when required (Section 8(7))",
+            "Require processor assistance with breach intimation and rights requests"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "Data fiduciaries and their processors"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "Data Fiduciaries and their Data Processors"
     },
-    13: {
-        "number": 13,
-        "title": "Additional Obligations of Significant Data Fiduciary",
-        "summary": "Establishes heightened obligations for SDFs: appoint DPO, conduct annual DPIA, perform independent audits, monitor algorithmic decisions.",
+    "significant_data_fiduciaries": {
+        "number": "DPDP Rules, 2025",
+        "title": "Additional Obligations of Significant Data Fiduciaries",
+        "summary": "Operationalises Section 10 of the Act. SDF status arises only by Central Government notification, based on factors including the volume and sensitivity of data, risk to Data Principal rights, and potential impact on sovereignty and integrity of India, electoral democracy, security of the State and public order. There is no numeric or resident-count threshold in the Act.",
         "requirements": [
-            "Appoint Indian resident Data Protection Officer",
-            "Conduct annual Data Protection Impact Assessment",
-            "Undertake independent compliance audit annually",
-            "Maintain enhanced security measures",
-            "Monitor algorithmic software for risk/bias",
-            "Track automated decision-making systems",
-            "Document all compliance activities",
-            "Report to Board as required",
-            "Implement additional safeguards"
+            "Appoint a Data Protection Officer based in India, responsible to the board of directors",
+            "Conduct periodic Data Protection Impact Assessments (annual under the DPDP Rules, 2025 - verify against the gazetted Rules)",
+            "Undertake periodic audit through an independent data auditor",
+            "Verify that algorithmic software deployed does not pose a risk to the rights of Data Principals",
+            "Undertake other measures as prescribed",
+            "Monitor Central Government notifications for SDF designation"
         ],
-        "deadline": "Effective May 13, 2027 (SDF obligations)",
-        "applies_to": "Significant Data Fiduciaries"
+        "deadline": "Substantive obligations effective May 13, 2027 (for notified SDFs)",
+        "applies_to": "Data Fiduciaries notified as Significant Data Fiduciaries"
     },
-    14: {
-        "number": 14,
-        "title": "International Data Transfer",
-        "summary": "Prescribes requirements for transferring personal data outside India. Requires explicit consent and adequate safeguards in recipient jurisdiction.",
+    "cross_border_transfers": {
+        "number": "DPDP Rules, 2025",
+        "title": "Cross-Border Data Transfers",
+        "summary": "Under Section 16 of the Act, personal data may be transferred to any country or territory outside India except those restricted by Central Government notification (negative-list model). There is no adequacy requirement, no explicit-consent requirement, and no SCC mechanism. Stricter sectoral restrictions (e.g., RBI payment data localisation) continue to apply (Section 16(2)).",
         "requirements": [
-            "Explicit consent for international transfer",
-            "Exception for legitimate uses (with notice)",
-            "Assess recipient jurisdiction protections",
-            "Ensure adequate data protection framework",
-            "Document transfer and safeguards",
-            "Fiduciary remains responsible for recipient",
-            "Cannot transfer to circumvent DPDPA",
-            "Board can restrict transfers to certain countries"
+            "Transfers permitted unless the destination is on the notified negative list",
+            "Monitor Central Government notifications restricting transfers",
+            "Comply with any conditions prescribed for transfers under the DPDP Rules, 2025",
+            "Continue complying with stricter sectoral laws (e.g., RBI payment data localisation) per Section 16(2)"
         ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "Data fiduciaries transferring data internationally"
-    },
-    15: {
-        "number": 15,
-        "title": "Significant Data Fiduciary - Criteria and Determination",
-        "summary": "Specifies criteria for determining SDF status. Includes volume of data, use for impactful decisions, sensitive data, critical infrastructure, and data combination factors.",
-        "requirements": [
-            "Government notifies SDF classifications",
-            "Consider volume of personal data (50+ lakh Indian residents)",
-            "Consider impactful automated decisions",
-            "Consider sensitive data processing",
-            "Consider critical information infrastructure",
-            "Consider cross-sectoral data use",
-            "Consider emerging technology use",
-            "Consider national security/democracy impact"
-        ],
-        "deadline": "Criteria notified under Rule 15",
-        "applies_to": "Government and data fiduciaries"
-    },
-    16: {
-        "number": 16,
-        "title": "Legitimate Uses",
-        "summary": "Provides detailed guidance on processing without consent for legitimate uses: voluntary provision, state functions, legal obligations, and Government-prescribed purposes.",
-        "requirements": [
-            "Voluntary provision with informed choice",
-            "State subsidies and benefits delivery",
-            "Court orders and legal obligations",
-            "Employment relationship processing",
-            "Government-prescribed uses",
-            "Processing limited to stated purpose",
-            "Transparency in legitimate use processing",
-            "Data principal notification required"
-        ],
-        "deadline": "Effective May 13, 2027",
-        "applies_to": "All data fiduciaries relying on legitimate uses"
+        "deadline": "Substantive obligations effective May 13, 2027",
+        "applies_to": "Data Fiduciaries transferring personal data outside India"
     }
 }
 
@@ -793,19 +766,19 @@ KEY_DEFINITIONS = {
 
     "Processing": "Wholly or partly automated operation or set of operations performed on digital personal data, including collection, recording, organization, storage, retrieval, use, disclosure, or deletion.",
 
-    "Consent": "Voluntary, specific, informed, and clear affirmative action by data principal agreeing to processing. Must be freely given without coercion or being bundled with other terms.",
+    "Consent": "Free, specific, informed, unconditional and unambiguous indication by the Data Principal, given by a clear affirmative action, signifying agreement to processing for the specified purpose and limited to the personal data necessary for that purpose (Section 6).",
 
     "Withdrawal of Consent": "Data principal's right to withdraw consent at any time. Fiduciary must provide easy mechanism for withdrawal.",
 
-    "Data Protection Board": "Apex regulatory authority for DPDPA enforcement. Receives grievances, conducts inquiries, imposes penalties, and makes rules within scope.",
+    "Data Protection Board of India": "The adjudicatory body established under Section 18 of the Act. Functions as a digital office (Section 28); directs urgent remedial measures on breach intimation, inquires into breaches on complaint or government reference, and imposes penalties per Section 33 and the Schedule (Section 27). Appeals against its orders lie to the TDSAT (Section 29).",
 
-    "Data Protection Officer": "Individual appointed by Significant Data Fiduciaries to ensure DPDPA compliance. Must be Indian resident, point of contact for grievances.",
+    "Data Protection Officer": "Individual appointed by a Significant Data Fiduciary under Section 10. Must be based in India, be responsible to the board of directors (or similar governing body), and act as the point of contact for grievance redressal.",
 
-    "Significant Data Fiduciary": "Data fiduciary meeting criteria: large volume data (50+ lakh Indian residents), impactful automated decisions, sensitive data, critical infrastructure, or data combination factors.",
+    "Significant Data Fiduciary": "A Data Fiduciary or class of Data Fiduciaries notified by the Central Government under Section 10, based on factors such as the volume and sensitivity of personal data processed, risk to Data Principal rights, and potential impact on sovereignty and integrity of India, electoral democracy, security of the State and public order. The Act contains no numeric or resident-count threshold.",
 
-    "Data Breach": "Unauthorized access, disclosure, modification, deletion, or loss of personal data. Must be reported to Board within 72 hours.",
+    "Data Breach": "Unauthorized processing, or accidental disclosure, acquisition, sharing, use, alteration, destruction or loss of access to personal data, that compromises its confidentiality, integrity or availability. The Data Fiduciary must intimate the Board and each affected Data Principal (Section 8(6)); under the DPDP Rules, 2025, the Board must be intimated immediately with a detailed report within 72 hours (Rule 7).",
 
-    "Breach Notification": "Notice to Data Protection Board and affected data principals describing breach nature, extent, impact, and mitigation measures.",
+    "Breach Notification": "Intimation to the Data Protection Board of India and each affected Data Principal in the prescribed form and manner (Section 8(6)). Under Rule 7 of the DPDP Rules, 2025: immediate intimation to the Board, followed by a detailed 72-hour report; affected Data Principals must be intimated without delay.",
 
     "Security Safeguards": "Technical and organizational measures protecting personal data from unauthorized access, modification, or deletion. Include encryption, access controls, auditing.",
 
@@ -813,25 +786,31 @@ KEY_DEFINITIONS = {
 
     "Data Deletion": "Permanent removal of personal data from systems. Fiduciary must delete upon request or when retention period expires.",
 
-    "Legitimate Use": "Processing without explicit consent for purposes: voluntary provision, state functions, legal obligations, employment, or Government-prescribed uses.",
+    "Certain Legitimate Uses": "Grounds under Section 7 for processing without consent: (a) voluntary provision for a specified purpose without indication of non-consent; (b) State subsidies, benefits, services, certificates, licences and permits; (c) State functions/sovereignty/security; (d) legal obligations and disclosures to the State; (e) compliance with judgments, decrees or orders; (f) medical emergencies (threat to life or health); (g) epidemics/public health; (h) disasters/breakdown of public order; (i) employment purposes and safeguarding the employer.",
 
-    "Cross-border Data Transfer": "Transfer of personal data outside India. Requires explicit consent or legitimate use justification. Recipient must have adequate protections.",
+    "Cross-border Data Transfer": "Transfer of personal data outside India. Under Section 16, permitted to any country except those restricted by Central Government notification (negative-list model). No adequacy requirement or explicit-consent requirement under the Act; stricter sectoral laws (e.g., RBI payment data localisation) continue to apply (Section 16(2)).",
 
-    "Consent Manager": "Registered intermediary managing consents on behalf of data principals. Must meet eligibility criteria and register with Board.",
+    "Consent Manager": "A person registered with the Data Protection Board of India who enables Data Principals to give, manage, review and withdraw consent through an accessible, transparent and interoperable platform, and who is accountable to the Data Principal (Section 6(7)-(9)).",
 
-    "Data Protection Impact Assessment": "Mandatory assessment for SDFs examining likelihood of harm to principals' rights, adequacy of safeguards, and mitigation measures. Conducted annually.",
+    "Data Protection Impact Assessment": "A process assessing risks to the rights of Data Principals and related safeguards. Significant Data Fiduciaries must undertake periodic DPIAs (Section 10); the DPDP Rules, 2025 prescribe the periodicity (verify against the gazetted Rules).",
 
-    "Automated Decision-making": "Decisions made wholly by technical systems without human involvement. Fiduciary must assess impact and maintain human oversight.",
+    "Automated Decision-making": "Decision-making performed by automated means. 'Processing' under the Act covers wholly or partly automated operations (Section 2); under the DPDP Rules, 2025, Significant Data Fiduciaries must verify that algorithmic software they deploy does not pose a risk to the rights of Data Principals.",
 
-    "Behavioral Tracking": "Monitoring of individual's online activities, preferences, or behavior. Prohibited for children; requires consent for adults.",
+    "Behavioral Tracking": "Monitoring of an individual's online activities, preferences, or behavior. Tracking and behavioural monitoring of children are prohibited (Section 9(3)).",
 
-    "Targeted Advertising": "Advertisements directed at individuals based on profiling. Prohibited for children under DPDPA.",
+    "Targeted Advertising": "Advertisements directed at individuals based on profiling. Targeted advertising directed at children is prohibited (Section 9(3)).",
 
-    "Grievance": "Formal complaint to Data Protection Board alleging violation of DPDPA provisions by data fiduciary.",
+    "Grievance": "Complaint by a Data Principal regarding an act or omission of a Data Fiduciary or Consent Manager. Must first be raised through the fiduciary's or consent manager's grievance redressal mechanism (Section 13); only after exhausting that remedy may the Data Principal complain to the Data Protection Board of India.",
 
-    "Child": "Individual under 18 years of age. Subject to enhanced data protection and parental consent requirements.",
+    "Child": "An individual who has not completed eighteen years of age (Section 2). Processing requires verifiable consent of the parent or lawful guardian, and tracking, behavioural monitoring and targeted advertising directed at children are prohibited (Section 9).",
 
-    "Sensitive Personal Data": "Under DPDPA, all personal data is treated similarly. However, certain categories like children's, disability, and behavioral data require higher protections.",
+    "Sensitive Personal Data": "The DPDPA does not create a separate 'sensitive personal data' category - all digital personal data is protected uniformly. Children's data attracts additional protections (Section 9), and data sensitivity is a factor the Central Government considers when notifying Significant Data Fiduciaries (Section 10).",
+
+    "Nomination": "The Data Principal's right under Section 14 to nominate one or more individuals to exercise the Data Principal's rights under the Act in the event of death or incapacity.",
+
+    "Duties of Data Principals": "Obligations under Section 15: comply with applicable laws, do not impersonate, do not suppress material information, do not register false or frivolous complaints, and furnish verifiably authentic information for correction or erasure. Breach attracts a penalty of up to INR 10,000 (Schedule).",
+
+    "Appellate Tribunal (TDSAT)": "The Telecom Disputes Settlement and Appellate Tribunal, which hears appeals against orders and directions of the Data Protection Board of India. Appeals must be filed within 60 days (extendable for sufficient cause); further appeal lies to the Supreme Court (Section 29).",
 
     "Data Minimization": "Collecting only personal data necessary for stated purpose. Fiduciary must not collect excessive data.",
 
@@ -848,37 +827,37 @@ COMPLIANCE_CHECKLIST = {
     "Governance": [
         {
             "item": "Assess SDF Status",
-            "description": "Determine if organization qualifies as Significant Data Fiduciary based on data volume, processing impact, or data sensitivity",
+            "description": "SDF status arises only by Central Government notification (Section 10 factors: volume and sensitivity of data, risk to Data Principal rights, impact on sovereignty, electoral democracy, security of the State, public order). Monitor notifications to determine whether your organization is designated",
             "priority": "CRITICAL",
-            "section_reference": "Section 5, Rule 15",
+            "section_reference": "Section 10",
             "is_sdf_only": False
         },
         {
             "item": "Appoint Data Protection Officer",
-            "description": "SDFs must appoint Indian resident DPO responsible to Board/CEO, acting as compliance focal point",
+            "description": "SDFs must appoint a DPO based in India, responsible to the board of directors (or similar governing body) and acting as point of contact for grievance redressal",
             "priority": "CRITICAL",
-            "section_reference": "Section 8",
+            "section_reference": "Section 10",
             "is_sdf_only": True
         },
         {
             "item": "Establish Grievance Mechanism",
-            "description": "Create internal grievance redressal process with 30-day response target. Escalate to DPO if SDF",
+            "description": "Create a readily available grievance redressal process; respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules). Escalate to DPO if SDF",
             "priority": "CRITICAL",
-            "section_reference": "Section 14, Rule 9",
+            "section_reference": "Section 13, Section 8(10)",
             "is_sdf_only": False
         },
         {
             "item": "Maintain Data Fiduciary Records",
             "description": "Document all processing activities, legal bases, consent records, breach reports, and compliance evidence",
             "priority": "HIGH",
-            "section_reference": "Section 9",
+            "section_reference": "Section 8",
             "is_sdf_only": False
         },
         {
             "item": "Create Data Retention Policy",
-            "description": "Establish written policy specifying retention period for each data category and deletion procedures",
+            "description": "Establish written policy specifying retention period for each data category and erasure procedures (erase when consent is withdrawn or purpose no longer served)",
             "priority": "HIGH",
-            "section_reference": "Section 9, Rule 5",
+            "section_reference": "Section 8(7)",
             "is_sdf_only": False
         }
     ],
@@ -887,35 +866,35 @@ COMPLIANCE_CHECKLIST = {
             "item": "Obtain Written Consent",
             "description": "Collect voluntary, specific, informed, clear affirmative consent. Maintain proof and records",
             "priority": "CRITICAL",
-            "section_reference": "Section 11, Rule 3",
+            "section_reference": "Section 6, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Use Consent Manager for Consent Collection",
             "description": "Consider using registered Consent Manager to collect and manage consents on behalf of fiduciary",
             "priority": "MEDIUM",
-            "section_reference": "Section 16, Rule 4",
+            "section_reference": "Section 6(7)-(9), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Implement Consent Withdrawal Mechanism",
-            "description": "Provide easy mechanism for data principals to withdraw consent at any time",
+            "description": "Provide easy mechanism for Data Principals to withdraw consent at any time; withdrawal must be as easy as giving consent",
             "priority": "HIGH",
-            "section_reference": "Section 11",
+            "section_reference": "Section 6(4)",
             "is_sdf_only": False
         },
         {
             "item": "Avoid Bundled Consent",
             "description": "Do not bundle data consent with service terms. Consent must be separate, specific, and optional",
             "priority": "CRITICAL",
-            "section_reference": "Section 11, Rule 3",
+            "section_reference": "Section 6, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Obtain Parental Consent for Children",
             "description": "For children (under 18), obtain verifiable consent from parent or guardian before processing",
             "priority": "CRITICAL",
-            "section_reference": "Section 9(1)(d), Rule 10",
+            "section_reference": "Section 9, DPDP Rules 2025",
             "is_sdf_only": False
         }
     ],
@@ -924,49 +903,49 @@ COMPLIANCE_CHECKLIST = {
             "item": "Create Standalone Privacy Notice",
             "description": "Provide clear, standalone notice (not buried in T&Cs) disclosing all data collection and processing details",
             "priority": "CRITICAL",
-            "section_reference": "Rule 2",
+            "section_reference": "Section 5, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Itemize Personal Data Categories",
             "description": "Clearly list each category of personal data collected with examples",
             "priority": "HIGH",
-            "section_reference": "Rule 2",
+            "section_reference": "Section 5, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Disclose Processing Purposes",
             "description": "Specify every purpose for which personal data will be processed",
             "priority": "CRITICAL",
-            "section_reference": "Rule 2",
+            "section_reference": "Section 5, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Include Data Retention Period",
             "description": "Clearly state how long personal data will be retained and deletion policy",
             "priority": "HIGH",
-            "section_reference": "Rule 2, Rule 5",
+            "section_reference": "Section 5, Section 8(7)",
             "is_sdf_only": False
         },
         {
             "item": "Disclose Data Recipients",
             "description": "Identify parties who will receive personal data (processors, partners, government agencies)",
             "priority": "HIGH",
-            "section_reference": "Rule 2",
+            "section_reference": "Section 5, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Include Data Principal Rights Information",
             "description": "Inform about rights: access, correction, deletion, grievance filing with links/instructions",
             "priority": "HIGH",
-            "section_reference": "Rule 2, Rule 8",
+            "section_reference": "Section 5, Sections 11-14",
             "is_sdf_only": False
         },
         {
             "item": "Update Privacy Notices",
             "description": "Review and update notices when processing changes or new purposes added",
             "priority": "MEDIUM",
-            "section_reference": "Rule 2",
+            "section_reference": "Section 5, DPDP Rules 2025",
             "is_sdf_only": False
         }
     ],
@@ -975,56 +954,56 @@ COMPLIANCE_CHECKLIST = {
             "item": "Implement Security Safeguards",
             "description": "Deploy technical and organizational measures: encryption, access controls, authentication, auditing",
             "priority": "CRITICAL",
-            "section_reference": "Section 9, Rule 6",
+            "section_reference": "Section 8(4)-(5)",
             "is_sdf_only": False
         },
         {
             "item": "Encrypt Data at Rest",
             "description": "Use strong encryption for stored personal data in databases, backups, archives",
             "priority": "CRITICAL",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Encrypt Data in Transit",
             "description": "Use TLS/SSL encryption for data transmission over networks and internet",
             "priority": "CRITICAL",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Implement Access Controls",
             "description": "Restrict access to personal data to authorized personnel only. Use role-based access control",
             "priority": "CRITICAL",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Maintain Processing Logs",
             "description": "Document all processing activities including access, modification, deletion with timestamps and user info",
             "priority": "HIGH",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Conduct Security Audits",
             "description": "Regularly audit security safeguards through internal reviews and third-party assessments",
             "priority": "MEDIUM",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Perform Penetration Testing",
             "description": "Test systems against vulnerabilities and simulated attacks. Remediate findings promptly",
             "priority": "MEDIUM",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Manage Vendor/Processor Security",
             "description": "Ensure data processors implement equivalent security measures through contracts and audits",
             "priority": "HIGH",
-            "section_reference": "Section 15, Rule 12",
+            "section_reference": "Section 8(2)",
             "is_sdf_only": False
         }
     ],
@@ -1033,28 +1012,28 @@ COMPLIANCE_CHECKLIST = {
             "item": "Establish Breach Detection Mechanism",
             "description": "Implement tools and processes to detect unauthorized access, disclosure, or modification of personal data",
             "priority": "CRITICAL",
-            "section_reference": "Section 6",
+            "section_reference": "Section 8(6)",
             "is_sdf_only": False
         },
         {
             "item": "Notify Board Within 72 Hours",
-            "description": "Report data breach to Data Protection Board with detailed information within 72 hours of discovery",
+            "description": "Intimate the Data Protection Board of India immediately, with a detailed report within 72 hours of becoming aware of the breach",
             "priority": "CRITICAL",
-            "section_reference": "Section 6, Rule 7",
+            "section_reference": "Section 8(6), Rule 7",
             "is_sdf_only": False
         },
         {
             "item": "Notify Data Principals Without Delay",
             "description": "Inform affected data principals of breach, its nature, extent, and mitigation measures",
             "priority": "CRITICAL",
-            "section_reference": "Section 6, Rule 7",
+            "section_reference": "Section 8(6), Rule 7",
             "is_sdf_only": False
         },
         {
             "item": "Maintain Breach Records",
             "description": "Document all breaches with discovery date, notification evidence, impact assessment, and remediation",
             "priority": "HIGH",
-            "section_reference": "Section 6",
+            "section_reference": "Section 8(6)",
             "is_sdf_only": False
         },
         {
@@ -1075,37 +1054,37 @@ COMPLIANCE_CHECKLIST = {
     "Data Principal Rights": [
         {
             "item": "Enable Access Requests",
-            "description": "Provide mechanism for data principals to access their personal data. Respond within 30 days",
+            "description": "Provide mechanism for Data Principals to obtain a summary of their personal data, processing activities, and the identities of fiduciaries/processors with whom it was shared. Respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)",
             "priority": "HIGH",
-            "section_reference": "Section 13, Rule 8",
+            "section_reference": "Section 11, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Enable Correction Requests",
             "description": "Allow data principals to correct inaccurate/misleading data. Process promptly",
             "priority": "HIGH",
-            "section_reference": "Section 12, Rule 8",
+            "section_reference": "Section 12, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Enable Deletion Requests",
             "description": "Allow data principals to request erasure of personal data. Delete unless legal retention required",
             "priority": "HIGH",
-            "section_reference": "Section 12, Rule 8",
+            "section_reference": "Section 12, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Provide Information in Accessible Format",
-            "description": "Respond to principal requests with clear information in commonly understood format",
+            "description": "Respond to Data Principal requests with clear information in commonly understood format",
             "priority": "MEDIUM",
-            "section_reference": "Rule 8",
+            "section_reference": "Section 11, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
-            "item": "Do Not Charge Excessive Fees",
-            "description": "If charging for access requests, fees must be reasonable and not excessive",
+            "item": "Enable Nomination Facility",
+            "description": "Allow Data Principals to nominate one or more individuals who may exercise their rights in the event of death or incapacity",
             "priority": "MEDIUM",
-            "section_reference": "Rule 8",
+            "section_reference": "Section 14",
             "is_sdf_only": False
         }
     ],
@@ -1114,35 +1093,35 @@ COMPLIANCE_CHECKLIST = {
             "item": "Identify Children's Data Processing",
             "description": "Map all processing of children's personal data and implement enhanced protections",
             "priority": "CRITICAL",
-            "section_reference": "Section 9(1)(d), Rule 10",
+            "section_reference": "Section 9, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Implement Age Verification",
-            "description": "Implement mechanisms to verify age of users. Treat under-18 as child requiring parental consent",
+            "description": "Implement mechanisms to verify age of users. Treat under-18 as child requiring verifiable parental/guardian consent",
             "priority": "HIGH",
-            "section_reference": "Rule 10",
+            "section_reference": "Section 9, DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Prohibit Behavioral Tracking of Children",
             "description": "Do not track, monitor, or profile children's online behavior, activities, or preferences",
             "priority": "CRITICAL",
-            "section_reference": "Section 9(1)(d)",
+            "section_reference": "Section 9(3)",
             "is_sdf_only": False
         },
         {
             "item": "Prohibit Targeted Advertising to Children",
             "description": "Do not direct advertisements to children based on profiling or behavior",
             "priority": "CRITICAL",
-            "section_reference": "Section 9(1)(d)",
+            "section_reference": "Section 9(3)",
             "is_sdf_only": False
         },
         {
             "item": "Provide Accessible Mechanisms for Disability",
-            "description": "Ensure all DPDPA-related mechanisms (notices, grievance, rights exercise) are accessible to persons with disabilities",
+            "description": "Ensure all DPDPA-related mechanisms (notices, grievance, rights exercise) are accessible to persons with disabilities; obtain verifiable consent of the lawful guardian where one exists",
             "priority": "HIGH",
-            "section_reference": "Rule 11",
+            "section_reference": "Section 9, DPDP Rules 2025",
             "is_sdf_only": False
         }
     ],
@@ -1151,123 +1130,123 @@ COMPLIANCE_CHECKLIST = {
             "item": "Identify All Data Processors",
             "description": "Document all third parties processing personal data on your behalf (hosting, analytics, CRM, etc.)",
             "priority": "HIGH",
-            "section_reference": "Section 15, Rule 12",
+            "section_reference": "Section 8(2)",
             "is_sdf_only": False
         },
         {
             "item": "Execute Data Processing Contracts",
             "description": "Have written agreement with each processor clearly defining roles, obligations, and security requirements",
             "priority": "CRITICAL",
-            "section_reference": "Section 15, Rule 12",
+            "section_reference": "Section 8(2)",
             "is_sdf_only": False
         },
         {
             "item": "Restrict Processor to Instructions",
             "description": "Ensure processor agreement explicitly prohibits processing beyond fiduciary's instructions",
             "priority": "CRITICAL",
-            "section_reference": "Section 15, Rule 12",
+            "section_reference": "Section 8(2)",
             "is_sdf_only": False
         },
         {
             "item": "Audit Processor Security",
             "description": "Conduct or require audits of processor's security and compliance measures annually",
             "priority": "HIGH",
-            "section_reference": "Rule 12",
+            "section_reference": "Section 8(1)-(2)",
             "is_sdf_only": False
         },
         {
             "item": "Control Sub-processor Use",
             "description": "Require processor to get your approval before engaging sub-processors. Maintain sub-processor list",
             "priority": "HIGH",
-            "section_reference": "Rule 12",
+            "section_reference": "Section 8(1)-(2)",
             "is_sdf_only": False
         },
         {
             "item": "Include Data Principal Rights Assistance",
             "description": "Require processors to assist in responding to access, correction, deletion, and breach notification requests",
             "priority": "HIGH",
-            "section_reference": "Rule 12",
+            "section_reference": "Section 8(1)-(2)",
             "is_sdf_only": False
         }
     ],
     "International Data Transfer": [
         {
             "item": "Identify International Data Transfers",
-            "description": "Map all transfer of personal data outside India to other countries",
+            "description": "Map all transfers of personal data outside India to other countries",
             "priority": "MEDIUM",
-            "section_reference": "Section 17, Rule 14",
+            "section_reference": "Section 16",
             "is_sdf_only": False
         },
         {
-            "item": "Obtain Explicit Consent for Transfers",
-            "description": "Get specific, informed consent for transferring data outside India. Exception only for legitimate uses with notice",
+            "item": "Check the Negative List Before Transferring",
+            "description": "Transfers are permitted to any country except those restricted by Central Government notification (negative-list model). Monitor notifications; no adequacy assessment or explicit-consent requirement applies under the Act",
             "priority": "CRITICAL",
-            "section_reference": "Section 17, Rule 14",
+            "section_reference": "Section 16",
             "is_sdf_only": False
         },
         {
-            "item": "Assess Recipient Country Protection",
-            "description": "Evaluate data protection laws and practices in recipient country. Ensure adequate safeguards exist",
+            "item": "Comply with Sectoral Localisation Requirements",
+            "description": "Stricter sectoral restrictions (e.g., RBI payment data localisation) continue to apply in addition to the Act",
             "priority": "HIGH",
-            "section_reference": "Section 17, Rule 14",
+            "section_reference": "Section 16(2)",
             "is_sdf_only": False
         },
         {
-            "item": "Document Transfer Safeguards",
-            "description": "Maintain evidence of safeguards ensuring transferred data protection equivalent to India standards",
+            "item": "Document Transfer Locations and Recipients",
+            "description": "Maintain records of destinations and recipients of transferred personal data, so restricted-country notifications can be acted on quickly",
             "priority": "HIGH",
-            "section_reference": "Section 17, Rule 14",
+            "section_reference": "Section 16",
             "is_sdf_only": False
         },
         {
             "item": "Remain Accountable for Recipient",
-            "description": "Ensure fiduciary remains responsible for recipient's processing and protection of transferred data",
+            "description": "The Data Fiduciary remains responsible for compliance in respect of processing undertaken on its behalf, including by overseas processors, under a valid contract",
             "priority": "CRITICAL",
-            "section_reference": "Section 17",
+            "section_reference": "Section 8(1)-(2), Section 16",
             "is_sdf_only": False
         }
     ],
     "SDF-Specific Obligations": [
         {
-            "item": "Conduct Annual Data Protection Impact Assessment",
-            "description": "SDFs must assess high-risk processing, document safeguards, and risk mitigation measures annually",
+            "item": "Conduct Periodic Data Protection Impact Assessment",
+            "description": "SDFs must undertake periodic DPIAs assessing risks to Data Principal rights, documenting safeguards and mitigation (annual under the DPDP Rules, 2025 - verify against the gazetted Rules)",
             "priority": "CRITICAL",
-            "section_reference": "Section 7, Section 10, Rule 13",
+            "section_reference": "Section 10, DPDP Rules 2025",
             "is_sdf_only": True
         },
         {
-            "item": "Perform Independent Annual Audit",
-            "description": "SDFs must commission independent auditor to assess DPDPA compliance once per year",
+            "item": "Perform Periodic Independent Audit",
+            "description": "SDFs must appoint an independent data auditor and undertake periodic audits of DPDPA compliance (annual under the DPDP Rules, 2025 - verify against the gazetted Rules)",
             "priority": "CRITICAL",
-            "section_reference": "Section 10, Rule 13",
+            "section_reference": "Section 10, DPDP Rules 2025",
             "is_sdf_only": True
         },
         {
             "item": "Monitor Algorithmic Processing",
             "description": "SDFs must assess automated decision-making systems for bias, fairness, and data principal impact",
             "priority": "HIGH",
-            "section_reference": "Section 10, Rule 13",
+            "section_reference": "Section 10, DPDP Rules 2025",
             "is_sdf_only": True
         },
         {
             "item": "Maintain DPO Independence",
-            "description": "Ensure DPO has sufficient organizational independence to raise compliance concerns without retaliation",
+            "description": "Ensure DPO has sufficient organizational independence to raise compliance concerns without retaliation; DPO is responsible to the board of directors",
             "priority": "CRITICAL",
-            "section_reference": "Section 8",
+            "section_reference": "Section 10",
             "is_sdf_only": True
         },
         {
             "item": "Document SDF Compliance Activities",
             "description": "Maintain records of DPIA, audits, DPO activities, algorithmic assessments, and Board interactions",
             "priority": "HIGH",
-            "section_reference": "Section 10, Rule 13",
+            "section_reference": "Section 10, DPDP Rules 2025",
             "is_sdf_only": True
         },
         {
-            "item": "Report to Data Protection Board",
+            "item": "Report to Data Protection Board of India",
             "description": "Provide Board with audit reports, DPIA summaries, and compliance documentation as requested",
             "priority": "HIGH",
-            "section_reference": "Section 10, Rule 13",
+            "section_reference": "Section 10, DPDP Rules 2025",
             "is_sdf_only": True
         }
     ],
@@ -1283,14 +1262,14 @@ COMPLIANCE_CHECKLIST = {
             "item": "Train Employees on DPDPA",
             "description": "Conduct awareness training for all staff on DPDPA obligations, data handling, breach notification",
             "priority": "MEDIUM",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
             "item": "Establish Access Control Training",
             "description": "Train authorized personnel on accessing personal data, maintaining confidentiality, audit logs",
             "priority": "MEDIUM",
-            "section_reference": "Rule 6",
+            "section_reference": "Section 8(5), DPDP Rules 2025",
             "is_sdf_only": False
         },
         {
@@ -1338,7 +1317,7 @@ COMPLIANCE_CHECKLIST = {
 FAQ = [
     {
         "question": "Who does DPDPA apply to?",
-        "answer": "DPDPA applies to any person (individual, company, organization, government entity) who determines the purpose and means of processing personal data in digital form in India. Excludes: government employee data in official capacity, non-digital processing."
+        "answer": "DPDPA applies to any person (individual, company, organization, government entity) processing digital personal data within India, and to processing outside India in connection with offering goods or services to Data Principals in India (Section 3). It does not apply to: personal data processed by an individual for personal or domestic purposes, or personal data made publicly available by the Data Principal or by another person under a legal obligation."
     },
     {
         "question": "What is personal data under DPDPA?",
@@ -1346,15 +1325,15 @@ FAQ = [
     },
     {
         "question": "What is a Significant Data Fiduciary?",
-        "answer": "SDF is a data fiduciary meeting specific criteria: processes 50+ lakh personal data of Indian residents, makes impactful automated decisions, processes sensitive data, operates critical information infrastructure, or processes data in combination with other data. SDFs face stricter obligations."
+        "answer": "An SDF is a Data Fiduciary (or class of fiduciaries) notified as such by the Central Government under Section 10 - there is no numeric or resident-count threshold in the Act. The notification is based on factors including the volume and sensitivity of personal data processed, risk to Data Principal rights, and potential impact on the sovereignty and integrity of India, electoral democracy, security of the State, and public order. SDFs face additional obligations: a DPO based in India responsible to the board of directors, an independent data auditor, and periodic DPIAs and audits."
     },
     {
         "question": "Can I collect personal data without consent?",
-        "answer": "Yes, in two cases: (1) Legitimate uses - voluntary provision, state benefits, legal obligations, employment, or Government-prescribed purposes; (2) Automatic processing without consent is NOT allowed. All non-legitimate processing requires explicit consent."
+        "answer": "Yes, only for the 'certain legitimate uses' in Section 7: (a) voluntary provision for a specified purpose without indication of non-consent; (b) State subsidies, benefits, services, certificates, licences and permits; (c) State functions and sovereignty/security; (d) legal obligations and disclosures to the State; (e) compliance with judgments or orders; (f) medical emergencies; (g) epidemics/public health; (h) disasters/breakdown of public order; (i) employment purposes and safeguarding the employer. All other processing requires consent under Section 6."
     },
     {
         "question": "How do I obtain valid consent under DPDPA?",
-        "answer": "Consent must be: (1) Voluntary - free from coercion; (2) Specific - for each purpose separately; (3) Informed - data principal understands what they consent to; (4) Clear affirmative action - opt-in, not opt-out, such as checkbox click or signature; (5) Kept separate from service terms. Maintain proof of consent."
+        "answer": "Under Section 6, consent must be: (1) Free - without coercion; (2) Specific - limited to the specified purpose; (3) Informed - preceded or accompanied by a Section 5 notice; (4) Unconditional - not bundled with unrelated terms; (5) Unambiguous, with a clear affirmative action (opt-in, not opt-out); and (6) Limited to the personal data necessary for the purpose. Withdrawal must be as easy as giving consent. Maintain records evidencing notice and consent."
     },
     {
         "question": "Can I use blanket consent for all purposes?",
@@ -1366,19 +1345,19 @@ FAQ = [
     },
     {
         "question": "What must I do if personal data is breached?",
-        "answer": "Upon discovering a breach: (1) Immediately notify Data Protection Board; (2) Provide detailed 72-hour report with breach details, impact, and remediation; (3) Notify affected individuals without delay with breach information; (4) Maintain breach documentation; (5) Implement preventive measures. No materiality threshold - all breaches reportable."
+        "answer": "Under Section 8(6) read with Rule 7 of the DPDP Rules, 2025: (1) Immediately intimate the Data Protection Board of India; (2) Submit a detailed report to the Board within 72 hours covering breach details, impact, and remediation; (3) Intimate each affected Data Principal without delay; (4) Maintain breach documentation; (5) Implement preventive measures. No materiality threshold - all breaches reportable. Maximum penalty for failure to notify: INR 200 crore (Schedule)."
     },
     {
-        "question": "What are my data principal rights?",
-        "answer": "Data principals can: (1) Access their personal data; (2) Know what data is processed and why; (3) Correct inaccurate or incomplete data; (4) Request data deletion; (5) Withdraw consent anytime; (6) File grievance with Board; (7) Receive information in accessible format. Fiduciary must respond within reasonable timeframe."
+        "question": "What are my Data Principal rights?",
+        "answer": "Data Principals can: (1) Access a summary of their personal data, processing activities, and the fiduciaries/processors it was shared with (Section 11); (2) Seek correction, completion, updating and erasure (Section 12); (3) Use readily available grievance redressal (Section 13); (4) Nominate individual(s) to exercise rights on death or incapacity (Section 14); (5) Withdraw consent at any time, as easily as it was given (Section 6(4)). The fiduciary must respond within the time period published by the Data Fiduciary / as prescribed under the DPDP Rules, 2025 (verify against the gazetted Rules)."
     },
     {
         "question": "Do I need a Data Protection Officer?",
-        "answer": "Only Significant Data Fiduciaries must appoint a DPO. The DPO must be an Indian resident, report to governing body, act as compliance focal point, and handle grievance redressal. Regular data fiduciaries do not require DPO appointment."
+        "answer": "Only Significant Data Fiduciaries (notified under Section 10) must appoint a DPO. The DPO must be based in India, be responsible to the board of directors (or similar governing body), and act as the point of contact for grievance redressal. Other Data Fiduciaries need not appoint a DPO, but must publish contact details of a person able to answer Data Principals' questions about processing (Section 8(9))."
     },
     {
         "question": "What is a Data Protection Impact Assessment?",
-        "answer": "DPIA is an assessment required annually by SDFs examining: (1) Likelihood of harm to data principals' rights, (2) Adequacy of safeguards, (3) Processing risks, (4) Risk mitigation measures. Results must be documented and reviewed. Helps identify high-risk processing."
+        "answer": "A DPIA is a process assessing risks to the rights of Data Principals and the safeguards and mitigation measures in place. Significant Data Fiduciaries must undertake DPIAs periodically (Section 10); the DPDP Rules, 2025 prescribe the periodicity (verify against the gazetted Rules). Results must be documented; SDFs must also undergo periodic audit by an independent data auditor."
     },
     {
         "question": "How do I handle children's data?",
@@ -1390,19 +1369,19 @@ FAQ = [
     },
     {
         "question": "What happens if I transfer data outside India?",
-        "answer": "International transfer requires: (1) Explicit consent from data principal (exception: legitimate uses with notice); (2) Assessment that recipient country has adequate data protection; (3) Documentation of safeguards; (4) Fiduciary remains responsible for recipient's processing. Cannot transfer to circumvent DPDPA."
+        "answer": "Section 16 follows a negative-list model: transfer is allowed to any country EXCEPT those restricted by Central Government notification. There is no adequacy requirement, no explicit-consent requirement, and no SCC mechanism under the Act. You must: (1) Monitor restricted-country notifications; (2) Continue meeting all your Data Fiduciary obligations for the transferred data, including for overseas processors (Section 8(1)-(2)); (3) Comply with stricter sectoral rules that continue to apply, e.g., RBI payment data localisation (Section 16(2))."
     },
     {
         "question": "What are DPDPA penalties?",
-        "answer": "Penalties range from INR 50 crore to INR 250 crore depending on violation: (1) INR 50 crore - unauthorized processing, consent violations, data principal rights denial; (2) INR 200 crore - breach notification failure; (3) INR 250 crore - security safeguards failure, SDF obligations failure. Penalties are absolute amounts, not revenue percentage."
+        "answer": "Penalties are set out in the Schedule to the Act and imposed by the Board under Section 33: (1) up to INR 250 crore - failure of reasonable security safeguards (Section 8(5)); (2) up to INR 200 crore - failure to notify a breach to the Board/Data Principals (Section 8(6)); (3) up to INR 200 crore - breach of children's data obligations (Section 9); (4) up to INR 150 crore - breach of SDF obligations (Section 10); (5) up to INR 10,000 - breach of Data Principal duties (Section 15); (6) breach of a voluntary undertaking - up to the penalty for the underlying breach; (7) up to INR 50 crore - any other breach of the Act or Rules (residual). Penalties are absolute amounts, not a revenue percentage, and are credited to the Consolidated Fund of India (Section 34)."
     },
     {
-        "question": "How do I file a grievance with Data Protection Board?",
-        "answer": "Data principals can file grievances: (1) Online through Board's digital portal (effective May 13, 2027); (2) Against data fiduciaries violating DPDPA; (3) Board initiates own inquiries; (4) Natural justice principles apply; (5) Board can impose remedial orders and penalties. Board contact info available on official website."
+        "question": "How do I complain to the Data Protection Board of India?",
+        "answer": "First exhaust the Data Fiduciary's or Consent Manager's own grievance redressal mechanism (Section 13) - this is mandatory before approaching the Board. Then: (1) Complain to the Board, which functions as a digital office (Section 28); (2) The Board may inquire, direct remedial measures and impose penalties per the Schedule (Section 27); (3) Appeals against Board orders lie to the Telecom Disputes Settlement and Appellate Tribunal (TDSAT) within 60 days, extendable for sufficient cause, with further appeal to the Supreme Court (Section 29)."
     },
     {
         "question": "What is the implementation timeline?",
-        "answer": "DPDPA has staggered implementation: (1) August 4, 2023 - Act commencement (definitions, Board); (2) November 13, 2026 - Consent Managers registration begins; (3) May 13, 2027 - Full compliance mandatory (consent, fiduciary obligations, Board powers effective). Prepare from now for May 2027 deadline."
+        "answer": "DPDPA has staggered implementation: (1) August 11, 2023 - Act enacted (received Presidential assent); provisions commence in stages by notification; (2) November 13, 2025 - DPDP Rules, 2025 notified; (3) November 13, 2026 - Consent Manager registration with the Board begins; (4) May 13, 2027 - substantive obligations mandatory (notice, consent, fiduciary obligations, rights). Prepare from now for the May 2027 deadline."
     },
     {
         "question": "How do I ensure my data processor complies?",
@@ -1414,7 +1393,7 @@ FAQ = [
     },
     {
         "question": "Can data be used for behavioral targeting/profiling?",
-        "answer": "Behavioral targeting/profiling requires explicit consent. Prohibited for children under 18. For adults: consent must be specific for profiling purposes, clear disclosure of profiling practices, right to understand decisions made by profiling, right to contest. SDFs must monitor algorithmic systems for bias."
+        "answer": "For children (under 18), tracking, behavioural monitoring and targeted advertising are prohibited outright (Section 9(3)). For adults, such processing needs a valid legal basis - in practice, consent under Section 6 that is specific to the profiling purpose and covered in the Section 5 notice. Under the DPDP Rules, 2025, Significant Data Fiduciaries must also verify that algorithmic software they deploy does not pose a risk to the rights of Data Principals."
     }
 ]
 
@@ -1422,9 +1401,9 @@ FAQ = [
 # 6. PENALTY_MATRIX - Detailed penalty information
 PENALTY_MATRIX = {
     "Unauthorized Processing": {
-        "description": "Processing personal data without valid legal basis (consent or legitimate use)",
+        "description": "Processing personal data without valid legal basis (consent or certain legitimate use)",
         "max_penalty": "50 crore INR",
-        "section": "Section 4, 30",
+        "section": "Sections 4-7; Schedule (residual)",
         "examples": [
             "Processing without obtaining consent",
             "Using data for purpose not disclosed",
@@ -1435,7 +1414,7 @@ PENALTY_MATRIX = {
     "Consent Violations": {
         "description": "Invalid, coerced, bundled consent or failure to maintain consent proof",
         "max_penalty": "50 crore INR",
-        "section": "Section 11",
+        "section": "Section 6; Schedule (residual)",
         "examples": [
             "Bundled consent with service terms",
             "Opt-out instead of opt-in consent",
@@ -1445,21 +1424,21 @@ PENALTY_MATRIX = {
         ]
     },
     "Data Principal Rights Denial": {
-        "description": "Denying access, correction, deletion, or grievance rights",
+        "description": "Denying access, correction/erasure, grievance redressal, or nomination rights",
         "max_penalty": "50 crore INR",
-        "section": "Section 12, 13, 14",
+        "section": "Sections 11-14; Schedule (residual)",
         "examples": [
-            "Refusing access request without justification",
-            "Denying correction of inaccurate data",
-            "Refusing deletion request",
-            "Not responding to grievance within timeframe",
-            "Charging excessive fees for rights exercise"
+            "Refusing access request without justification (Section 11)",
+            "Denying correction of inaccurate data (Section 12)",
+            "Refusing erasure request without a legal basis to retain (Section 12)",
+            "Not responding to grievance within the prescribed/published period (Section 13)",
+            "Not providing a nomination facility (Section 14)"
         ]
     },
     "Breach Notification Failure": {
-        "description": "Failure to notify Board within 72 hours or notify affected principals",
+        "description": "Failure to intimate the Board (immediately, with a detailed 72-hour report) or affected Data Principals of a personal data breach",
         "max_penalty": "200 crore INR",
-        "section": "Section 6, Rule 7",
+        "section": "Section 8(6); Rule 7, DPDP Rules 2025",
         "examples": [
             "No notification to Board within 72 hours",
             "No notification to affected principals",
@@ -1468,9 +1447,9 @@ PENALTY_MATRIX = {
         ]
     },
     "Security Safeguards Failure": {
-        "description": "Inadequate security measures leading to unauthorized access/disclosure",
+        "description": "Failure to take reasonable security safeguards to prevent personal data breach",
         "max_penalty": "250 crore INR",
-        "section": "Section 9, Rule 6",
+        "section": "Section 8(5); Schedule",
         "examples": [
             "No encryption of stored personal data",
             "Weak access controls and authentication",
@@ -1480,21 +1459,21 @@ PENALTY_MATRIX = {
         ]
     },
     "SDF Obligations Failure": {
-        "description": "SDFs failing to appoint DPO, conduct DPIA, or perform audits",
-        "max_penalty": "250 crore INR",
-        "section": "Section 10, Rule 13",
+        "description": "SDFs failing to appoint a DPO based in India, appoint an independent data auditor, or undertake periodic DPIAs and audits",
+        "max_penalty": "150 crore INR",
+        "section": "Section 10; Schedule",
         "examples": [
             "No Data Protection Officer appointed",
-            "Missing annual DPIA",
-            "No independent audit performed",
-            "Inadequate algorithmic monitoring",
-            "No processing logs maintained"
+            "Missing periodic DPIA",
+            "No independent data auditor appointed / no periodic audit",
+            "Failure to verify algorithmic software does not pose risk to Data Principal rights",
+            "Other prescribed SDF measures not undertaken"
         ]
     },
     "Children's Data Violations": {
-        "description": "Processing children's data without parental consent or violating protections",
-        "max_penalty": "250 crore INR",
-        "section": "Section 9(1)(d), Rule 10",
+        "description": "Processing children's data without verifiable parental/guardian consent or violating Section 9 protections",
+        "max_penalty": "200 crore INR",
+        "section": "Section 9; Schedule",
         "examples": [
             "Processing without parental/guardian consent",
             "Behavioral tracking of children",
@@ -1504,9 +1483,9 @@ PENALTY_MATRIX = {
         ]
     },
     "Processor/Vendor Non-compliance": {
-        "description": "Using processor without contract or failing to ensure compliance",
+        "description": "Engaging a Data Processor without a valid contract or failing to ensure compliance",
         "max_penalty": "50 crore INR",
-        "section": "Section 15, Rule 12",
+        "section": "Section 8(2); Schedule (residual)",
         "examples": [
             "No processing contract with vendor",
             "Processor processes beyond fiduciary instructions",
@@ -1516,9 +1495,9 @@ PENALTY_MATRIX = {
         ]
     },
     "Consent Manager Violations": {
-        "description": "Operating as consent manager without registration or violating obligations",
+        "description": "Operating as Consent Manager without Board registration or violating obligations",
         "max_penalty": "50 crore INR",
-        "section": "Section 16, Rule 4",
+        "section": "Section 6(7)-(9); Schedule (residual)",
         "examples": [
             "Operating without Board registration",
             "Processing personal data itself",
@@ -1528,15 +1507,35 @@ PENALTY_MATRIX = {
         ]
     },
     "Board Order Non-compliance": {
-        "description": "Failure to comply with Board directions, orders, or corrective measures",
+        "description": "Failure to comply with directions, orders, or remedial measures of the Data Protection Board of India",
         "max_penalty": "50 crore INR",
-        "section": "Section 32",
+        "section": "Section 27; Schedule (residual)",
         "examples": [
-            "Not implementing Board-ordered remedies",
+            "Not implementing Board-directed remedial or mitigation measures",
             "Missing Board-imposed deadlines",
-            "Not providing information to Board when required",
-            "Continuing violation despite Board notice",
-            "Not cooperating with Board inquiry"
+            "Not providing information to the Board when required",
+            "Continuing breach despite Board direction",
+            "Not cooperating with a Board inquiry"
+        ]
+    },
+    "Data Principal Duties Breach": {
+        "description": "Breach by a Data Principal of the duties under Section 15 (e.g., impersonation, suppression of material information, false or frivolous complaints)",
+        "max_penalty": "10,000 INR",
+        "section": "Section 15; Schedule",
+        "examples": [
+            "Impersonating another person while providing personal data",
+            "Suppressing material information when providing data to the State",
+            "Registering a false or frivolous grievance or complaint",
+            "Furnishing unverifiable information for correction or erasure"
+        ]
+    },
+    "Breach of Voluntary Undertaking": {
+        "description": "Breach of a voluntary undertaking accepted by the Board under Section 31",
+        "max_penalty": "Up to the penalty applicable to the underlying breach",
+        "section": "Sections 31-32; Schedule",
+        "examples": [
+            "Failing to perform actions committed to in an accepted voluntary undertaking",
+            "Resuming the conduct the undertaking was meant to remedy"
         ]
     }
 }
@@ -1545,34 +1544,34 @@ PENALTY_MATRIX = {
 # 7. TIMELINE - Key implementation dates
 TIMELINE = [
     {
-        "date": "August 4, 2023",
-        "event": "DPDPA 2023 Commencement",
-        "description": "Digital Personal Data Protection Act 2023 came into force. Definitions, Data Protection Board establishment, rule-making authority became effective.",
+        "date": "August 11, 2023",
+        "event": "DPDPA 2023 Enacted",
+        "description": "Digital Personal Data Protection Act 2023 received Presidential assent. Its provisions come into force in stages, on dates notified by the Central Government (Section 1).",
         "who_affected": "All organizations"
     },
     {
-        "date": "November 14, 2025",
+        "date": "November 13, 2025",
         "event": "DPDP Rules 2025 Notification",
         "description": "Digital Personal Data Protection Rules 2025 officially notified by MeitY. Provides operational framework and detailed compliance procedures.",
-        "who_affected": "All data fiduciaries and consent managers"
+        "who_affected": "All Data Fiduciaries and Consent Managers"
     },
     {
         "date": "November 13, 2026",
         "event": "Consent Manager Registration Opens",
-        "description": "Consent Manager registration with Data Protection Board becomes operational. Registration effective one year from rules notification.",
+        "description": "Consent Manager registration with the Data Protection Board of India becomes operational. Registration effective one year from rules notification.",
         "who_affected": "Consent Manager entities"
     },
     {
         "date": "May 13, 2027",
         "event": "Full DPDPA Compliance Mandatory",
         "description": "Core provisions of DPDPA become fully effective after 18-month transition period. All compliance obligations mandatory: consent requirement, fiduciary obligations, Board enforcement powers. No grace period - full penalties applicable from Day 1.",
-        "who_affected": "All data fiduciaries and data principals"
+        "who_affected": "All Data Fiduciaries and Data Principals"
     },
     {
         "date": "Ongoing",
-        "event": "Data Protection Board Operations",
-        "description": "Board fully operational from November 14, 2025 with digital grievance portal. Data principals can file complaints. Board conducts inquiries and imposes penalties.",
-        "who_affected": "All data principals and fiduciaries"
+        "event": "Data Protection Board of India Operations",
+        "description": "The Data Protection Board of India operates as a digital office. Data Principals can complain to the Board after exhausting the fiduciary's grievance redressal (Section 13). The Board conducts inquiries and imposes penalties; appeals lie to the TDSAT within 60 days (Section 29).",
+        "who_affected": "All Data Principals and Data Fiduciaries"
     }
 ]
 
@@ -1582,12 +1581,12 @@ SECTOR_GUIDANCE = {
     "FinTech and Banking": {
         "special_considerations": [
             "Processing financial data (account numbers, transaction history) - highly sensitive",
-            "Likely classified as Significant Data Fiduciary due to volume and criticality",
-            "Regulatory compliance (KYC, AML) may qualify as legitimate use",
-            "Investment/trading algorithms must be monitored for bias and fairness",
-            "Cross-border money transfer involves international data transfer - explicit consent required",
-            "Fraudulent transaction detection uses behavioral analysis - consent/legitimate basis required",
-            "Loan approval algorithms: Automated decision-making impact assessment required"
+            "May be notified as a Significant Data Fiduciary by the Central Government (Section 10 factors include volume and sensitivity of data)",
+            "Regulatory compliance (KYC, AML) may qualify as a legitimate use (Section 7(d) - legal obligation)",
+            "If notified as an SDF, verify that algorithmic software does not pose a risk to Data Principal rights (DPDP Rules, 2025)",
+            "Cross-border money transfer: permitted unless the destination country is restricted by Central Government notification (Section 16); RBI payment data localisation continues to apply (Section 16(2))",
+            "Fraudulent transaction detection uses behavioral analysis - consent or a legitimate use basis required",
+            "Loan default assessment benefits from a Section 17 exemption; other credit processing needs a valid legal basis"
         ],
         "additional_regulations": [
             "Reserve Bank of India (RBI) guidelines on data security",
@@ -1599,15 +1598,16 @@ SECTOR_GUIDANCE = {
         ],
         "examples": [
             "Bank collecting KYC data as legitimate use (legal obligation)",
-            "Fintech requiring explicit consent for behavioral tracking in lending algorithm",
-            "Investment platform needing DPO and DPIA due to SDF status",
+            "Fintech obtaining specific consent for behavioral tracking in lending algorithm",
+            "Investment platform needing DPO and DPIA if notified as an SDF (Section 10)",
             "Payment processor with vendor agreements ensuring processor compliance"
         ]
     },
     "Healthcare": {
         "special_considerations": [
-            "Processing medical/health data - highly sensitive requiring enhanced protections",
-            "Likely Significant Data Fiduciary due to health data sensitivity",
+            "Processing medical/health data - sensitivity of data is a factor for SDF notification (Section 10)",
+            "May be notified as a Significant Data Fiduciary given the sensitivity of health data (Section 10)",
+            "Medical emergencies (threat to life or health) are a legitimate use permitting processing without consent (Section 7(f)); epidemic/public health measures under Section 7(g)",
             "Telemedicine platforms collecting patient data including location",
             "Medical records transmission to specialists - disclosure without fresh consent problematic",
             "Prescription data, medication history, diagnoses - sensitive and require specific consent",
@@ -1626,7 +1626,7 @@ SECTOR_GUIDANCE = {
         "examples": [
             "Hospital obtaining parental consent for child patient data processing",
             "Telemedicine app implementing location data transparency notice",
-            "Healthcare provider appointing DPO due to SDF classification",
+            "Healthcare provider appointing DPO after being notified as an SDF (Section 10)",
             "Medical records transfer to specialists requiring specific new consent",
             "AI diagnosis tool requiring DPIA examining accuracy and bias"
         ]
@@ -1634,7 +1634,7 @@ SECTOR_GUIDANCE = {
     "E-commerce": {
         "special_considerations": [
             "Extensive customer data collection (name, address, payment, browsing, preferences)",
-            "Likely Significant Data Fiduciary due to large customer base and volume",
+            "May be notified as a Significant Data Fiduciary given data volume (a Section 10 factor)",
             "Behavioral tracking for personalized recommendations - consent required",
             "Targeted advertising to customers - specific consent needed",
             "Payment processors as vendors - processor agreements essential",
@@ -1651,18 +1651,18 @@ SECTOR_GUIDANCE = {
         "examples": [
             "E-commerce platform obtaining specific consent for recommendation algorithm",
             "Marketplace restricting personalized email marketing to opted-in users",
-            "Shopping app appointing DPO due to volume and algorithmic profiling",
+            "Shopping app appointing DPO after being notified as an SDF (Section 10)",
             "Vendor management ensuring third-party sellers comply with DPDPA",
             "Payment processor agreement ensuring PCI compliance and data security"
         ]
     },
     "IT Services and Software": {
         "special_considerations": [
-            "SaaS platforms processing customer data - often Significant Data Fiduciary",
+            "SaaS platforms processing customer data - may be notified as a Significant Data Fiduciary (Section 10)",
             "Cloud infrastructure providers as data processors - vendor agreements critical",
             "Logging and monitoring systems collecting personal data - purpose limitation needed",
             "Bug fixes and product improvement using customer data - require consent",
-            "Analytics tools tracking user behavior - explicit consent required",
+            "Analytics tools tracking user behavior - specific consent required (Section 6)",
             "Subcontractors and third-party tools used - all processor contracts required",
             "Open-source software implications - verify compliance of libraries/dependencies",
             "Developer access to production personal data - strict access controls needed"
@@ -1689,7 +1689,7 @@ SECTOR_GUIDANCE = {
             "Alumni data retention after graduation - clear retention limits needed",
             "Faculty/staff data separate from student data - different consent levels",
             "Automated grading systems - transparency and appeal mechanisms needed",
-            "Educational institution likely SDF due to student data volume and sensitivity"
+            "Educational institution may be notified as an SDF given student data volume and sensitivity (Section 10 factors)"
         ],
         "additional_regulations": [
             "National Education Policy 2020",
@@ -1700,15 +1700,15 @@ SECTOR_GUIDANCE = {
         "examples": [
             "School obtaining parental consent before using educational app collecting behavior data",
             "Online exam platform disclosing proctoring methods and data collection",
-            "Educational institution appointing DPO due to large student database",
+            "Educational institution appointing DPO after being notified as an SDF (Section 10)",
             "University retaining alumni contact data with clear retention period and deletion policy",
             "School implementing age-appropriate privacy notices for student data"
         ]
     },
     "Government and Public Sector": {
         "special_considerations": [
-            "Government employee data processing - exempt from DPDPA if in official capacity",
-            "Citizen data (taxes, licenses, subsidies, services) - legitimate use basis (state functions)",
+            "State instrumentalities may be exempted from certain provisions only by Central Government notification (Section 17)",
+            "Citizen data (taxes, licenses, subsidies, services, certificates, permits) - legitimate use basis under Section 7(b)-(c)",
             "Public records with personal data - balance transparency with privacy",
             "Biometric data collection for identification (Aadhaar interface) - consent and transparency critical",
             "Intelligence and law enforcement data - separate legal frameworks may apply",
@@ -1904,9 +1904,9 @@ def get_compliance_score_interpretation(score: float) -> dict:
 
 # Metadata about knowledge base
 KNOWLEDGE_BASE_INFO = {
-    "version": "1.0",
-    "last_updated": "March 4, 2026",
-    "coverage": "DPDPA 2023 and DPDP Rules 2025",
+    "version": "1.1",
+    "last_updated": "July 3, 2026",
+    "coverage": "DPDPA 2023 (Sections 1-44 and the Schedule) and DPDP Rules 2025",
     "total_sections": len(DPDPA_SECTIONS),
     "total_rules": len(DPDP_RULES),
     "total_definitions": len(KEY_DEFINITIONS),

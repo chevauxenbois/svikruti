@@ -11,11 +11,10 @@ Open source and free to use.
 
 import streamlit as st
 from datetime import datetime, timedelta
+import html
 import json
 from pathlib import Path
 import os
-import tempfile
-import hashlib
 import plotly.graph_objects as go
 
 # Import local modules with graceful fallback
@@ -424,10 +423,8 @@ def init_session_state():
 init_session_state()
 
 # ==================== UTILITY FUNCTIONS ====================
-
-def hash_password(password):
-    """Hash a password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+# NOTE: password hashing lives in database.Database._hash_password (salted
+# PBKDF2-HMAC-SHA256, 100k iterations). Do not add ad-hoc hashing here.
 
 def format_date(date_str):
     """Format date string for display"""
@@ -525,7 +522,7 @@ def render_login_page():
                             st.success("Welcome back!")
                             st.rerun()
                         else:
-                            st.error("Invalid email or password.")
+                            st.error("Invalid credentials or account temporarily locked. Please try again later.")
 
         with tab2:
             st.markdown("### Create Account")
@@ -533,6 +530,11 @@ def render_login_page():
             with st.form("signup_form", clear_on_submit=True):
                 full_name = st.text_input("Full Name", placeholder="John Doe")
                 email = st.text_input("Email Address", placeholder="you@example.com")
+                invite_code = st.text_input(
+                    "Invite Code (optional)",
+                    placeholder="Paste an invite code to join an existing organization"
+                )
+                st.caption("Leave organization details below empty if you are joining with an invite code.")
                 org_name = st.text_input("Organization Name", placeholder="Acme Corp")
                 industry = st.selectbox("Industry", config.INDUSTRY_TYPES)
 
@@ -543,8 +545,11 @@ def render_login_page():
                 submit = st.form_submit_button("Create Account", use_container_width=True, type="primary")
 
                 if submit:
-                    if not all([full_name, email, org_name, password, confirm_password]):
+                    invite_code = (invite_code or "").strip()
+                    if not all([full_name, email, password, confirm_password]):
                         st.error("Please fill in all fields")
+                    elif not invite_code and not org_name:
+                        st.error("Please enter an organization name (or provide an invite code)")
                     elif len(password) < 8:
                         st.error("Password must be at least 8 characters")
                     elif password != confirm_password:
@@ -558,6 +563,39 @@ def render_login_page():
 
                         if existing_user:
                             st.error("Email already registered. Please login instead.")
+                        elif invite_code:
+                            # Join an existing organization via invite
+                            invite = st.session_state.db.get_invite_by_token(invite_code)
+                            if not invite:
+                                st.error("Invalid, expired, or already-used invite code.")
+                            elif invite["email"].strip().lower() != email.strip().lower():
+                                st.error("This invite code was issued for a different email address.")
+                            else:
+                                try:
+                                    user_id = st.session_state.db.create_user(
+                                        email=email,
+                                        password=password,
+                                        full_name=full_name,
+                                        role=invite["role"],
+                                        org_id=invite["org_id"]
+                                    )
+                                    st.session_state.db.accept_invite(invite_code, user_id)
+
+                                    st.session_state.authenticated = True
+                                    st.session_state.user_id = user_id
+                                    st.session_state.org_id = invite["org_id"]
+                                    st.session_state.user_info = {
+                                        "id": user_id,
+                                        "email": email,
+                                        "full_name": full_name,
+                                        "role": invite["role"],
+                                        "org_id": invite["org_id"]
+                                    }
+                                    st.session_state.page = "Dashboard"
+                                    st.success("Account created — you have joined your organization!")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Error creating account: {str(e)}")
                         else:
                             try:
                                 org_id = st.session_state.db.create_organization(
@@ -620,8 +658,8 @@ def render_sidebar():
 
         st.markdown(f"""
         <div style="background: rgba(17, 24, 39, 0.8); padding: 16px; border-radius: 12px; border: 1px solid rgba(30, 41, 59, 0.5); margin-bottom: 24px;">
-            <div style="color: #14B8A6; font-weight: 600; margin-bottom: 8px; font-size: 14px;">{user['full_name']}</div>
-            <div style="color: #94A3B8; font-size: 13px; margin-bottom: 8px;">{org['name']}</div>
+            <div style="color: #14B8A6; font-weight: 600; margin-bottom: 8px; font-size: 14px;">{html.escape(str(user['full_name']))}</div>
+            <div style="color: #94A3B8; font-size: 13px; margin-bottom: 8px;">{html.escape(str(org['name']))}</div>
             <div style="color: #64748B; font-size: 12px;">{get_role_badge(user['role'])}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -705,20 +743,65 @@ def render_sidebar():
                 invite_email = st.text_input("Email to invite", key="invite_email_input")
                 invite_role = st.selectbox("Role", ["member", "viewer"], key="invite_role")
 
-                if st.button("Send Invite", use_container_width=True):
-                    if invite_email:
+                if st.button("Generate Invite Code", use_container_width=True):
+                    if not invite_email or "@" not in invite_email:
+                        st.error("Enter a valid email address")
+                    else:
                         conn = st.session_state.db.get_connection()
                         cursor = conn.cursor()
-                        cursor.execute("SELECT id FROM users WHERE email = ? AND org_id = ?",
-                                     (invite_email, st.session_state.org_id))
+                        cursor.execute("SELECT id FROM users WHERE email = ?",
+                                     (invite_email,))
                         existing = cursor.fetchone()
+                        conn.close()
 
                         if existing:
-                            st.error("User already in organization")
+                            st.error("A user with this email already exists")
                         else:
-                            st.info(f"Invite sent to {invite_email}")
+                            limits = st.session_state.db.check_org_limits(st.session_state.org_id)
+                            if limits["users_remaining"] <= 0:
+                                st.error("User limit reached for your organization")
+                            else:
+                                try:
+                                    token = st.session_state.db.create_invite(
+                                        st.session_state.org_id,
+                                        invite_email.strip(),
+                                        invite_role
+                                    )
+                                    st.session_state["last_invite"] = {
+                                        "email": invite_email.strip(),
+                                        "token": token,
+                                    }
+                                except Exception as e:
+                                    st.error(f"Could not create invite: {str(e)}")
 
-                        conn.close()
+                if st.session_state.get("last_invite"):
+                    last = st.session_state["last_invite"]
+                    st.success(f"Invite created for {last['email']} (valid 7 days)")
+                    st.code(last["token"], language=None)
+                    st.caption(
+                        "Copy this invite code and share it with the invitee. "
+                        "They should paste it into the 'Invite Code' field on the Sign Up form. "
+                        "No email is sent — this app is local-first."
+                    )
+
+                st.divider()
+
+                st.write("**Pending Invites**")
+                pending_invites = st.session_state.db.get_pending_invites(st.session_state.org_id)
+                if pending_invites:
+                    for inv in pending_invites:
+                        col1, col2 = st.columns([2, 1])
+                        with col1:
+                            st.write(inv["email"])
+                            st.caption(f"{inv['role']} | {inv['status']} | expires {str(inv['expires_at'])[:10]}")
+                        with col2:
+                            if st.button("Revoke", key=f"revoke_invite_{inv['id']}", use_container_width=True):
+                                st.session_state.db.revoke_invite(st.session_state.org_id, inv["id"])
+                                if st.session_state.get("last_invite", {}).get("token") == inv.get("token"):
+                                    st.session_state.pop("last_invite", None)
+                                st.rerun()
+                else:
+                    st.caption("No pending invites")
 
         st.markdown("---")
 
@@ -742,29 +825,29 @@ def page_dashboard():
 
     org_id = st.session_state.org_id
     stats = st.session_state.db.get_dashboard_stats(org_id)
-    org = stats["organization"]
+    org = st.session_state.db.get_organization(org_id) or {}
+    latest_assessment = st.session_state.db.get_latest_assessment(org_id)
 
     # Metric cards
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        latest_score = stats["latest_assessment"]
-        if latest_score:
-            score = round(latest_score["overall_score"], 1)
+        if latest_assessment:
+            score = round(latest_assessment.get("overall_score", 0), 1)
             st.metric("Compliance Score", f"{score}%", "out of 100")
         else:
             st.metric("Compliance Score", "—", "Not assessed")
 
     with col2:
-        pending_tasks = stats["task_counts"].get("PENDING", 0)
+        pending_tasks = stats.get("pending_tasks", 0)
         st.metric("Pending Tasks", pending_tasks, "to complete")
 
     with col3:
-        open_breaches = stats["open_breaches"]
+        open_breaches = stats.get("open_breaches", 0)
         st.metric("Open Breaches", open_breaches, "incidents")
 
     with col4:
-        docs = stats["total_documents"]
+        docs = stats.get("total_documents", 0)
         st.metric("Documents", docs, "generated")
 
     st.markdown("---")
@@ -774,8 +857,8 @@ def page_dashboard():
 
     with col1:
         st.markdown("### Compliance Score")
-        if stats["latest_assessment"]:
-            score = stats["latest_assessment"]["overall_score"]
+        if latest_assessment:
+            score = latest_assessment.get("overall_score", 0)
             fig = go.Figure(data=[go.Indicator(
                 mode="gauge+number+delta",
                 value=score,
@@ -807,8 +890,8 @@ def page_dashboard():
 
     with col2:
         st.markdown("### Category Breakdown")
-        if stats["latest_assessment"]:
-            category_scores = stats["latest_assessment"]["category_scores"]
+        if latest_assessment and latest_assessment.get("category_scores"):
+            category_scores = latest_assessment["category_scores"]
             categories = list(category_scores.keys())
             scores = list(category_scores.values())
 
@@ -872,9 +955,9 @@ def page_dashboard():
     with col2:
         st.markdown("### Module Status")
         modules = {
-            "Gap Assessment": stats["latest_assessment"] is not None,
-            "Documents": stats["total_documents"] > 0,
-            "Tasks Created": sum(stats["task_counts"].values()) > 0,
+            "Gap Assessment": latest_assessment is not None,
+            "Documents": stats.get("total_documents", 0) > 0,
+            "Tasks Created": len(st.session_state.db.get_tasks(org_id)) > 0,
             "Breach Plan": True,
             "Activity Log": len(st.session_state.db.get_activity_log(org_id, limit=1)) > 0,
         }
@@ -903,12 +986,12 @@ def page_dashboard():
 
     with col2:
         st.markdown("### Key Information")
-        st.write(f"**Organization:** {org['name']}")
-        st.write(f"**Industry:** {org['industry']}")
-        st.write(f"**Size:** {org['size']}")
-        if stats['latest_assessment']:
-            st.write(f"**Last Assessment:** {stats['latest_assessment']['assessment_date'][:10]}")
-        st.write(f"**SDF Status:** {org['sdf_status']}")
+        st.write(f"**Organization:** {org.get('name', '—')}")
+        st.write(f"**Industry:** {org.get('industry', '—')}")
+        st.write(f"**Size:** {org.get('size', '—')}")
+        if latest_assessment and latest_assessment.get('assessment_date'):
+            st.write(f"**Last Assessment:** {str(latest_assessment['assessment_date'])[:10]}")
+        st.write(f"**SDF Status:** {org.get('sdf_status', '—')}")
 
 # ==================== PAGE: GAP ASSESSMENT ====================
 def page_gap_assessment():
@@ -1349,12 +1432,12 @@ def page_compliance_tracker():
             for task in config.DEFAULT_COMPLIANCE_TASKS:
                 due_date = datetime.now() + timedelta(days=task["days_to_deadline"])
                 st.session_state.db.create_task(
-                    org_id,
-                    task["title"],
-                    task["description"],
-                    task["category"],
-                    task["priority"],
-                    due_date.strftime("%Y-%m-%d")
+                    org_id=org_id,
+                    title=task["title"],
+                    category=task["category"],
+                    priority=task["priority"],
+                    due_date=due_date.strftime("%Y-%m-%d"),
+                    description=task["description"]
                 )
             st.success("Tasks imported!")
             st.rerun()
@@ -1428,12 +1511,12 @@ def page_compliance_tracker():
         if st.button("Create", type="primary", use_container_width=True):
             if task_title:
                 st.session_state.db.create_task(
-                    org_id,
-                    task_title,
-                    task_desc,
-                    task_cat,
-                    task_priority,
-                    task_due.strftime("%Y-%m-%d")
+                    org_id=org_id,
+                    title=task_title,
+                    category=task_cat,
+                    priority=task_priority,
+                    due_date=task_due.strftime("%Y-%m-%d"),
+                    description=task_desc
                 )
                 st.success("Task created!")
                 st.rerun()
@@ -1480,12 +1563,12 @@ def page_breach_response():
         if st.button("Report", type="primary", use_container_width=True):
             if description:
                 breach_id = st.session_state.db.create_breach_incident(
-                    org_id,
-                    incident_date.strftime("%Y-%m-%d"),
-                    description,
-                    data_affected,
-                    severity,
-                    notes
+                    org_id=org_id,
+                    incident_date=incident_date.strftime("%Y-%m-%d"),
+                    description=description,
+                    severity=severity,
+                    data_affected=data_affected,
+                    notes=notes
                 )
                 st.success(f"Breach #{breach_id} reported!")
                 st.rerun()
@@ -1507,10 +1590,10 @@ def page_breach_response():
                     st.markdown(f"""
                     <div class="card" style="border-left: 4px solid {severity_color};">
                         <strong>Breach #{breach['id']}</strong><br>
-                        <em>{breach['incident_date']}</em><br>
-                        {breach['description']}<br>
-                        <span style="color: {severity_color}; font-weight: bold;">Severity: {breach['severity']}</span><br>
-                        Data: {breach['data_affected']} | Individuals: {breach['id']}
+                        <em>{html.escape(str(breach['incident_date']))}</em><br>
+                        {html.escape(str(breach['description']))}<br>
+                        <span style="color: {severity_color}; font-weight: bold;">Severity: {html.escape(str(breach['severity']))}</span><br>
+                        Data: {html.escape(str(breach['data_affected']))} | Individuals: {breach['id']}
                     </div>
                     """, unsafe_allow_html=True)
 

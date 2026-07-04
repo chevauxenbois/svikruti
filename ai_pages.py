@@ -15,6 +15,7 @@ Author: Harsh Kahate
 Version: 0.1.0
 """
 
+import html
 import streamlit as st
 from typing import Optional, Dict, List, Any
 from datetime import datetime
@@ -211,10 +212,8 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
 
         for i, suggestion in enumerate(suggestions):
             if st.button(suggestion, key=f"suggest_{i}", use_container_width=True):
-                st.session_state.ai_chat_history.append({
-                    "role": "user",
-                    "content": suggestion
-                })
+                # Queue the question so the normal chat handler processes it
+                st.session_state.ai_pending_question = suggestion
                 st.rerun()
 
     # Display chat history with styled messages
@@ -232,7 +231,7 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
                     word-wrap: break-word;
                     color: #F5F5F5;
                 ">
-                    {message['content']}
+                    {html.escape(str(message['content']))}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -249,13 +248,17 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
                     word-wrap: break-word;
                     color: #F5F5F5;
                 ">
-                    {message['content']}
+                    {html.escape(str(message['content']))}
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
     # Chat input
     user_input = st.chat_input("Ask your DPDPA question...")
+
+    # A clicked suggested question is processed through the same path as typed input
+    if not user_input:
+        user_input = st.session_state.pop("ai_pending_question", None)
 
     if user_input:
         # Add user message to history
@@ -280,14 +283,16 @@ Provide personalized, accurate, and actionable guidance.
                     *st.session_state.ai_chat_history
                 ]
 
-                response = ai_engine.chat_completion(messages)
+                result = ai_engine.chat_completion(messages)
 
-                if response:
+                if result and result.get("response"):
                     st.session_state.ai_chat_history.append({
                         "role": "assistant",
-                        "content": response
+                        "content": result["response"]
                     })
                     st.rerun()
+                elif result and result.get("error"):
+                    st.error(result["error"])
                 else:
                     st.error("Failed to get response from AI.")
             except Exception as e:
@@ -360,10 +365,19 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
                 }
 
                 # Generate document using AI
-                generated_content = ai_engine.draft_document(
+                draft_result = ai_engine.draft_document(
                     doc_type=selected_doc_type,
                     org_data=org_data
                 )
+
+                generated_content = None
+                if isinstance(draft_result, dict):
+                    if draft_result.get("error"):
+                        st.error(draft_result["error"])
+                    else:
+                        generated_content = draft_result.get("document")
+                elif draft_result:
+                    generated_content = draft_result
 
                 if generated_content:
                     st.success("Document generated successfully!")
@@ -403,7 +417,7 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
                                 st.success("Document saved!")
                             except Exception as e:
                                 st.error(f"Failed to save: {str(e)}")
-                else:
+                elif not (isinstance(draft_result, dict) and draft_result.get("error")):
                     st.error("Failed to generate document.")
             except Exception as e:
                 st.error(f"Error: {str(e)}")
@@ -528,11 +542,21 @@ def page_gap_assessment_advisor(db, org_id: int, user_info: Dict) -> None:
                 except json.JSONDecodeError:
                     pass
 
-                # Display as expandable sections
+                # Display the remediation plan
                 if isinstance(analysis, dict):
-                    for category, details in analysis.items():
-                        with st.expander(f"📌 {category}", expanded=False):
-                            st.write(details)
+                    if analysis.get("error"):
+                        st.error(analysis["error"])
+                    elif analysis.get("plan"):
+                        if analysis.get("priority_areas"):
+                            st.warning(
+                                "Critical gap areas (score < 50%): "
+                                + ", ".join(analysis["priority_areas"])
+                            )
+                        st.markdown(analysis["plan"])
+                    else:
+                        for category, details in analysis.items():
+                            with st.expander(f"📌 {category}", expanded=False):
+                                st.write(details)
                 else:
                     st.markdown(analysis)
 
@@ -704,56 +728,46 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
 
         # Display results
         if isinstance(analysis, dict):
-            # Severity badge with color-coded card
-            severity = analysis.get("severity", "Medium").upper()
+            if analysis.get("error"):
+                st.error(analysis["error"])
+            else:
+                # Severity badge with color-coded card
+                severity = (analysis.get("severity") or "Unclassified").upper()
 
-            severity_colors = {
-                "CRITICAL": ("#EF4444", "#DC2626", "🔴"),
-                "HIGH": ("#F97316", "#EA580C", "🟠"),
-                "MEDIUM": ("#FBBF24", "#F59E0B", "🟡"),
-                "LOW": ("#4ADE80", "#22C55E", "🟢")
-            }
+                severity_colors = {
+                    "CRITICAL": ("#EF4444", "#DC2626", "🔴"),
+                    "HIGH": ("#F97316", "#EA580C", "🟠"),
+                    "MEDIUM": ("#FBBF24", "#F59E0B", "🟡"),
+                    "LOW": ("#4ADE80", "#22C55E", "🟢")
+                }
 
-            bg_color, border_color, emoji = severity_colors.get(severity, ("#9CA3AF", "#6B7280", "⚪"))
+                bg_color, border_color, emoji = severity_colors.get(severity, ("#9CA3AF", "#6B7280", "⚪"))
 
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(135deg, rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.1), rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.05));
-                border: 2px solid {border_color};
-                border-radius: 12px;
-                padding: 20px;
-                margin: 16px 0;
-                text-align: center;
-            ">
-                <div style="font-size: 32px; margin-bottom: 8px;">{emoji}</div>
-                <p style="margin: 0; font-size: 24px; font-weight: 700; color: {border_color};">
-                    {severity} Severity
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div style="
+                    background: linear-gradient(135deg, rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.1), rgba({int(bg_color[1:3], 16)}, {int(bg_color[3:5], 16)}, {int(bg_color[5:7], 16)}, 0.05));
+                    border: 2px solid {border_color};
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 16px 0;
+                    text-align: center;
+                ">
+                    <div style="font-size: 32px; margin-bottom: 8px;">{emoji}</div>
+                    <p style="margin: 0; font-size: 24px; font-weight: 700; color: {border_color};">
+                        {severity} Severity
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
 
-            st.divider()
+                if severity == "UNCLASSIFIED":
+                    st.info("The AI response did not include an explicit severity line. Review the analysis below and classify manually.")
 
-            # Risk assessment
-            with st.expander("Risk Assessment", expanded=True):
-                st.write(analysis.get("risk_assessment", "No risk assessment available"))
+                st.divider()
 
-            # DPB Notification draft
-            with st.expander("DPB Notification Draft"):
-                st.markdown(analysis.get("dpb_notification", "No notification draft available"))
-
-            # Data Principal Notification draft
-            with st.expander("Data Principal Notification Draft"):
-                st.markdown(analysis.get("principal_notification", "No notification draft available"))
-
-            # Recommended actions
-            with st.expander("Recommended Actions"):
-                actions = analysis.get("actions", "No actions listed")
-                if isinstance(actions, list):
-                    for i, action in enumerate(actions, 1):
-                        st.write(f"{i}. {action}")
-                else:
-                    st.write(actions)
+                # Full analysis (severity reasoning, Board notification draft,
+                # Data Principal notification draft)
+                with st.expander("Analysis & Notification Drafts", expanded=True):
+                    st.markdown(analysis.get("analysis", "No analysis available"))
         else:
             st.markdown(analysis)
 
@@ -858,15 +872,24 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
             pass
 
         if isinstance(review, dict):
-            # Overall score with visual gauge indicators
-            col1, col2, col3 = st.columns(3)
+            if review.get("error"):
+                st.error(review["error"])
+                return
 
-            overall = review.get("overall_score", 0)
-            readability = review.get("readability_score", 0)
-            compliance = review.get("compliance_score", 0)
+            scores = review.get("scores") or {}
+            compliance = scores.get("compliance")
+            readability = scores.get("readability")
+            completeness = scores.get("completeness")
 
-            def render_gauge(label: str, score: int, color: str) -> None:
-                """Render a visual gauge indicator."""
+            def render_gauge(label: str, score: Optional[int], color: str) -> None:
+                """Render a visual gauge indicator; shows an unscored state when the score is unavailable."""
+                if score is None:
+                    color = "#6B7280"
+                    display_value = "—"
+                    footer = "score unavailable"
+                else:
+                    display_value = str(score)
+                    footer = "out of 10"
                 st.markdown(f"""
                 <div style="text-align: center; padding: 12px;">
                     <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px;">{label}</p>
@@ -881,95 +904,35 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
                         justify-content: center;
                         border: 3px solid {color};
                     ">
-                        <span style="font-size: 28px; font-weight: 700; color: {color};">{score}</span>
+                        <span style="font-size: 28px; font-weight: 700; color: {color};">{display_value}</span>
                     </div>
-                    <p style="margin: 8px 0 0 0; color: #F5F5F5; font-size: 12px;">out of 10</p>
+                    <p style="margin: 8px 0 0 0; color: #F5F5F5; font-size: 12px;">{footer}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
+            if not review.get("scores_available", any(v is not None for v in scores.values())):
+                st.info("Automated scores unavailable — the AI response could not be parsed into scores. See the full review below.")
+
+            col1, col2, col3 = st.columns(3)
             with col1:
-                render_gauge("Overall Score", overall, "#14B8A6")
+                render_gauge("Compliance", compliance, "#14B8A6")
             with col2:
                 render_gauge("Readability", readability, "#3B82F6")
             with col3:
-                render_gauge("Compliance", compliance, "#F59E0B")
+                render_gauge("Completeness", completeness, "#F59E0B")
 
-            # Completeness score
             st.divider()
-            completeness = review.get("completeness_score", 0)
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
-                border: 1px solid rgba(139, 92, 246, 0.3);
-                border-radius: 12px;
-                padding: 16px;
-                margin: 16px 0;
-            ">
-                <p style="margin: 0 0 8px 0; color: #9CA3AF; font-size: 14px;">Completeness</p>
-                <div style="
-                    background: rgba(107, 114, 128, 0.2);
-                    height: 8px;
-                    border-radius: 4px;
-                    overflow: hidden;
-                ">
-                    <div style="
-                        background: linear-gradient(90deg, #8B5CF6, #3B82F6);
-                        height: 100%;
-                        width: {completeness}%;
-                        transition: width 0.3s ease;
-                    "></div>
-                </div>
-                <p style="margin: 8px 0 0 0; color: #F5F5F5; font-weight: 600;">{completeness}/10</p>
-            </div>
-            """, unsafe_allow_html=True)
 
-            # Issues found
-            with st.expander("Issues Found", expanded=True):
-                issues = review.get("issues", [])
-                if isinstance(issues, list):
-                    if issues:
-                        for issue in issues:
-                            st.markdown(f"""
-                            <div style="
-                                background: rgba(239, 68, 68, 0.1);
-                                border-left: 3px solid #EF4444;
-                                border-radius: 4px;
-                                padding: 12px;
-                                margin: 8px 0;
-                            ">
-                                <p style="margin: 0; color: #FCA5A5;">• {issue}</p>
-                            </div>
-                            """, unsafe_allow_html=True)
-                    else:
-                        st.success("No major issues found!")
-                else:
-                    st.write(issues)
-
-            # Suggestions
-            with st.expander("Suggested Improvements", expanded=True):
-                suggestions = review.get("suggestions", "No suggestions available")
-                if isinstance(suggestions, list):
-                    for i, suggestion in enumerate(suggestions, 1):
-                        st.markdown(f"""
-                        <div style="
-                            background: rgba(59, 130, 246, 0.1);
-                            border-left: 3px solid #3B82F6;
-                            border-radius: 4px;
-                            padding: 12px;
-                            margin: 8px 0;
-                        ">
-                            <p style="margin: 0; color: #93C5FD;"><strong>{i}.</strong> {suggestion}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                else:
-                    st.write(suggestions)
+            # Full review feedback (issues and recommendations)
+            st.markdown("#### Detailed Review")
+            st.markdown(review.get("feedback", "No feedback available."))
 
             # Generate improved version
             if st.button("Generate Improved Version"):
                 with st.spinner("Generating improved notice..."):
                     try:
                         # Ask AI to rewrite
-                        improved = ai_engine.chat_completion([
+                        improved_result = ai_engine.chat_completion([
                             {
                                 "role": "system",
                                 "content": "You are a privacy policy expert. Rewrite the following privacy notice to be more compliant with DPDPA, more readable, and more complete. Keep the same general structure but improve clarity and completeness."
@@ -979,6 +942,15 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
                                 "content": notice_text
                             }
                         ])
+
+                        improved = None
+                        if isinstance(improved_result, dict):
+                            if improved_result.get("error"):
+                                st.error(improved_result["error"])
+                            else:
+                                improved = improved_result.get("response")
+                        elif improved_result:
+                            improved = improved_result
 
                         if improved:
                             st.success("Improved version generated!")
@@ -1030,27 +1002,45 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
 
         col1, col2 = st.columns(2)
 
-        with col1:
-            # Provider selection with visual cards
-            provider_options = ["OpenAI", "Anthropic", "Google Gemini"]
-            current_provider = current_settings.get("provider", "openai").title().replace("_", " ")
-            provider_index = provider_options.index(current_provider) if current_provider in provider_options else 0
+        # Display labels mapped to canonical provider keys ("google_gemini" is
+        # legacy — normalized to "gemini" on read by ai_engine).
+        provider_labels = {
+            "openai": "OpenAI",
+            "anthropic": "Anthropic",
+            "gemini": "Google Gemini",
+        }
+        label_to_key = {v: k for k, v in provider_labels.items()}
 
-            provider = st.radio(
+        with col1:
+            current_provider_key = current_settings.get("provider", "openai")
+            if current_provider_key == "google_gemini":  # legacy value from older DBs
+                current_provider_key = "gemini"
+            provider_options = list(provider_labels.values())
+            current_label = provider_labels.get(current_provider_key, "OpenAI")
+            provider_index = provider_options.index(current_label)
+
+            provider_label = st.radio(
                 "AI Provider",
                 provider_options,
                 index=provider_index,
                 horizontal=False
             )
-            provider = provider.lower().replace(" ", "_")
+            provider = label_to_key[provider_label]
 
         with col2:
-            api_key = st.text_input(
+            existing_key = current_settings.get("api_key", "")
+            if existing_key:
+                masked_tail = existing_key[-4:] if len(existing_key) >= 4 else "****"
+                st.caption(f"API key configured — ends in …{masked_tail}")
+            # Never prefill the stored key back into the form. Leaving this
+            # blank keeps the existing key; entering a value replaces it.
+            api_key_input = st.text_input(
                 "API Key",
-                value=current_settings.get("api_key", ""),
+                value="",
                 type="password",
-                placeholder="Enter your API key"
+                placeholder="Enter new API key to replace" if existing_key else "Enter your API key"
             )
+            api_key = api_key_input.strip() or existing_key
 
         st.divider()
 
@@ -1064,12 +1054,12 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                 "gpt-4-turbo": "GPT-4 Turbo (Powerful)"
             },
             "anthropic": {
-                "claude-3-haiku": "Claude 3 Haiku (Fast, Recommended)",
-                "claude-3.5-sonnet": "Claude 3.5 Sonnet (Powerful)"
+                "claude-sonnet-4-5": "Claude Sonnet 4.5 (Balanced, Recommended)",
+                "claude-haiku-4-5": "Claude Haiku 4.5 (Fast)"
             },
-            "google_gemini": {
-                "gemini-2.0-flash": "Gemini 2.0 Flash (Fast, Recommended)",
-                "gemini-1.5-pro": "Gemini 1.5 Pro (Powerful)"
+            "gemini": {
+                "gemini-2.5-flash": "Gemini 2.5 Flash (Fast, Recommended)",
+                "gemini-2.5-pro": "Gemini 2.5 Pro (Powerful)"
             }
         }
 
@@ -1118,8 +1108,10 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                             {"role": "user", "content": "Say 'Connection successful' in 2 words"}
                         ])
 
-                        if response:
+                        if isinstance(response, dict) and response.get("response"):
                             st.success("Connection successful!")
+                        elif isinstance(response, dict) and response.get("error"):
+                            st.error(f"Connection failed: {response['error']}")
                         else:
                             st.error("Connection failed")
                     except Exception as e:
@@ -1129,6 +1121,9 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
 
         # Save settings button
         if st.button("Save Settings", use_container_width=True):
+            if not api_key:
+                st.error("Please enter an API key.")
+                st.stop()
             try:
                 save_ai_settings(
                     db=db,
@@ -1154,15 +1149,17 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                queries_this_month = usage.get("queries_this_month", 0)
+                queries_this_month = usage.get("query_count", 0)
                 st.metric(
                     "Queries This Month",
                     f"{queries_this_month}/{monthly_limit}",
-                    delta=f"{monthly_limit - queries_this_month} remaining"
+                    delta=f"{max(0, monthly_limit - queries_this_month)} remaining"
                 )
+                if queries_this_month >= monthly_limit:
+                    st.warning("Monthly limit reached — AI calls are blocked until next month or a higher limit is saved.")
 
             with col2:
-                est_cost = usage.get("estimated_cost", 0)
+                est_cost = usage.get("total_cost", 0)
                 st.metric(
                     "Estimated Cost",
                     f"${est_cost:.2f}",
@@ -1170,19 +1167,19 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
                 )
 
             with col3:
-                last_used = usage.get("last_used", "Never")
-                st.metric("Last Used", last_used)
+                total_tokens = usage.get("total_input_tokens", 0) + usage.get("total_output_tokens", 0)
+                st.metric("Tokens This Month", f"{total_tokens:,}")
 
             # Usage by feature (if plotly available)
             if PLOTLY_AVAILABLE:
                 st.subheader("Usage by Feature")
 
-                feature_usage = usage.get("by_feature", {})
+                feature_usage = usage.get("feature_usage", {})
                 if feature_usage:
                     fig = go.Figure(
                         data=[go.Bar(
                             x=list(feature_usage.keys()),
-                            y=list(feature_usage.values()),
+                            y=[v.get("count", 0) if isinstance(v, dict) else v for v in feature_usage.values()],
                             marker_color="#14B8A6"
                         )],
                         layout=go.Layout(

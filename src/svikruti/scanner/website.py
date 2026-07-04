@@ -1,13 +1,19 @@
-"""Website scanner using Python stdlib networking and HTML parsing."""
+"""Website scanner using Python stdlib networking and HTML parsing.
+
+This scanner fetches a single page (plus, optionally, the linked privacy
+notice). Any copy surfaced from this module must therefore say "page",
+singular — pages_scanned is always 1.
+"""
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from http.cookies import SimpleCookie
 from typing import Dict, List, Optional, Set
 from urllib.parse import urljoin, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from svikruti.models import Evidence
 from svikruti.scanner.patterns import PERSONAL_DATA_PATTERNS, THIRD_PARTY_PATTERNS, normalize_text
@@ -19,6 +25,8 @@ MAX_RESPONSE_BYTES = 2_500_000
 @dataclass
 class WebsiteScanResult:
     evidence: List[Evidence]
+    # Always 1 today: this module scans a single page. Keep any user-facing
+    # wording singular ("page scanned") until multi-page crawling exists.
     pages_scanned: int
     privacy_notice_text: str = ""
     detected_data_categories: Set[str] = field(default_factory=set)
@@ -31,8 +39,10 @@ class PageParser(HTMLParser):
         self.base_url = base_url
         self.forms: List[Dict[str, str]] = []
         self.scripts: List[str] = []
+        self.iframes: List[str] = []
         self.links: List[Dict[str, str]] = []
         self.text_chunks: List[str] = []
+        self.script_blocks: List[str] = []
         self._in_script = False
         self._in_style = False
 
@@ -43,6 +53,10 @@ class PageParser(HTMLParser):
             src = attr.get("src")
             if src:
                 self.scripts.append(urljoin(self.base_url, src))
+        elif tag == "iframe":
+            src = attr.get("src")
+            if src:
+                self.iframes.append(urljoin(self.base_url, src))
         elif tag == "style":
             self._in_style = True
         elif tag in {"input", "textarea", "select"}:
@@ -67,24 +81,45 @@ class PageParser(HTMLParser):
             self._in_style = False
 
     def handle_data(self, data: str):
-        if not self._in_script and not self._in_style:
+        if self._in_script:
+            # Inline <script> bodies are kept separately so third-party
+            # detection can require domain-like references inside them.
+            if data.strip():
+                self.script_blocks.append(data)
+        elif not self._in_style:
             stripped = " ".join(data.split())
             if stripped:
                 self.text_chunks.append(stripped)
 
 
-def _fetch(url: str) -> tuple[str, Dict[str, str]]:
+class _HttpOnlyRedirectHandler(HTTPRedirectHandler):
+    """SSRF hardening: refuse redirects to non-http(s) schemes (file:// etc.)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = urljoin(req.full_url, newurl)
+        if urlparse(target).scheme not in {"http", "https"}:
+            raise ValueError(f"Refusing to follow redirect to non-http(s) URL: {target}")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_OPENER = build_opener(_HttpOnlyRedirectHandler())
+
+
+def _fetch(url: str) -> tuple[str, Dict[str, str], List[str]]:
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         raise ValueError("Only http and https URLs are supported for website scans.")
     request = Request(url, headers={"User-Agent": "SvikrutiPrivacyOps/0.4 (+https://svikruti.ai)"})
-    with urlopen(request, timeout=20) as response:
+    with _OPENER.open(request, timeout=20) as response:
         body = response.read(MAX_RESPONSE_BYTES + 1)
         if len(body) > MAX_RESPONSE_BYTES:
             raise ValueError("Website response is too large to scan safely.")
         charset = response.headers.get_content_charset() or "utf-8"
         headers = {key.lower(): value for key, value in response.headers.items()}
-    return body.decode(charset, errors="ignore"), headers
+        # A dict comprehension collapses repeated Set-Cookie headers to the
+        # last one; get_all (email.message API) preserves every cookie.
+        set_cookies = list(response.headers.get_all("Set-Cookie") or [])
+    return body.decode(charset, errors="ignore"), headers, set_cookies
 
 
 def _domain(url: str) -> str:
@@ -100,16 +135,51 @@ def _find_privacy_url(parser: PageParser, base_url: str) -> Optional[str]:
     return candidates[0] if candidates else None
 
 
-def _cookie_names(headers: Dict[str, str]) -> List[str]:
-    raw = headers.get("set-cookie", "")
-    if not raw:
-        return []
-    cookie = SimpleCookie()
-    try:
-        cookie.load(raw)
-    except Exception:
-        return [raw.split("=", 1)[0].strip()] if "=" in raw else []
-    return list(cookie.keys())
+def _cookie_names(set_cookie_headers: List[str]) -> List[str]:
+    """Parse every Set-Cookie header (there is typically one per cookie)."""
+    names: List[str] = []
+    for raw in set_cookie_headers:
+        parsed: List[str] = []
+        cookie = SimpleCookie()
+        try:
+            cookie.load(raw)
+            parsed = list(cookie.keys())
+        except Exception:
+            parsed = []
+        if not parsed and "=" in raw:
+            parsed = [raw.split("=", 1)[0].strip()]
+        for name in parsed:
+            if name and name not in names:
+                names.append(name)
+    return names
+
+
+def _third_party_present(needles: List[str], hosts: Set[str], urls_blob: str, inline_js: str) -> bool:
+    """Vendor detection without bare-substring matching over page text.
+
+    - Call-style needles ("gtag(", "fbq(") are looked for in inline <script>
+      blocks only.
+    - Domain-like needles ("checkout.razorpay.com", "payu.in") may appear in
+      resource URLs (script src / link href / iframe src) or inline scripts.
+    - Bare vendor words ("stripe", "mixpanel") must appear either in a
+      resource URL host, or inside inline scripts as part of a domain-like
+      pattern (e.g. "cdn.mixpanel.com/") — never as a bare word in HTML text.
+    """
+    for needle in needles:
+        lowered = needle.lower()
+        if "(" in lowered:
+            if lowered in inline_js:
+                return True
+            continue
+        if "." in lowered or "/" in lowered:
+            if lowered in urls_blob or lowered in inline_js:
+                return True
+            continue
+        if any(lowered in host for host in hosts):
+            return True
+        if re.search(rf"\b{re.escape(lowered)}\.[a-z]{{2,}}(?:[/'\"]|\b)", inline_js):
+            return True
+    return False
 
 
 def _matched_terms(normalized_value: str, terms: List[str]) -> List[str]:
@@ -134,7 +204,8 @@ def _metadata(detector_id: str, confidence: str, evidence_ref: str, **extra: obj
 
 
 def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
-    html, headers = _fetch(url)
+    """Scan a single page (pages_scanned is always 1)."""
+    html, headers, set_cookies = _fetch(url)
     parser = PageParser(url)
     parser.feed(html)
 
@@ -143,7 +214,6 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
     third_parties: Set[str] = set()
     base_domain = _domain(url)
     full_text = " ".join(parser.text_chunks)
-    lower_html = html.lower()
 
     for field in parser.forms:
         field_blob = normalize_text(" ".join(value for value in field.values() if value))
@@ -195,8 +265,16 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                 )
             )
 
+    # Vendor tokens must appear in resource URLs (script src / link href /
+    # iframe src) or, as a fallback, inside inline <script> blocks with a
+    # domain-like pattern — never as bare substrings of visible page text.
+    resource_urls = parser.scripts + parser.iframes + [link.get("href", "") for link in parser.links]
+    resource_hosts = {urlparse(resource).netloc.lower() for resource in resource_urls if resource}
+    resource_hosts.discard("")
+    urls_blob = " ".join(resource_urls).lower()
+    inline_js = "\n".join(parser.script_blocks).lower()
     for name, needles in THIRD_PARTY_PATTERNS.items():
-        if any(needle.lower() in lower_html for needle in needles):
+        if _third_party_present(needles, resource_hosts, urls_blob, inline_js):
             third_parties.add(name)
             evidence.append(
                 Evidence(
@@ -216,7 +294,7 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
                 )
             )
 
-    cookies = _cookie_names(headers)
+    cookies = _cookie_names(set_cookies)
     if cookies:
         evidence.append(
             Evidence(
@@ -248,7 +326,7 @@ def scan_website(url: str, fetch_notice: bool = True) -> WebsiteScanResult:
         )
     elif fetch_notice:
         try:
-            notice_html, _headers = _fetch(privacy_url)
+            notice_html, _headers, _notice_cookies = _fetch(privacy_url)
             notice_parser = PageParser(privacy_url)
             notice_parser.feed(notice_html)
             notice_text = " ".join(notice_parser.text_chunks)
