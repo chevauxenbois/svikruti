@@ -4,7 +4,7 @@ Svikruti is an open-source privacy engineering workbench for DPDPA readiness.
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.8.0
+## Current Release: 0.8.1
 
 - Local CLI scanner for repository, website, privacy notice, browser-consent,
   vendor, and security-evidence signals.
