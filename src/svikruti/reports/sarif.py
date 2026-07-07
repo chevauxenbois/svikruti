@@ -33,7 +33,8 @@ def write_sarif(result: ScanResult, output_path: str) -> None:
             rule_id,
             {
                 "id": rule_id,
-                "name": item.label,
+                # SARIF spec wants identifier-like names (no spaces).
+                "name": rule_id.replace(".", "_"),
                 "shortDescription": {"text": item.label},
                 "fullDescription": {"text": item.recommendation},
                 "help": {"text": item.recommendation},
@@ -47,7 +48,10 @@ def write_sarif(result: ScanResult, output_path: str) -> None:
                 "locations": [
                     {
                         "physicalLocation": {
-                            "artifactLocation": {"uri": item.file},
+                            "artifactLocation": {
+                                # SARIF URIs must use forward slashes even on Windows.
+                                "uri": item.file.replace("\\", "/")
+                            },
                             "region": {"startLine": item.line or 1},
                         }
                     }

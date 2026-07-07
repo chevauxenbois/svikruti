@@ -1874,6 +1874,7 @@ def _escape(value: Any) -> str:
         .replace("<", "&lt;")
         .replace(">", "&gt;")
         .replace('"', "&quot;")
+        .replace("'", "&#x27;")
     )
 
 

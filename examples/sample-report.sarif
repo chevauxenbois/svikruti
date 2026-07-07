@@ -9,8 +9,73 @@
           "informationUri": "https://svikruti.ai",
           "rules": [
             {
+              "id": "svikruti.storage_point.data_minimization",
+              "name": "svikruti_storage_point_data_minimization",
+              "shortDescription": {
+                "text": "Health data signal"
+              },
+              "fullDescription": {
+                "text": "Document storage location, retention, access controls, and deletion process for this data category."
+              },
+              "help": {
+                "text": "Document storage location, retention, access controls, and deletion process for this data category."
+              }
+            },
+            {
+              "id": "svikruti.storage_point.notice_transparency",
+              "name": "svikruti_storage_point_notice_transparency",
+              "shortDescription": {
+                "text": "Identity data signal"
+              },
+              "fullDescription": {
+                "text": "Document storage location, retention, access controls, and deletion process for this data category."
+              },
+              "help": {
+                "text": "Document storage location, retention, access controls, and deletion process for this data category."
+              }
+            },
+            {
+              "id": "svikruti.personal_data_reference.consent_and_notice",
+              "name": "svikruti_personal_data_reference_consent_and_notice",
+              "shortDescription": {
+                "text": "Contact data signal"
+              },
+              "fullDescription": {
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+              },
+              "help": {
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+              }
+            },
+            {
+              "id": "svikruti.personal_data_reference.data_minimization",
+              "name": "svikruti_personal_data_reference_data_minimization",
+              "shortDescription": {
+                "text": "Health data signal"
+              },
+              "fullDescription": {
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+              },
+              "help": {
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+              }
+            },
+            {
+              "id": "svikruti.collection_point.data_minimization",
+              "name": "svikruti_collection_point_data_minimization",
+              "shortDescription": {
+                "text": "Health data signal"
+              },
+              "fullDescription": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              },
+              "help": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              }
+            },
+            {
               "id": "svikruti.third_party.third-party_processors",
-              "name": "Third-party service detected: Razorpay",
+              "name": "svikruti_third_party_third-party_processors",
               "shortDescription": {
                 "text": "Third-party service detected: Razorpay"
               },
@@ -23,7 +88,7 @@
             },
             {
               "id": "svikruti.personal_data_reference.notice_transparency",
-              "name": "Identity data signal",
+              "name": "svikruti_personal_data_reference_notice_transparency",
               "shortDescription": {
                 "text": "Identity data signal"
               },
@@ -35,21 +100,8 @@
               }
             },
             {
-              "id": "svikruti.personal_data_reference.consent_and_notice",
-              "name": "Contact data signal",
-              "shortDescription": {
-                "text": "Contact data signal"
-              },
-              "fullDescription": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              },
-              "help": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              }
-            },
-            {
               "id": "svikruti.personal_data_reference.purpose_limitation",
-              "name": "Location data signal",
+              "name": "svikruti_personal_data_reference_purpose_limitation",
               "shortDescription": {
                 "text": "Location data signal"
               },
@@ -61,21 +113,8 @@
               }
             },
             {
-              "id": "svikruti.personal_data_reference.data_minimization",
-              "name": "Government ID data signal",
-              "shortDescription": {
-                "text": "Government ID data signal"
-              },
-              "fullDescription": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              },
-              "help": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              }
-            },
-            {
               "id": "svikruti.collection_point.security_safeguards",
-              "name": "Financial data signal",
+              "name": "svikruti_collection_point_security_safeguards",
               "shortDescription": {
                 "text": "Financial data signal"
               },
@@ -88,7 +127,7 @@
             },
             {
               "id": "svikruti.logging_risk.consent_and_notice",
-              "name": "Contact data signal",
+              "name": "svikruti_logging_risk_consent_and_notice",
               "shortDescription": {
                 "text": "Contact data signal"
               },
@@ -101,7 +140,7 @@
             },
             {
               "id": "svikruti.logging_risk.data_minimization",
-              "name": "Government ID data signal",
+              "name": "svikruti_logging_risk_data_minimization",
               "shortDescription": {
                 "text": "Government ID data signal"
               },
@@ -114,7 +153,7 @@
             },
             {
               "id": "svikruti.logging_risk.purpose_limitation",
-              "name": "Possible Location data signal",
+              "name": "svikruti_logging_risk_purpose_limitation",
               "shortDescription": {
                 "text": "Possible Location data signal"
               },
@@ -126,21 +165,8 @@
               }
             },
             {
-              "id": "svikruti.storage_point.notice_transparency",
-              "name": "Identity data signal",
-              "shortDescription": {
-                "text": "Identity data signal"
-              },
-              "fullDescription": {
-                "text": "Document storage location, retention, access controls, and deletion process for this data category."
-              },
-              "help": {
-                "text": "Document storage location, retention, access controls, and deletion process for this data category."
-              }
-            },
-            {
               "id": "svikruti.personal_data_reference.security_safeguards",
-              "name": "Financial data signal",
+              "name": "svikruti_personal_data_reference_security_safeguards",
               "shortDescription": {
                 "text": "Financial data signal"
               },
@@ -152,73 +178,8 @@
               }
             },
             {
-              "id": "svikruti.personal_data_reference.tracking_and_consent",
-              "name": "Device data signal",
-              "shortDescription": {
-                "text": "Device data signal"
-              },
-              "fullDescription": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              },
-              "help": {
-                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-              }
-            },
-            {
-              "id": "svikruti.collection_point.consent_and_notice",
-              "name": "Contact data signal",
-              "shortDescription": {
-                "text": "Contact data signal"
-              },
-              "fullDescription": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              },
-              "help": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              }
-            },
-            {
-              "id": "svikruti.collection_point.purpose_limitation",
-              "name": "Possible Location data signal",
-              "shortDescription": {
-                "text": "Possible Location data signal"
-              },
-              "fullDescription": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              },
-              "help": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              }
-            },
-            {
-              "id": "svikruti.storage_point.data_minimization",
-              "name": "Health data signal",
-              "shortDescription": {
-                "text": "Health data signal"
-              },
-              "fullDescription": {
-                "text": "Document storage location, retention, access controls, and deletion process for this data category."
-              },
-              "help": {
-                "text": "Document storage location, retention, access controls, and deletion process for this data category."
-              }
-            },
-            {
-              "id": "svikruti.collection_point.data_minimization",
-              "name": "Health data signal",
-              "shortDescription": {
-                "text": "Health data signal"
-              },
-              "fullDescription": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              },
-              "help": {
-                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-              }
-            },
-            {
               "id": "svikruti.collection_point.children's_data",
-              "name": "Possible Children data signal",
+              "name": "svikruti_collection_point_children's_data",
               "shortDescription": {
                 "text": "Possible Children data signal"
               },
@@ -231,7 +192,7 @@
             },
             {
               "id": "svikruti.collection_point.notice_transparency",
-              "name": "Identity data signal",
+              "name": "svikruti_collection_point_notice_transparency",
               "shortDescription": {
                 "text": "Identity data signal"
               },
@@ -244,7 +205,7 @@
             },
             {
               "id": "svikruti.form_field.notice_transparency",
-              "name": "Form field collects Identity",
+              "name": "svikruti_form_field_notice_transparency",
               "shortDescription": {
                 "text": "Form field collects Identity"
               },
@@ -256,8 +217,34 @@
               }
             },
             {
+              "id": "svikruti.collection_point.consent_and_notice",
+              "name": "svikruti_collection_point_consent_and_notice",
+              "shortDescription": {
+                "text": "Contact data signal"
+              },
+              "fullDescription": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              },
+              "help": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              }
+            },
+            {
+              "id": "svikruti.collection_point.purpose_limitation",
+              "name": "svikruti_collection_point_purpose_limitation",
+              "shortDescription": {
+                "text": "Possible Location data signal"
+              },
+              "fullDescription": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              },
+              "help": {
+                "text": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+              }
+            },
+            {
               "id": "svikruti.collection_point.tracking_and_consent",
-              "name": "Device data signal",
+              "name": "svikruti_collection_point_tracking_and_consent",
               "shortDescription": {
                 "text": "Device data signal"
               },
@@ -270,7 +257,7 @@
             },
             {
               "id": "svikruti.logging_risk.children's_data",
-              "name": "Children data signal",
+              "name": "svikruti_logging_risk_children's_data",
               "shortDescription": {
                 "text": "Children data signal"
               },
@@ -282,34 +269,47 @@
               }
             },
             {
-              "id": "svikruti.semantic_collection_point.notice_transparency",
-              "name": "Identity request body field",
+              "id": "svikruti.personal_data_reference.tracking_and_consent",
+              "name": "svikruti_personal_data_reference_tracking_and_consent",
               "shortDescription": {
-                "text": "Identity request body field"
+                "text": "Device data signal"
               },
               "fullDescription": {
-                "text": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
               },
               "help": {
-                "text": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+                "text": "Review purpose, notice coverage, retention, access controls, and minimization for this data element."
               }
             },
             {
-              "id": "svikruti.semantic_logging_sink.security_safeguards",
-              "name": "Contact logging sink",
+              "id": "svikruti.semantic_storage_field.storage_limitation",
+              "name": "svikruti_semantic_storage_field_storage_limitation",
               "shortDescription": {
-                "text": "Contact logging sink"
+                "text": "Identity model field"
               },
               "fullDescription": {
-                "text": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
+                "text": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
               },
               "help": {
-                "text": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
+                "text": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+              }
+            },
+            {
+              "id": "svikruti.semantic_collection_point.notice_transparency",
+              "name": "svikruti_semantic_collection_point_notice_transparency",
+              "shortDescription": {
+                "text": "Contact request collection"
+              },
+              "fullDescription": {
+                "text": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+              },
+              "help": {
+                "text": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
               }
             },
             {
               "id": "svikruti.semantic_storage_sink.storage_limitation",
-              "name": "Contact database write",
+              "name": "svikruti_semantic_storage_sink_storage_limitation",
               "shortDescription": {
                 "text": "Contact database write"
               },
@@ -321,21 +321,21 @@
               }
             },
             {
-              "id": "svikruti.semantic_storage_field.storage_limitation",
-              "name": "Identity schema field",
+              "id": "svikruti.semantic_logging_sink.security_safeguards",
+              "name": "svikruti_semantic_logging_sink_security_safeguards",
               "shortDescription": {
-                "text": "Identity schema field"
+                "text": "Contact logging sink"
               },
               "fullDescription": {
-                "text": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+                "text": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
               },
               "help": {
-                "text": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+                "text": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
               }
             },
             {
               "id": "svikruti.semantic_runtime_config.security_safeguards",
-              "name": "Contact runtime config reference",
+              "name": "svikruti_semantic_runtime_config_security_safeguards",
               "shortDescription": {
                 "text": "Contact runtime config reference"
               },
@@ -348,7 +348,7 @@
             },
             {
               "id": "svikruti.semantic_secret_reference.security_safeguards",
-              "name": "Kubernetes secret/config reference",
+              "name": "svikruti_semantic_secret_reference_security_safeguards",
               "shortDescription": {
                 "text": "Kubernetes secret/config reference"
               },
@@ -360,99 +360,8 @@
               }
             },
             {
-              "id": "svikruti.security_tooling.breach_readiness",
-              "name": "CodeQL evidence",
-              "shortDescription": {
-                "text": "CodeQL evidence"
-              },
-              "fullDescription": {
-                "text": "Attach scan output or CI run evidence to the DPDPA breach-readiness pack."
-              },
-              "help": {
-                "text": "Attach scan output or CI run evidence to the DPDPA breach-readiness pack."
-              }
-            },
-            {
-              "id": "svikruti.security_monitoring.security_safeguards",
-              "name": "PagerDuty monitoring evidence",
-              "shortDescription": {
-                "text": "PagerDuty monitoring evidence"
-              },
-              "fullDescription": {
-                "text": "Confirm alert routing, retention, owner, and incident escalation path."
-              },
-              "help": {
-                "text": "Confirm alert routing, retention, owner, and incident escalation path."
-              }
-            },
-            {
-              "id": "svikruti.incident_readiness.breach_readiness",
-              "name": "Incident or breach response evidence",
-              "shortDescription": {
-                "text": "Incident or breach response evidence"
-              },
-              "fullDescription": {
-                "text": "Confirm owners, notification workflow, impact assessment, and evidence retention."
-              },
-              "help": {
-                "text": "Confirm owners, notification workflow, impact assessment, and evidence retention."
-              }
-            },
-            {
-              "id": "svikruti.cloud_misconfiguration.security_safeguards",
-              "name": "Public database exposure",
-              "shortDescription": {
-                "text": "Public database exposure"
-              },
-              "fullDescription": {
-                "text": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
-              },
-              "help": {
-                "text": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
-              }
-            },
-            {
-              "id": "svikruti.encryption_evidence.security_safeguards",
-              "name": "Storage encryption evidence",
-              "shortDescription": {
-                "text": "Storage encryption evidence"
-              },
-              "fullDescription": {
-                "text": "Confirm this protects personal-data systems in production and link it to the technical control register."
-              },
-              "help": {
-                "text": "Confirm this protects personal-data systems in production and link it to the technical control register."
-              }
-            },
-            {
-              "id": "svikruti.endpoint_security.security_safeguards",
-              "name": "GuardDuty endpoint/security evidence",
-              "shortDescription": {
-                "text": "GuardDuty endpoint/security evidence"
-              },
-              "fullDescription": {
-                "text": "Confirm coverage for production assets that process personal data."
-              },
-              "help": {
-                "text": "Confirm coverage for production assets that process personal data."
-              }
-            },
-            {
-              "id": "svikruti.resilience_evidence.breach_readiness",
-              "name": "Backup or recovery evidence",
-              "shortDescription": {
-                "text": "Backup or recovery evidence"
-              },
-              "fullDescription": {
-                "text": "Confirm backup scope, restore testing, retention, and deletion alignment for personal data."
-              },
-              "help": {
-                "text": "Confirm backup scope, restore testing, retention, and deletion alignment for personal data."
-              }
-            },
-            {
               "id": "svikruti.weak_crypto.security_safeguards",
-              "name": "MD5 hashing",
+              "name": "svikruti_weak_crypto_security_safeguards",
               "shortDescription": {
                 "text": "MD5 hashing"
               },
@@ -465,7 +374,7 @@
             },
             {
               "id": "svikruti.insecure_transport.security_safeguards",
-              "name": "Insecure HTTP endpoint detected",
+              "name": "svikruti_insecure_transport_security_safeguards",
               "shortDescription": {
                 "text": "Insecure HTTP endpoint detected"
               },
@@ -478,7 +387,7 @@
             },
             {
               "id": "svikruti.secret_exposure.security_safeguards",
-              "name": "Hard-coded token",
+              "name": "svikruti_secret_exposure_security_safeguards",
               "shortDescription": {
                 "text": "Hard-coded token"
               },
@@ -490,8 +399,99 @@
               }
             },
             {
+              "id": "svikruti.cloud_misconfiguration.security_safeguards",
+              "name": "svikruti_cloud_misconfiguration_security_safeguards",
+              "shortDescription": {
+                "text": "Public database exposure"
+              },
+              "fullDescription": {
+                "text": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
+              },
+              "help": {
+                "text": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
+              }
+            },
+            {
+              "id": "svikruti.encryption_evidence.security_safeguards",
+              "name": "svikruti_encryption_evidence_security_safeguards",
+              "shortDescription": {
+                "text": "Storage encryption evidence"
+              },
+              "fullDescription": {
+                "text": "Confirm this protects personal-data systems in production and link it to the technical control register."
+              },
+              "help": {
+                "text": "Confirm this protects personal-data systems in production and link it to the technical control register."
+              }
+            },
+            {
+              "id": "svikruti.security_tooling.breach_readiness",
+              "name": "svikruti_security_tooling_breach_readiness",
+              "shortDescription": {
+                "text": "CodeQL evidence"
+              },
+              "fullDescription": {
+                "text": "Attach scan output or CI run evidence to the DPDPA breach-readiness pack."
+              },
+              "help": {
+                "text": "Attach scan output or CI run evidence to the DPDPA breach-readiness pack."
+              }
+            },
+            {
+              "id": "svikruti.security_monitoring.security_safeguards",
+              "name": "svikruti_security_monitoring_security_safeguards",
+              "shortDescription": {
+                "text": "PagerDuty monitoring evidence"
+              },
+              "fullDescription": {
+                "text": "Confirm alert routing, retention, owner, and incident escalation path."
+              },
+              "help": {
+                "text": "Confirm alert routing, retention, owner, and incident escalation path."
+              }
+            },
+            {
+              "id": "svikruti.incident_readiness.breach_readiness",
+              "name": "svikruti_incident_readiness_breach_readiness",
+              "shortDescription": {
+                "text": "Incident or breach response evidence"
+              },
+              "fullDescription": {
+                "text": "Confirm owners, notification workflow, impact assessment, and evidence retention."
+              },
+              "help": {
+                "text": "Confirm owners, notification workflow, impact assessment, and evidence retention."
+              }
+            },
+            {
+              "id": "svikruti.endpoint_security.security_safeguards",
+              "name": "svikruti_endpoint_security_security_safeguards",
+              "shortDescription": {
+                "text": "GuardDuty endpoint/security evidence"
+              },
+              "fullDescription": {
+                "text": "Confirm coverage for production assets that process personal data."
+              },
+              "help": {
+                "text": "Confirm coverage for production assets that process personal data."
+              }
+            },
+            {
+              "id": "svikruti.resilience_evidence.breach_readiness",
+              "name": "svikruti_resilience_evidence_breach_readiness",
+              "shortDescription": {
+                "text": "Backup or recovery evidence"
+              },
+              "fullDescription": {
+                "text": "Confirm backup scope, restore testing, retention, and deletion alignment for personal data."
+              },
+              "help": {
+                "text": "Confirm backup scope, restore testing, retention, and deletion alignment for personal data."
+              }
+            },
+            {
               "id": "svikruti.imported_security_finding.breach_readiness",
-              "name": "Trivy vulnerability: CVE-2026-0001",
+              "name": "svikruti_imported_security_finding_breach_readiness",
               "shortDescription": {
                 "text": "Trivy vulnerability: CVE-2026-0001"
               },
@@ -506,6 +506,366 @@
         }
       },
       "results": [
+        {
+          "ruleId": "svikruti.storage_point.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms patient in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "storage_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.storage_point.notice_transparency",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms full_name in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "storage_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms phone, phone_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms diagnosis in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms prescription in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms blood_group in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms patient in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.storage_point.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms patient in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "storage_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.storage_point.notice_transparency",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms full_name in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "storage_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 17
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms phone, phone_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms diagnosis in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 19
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms prescription in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 20
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms blood_group in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
         {
           "ruleId": "svikruti.third_party.third-party_processors",
           "level": "warning",
@@ -996,10 +1356,106 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "customer_schema.sql"
+                  "uri": "schema.prisma"
                 },
                 "region": {
                   "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms pan_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.security_safeguards",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms upi, upi_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.notice_transparency",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms full_name in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 5
                 }
               }
             }
@@ -1020,10 +1476,10 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "customer_schema.sql"
+                  "uri": "SpringCustomerController.java"
                 },
                 "region": {
-                  "startLine": 4
+                  "startLine": 6
                 }
               }
             }
@@ -1038,61 +1494,13 @@
           "ruleId": "svikruti.personal_data_reference.purpose_limitation",
           "level": "warning",
           "message": {
-            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+            "text": "Detected terms address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "customer_schema.sql"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms mobile, mobile_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "customer_schema.sql"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms aadhaar in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "customer_schema.sql"
+                  "uri": "SpringCustomerController.java"
                 },
                 "region": {
                   "startLine": 6
@@ -1101,7 +1509,7 @@
             }
           ],
           "properties": {
-            "severity": "CRITICAL",
+            "severity": "MEDIUM",
             "source": "code",
             "kind": "personal_data_reference"
           }
@@ -1116,7 +1524,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "customer_schema.sql"
+                  "uri": "SpringCustomerController.java"
                 },
                 "region": {
                   "startLine": 7
@@ -1131,112 +1539,16 @@
           }
         },
         {
-          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms address, address_line in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "customer_schema.sql"
-                },
-                "region": {
-                  "startLine": 8
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms pincode in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "customer_schema.sql"
-                },
-                "region": {
-                  "startLine": 9
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.tracking_and_consent",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms device_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "customer_schema.sql"
-                },
-                "region": {
-                  "startLine": 10
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
-                },
-                "region": {
-                  "startLine": 12
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.consent_and_notice",
+          "ruleId": "svikruti.logging_risk.data_minimization",
           "level": "error",
           "message": {
-            "text": "Detected terms email in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+            "text": "Detected terms pan_number in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
+                  "uri": "SpringCustomerController.java"
                 },
                 "region": {
                   "startLine": 16
@@ -1245,559 +1557,31 @@
             }
           ],
           "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.tracking_and_consent",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms device_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
-                },
-                "region": {
-                  "startLine": 17
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.consent_and_notice",
-          "level": "error",
-          "message": {
-            "text": "Detected terms email, email_address in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.purpose_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Detected terms upi, upi_id in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Detected terms upi in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 6
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.consent_and_notice",
-          "level": "error",
-          "message": {
-            "text": "Detected terms email, email_address in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Detected terms upi, upi_id in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.purpose_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "laravel_checkout.php"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.storage_point.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms patient in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
             "severity": "CRITICAL",
             "source": "code",
-            "kind": "storage_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.storage_point.notice_transparency",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms full_name in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "storage_point"
+            "kind": "logging_risk"
           }
         },
         {
           "ruleId": "svikruti.personal_data_reference.consent_and_notice",
           "level": "warning",
           "message": {
-            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+            "text": "Detected terms phone in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "django_patient.py"
+                  "uri": "insecure_controls.js"
                 },
                 "region": {
-                  "startLine": 6
+                  "startLine": 3
                 }
               }
             }
           ],
           "properties": {
             "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms phone, phone_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms diagnosis in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 8
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms prescription in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 9
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms blood_group in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 10
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.collection_point.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms patient in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.storage_point.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms patient in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 15
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "storage_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.storage_point.notice_transparency",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms full_name in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 16
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "storage_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 17
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms phone, phone_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 18
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms diagnosis in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 19
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms prescription in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 20
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms blood_group in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 21
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
             "source": "code",
             "kind": "personal_data_reference"
           }
@@ -2412,7 +2196,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "schema.prisma"
+                  "uri": "customer_schema.sql"
                 },
                 "region": {
                   "startLine": 3
@@ -2430,13 +2214,13 @@
           "ruleId": "svikruti.personal_data_reference.consent_and_notice",
           "level": "warning",
           "message": {
-            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+            "text": "Detected terms email, email_address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "schema.prisma"
+                  "uri": "customer_schema.sql"
                 },
                 "region": {
                   "startLine": 4
@@ -2451,19 +2235,67 @@
           }
         },
         {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
+          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
+          "level": "warning",
           "message": {
-            "text": "Detected terms pan_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "schema.prisma"
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms mobile, mobile_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "customer_schema.sql"
                 },
                 "region": {
                   "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
+          "message": {
+            "text": "Detected terms aadhaar in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 6
                 }
               }
             }
@@ -2475,19 +2307,331 @@
           }
         },
         {
-          "ruleId": "svikruti.personal_data_reference.security_safeguards",
-          "level": "warning",
+          "ruleId": "svikruti.personal_data_reference.data_minimization",
+          "level": "error",
           "message": {
-            "text": "Detected terms upi, upi_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+            "text": "Detected terms pan_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "schema.prisma"
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms address, address_line in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms pincode in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.tracking_and_consent",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms device_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "customer_schema.sql"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.consent_and_notice",
+          "level": "error",
+          "message": {
+            "text": "Detected terms email, email_address in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.purpose_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Detected terms upi, upi_id in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Detected terms upi in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
                 },
                 "region": {
                   "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.consent_and_notice",
+          "level": "error",
+          "message": {
+            "text": "Detected terms email, email_address in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Detected terms upi, upi_id in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.purpose_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "laravel_checkout.php"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms email in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "k8s-deployment.yaml"
+                },
+                "region": {
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "code",
+            "kind": "personal_data_reference"
+          }
+        },
+        {
+          "ruleId": "svikruti.collection_point.consent_and_notice",
+          "level": "error",
+          "message": {
+            "text": "Detected terms email in code context. Recommendation: Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "k8s-deployment.yaml"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "code",
+            "kind": "collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.personal_data_reference.tracking_and_consent",
+          "level": "warning",
+          "message": {
+            "text": "Detected terms device_id in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "k8s-deployment.yaml"
+                },
+                "region": {
+                  "startLine": 17
                 }
               }
             }
@@ -2536,150 +2680,6 @@
                 },
                 "region": {
                   "startLine": 17
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.notice_transparency",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms full_name in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms email, email_address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 6
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 6
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms pan_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "personal_data_reference"
-          }
-        },
-        {
-          "ruleId": "svikruti.logging_risk.data_minimization",
-          "level": "error",
-          "message": {
-            "text": "Detected terms pan_number in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 16
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "code",
-            "kind": "logging_risk"
-          }
-        },
-        {
-          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
-          "level": "warning",
-          "message": {
-            "text": "Detected terms phone in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "insecure_controls.js"
-                },
-                "region": {
-                  "startLine": 3
                 }
               }
             }
@@ -2856,6 +2856,294 @@
             "severity": "CRITICAL",
             "source": "code",
             "kind": "storage_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Parser identified `full_name` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified `email` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified `phone_number` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified `diagnosis` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified `prescription` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified `blood_group` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
+          "level": "error",
+          "message": {
+            "text": "Parser identified request-body handling for Contact data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
+          "level": "error",
+          "message": {
+            "text": "Parser identified request-body handling for Health data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
+          "level": "warning",
+          "message": {
+            "text": "Parser identified request-body handling for Identity data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "semantic-parser",
+            "kind": "semantic_collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified a database write path for Contact data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser identified a database write path for Health data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Parser identified a database write path for Identity data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "django_patient.py"
+                },
+                "region": {
+                  "startLine": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_sink"
           }
         },
         {
@@ -3204,6 +3492,318 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Schema parser identified `email` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Schema parser identified `pan_number` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Schema parser identified `upi_id` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "schema.prisma"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Parser heuristic identified `fullName` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "MEDIUM",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser heuristic identified `emailAddress` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Parser heuristic identified `panNumber` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_field"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
+          "level": "error",
+          "message": {
+            "text": "Java parser heuristic identified Government ID data in request source. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_collection_point"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Java parser heuristic identified Government ID data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "SpringCustomerController.java"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_logging_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Ruby parser heuristic identified Children data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "rails_students.rb"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_logging_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Ruby parser heuristic identified Contact data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "rails_students.rb"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_logging_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Ruby parser heuristic identified Children data in database write. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "rails_students.rb"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
+          "level": "error",
+          "message": {
+            "text": "Ruby parser heuristic identified Contact data in database write. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "rails_students.rb"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_storage_sink"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
+          "level": "warning",
+          "message": {
+            "text": "Schema parser identified `full_name` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
                   "uri": "customer_schema.sql"
                 },
                 "region": {
@@ -3387,78 +3987,6 @@
           }
         },
         {
-          "ruleId": "svikruti.semantic_runtime_config.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Kubernetes manifest references `CUSTOMER_EMAIL` in Deployment configuration. Recommendation: Confirm this runtime config does not expose personal data and is backed by secrets/config governance."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
-                },
-                "region": {
-                  "startLine": 12
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_runtime_config"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_runtime_config.security_safeguards",
-          "level": "warning",
-          "message": {
-            "text": "Kubernetes manifest references `DEVICE_ID` in Deployment configuration. Recommendation: Confirm this runtime config does not expose personal data and is backed by secrets/config governance."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
-                },
-                "region": {
-                  "startLine": 17
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "semantic-parser",
-            "kind": "semantic_runtime_config"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_secret_reference.security_safeguards",
-          "level": "note",
-          "message": {
-            "text": "Kubernetes manifest references Secret, ConfigMap, image pull secret, or TLS material. Recommendation: Confirm secrets are encrypted at rest, access-controlled, rotated, and not storing personal data unnecessarily."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "k8s-deployment.yaml"
-                },
-                "region": {
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "LOW",
-            "source": "semantic-parser",
-            "kind": "semantic_secret_reference"
-          }
-        },
-        {
           "ruleId": "svikruti.semantic_collection_point.notice_transparency",
           "level": "error",
           "message": {
@@ -3579,19 +4107,43 @@
           }
         },
         {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "warning",
+          "ruleId": "svikruti.semantic_runtime_config.security_safeguards",
+          "level": "error",
           "message": {
-            "text": "Parser identified `full_name` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+            "text": "Kubernetes manifest references `CUSTOMER_EMAIL` in Deployment configuration. Recommendation: Confirm this runtime config does not expose personal data and is backed by secrets/config governance."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "django_patient.py"
+                  "uri": "k8s-deployment.yaml"
                 },
                 "region": {
-                  "startLine": 5
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "semantic-parser",
+            "kind": "semantic_runtime_config"
+          }
+        },
+        {
+          "ruleId": "svikruti.semantic_runtime_config.security_safeguards",
+          "level": "warning",
+          "message": {
+            "text": "Kubernetes manifest references `DEVICE_ID` in Deployment configuration. Recommendation: Confirm this runtime config does not expose personal data and is backed by secrets/config governance."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "k8s-deployment.yaml"
+                },
+                "region": {
+                  "startLine": 17
                 }
               }
             }
@@ -3599,463 +4151,31 @@
           "properties": {
             "severity": "MEDIUM",
             "source": "semantic-parser",
-            "kind": "semantic_storage_field"
+            "kind": "semantic_runtime_config"
           }
         },
         {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
+          "ruleId": "svikruti.semantic_secret_reference.security_safeguards",
+          "level": "note",
           "message": {
-            "text": "Parser identified `email` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
+            "text": "Kubernetes manifest references Secret, ConfigMap, image pull secret, or TLS material. Recommendation: Confirm secrets are encrypted at rest, access-controlled, rotated, and not storing personal data unnecessarily."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "django_patient.py"
+                  "uri": "k8s-deployment.yaml"
                 },
                 "region": {
-                  "startLine": 6
+                  "startLine": 1
                 }
               }
             }
           ],
           "properties": {
-            "severity": "HIGH",
+            "severity": "LOW",
             "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified `phone_number` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified `diagnosis` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 8
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified `prescription` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 9
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified `blood_group` as a personal-data field on model/schema `Patient`. Recommendation: Map this model field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 10
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
-          "level": "error",
-          "message": {
-            "text": "Parser identified request-body handling for Contact data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
-          "level": "error",
-          "message": {
-            "text": "Parser identified request-body handling for Health data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
-          "level": "warning",
-          "message": {
-            "text": "Parser identified request-body handling for Identity data in `create_patient`. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "semantic-parser",
-            "kind": "semantic_collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified a database write path for Contact data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser identified a database write path for Health data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Parser identified a database write path for Identity data in `create_patient`. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "django_patient.py"
-                },
-                "region": {
-                  "startLine": 13
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Ruby parser heuristic identified Children data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "rails_students.rb"
-                },
-                "region": {
-                  "startLine": 3
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_logging_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Ruby parser heuristic identified Contact data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "rails_students.rb"
-                },
-                "region": {
-                  "startLine": 3
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_logging_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Ruby parser heuristic identified Children data in database write. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "rails_students.rb"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_sink.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Ruby parser heuristic identified Contact data in database write. Recommendation: Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "rails_students.rb"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_sink"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Schema parser identified `full_name` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "schema.prisma"
-                },
-                "region": {
-                  "startLine": 3
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Schema parser identified `email` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "schema.prisma"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Schema parser identified `pan_number` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "schema.prisma"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Schema parser identified `upi_id` as a personal-data field. Recommendation: Map this schema field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "schema.prisma"
-                },
-                "region": {
-                  "startLine": 6
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
+            "kind": "semantic_secret_reference"
           }
         },
         {
@@ -4104,126 +4224,6 @@
             "severity": "CRITICAL",
             "source": "semantic-parser",
             "kind": "semantic_collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "warning",
-          "message": {
-            "text": "Parser heuristic identified `fullName` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "MEDIUM",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser heuristic identified `emailAddress` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 6
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_storage_field.storage_limitation",
-          "level": "error",
-          "message": {
-            "text": "Parser heuristic identified `panNumber` as a personal-data field. Recommendation: Map this field to purpose, retention, access control, deletion, and production data-store evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 7
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_storage_field"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_collection_point.notice_transparency",
-          "level": "error",
-          "message": {
-            "text": "Java parser heuristic identified Government ID data in request source. Recommendation: Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 15
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_collection_point"
-          }
-        },
-        {
-          "ruleId": "svikruti.semantic_logging_sink.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Java parser heuristic identified Government ID data in logging sink. Recommendation: Mask, remove, hash, or justify personal data in logs and attach log-retention evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "SpringCustomerController.java"
-                },
-                "region": {
-                  "startLine": 16
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "semantic-parser",
-            "kind": "semantic_logging_sink"
           }
         },
         {
@@ -4371,6 +4371,174 @@
           }
         },
         {
+          "ruleId": "svikruti.weak_crypto.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Weak or legacy cryptography pattern detected: MD5 hashing. Recommendation: Use modern, reviewed cryptography and document the control protecting personal data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "insecure_controls.js"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "technical-control",
+            "kind": "weak_crypto"
+          }
+        },
+        {
+          "ruleId": "svikruti.insecure_transport.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Code or config references a non-local HTTP endpoint. If personal data flows here, transport protection is weak. Recommendation: Use HTTPS/TLS for personal-data transport or document a tightly scoped internal exception."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "insecure_controls.js"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "technical-control",
+            "kind": "insecure_transport"
+          }
+        },
+        {
+          "ruleId": "svikruti.secret_exposure.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Potential hard-coded secret or credential detected: Hard-coded token. Recommendation: Remove the secret, rotate it, and use a managed secret store."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "insecure_controls.js"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "CRITICAL",
+            "source": "technical-control",
+            "kind": "secret_exposure"
+          }
+        },
+        {
+          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Cloud or infrastructure misconfiguration pattern detected: Public database exposure. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "risky_cloud.tf"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "technical-control",
+            "kind": "cloud_misconfiguration"
+          }
+        },
+        {
+          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Cloud or infrastructure misconfiguration pattern detected: Storage encryption disabled. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "risky_cloud.tf"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "technical-control",
+            "kind": "cloud_misconfiguration"
+          }
+        },
+        {
+          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
+          "level": "error",
+          "message": {
+            "text": "Cloud or infrastructure misconfiguration pattern detected: Public storage ACL. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "risky_cloud.tf"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "HIGH",
+            "source": "technical-control",
+            "kind": "cloud_misconfiguration"
+          }
+        },
+        {
+          "ruleId": "svikruti.encryption_evidence.security_safeguards",
+          "level": "note",
+          "message": {
+            "text": "Repository contains storage encryption evidence. Recommendation: Confirm this protects personal-data systems in production and link it to the technical control register."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "risky_cloud.tf"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "severity": "LOW",
+            "source": "technical-control",
+            "kind": "encryption_evidence"
+          }
+        },
+        {
           "ruleId": "svikruti.security_tooling.breach_readiness",
           "level": "note",
           "message": {
@@ -4515,102 +4683,6 @@
           }
         },
         {
-          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Cloud or infrastructure misconfiguration pattern detected: Public database exposure. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "risky_cloud.tf"
-                },
-                "region": {
-                  "startLine": 3
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "technical-control",
-            "kind": "cloud_misconfiguration"
-          }
-        },
-        {
-          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Cloud or infrastructure misconfiguration pattern detected: Storage encryption disabled. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "risky_cloud.tf"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "technical-control",
-            "kind": "cloud_misconfiguration"
-          }
-        },
-        {
-          "ruleId": "svikruti.cloud_misconfiguration.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Cloud or infrastructure misconfiguration pattern detected: Public storage ACL. Recommendation: Review production exposure, restrict access, enable encryption, and attach cloud control evidence."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "risky_cloud.tf"
-                },
-                "region": {
-                  "startLine": 9
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "technical-control",
-            "kind": "cloud_misconfiguration"
-          }
-        },
-        {
-          "ruleId": "svikruti.encryption_evidence.security_safeguards",
-          "level": "note",
-          "message": {
-            "text": "Repository contains storage encryption evidence. Recommendation: Confirm this protects personal-data systems in production and link it to the technical control register."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "risky_cloud.tf"
-                },
-                "region": {
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "LOW",
-            "source": "technical-control",
-            "kind": "encryption_evidence"
-          }
-        },
-        {
           "ruleId": "svikruti.encryption_evidence.security_safeguards",
           "level": "note",
           "message": {
@@ -4752,78 +4824,6 @@
             "severity": "LOW",
             "source": "technical-control",
             "kind": "resilience_evidence"
-          }
-        },
-        {
-          "ruleId": "svikruti.weak_crypto.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Weak or legacy cryptography pattern detected: MD5 hashing. Recommendation: Use modern, reviewed cryptography and document the control protecting personal data."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "insecure_controls.js"
-                },
-                "region": {
-                  "startLine": 3
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "technical-control",
-            "kind": "weak_crypto"
-          }
-        },
-        {
-          "ruleId": "svikruti.insecure_transport.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Code or config references a non-local HTTP endpoint. If personal data flows here, transport protection is weak. Recommendation: Use HTTPS/TLS for personal-data transport or document a tightly scoped internal exception."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "insecure_controls.js"
-                },
-                "region": {
-                  "startLine": 4
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "HIGH",
-            "source": "technical-control",
-            "kind": "insecure_transport"
-          }
-        },
-        {
-          "ruleId": "svikruti.secret_exposure.security_safeguards",
-          "level": "error",
-          "message": {
-            "text": "Potential hard-coded secret or credential detected: Hard-coded token. Recommendation: Remove the secret, rotate it, and use a managed secret store."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "insecure_controls.js"
-                },
-                "region": {
-                  "startLine": 5
-                }
-              }
-            }
-          ],
-          "properties": {
-            "severity": "CRITICAL",
-            "source": "technical-control",
-            "kind": "secret_exposure"
           }
         },
         {

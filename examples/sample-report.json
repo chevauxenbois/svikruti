@@ -1,6 +1,6 @@
 {
   "product": "Svikruti PrivacyOps Evidence Scanner",
-  "generated_at": "2026-07-04T15:06:10.484944+00:00",
+  "generated_at": "2026-07-07T11:30:48.720486+00:00",
   "repo_path": "examples/realistic",
   "url": null,
   "summary": {
@@ -23,6 +23,415 @@
     "risk_level": "CRITICAL"
   },
   "evidence": [
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "django_patient.py",
+      "line": 4,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:4:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "django_patient.py",
+      "line": 5,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:5:code.storage_point.identity",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 6,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:6:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms phone, phone_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 7,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:7:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone",
+          "phone_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms diagnosis in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 8,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:8:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "diagnosis"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms prescription in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 9,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:9:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "prescription"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms blood_group in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 10,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:10:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "blood_group"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.collection_point.health",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:13:code.collection_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "collection_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms patient in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "django_patient.py",
+      "line": 15,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.storage_point.health",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:15:code.storage_point.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "patient"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "storage_point",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
+      "file": "django_patient.py",
+      "line": 16,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:16:code.storage_point.identity",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "storage_point",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 17,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:17:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms phone, phone_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 18,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "django_patient.py:18:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Contact",
+        "matched_terms": [
+          "phone",
+          "phone_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms diagnosis in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 19,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:19:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "diagnosis"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms prescription in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 20,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:20:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "prescription"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Health data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms blood_group in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "django_patient.py",
+      "line": 21,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.health",
+        "confidence": "low",
+        "evidence_ref": "django_patient.py:21:code.personal_data_reference.health",
+        "file_context": "application",
+        "language": "Python",
+        "data_category": "Health",
+        "matched_terms": [
+          "blood_group"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Django",
+          "Flask"
+        ]
+      }
+    },
     {
       "kind": "third_party",
       "label": "Third-party service detected: Razorpay",
@@ -557,21 +966,23 @@
       "source": "code",
       "detail": "Detected terms full_name in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
+      "file": "schema.prisma",
       "line": 3,
       "category": "Notice transparency",
       "metadata": {
         "detector_id": "code.personal_data_reference.identity",
         "confidence": "low",
-        "evidence_ref": "customer_schema.sql:3:code.personal_data_reference.identity",
+        "evidence_ref": "schema.prisma:3:code.personal_data_reference.identity",
         "file_context": "application",
-        "language": "SQL",
+        "language": "Unknown",
         "data_category": "Identity",
         "matched_terms": [
           "full_name"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": []
+        "frameworks": [
+          "Prisma"
+        ]
       }
     },
     {
@@ -579,99 +990,26 @@
       "label": "Contact data signal",
       "severity": "MEDIUM",
       "source": "code",
-      "detail": "Detected terms email, email_address in code context.",
+      "detail": "Detected terms email in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
+      "file": "schema.prisma",
       "line": 4,
       "category": "Consent and notice",
       "metadata": {
         "detector_id": "code.personal_data_reference.contact",
-        "confidence": "medium",
-        "evidence_ref": "customer_schema.sql:4:code.personal_data_reference.contact",
+        "confidence": "low",
+        "evidence_ref": "schema.prisma:4:code.personal_data_reference.contact",
         "file_context": "application",
-        "language": "SQL",
+        "language": "Unknown",
         "data_category": "Contact",
         "matched_terms": [
-          "email",
-          "email_address"
+          "email"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": [],
+        "frameworks": [
+          "Prisma"
+        ],
         "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Possible Location data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 4,
-      "category": "Purpose limitation",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.location",
-        "confidence": "low",
-        "evidence_ref": "customer_schema.sql:4:code.personal_data_reference.location",
-        "file_context": "application",
-        "language": "SQL",
-        "data_category": "Location",
-        "matched_terms": [
-          "address"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms mobile, mobile_number in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 5,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "medium",
-        "evidence_ref": "customer_schema.sql:5:code.personal_data_reference.contact",
-        "file_context": "application",
-        "language": "SQL",
-        "data_category": "Contact",
-        "matched_terms": [
-          "mobile",
-          "mobile_number"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Government ID data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms aadhaar in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 6,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.government_id",
-        "confidence": "low",
-        "evidence_ref": "customer_schema.sql:6:code.personal_data_reference.government_id",
-        "file_context": "application",
-        "language": "SQL",
-        "data_category": "Government ID",
-        "matched_terms": [
-          "aadhaar"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": []
       }
     },
     {
@@ -681,21 +1019,105 @@
       "source": "code",
       "detail": "Detected terms pan_number in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 7,
+      "file": "schema.prisma",
+      "line": 5,
       "category": "Data minimization",
       "metadata": {
         "detector_id": "code.personal_data_reference.government_id",
         "confidence": "low",
-        "evidence_ref": "customer_schema.sql:7:code.personal_data_reference.government_id",
+        "evidence_ref": "schema.prisma:5:code.personal_data_reference.government_id",
         "file_context": "application",
-        "language": "SQL",
+        "language": "Unknown",
         "data_category": "Government ID",
         "matched_terms": [
           "pan_number"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": []
+        "frameworks": [
+          "Prisma"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Financial data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms upi, upi_id in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "schema.prisma",
+      "line": 6,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.financial",
+        "confidence": "medium",
+        "evidence_ref": "schema.prisma:6:code.personal_data_reference.financial",
+        "file_context": "application",
+        "language": "Unknown",
+        "data_category": "Financial",
+        "matched_terms": [
+          "upi",
+          "upi_id"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Prisma"
+        ],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Identity data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms full_name in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "SpringCustomerController.java",
+      "line": 5,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.identity",
+        "confidence": "low",
+        "evidence_ref": "SpringCustomerController.java:5:code.personal_data_reference.identity",
+        "file_context": "application",
+        "language": "Java",
+        "data_category": "Identity",
+        "matched_terms": [
+          "full_name"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Spring"
+        ]
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "SpringCustomerController.java",
+      "line": 6,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:6:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "Java",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Spring"
+        ],
+        "scoring_duplicate": true
       }
     },
     {
@@ -703,591 +1125,76 @@
       "label": "Location data signal",
       "severity": "MEDIUM",
       "source": "code",
-      "detail": "Detected terms address, address_line in code context.",
+      "detail": "Detected terms address in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 8,
-      "category": "Purpose limitation",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.location",
-        "confidence": "medium",
-        "evidence_ref": "customer_schema.sql:8:code.personal_data_reference.location",
-        "file_context": "application",
-        "language": "SQL",
-        "data_category": "Location",
-        "matched_terms": [
-          "address",
-          "address_line"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Location data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms pincode in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 9,
+      "file": "SpringCustomerController.java",
+      "line": 6,
       "category": "Purpose limitation",
       "metadata": {
         "detector_id": "code.personal_data_reference.location",
         "confidence": "low",
-        "evidence_ref": "customer_schema.sql:9:code.personal_data_reference.location",
+        "evidence_ref": "SpringCustomerController.java:6:code.personal_data_reference.location",
         "file_context": "application",
-        "language": "SQL",
-        "data_category": "Location",
-        "matched_terms": [
-          "pincode"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Device data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms device_id in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "customer_schema.sql",
-      "line": 10,
-      "category": "Tracking and consent",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.device",
-        "confidence": "low",
-        "evidence_ref": "customer_schema.sql:10:code.personal_data_reference.device",
-        "file_context": "application",
-        "language": "SQL",
-        "data_category": "Device",
-        "matched_terms": [
-          "device_id"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms email in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "k8s-deployment.yaml",
-      "line": 12,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "low",
-        "evidence_ref": "k8s-deployment.yaml:12:code.personal_data_reference.contact",
-        "file_context": "config",
-        "language": "YAML",
-        "data_category": "Contact",
-        "matched_terms": [
-          "email"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Contact data signal",
-      "severity": "HIGH",
-      "source": "code",
-      "detail": "Detected terms email in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "k8s-deployment.yaml",
-      "line": 16,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.collection_point.contact",
-        "confidence": "medium",
-        "evidence_ref": "k8s-deployment.yaml:16:code.collection_point.contact",
-        "file_context": "config",
-        "language": "YAML",
-        "data_category": "Contact",
-        "matched_terms": [
-          "email"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Device data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms device_id in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "k8s-deployment.yaml",
-      "line": 17,
-      "category": "Tracking and consent",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.device",
-        "confidence": "low",
-        "evidence_ref": "k8s-deployment.yaml:17:code.personal_data_reference.device",
-        "file_context": "config",
-        "language": "YAML",
-        "data_category": "Device",
-        "matched_terms": [
-          "device_id"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Contact data signal",
-      "severity": "HIGH",
-      "source": "code",
-      "detail": "Detected terms email, email_address in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 4,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.collection_point.contact",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:4:code.collection_point.contact",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Contact",
-        "matched_terms": [
-          "email",
-          "email_address"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Possible Location data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 4,
-      "category": "Purpose limitation",
-      "metadata": {
-        "detector_id": "code.collection_point.location",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:4:code.collection_point.location",
-        "file_context": "application",
-        "language": "PHP",
+        "language": "Java",
         "data_category": "Location",
         "matched_terms": [
           "address"
         ],
-        "context_type": "collection_point",
-        "frameworks": []
+        "context_type": "personal_data_reference",
+        "frameworks": [
+          "Spring"
+        ]
       }
     },
     {
-      "kind": "collection_point",
-      "label": "Financial data signal",
-      "severity": "HIGH",
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
       "source": "code",
-      "detail": "Detected terms upi, upi_id in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 5,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "code.collection_point.financial",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:5:code.collection_point.financial",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Financial",
-        "matched_terms": [
-          "upi",
-          "upi_id"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Financial data signal",
-      "severity": "HIGH",
-      "source": "code",
-      "detail": "Detected terms upi in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 6,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "code.collection_point.financial",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:6:code.collection_point.financial",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Financial",
-        "matched_terms": [
-          "upi"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Contact data signal",
-      "severity": "HIGH",
-      "source": "code",
-      "detail": "Detected terms email, email_address in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
+      "detail": "Detected terms pan_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "SpringCustomerController.java",
       "line": 7,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.collection_point.contact",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:7:code.collection_point.contact",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Contact",
-        "matched_terms": [
-          "email",
-          "email_address"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Financial data signal",
-      "severity": "HIGH",
-      "source": "code",
-      "detail": "Detected terms upi, upi_id in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 7,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "code.collection_point.financial",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:7:code.collection_point.financial",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Financial",
-        "matched_terms": [
-          "upi",
-          "upi_id"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Possible Location data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "laravel_checkout.php",
-      "line": 7,
-      "category": "Purpose limitation",
-      "metadata": {
-        "detector_id": "code.collection_point.location",
-        "confidence": "medium",
-        "evidence_ref": "laravel_checkout.php:7:code.collection_point.location",
-        "file_context": "application",
-        "language": "PHP",
-        "data_category": "Location",
-        "matched_terms": [
-          "address"
-        ],
-        "context_type": "collection_point",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "storage_point",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms patient in code context.",
-      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
-      "file": "django_patient.py",
-      "line": 4,
       "category": "Data minimization",
       "metadata": {
-        "detector_id": "code.storage_point.health",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:4:code.storage_point.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "patient"
-        ],
-        "context_type": "storage_point",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "storage_point",
-      "label": "Identity data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms full_name in code context.",
-      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
-      "file": "django_patient.py",
-      "line": 5,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "code.storage_point.identity",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:5:code.storage_point.identity",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Identity",
-        "matched_terms": [
-          "full_name"
-        ],
-        "context_type": "storage_point",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms email in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 6,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
+        "detector_id": "code.personal_data_reference.government_id",
         "confidence": "low",
-        "evidence_ref": "django_patient.py:6:code.personal_data_reference.contact",
+        "evidence_ref": "SpringCustomerController.java:7:code.personal_data_reference.government_id",
         "file_context": "application",
-        "language": "Python",
-        "data_category": "Contact",
+        "language": "Java",
+        "data_category": "Government ID",
         "matched_terms": [
-          "email"
+          "pan_number"
         ],
         "context_type": "personal_data_reference",
         "frameworks": [
-          "Django",
-          "Flask"
-        ],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms phone, phone_number in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 7,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:7:code.personal_data_reference.contact",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Contact",
-        "matched_terms": [
-          "phone",
-          "phone_number"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms diagnosis in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 8,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:8:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "diagnosis"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
+          "Spring"
         ]
       }
     },
     {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
+      "kind": "logging_risk",
+      "label": "Government ID data signal",
       "severity": "CRITICAL",
       "source": "code",
-      "detail": "Detected terms prescription in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 9,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:9:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "prescription"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms blood_group in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 10,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:10:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "blood_group"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "collection_point",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms patient in code context.",
-      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.collection_point.health",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:13:code.collection_point.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "patient"
-        ],
-        "context_type": "collection_point",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "storage_point",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms patient in code context.",
-      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
-      "file": "django_patient.py",
-      "line": 15,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.storage_point.health",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:15:code.storage_point.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "patient"
-        ],
-        "context_type": "storage_point",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "storage_point",
-      "label": "Identity data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms full_name in code context.",
-      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
-      "file": "django_patient.py",
+      "detail": "Detected terms pan_number in code context.",
+      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "file": "SpringCustomerController.java",
       "line": 16,
-      "category": "Notice transparency",
+      "category": "Data minimization",
       "metadata": {
-        "detector_id": "code.storage_point.identity",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:16:code.storage_point.identity",
+        "detector_id": "code.logging_risk.government_id",
+        "confidence": "high",
+        "evidence_ref": "SpringCustomerController.java:16:code.logging_risk.government_id",
         "file_context": "application",
-        "language": "Python",
-        "data_category": "Identity",
+        "language": "Java",
+        "data_category": "Government ID",
         "matched_terms": [
-          "full_name"
+          "pan_number"
         ],
-        "context_type": "storage_point",
+        "context_type": "logging_risk",
         "frameworks": [
-          "Django",
-          "Flask"
+          "Spring"
         ]
       }
     },
@@ -1296,135 +1203,23 @@
       "label": "Contact data signal",
       "severity": "MEDIUM",
       "source": "code",
-      "detail": "Detected terms email in code context.",
+      "detail": "Detected terms phone in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 17,
+      "file": "insecure_controls.js",
+      "line": 3,
       "category": "Consent and notice",
       "metadata": {
         "detector_id": "code.personal_data_reference.contact",
         "confidence": "low",
-        "evidence_ref": "django_patient.py:17:code.personal_data_reference.contact",
+        "evidence_ref": "insecure_controls.js:3:code.personal_data_reference.contact",
         "file_context": "application",
-        "language": "Python",
+        "language": "JavaScript",
         "data_category": "Contact",
         "matched_terms": [
-          "email"
+          "phone"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms phone, phone_number in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 18,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "medium",
-        "evidence_ref": "django_patient.py:18:code.personal_data_reference.contact",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Contact",
-        "matched_terms": [
-          "phone",
-          "phone_number"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms diagnosis in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 19,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:19:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "diagnosis"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms prescription in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 20,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:20:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "prescription"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Health data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms blood_group in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "django_patient.py",
-      "line": 21,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.health",
-        "confidence": "low",
-        "evidence_ref": "django_patient.py:21:code.personal_data_reference.health",
-        "file_context": "application",
-        "language": "Python",
-        "data_category": "Health",
-        "matched_terms": [
-          "blood_group"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Django",
-          "Flask"
-        ]
+        "frameworks": []
       }
     },
     {
@@ -2110,23 +1905,21 @@
       "source": "code",
       "detail": "Detected terms full_name in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "schema.prisma",
+      "file": "customer_schema.sql",
       "line": 3,
       "category": "Notice transparency",
       "metadata": {
         "detector_id": "code.personal_data_reference.identity",
         "confidence": "low",
-        "evidence_ref": "schema.prisma:3:code.personal_data_reference.identity",
+        "evidence_ref": "customer_schema.sql:3:code.personal_data_reference.identity",
         "file_context": "application",
-        "language": "Unknown",
+        "language": "SQL",
         "data_category": "Identity",
         "matched_terms": [
           "full_name"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": [
-          "Prisma"
-        ]
+        "frameworks": []
       }
     },
     {
@@ -2134,26 +1927,99 @@
       "label": "Contact data signal",
       "severity": "MEDIUM",
       "source": "code",
-      "detail": "Detected terms email in code context.",
+      "detail": "Detected terms email, email_address in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "schema.prisma",
+      "file": "customer_schema.sql",
       "line": 4,
       "category": "Consent and notice",
       "metadata": {
         "detector_id": "code.personal_data_reference.contact",
-        "confidence": "low",
-        "evidence_ref": "schema.prisma:4:code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "customer_schema.sql:4:code.personal_data_reference.contact",
         "file_context": "application",
-        "language": "Unknown",
+        "language": "SQL",
         "data_category": "Contact",
         "matched_terms": [
-          "email"
+          "email",
+          "email_address"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": [
-          "Prisma"
-        ],
+        "frameworks": [],
         "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Possible Location data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "customer_schema.sql",
+      "line": 4,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "customer_schema.sql:4:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms mobile, mobile_number in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "customer_schema.sql",
+      "line": 5,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "customer_schema.sql:5:code.personal_data_reference.contact",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Contact",
+        "matched_terms": [
+          "mobile",
+          "mobile_number"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Government ID data signal",
+      "severity": "CRITICAL",
+      "source": "code",
+      "detail": "Detected terms aadhaar in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "customer_schema.sql",
+      "line": 6,
+      "category": "Data minimization",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.government_id",
+        "confidence": "low",
+        "evidence_ref": "customer_schema.sql:6:code.personal_data_reference.government_id",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Government ID",
+        "matched_terms": [
+          "aadhaar"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
       }
     },
     {
@@ -2163,51 +2029,341 @@
       "source": "code",
       "detail": "Detected terms pan_number in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "schema.prisma",
-      "line": 5,
+      "file": "customer_schema.sql",
+      "line": 7,
       "category": "Data minimization",
       "metadata": {
         "detector_id": "code.personal_data_reference.government_id",
         "confidence": "low",
-        "evidence_ref": "schema.prisma:5:code.personal_data_reference.government_id",
+        "evidence_ref": "customer_schema.sql:7:code.personal_data_reference.government_id",
         "file_context": "application",
-        "language": "Unknown",
+        "language": "SQL",
         "data_category": "Government ID",
         "matched_terms": [
           "pan_number"
         ],
         "context_type": "personal_data_reference",
-        "frameworks": [
-          "Prisma"
-        ]
+        "frameworks": []
       }
     },
     {
       "kind": "personal_data_reference",
-      "label": "Financial data signal",
+      "label": "Location data signal",
       "severity": "MEDIUM",
       "source": "code",
-      "detail": "Detected terms upi, upi_id in code context.",
+      "detail": "Detected terms address, address_line in code context.",
       "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "schema.prisma",
-      "line": 6,
+      "file": "customer_schema.sql",
+      "line": 8,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "medium",
+        "evidence_ref": "customer_schema.sql:8:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "address",
+          "address_line"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Location data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms pincode in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "customer_schema.sql",
+      "line": 9,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "customer_schema.sql:9:code.personal_data_reference.location",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Location",
+        "matched_terms": [
+          "pincode"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [],
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms device_id in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "customer_schema.sql",
+      "line": 10,
+      "category": "Tracking and consent",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.device",
+        "confidence": "low",
+        "evidence_ref": "customer_schema.sql:10:code.personal_data_reference.device",
+        "file_context": "application",
+        "language": "SQL",
+        "data_category": "Device",
+        "matched_terms": [
+          "device_id"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 4,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:4:code.collection_point.contact",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Possible Location data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 4,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.collection_point.location",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:4:code.collection_point.location",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Financial data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms upi, upi_id in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 5,
       "category": "Security safeguards",
       "metadata": {
-        "detector_id": "code.personal_data_reference.financial",
+        "detector_id": "code.collection_point.financial",
         "confidence": "medium",
-        "evidence_ref": "schema.prisma:6:code.personal_data_reference.financial",
+        "evidence_ref": "laravel_checkout.php:5:code.collection_point.financial",
         "file_context": "application",
-        "language": "Unknown",
+        "language": "PHP",
         "data_category": "Financial",
         "matched_terms": [
           "upi",
           "upi_id"
         ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Prisma"
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Financial data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms upi in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 6,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "code.collection_point.financial",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:6:code.collection_point.financial",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Financial",
+        "matched_terms": [
+          "upi"
         ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email, email_address in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 7,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:7:code.collection_point.contact",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email",
+          "email_address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Financial data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms upi, upi_id in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 7,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "code.collection_point.financial",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:7:code.collection_point.financial",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Financial",
+        "matched_terms": [
+          "upi",
+          "upi_id"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Possible Location data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms address in code context. No corroborating personal-data token was found nearby, so this is a possible signal only.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "laravel_checkout.php",
+      "line": 7,
+      "category": "Purpose limitation",
+      "metadata": {
+        "detector_id": "code.collection_point.location",
+        "confidence": "medium",
+        "evidence_ref": "laravel_checkout.php:7:code.collection_point.location",
+        "file_context": "application",
+        "language": "PHP",
+        "data_category": "Location",
+        "matched_terms": [
+          "address"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Contact data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "k8s-deployment.yaml",
+      "line": 12,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "low",
+        "evidence_ref": "k8s-deployment.yaml:12:code.personal_data_reference.contact",
+        "file_context": "config",
+        "language": "YAML",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": [],
         "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "collection_point",
+      "label": "Contact data signal",
+      "severity": "HIGH",
+      "source": "code",
+      "detail": "Detected terms email in code context.",
+      "recommendation": "Ensure the collection point has a clear purpose, notice, consent/legitimate-use basis, and withdrawal path where applicable.",
+      "file": "k8s-deployment.yaml",
+      "line": 16,
+      "category": "Consent and notice",
+      "metadata": {
+        "detector_id": "code.collection_point.contact",
+        "confidence": "medium",
+        "evidence_ref": "k8s-deployment.yaml:16:code.collection_point.contact",
+        "file_context": "config",
+        "language": "YAML",
+        "data_category": "Contact",
+        "matched_terms": [
+          "email"
+        ],
+        "context_type": "collection_point",
+        "frameworks": []
+      }
+    },
+    {
+      "kind": "personal_data_reference",
+      "label": "Device data signal",
+      "severity": "MEDIUM",
+      "source": "code",
+      "detail": "Detected terms device_id in code context.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
+      "file": "k8s-deployment.yaml",
+      "line": 17,
+      "category": "Tracking and consent",
+      "metadata": {
+        "detector_id": "code.personal_data_reference.device",
+        "confidence": "low",
+        "evidence_ref": "k8s-deployment.yaml:17:code.personal_data_reference.device",
+        "file_context": "config",
+        "language": "YAML",
+        "data_category": "Device",
+        "matched_terms": [
+          "device_id"
+        ],
+        "context_type": "personal_data_reference",
+        "frameworks": []
       }
     },
     {
@@ -2254,162 +2410,6 @@
         "matched_terms": [
           "mobile",
           "mobile_number"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": []
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Identity data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms full_name in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "SpringCustomerController.java",
-      "line": 5,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.identity",
-        "confidence": "low",
-        "evidence_ref": "SpringCustomerController.java:5:code.personal_data_reference.identity",
-        "file_context": "application",
-        "language": "Java",
-        "data_category": "Identity",
-        "matched_terms": [
-          "full_name"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Spring"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms email, email_address in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "SpringCustomerController.java",
-      "line": 6,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:6:code.personal_data_reference.contact",
-        "file_context": "application",
-        "language": "Java",
-        "data_category": "Contact",
-        "matched_terms": [
-          "email",
-          "email_address"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Spring"
-        ],
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Location data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms address in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "SpringCustomerController.java",
-      "line": 6,
-      "category": "Purpose limitation",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.location",
-        "confidence": "low",
-        "evidence_ref": "SpringCustomerController.java:6:code.personal_data_reference.location",
-        "file_context": "application",
-        "language": "Java",
-        "data_category": "Location",
-        "matched_terms": [
-          "address"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Spring"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Government ID data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms pan_number in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "SpringCustomerController.java",
-      "line": 7,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.government_id",
-        "confidence": "low",
-        "evidence_ref": "SpringCustomerController.java:7:code.personal_data_reference.government_id",
-        "file_context": "application",
-        "language": "Java",
-        "data_category": "Government ID",
-        "matched_terms": [
-          "pan_number"
-        ],
-        "context_type": "personal_data_reference",
-        "frameworks": [
-          "Spring"
-        ]
-      }
-    },
-    {
-      "kind": "logging_risk",
-      "label": "Government ID data signal",
-      "severity": "CRITICAL",
-      "source": "code",
-      "detail": "Detected terms pan_number in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
-      "file": "SpringCustomerController.java",
-      "line": 16,
-      "category": "Data minimization",
-      "metadata": {
-        "detector_id": "code.logging_risk.government_id",
-        "confidence": "high",
-        "evidence_ref": "SpringCustomerController.java:16:code.logging_risk.government_id",
-        "file_context": "application",
-        "language": "Java",
-        "data_category": "Government ID",
-        "matched_terms": [
-          "pan_number"
-        ],
-        "context_type": "logging_risk",
-        "frameworks": [
-          "Spring"
-        ]
-      }
-    },
-    {
-      "kind": "personal_data_reference",
-      "label": "Contact data signal",
-      "severity": "MEDIUM",
-      "source": "code",
-      "detail": "Detected terms phone in code context.",
-      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
-      "file": "insecure_controls.js",
-      "line": 3,
-      "category": "Consent and notice",
-      "metadata": {
-        "detector_id": "code.personal_data_reference.contact",
-        "confidence": "low",
-        "evidence_ref": "insecure_controls.js:3:code.personal_data_reference.contact",
-        "file_context": "application",
-        "language": "JavaScript",
-        "data_category": "Contact",
-        "matched_terms": [
-          "phone"
         ],
         "context_type": "personal_data_reference",
         "frameworks": []
@@ -2584,6 +2584,284 @@
         ],
         "context_type": "storage_point",
         "frameworks": []
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Identity model field",
+      "severity": "MEDIUM",
+      "source": "semantic-parser",
+      "detail": "Parser identified `full_name` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 5,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.identity",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:5:semantic.python.model_field.identity",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Identity",
+        "field": "full_name",
+        "class": "Patient",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Contact model field",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Parser identified `email` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 6,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.contact",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:6:semantic.python.model_field.contact",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Contact",
+        "field": "email",
+        "class": "Patient",
+        "semantic_role": "storage_field"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Contact model field",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Parser identified `phone_number` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 7,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.contact",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:7:semantic.python.model_field.contact",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Contact",
+        "field": "phone_number",
+        "class": "Patient",
+        "semantic_role": "storage_field"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Health model field",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser identified `diagnosis` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 8,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.health",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:8:semantic.python.model_field.health",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Health",
+        "field": "diagnosis",
+        "class": "Patient",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Health model field",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser identified `prescription` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 9,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.health",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:9:semantic.python.model_field.health",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Health",
+        "field": "prescription",
+        "class": "Patient",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Health model field",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser identified `blood_group` as a personal-data field on model/schema `Patient`.",
+      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "django_patient.py",
+      "line": 10,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.model_field.health",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:10:semantic.python.model_field.health",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Health",
+        "field": "blood_group",
+        "class": "Patient",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_collection_point",
+      "label": "Contact request collection",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Parser identified request-body handling for Contact data in `create_patient`.",
+      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "semantic.python.request_source.contact",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.request_source.contact",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Contact",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "request_source"
+      }
+    },
+    {
+      "kind": "semantic_collection_point",
+      "label": "Health request collection",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser identified request-body handling for Health data in `create_patient`.",
+      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "semantic.python.request_source.health",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.request_source.health",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Health",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "request_source",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_collection_point",
+      "label": "Identity request collection",
+      "severity": "MEDIUM",
+      "source": "semantic-parser",
+      "detail": "Parser identified request-body handling for Identity data in `create_patient`.",
+      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "semantic.python.request_source.identity",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.request_source.identity",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Identity",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "request_source"
+      }
+    },
+    {
+      "kind": "semantic_storage_sink",
+      "label": "Contact database write",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Parser identified a database write path for Contact data in `create_patient`.",
+      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.db_sink.contact",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.contact",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Contact",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "storage_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_sink",
+      "label": "Health database write",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser identified a database write path for Health data in `create_patient`.",
+      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.db_sink.health",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.health",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Health",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "storage_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_sink",
+      "label": "Identity database write",
+      "severity": "MEDIUM",
+      "source": "semantic-parser",
+      "detail": "Parser identified a database write path for Identity data in `create_patient`.",
+      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
+      "file": "django_patient.py",
+      "line": 13,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.python.db_sink.identity",
+        "confidence": "high",
+        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.identity",
+        "file_context": "application",
+        "language": "Python",
+        "parser": "python.ast",
+        "data_category": "Identity",
+        "endpoint_hint": "create_patient",
+        "semantic_role": "storage_sink",
+        "scoring_duplicate": true
       }
     },
     {
@@ -2912,6 +3190,300 @@
       "source": "semantic-parser",
       "detail": "Schema parser identified `full_name` as a personal-data field.",
       "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "schema.prisma",
+      "line": 3,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.prisma.schema_field.identity",
+        "confidence": "medium",
+        "evidence_ref": "schema.prisma:3:semantic.prisma.schema_field.identity",
+        "file_context": "application",
+        "language": "Unknown",
+        "parser": "schema.field_heuristic",
+        "data_category": "Identity",
+        "field": "full_name",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Contact schema field",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Schema parser identified `email` as a personal-data field.",
+      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "schema.prisma",
+      "line": 4,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.prisma.schema_field.contact",
+        "confidence": "medium",
+        "evidence_ref": "schema.prisma:4:semantic.prisma.schema_field.contact",
+        "file_context": "application",
+        "language": "Unknown",
+        "parser": "schema.field_heuristic",
+        "data_category": "Contact",
+        "field": "email",
+        "semantic_role": "storage_field"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Government ID schema field",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Schema parser identified `pan_number` as a personal-data field.",
+      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "schema.prisma",
+      "line": 5,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.prisma.schema_field.government_id",
+        "confidence": "medium",
+        "evidence_ref": "schema.prisma:5:semantic.prisma.schema_field.government_id",
+        "file_context": "application",
+        "language": "Unknown",
+        "parser": "schema.field_heuristic",
+        "data_category": "Government ID",
+        "field": "pan_number",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Financial schema field",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Schema parser identified `upi_id` as a personal-data field.",
+      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "schema.prisma",
+      "line": 6,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.prisma.schema_field.financial",
+        "confidence": "medium",
+        "evidence_ref": "schema.prisma:6:semantic.prisma.schema_field.financial",
+        "file_context": "application",
+        "language": "Unknown",
+        "parser": "schema.field_heuristic",
+        "data_category": "Financial",
+        "field": "upi_id",
+        "semantic_role": "storage_field"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Identity model/schema field",
+      "severity": "MEDIUM",
+      "source": "semantic-parser",
+      "detail": "Parser heuristic identified `fullName` as a personal-data field.",
+      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "SpringCustomerController.java",
+      "line": 5,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.java.field.identity",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:5:semantic.java.field.identity",
+        "file_context": "application",
+        "language": "Java",
+        "parser": "java.spring_heuristic",
+        "data_category": "Identity",
+        "field": "fullName",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Contact model/schema field",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Parser heuristic identified `emailAddress` as a personal-data field.",
+      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "SpringCustomerController.java",
+      "line": 6,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.java.field.contact",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:6:semantic.java.field.contact",
+        "file_context": "application",
+        "language": "Java",
+        "parser": "java.spring_heuristic",
+        "data_category": "Contact",
+        "field": "emailAddress",
+        "semantic_role": "storage_field"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Government ID model/schema field",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Parser heuristic identified `panNumber` as a personal-data field.",
+      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
+      "file": "SpringCustomerController.java",
+      "line": 7,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.java.field.government_id",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:7:semantic.java.field.government_id",
+        "file_context": "application",
+        "language": "Java",
+        "parser": "java.spring_heuristic",
+        "data_category": "Government ID",
+        "field": "panNumber",
+        "semantic_role": "storage_field",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_collection_point",
+      "label": "Government ID request source",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Java parser heuristic identified Government ID data in request source.",
+      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
+      "file": "SpringCustomerController.java",
+      "line": 15,
+      "category": "Notice transparency",
+      "metadata": {
+        "detector_id": "semantic.java.request_source.government_id",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:15:semantic.java.request_source.government_id",
+        "file_context": "application",
+        "language": "Java",
+        "parser": "java.spring_heuristic",
+        "data_category": "Government ID",
+        "endpoint_hint": "Post /customers",
+        "semantic_role": "request_source"
+      }
+    },
+    {
+      "kind": "semantic_logging_sink",
+      "label": "Government ID logging sink",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Java parser heuristic identified Government ID data in logging sink.",
+      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
+      "file": "SpringCustomerController.java",
+      "line": 16,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "semantic.java.log_sink.government_id",
+        "confidence": "medium",
+        "evidence_ref": "SpringCustomerController.java:16:semantic.java.log_sink.government_id",
+        "file_context": "application",
+        "language": "Java",
+        "parser": "java.spring_heuristic",
+        "data_category": "Government ID",
+        "endpoint_hint": "Post /customers",
+        "semantic_role": "log_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_logging_sink",
+      "label": "Children logging sink",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Ruby parser heuristic identified Children data in logging sink.",
+      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
+      "file": "rails_students.rb",
+      "line": 3,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "semantic.ruby.log_sink.children",
+        "confidence": "medium",
+        "evidence_ref": "rails_students.rb:3:semantic.ruby.log_sink.children",
+        "file_context": "application",
+        "language": "Ruby",
+        "parser": "ruby.rails_heuristic",
+        "data_category": "Children",
+        "endpoint_hint": "post /students",
+        "semantic_role": "log_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_logging_sink",
+      "label": "Contact logging sink",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Ruby parser heuristic identified Contact data in logging sink.",
+      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
+      "file": "rails_students.rb",
+      "line": 3,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "semantic.ruby.log_sink.contact",
+        "confidence": "medium",
+        "evidence_ref": "rails_students.rb:3:semantic.ruby.log_sink.contact",
+        "file_context": "application",
+        "language": "Ruby",
+        "parser": "ruby.rails_heuristic",
+        "data_category": "Contact",
+        "endpoint_hint": "post /students",
+        "semantic_role": "log_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_sink",
+      "label": "Children database write",
+      "severity": "CRITICAL",
+      "source": "semantic-parser",
+      "detail": "Ruby parser heuristic identified Children data in database write.",
+      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
+      "file": "rails_students.rb",
+      "line": 4,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.ruby.storage_sink.children",
+        "confidence": "medium",
+        "evidence_ref": "rails_students.rb:4:semantic.ruby.storage_sink.children",
+        "file_context": "application",
+        "language": "Ruby",
+        "parser": "ruby.rails_heuristic",
+        "data_category": "Children",
+        "endpoint_hint": "post /students",
+        "semantic_role": "storage_sink",
+        "scoring_duplicate": true
+      }
+    },
+    {
+      "kind": "semantic_storage_sink",
+      "label": "Contact database write",
+      "severity": "HIGH",
+      "source": "semantic-parser",
+      "detail": "Ruby parser heuristic identified Contact data in database write.",
+      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
+      "file": "rails_students.rb",
+      "line": 4,
+      "category": "Storage limitation",
+      "metadata": {
+        "detector_id": "semantic.ruby.storage_sink.contact",
+        "confidence": "medium",
+        "evidence_ref": "rails_students.rb:4:semantic.ruby.storage_sink.contact",
+        "file_context": "application",
+        "language": "Ruby",
+        "parser": "ruby.rails_heuristic",
+        "data_category": "Contact",
+        "endpoint_hint": "post /students",
+        "semantic_role": "storage_sink"
+      }
+    },
+    {
+      "kind": "semantic_storage_field",
+      "label": "Identity schema field",
+      "severity": "MEDIUM",
+      "source": "semantic-parser",
+      "detail": "Schema parser identified `full_name` as a personal-data field.",
+      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
       "file": "customer_schema.sql",
       "line": 3,
       "category": "Storage limitation",
@@ -3086,71 +3658,6 @@
       }
     },
     {
-      "kind": "semantic_runtime_config",
-      "label": "Contact runtime config reference",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Kubernetes manifest references `CUSTOMER_EMAIL` in Deployment configuration.",
-      "recommendation": "Confirm this runtime config does not expose personal data and is backed by secrets/config governance.",
-      "file": "k8s-deployment.yaml",
-      "line": 12,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "semantic.kubernetes.runtime_config.contact",
-        "confidence": "medium",
-        "evidence_ref": "k8s-deployment.yaml:12:semantic.kubernetes.runtime_config.contact",
-        "file_context": "config",
-        "language": "YAML",
-        "parser": "structured_artifact_heuristic",
-        "data_category": "Contact",
-        "field": "CUSTOMER_EMAIL",
-        "semantic_role": "runtime_config"
-      }
-    },
-    {
-      "kind": "semantic_runtime_config",
-      "label": "Device runtime config reference",
-      "severity": "MEDIUM",
-      "source": "semantic-parser",
-      "detail": "Kubernetes manifest references `DEVICE_ID` in Deployment configuration.",
-      "recommendation": "Confirm this runtime config does not expose personal data and is backed by secrets/config governance.",
-      "file": "k8s-deployment.yaml",
-      "line": 17,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "semantic.kubernetes.runtime_config.device",
-        "confidence": "medium",
-        "evidence_ref": "k8s-deployment.yaml:17:semantic.kubernetes.runtime_config.device",
-        "file_context": "config",
-        "language": "YAML",
-        "parser": "structured_artifact_heuristic",
-        "data_category": "Device",
-        "field": "DEVICE_ID",
-        "semantic_role": "runtime_config",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_secret_reference",
-      "label": "Kubernetes secret/config reference",
-      "severity": "LOW",
-      "source": "semantic-parser",
-      "detail": "Kubernetes manifest references Secret, ConfigMap, image pull secret, or TLS material.",
-      "recommendation": "Confirm secrets are encrypted at rest, access-controlled, rotated, and not storing personal data unnecessarily.",
-      "file": "k8s-deployment.yaml",
-      "line": null,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "semantic.kubernetes.secret_reference",
-        "confidence": "medium",
-        "evidence_ref": "k8s-deployment.yaml:semantic.kubernetes.secret_reference",
-        "file_context": "config",
-        "language": "YAML",
-        "parser": "structured_artifact_heuristic",
-        "semantic_role": "secret_reference"
-      }
-    },
-    {
       "kind": "semantic_collection_point",
       "label": "Contact request source",
       "severity": "HIGH",
@@ -3266,462 +3773,68 @@
       }
     },
     {
-      "kind": "semantic_storage_field",
-      "label": "Identity model field",
-      "severity": "MEDIUM",
-      "source": "semantic-parser",
-      "detail": "Parser identified `full_name` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 5,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.identity",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:5:semantic.python.model_field.identity",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Identity",
-        "field": "full_name",
-        "class": "Patient",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Contact model field",
+      "kind": "semantic_runtime_config",
+      "label": "Contact runtime config reference",
       "severity": "HIGH",
       "source": "semantic-parser",
-      "detail": "Parser identified `email` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 6,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.contact",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:6:semantic.python.model_field.contact",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Contact",
-        "field": "email",
-        "class": "Patient",
-        "semantic_role": "storage_field"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Contact model field",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Parser identified `phone_number` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 7,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.contact",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:7:semantic.python.model_field.contact",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Contact",
-        "field": "phone_number",
-        "class": "Patient",
-        "semantic_role": "storage_field"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Health model field",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser identified `diagnosis` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 8,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.health",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:8:semantic.python.model_field.health",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Health",
-        "field": "diagnosis",
-        "class": "Patient",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Health model field",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser identified `prescription` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 9,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.health",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:9:semantic.python.model_field.health",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Health",
-        "field": "prescription",
-        "class": "Patient",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Health model field",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser identified `blood_group` as a personal-data field on model/schema `Patient`.",
-      "recommendation": "Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "django_patient.py",
-      "line": 10,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.model_field.health",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:10:semantic.python.model_field.health",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Health",
-        "field": "blood_group",
-        "class": "Patient",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_collection_point",
-      "label": "Contact request collection",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Parser identified request-body handling for Contact data in `create_patient`.",
-      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "semantic.python.request_source.contact",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.request_source.contact",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Contact",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "request_source"
-      }
-    },
-    {
-      "kind": "semantic_collection_point",
-      "label": "Health request collection",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser identified request-body handling for Health data in `create_patient`.",
-      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "semantic.python.request_source.health",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.request_source.health",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Health",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "request_source",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_collection_point",
-      "label": "Identity request collection",
-      "severity": "MEDIUM",
-      "source": "semantic-parser",
-      "detail": "Parser identified request-body handling for Identity data in `create_patient`.",
-      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "semantic.python.request_source.identity",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.request_source.identity",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Identity",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "request_source"
-      }
-    },
-    {
-      "kind": "semantic_storage_sink",
-      "label": "Contact database write",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Parser identified a database write path for Contact data in `create_patient`.",
-      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.db_sink.contact",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.contact",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Contact",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "storage_sink",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_sink",
-      "label": "Health database write",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser identified a database write path for Health data in `create_patient`.",
-      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.db_sink.health",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.health",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Health",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "storage_sink",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_sink",
-      "label": "Identity database write",
-      "severity": "MEDIUM",
-      "source": "semantic-parser",
-      "detail": "Parser identified a database write path for Identity data in `create_patient`.",
-      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
-      "file": "django_patient.py",
-      "line": 13,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.python.db_sink.identity",
-        "confidence": "high",
-        "evidence_ref": "django_patient.py:13:semantic.python.db_sink.identity",
-        "file_context": "application",
-        "language": "Python",
-        "parser": "python.ast",
-        "data_category": "Identity",
-        "endpoint_hint": "create_patient",
-        "semantic_role": "storage_sink",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_logging_sink",
-      "label": "Children logging sink",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Ruby parser heuristic identified Children data in logging sink.",
-      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
-      "file": "rails_students.rb",
-      "line": 3,
+      "detail": "Kubernetes manifest references `CUSTOMER_EMAIL` in Deployment configuration.",
+      "recommendation": "Confirm this runtime config does not expose personal data and is backed by secrets/config governance.",
+      "file": "k8s-deployment.yaml",
+      "line": 12,
       "category": "Security safeguards",
       "metadata": {
-        "detector_id": "semantic.ruby.log_sink.children",
+        "detector_id": "semantic.kubernetes.runtime_config.contact",
         "confidence": "medium",
-        "evidence_ref": "rails_students.rb:3:semantic.ruby.log_sink.children",
-        "file_context": "application",
-        "language": "Ruby",
-        "parser": "ruby.rails_heuristic",
-        "data_category": "Children",
-        "endpoint_hint": "post /students",
-        "semantic_role": "log_sink",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_logging_sink",
-      "label": "Contact logging sink",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Ruby parser heuristic identified Contact data in logging sink.",
-      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
-      "file": "rails_students.rb",
-      "line": 3,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "semantic.ruby.log_sink.contact",
-        "confidence": "medium",
-        "evidence_ref": "rails_students.rb:3:semantic.ruby.log_sink.contact",
-        "file_context": "application",
-        "language": "Ruby",
-        "parser": "ruby.rails_heuristic",
+        "evidence_ref": "k8s-deployment.yaml:12:semantic.kubernetes.runtime_config.contact",
+        "file_context": "config",
+        "language": "YAML",
+        "parser": "structured_artifact_heuristic",
         "data_category": "Contact",
-        "endpoint_hint": "post /students",
-        "semantic_role": "log_sink",
-        "scoring_duplicate": true
+        "field": "CUSTOMER_EMAIL",
+        "semantic_role": "runtime_config"
       }
     },
     {
-      "kind": "semantic_storage_sink",
-      "label": "Children database write",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Ruby parser heuristic identified Children data in database write.",
-      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
-      "file": "rails_students.rb",
-      "line": 4,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.ruby.storage_sink.children",
-        "confidence": "medium",
-        "evidence_ref": "rails_students.rb:4:semantic.ruby.storage_sink.children",
-        "file_context": "application",
-        "language": "Ruby",
-        "parser": "ruby.rails_heuristic",
-        "data_category": "Children",
-        "endpoint_hint": "post /students",
-        "semantic_role": "storage_sink",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_sink",
-      "label": "Contact database write",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Ruby parser heuristic identified Contact data in database write.",
-      "recommendation": "Attach storage encryption, access-control, retention, deletion, and backup/restore evidence for this data path.",
-      "file": "rails_students.rb",
-      "line": 4,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.ruby.storage_sink.contact",
-        "confidence": "medium",
-        "evidence_ref": "rails_students.rb:4:semantic.ruby.storage_sink.contact",
-        "file_context": "application",
-        "language": "Ruby",
-        "parser": "ruby.rails_heuristic",
-        "data_category": "Contact",
-        "endpoint_hint": "post /students",
-        "semantic_role": "storage_sink"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Identity schema field",
+      "kind": "semantic_runtime_config",
+      "label": "Device runtime config reference",
       "severity": "MEDIUM",
       "source": "semantic-parser",
-      "detail": "Schema parser identified `full_name` as a personal-data field.",
-      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "schema.prisma",
-      "line": 3,
-      "category": "Storage limitation",
+      "detail": "Kubernetes manifest references `DEVICE_ID` in Deployment configuration.",
+      "recommendation": "Confirm this runtime config does not expose personal data and is backed by secrets/config governance.",
+      "file": "k8s-deployment.yaml",
+      "line": 17,
+      "category": "Security safeguards",
       "metadata": {
-        "detector_id": "semantic.prisma.schema_field.identity",
+        "detector_id": "semantic.kubernetes.runtime_config.device",
         "confidence": "medium",
-        "evidence_ref": "schema.prisma:3:semantic.prisma.schema_field.identity",
-        "file_context": "application",
-        "language": "Unknown",
-        "parser": "schema.field_heuristic",
-        "data_category": "Identity",
-        "field": "full_name",
-        "semantic_role": "storage_field",
+        "evidence_ref": "k8s-deployment.yaml:17:semantic.kubernetes.runtime_config.device",
+        "file_context": "config",
+        "language": "YAML",
+        "parser": "structured_artifact_heuristic",
+        "data_category": "Device",
+        "field": "DEVICE_ID",
+        "semantic_role": "runtime_config",
         "scoring_duplicate": true
       }
     },
     {
-      "kind": "semantic_storage_field",
-      "label": "Contact schema field",
-      "severity": "HIGH",
+      "kind": "semantic_secret_reference",
+      "label": "Kubernetes secret/config reference",
+      "severity": "LOW",
       "source": "semantic-parser",
-      "detail": "Schema parser identified `email` as a personal-data field.",
-      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "schema.prisma",
-      "line": 4,
-      "category": "Storage limitation",
+      "detail": "Kubernetes manifest references Secret, ConfigMap, image pull secret, or TLS material.",
+      "recommendation": "Confirm secrets are encrypted at rest, access-controlled, rotated, and not storing personal data unnecessarily.",
+      "file": "k8s-deployment.yaml",
+      "line": null,
+      "category": "Security safeguards",
       "metadata": {
-        "detector_id": "semantic.prisma.schema_field.contact",
+        "detector_id": "semantic.kubernetes.secret_reference",
         "confidence": "medium",
-        "evidence_ref": "schema.prisma:4:semantic.prisma.schema_field.contact",
-        "file_context": "application",
-        "language": "Unknown",
-        "parser": "schema.field_heuristic",
-        "data_category": "Contact",
-        "field": "email",
-        "semantic_role": "storage_field"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Government ID schema field",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Schema parser identified `pan_number` as a personal-data field.",
-      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "schema.prisma",
-      "line": 5,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.prisma.schema_field.government_id",
-        "confidence": "medium",
-        "evidence_ref": "schema.prisma:5:semantic.prisma.schema_field.government_id",
-        "file_context": "application",
-        "language": "Unknown",
-        "parser": "schema.field_heuristic",
-        "data_category": "Government ID",
-        "field": "pan_number",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Financial schema field",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Schema parser identified `upi_id` as a personal-data field.",
-      "recommendation": "Map this schema field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "schema.prisma",
-      "line": 6,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.prisma.schema_field.financial",
-        "confidence": "medium",
-        "evidence_ref": "schema.prisma:6:semantic.prisma.schema_field.financial",
-        "file_context": "application",
-        "language": "Unknown",
-        "parser": "schema.field_heuristic",
-        "data_category": "Financial",
-        "field": "upi_id",
-        "semantic_role": "storage_field"
+        "evidence_ref": "k8s-deployment.yaml:semantic.kubernetes.secret_reference",
+        "file_context": "config",
+        "language": "YAML",
+        "parser": "structured_artifact_heuristic",
+        "semantic_role": "secret_reference"
       }
     },
     {
@@ -3766,119 +3879,6 @@
         "data_category": "Government ID",
         "endpoint_hint": "POST /kyc",
         "semantic_role": "request_source"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Identity model/schema field",
-      "severity": "MEDIUM",
-      "source": "semantic-parser",
-      "detail": "Parser heuristic identified `fullName` as a personal-data field.",
-      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "SpringCustomerController.java",
-      "line": 5,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.java.field.identity",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:5:semantic.java.field.identity",
-        "file_context": "application",
-        "language": "Java",
-        "parser": "java.spring_heuristic",
-        "data_category": "Identity",
-        "field": "fullName",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Contact model/schema field",
-      "severity": "HIGH",
-      "source": "semantic-parser",
-      "detail": "Parser heuristic identified `emailAddress` as a personal-data field.",
-      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "SpringCustomerController.java",
-      "line": 6,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.java.field.contact",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:6:semantic.java.field.contact",
-        "file_context": "application",
-        "language": "Java",
-        "parser": "java.spring_heuristic",
-        "data_category": "Contact",
-        "field": "emailAddress",
-        "semantic_role": "storage_field"
-      }
-    },
-    {
-      "kind": "semantic_storage_field",
-      "label": "Government ID model/schema field",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Parser heuristic identified `panNumber` as a personal-data field.",
-      "recommendation": "Map this field to purpose, retention, access control, deletion, and production data-store evidence.",
-      "file": "SpringCustomerController.java",
-      "line": 7,
-      "category": "Storage limitation",
-      "metadata": {
-        "detector_id": "semantic.java.field.government_id",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:7:semantic.java.field.government_id",
-        "file_context": "application",
-        "language": "Java",
-        "parser": "java.spring_heuristic",
-        "data_category": "Government ID",
-        "field": "panNumber",
-        "semantic_role": "storage_field",
-        "scoring_duplicate": true
-      }
-    },
-    {
-      "kind": "semantic_collection_point",
-      "label": "Government ID request source",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Java parser heuristic identified Government ID data in request source.",
-      "recommendation": "Confirm notice, purpose, consent/legitimate-use basis, validation, and retention for this endpoint.",
-      "file": "SpringCustomerController.java",
-      "line": 15,
-      "category": "Notice transparency",
-      "metadata": {
-        "detector_id": "semantic.java.request_source.government_id",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:15:semantic.java.request_source.government_id",
-        "file_context": "application",
-        "language": "Java",
-        "parser": "java.spring_heuristic",
-        "data_category": "Government ID",
-        "endpoint_hint": "Post /customers",
-        "semantic_role": "request_source"
-      }
-    },
-    {
-      "kind": "semantic_logging_sink",
-      "label": "Government ID logging sink",
-      "severity": "CRITICAL",
-      "source": "semantic-parser",
-      "detail": "Java parser heuristic identified Government ID data in logging sink.",
-      "recommendation": "Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
-      "file": "SpringCustomerController.java",
-      "line": 16,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "semantic.java.log_sink.government_id",
-        "confidence": "medium",
-        "evidence_ref": "SpringCustomerController.java:16:semantic.java.log_sink.government_id",
-        "file_context": "application",
-        "language": "Java",
-        "parser": "java.spring_heuristic",
-        "data_category": "Government ID",
-        "endpoint_hint": "Post /customers",
-        "semantic_role": "log_sink",
-        "scoring_duplicate": true
       }
     },
     {
@@ -4016,6 +4016,146 @@
       }
     },
     {
+      "kind": "weak_crypto",
+      "label": "MD5 hashing",
+      "severity": "HIGH",
+      "source": "technical-control",
+      "detail": "Weak or legacy cryptography pattern detected: MD5 hashing.",
+      "recommendation": "Use modern, reviewed cryptography and document the control protecting personal data.",
+      "file": "insecure_controls.js",
+      "line": 3,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.weak_crypto.md5_hashing",
+        "confidence": "high",
+        "evidence_ref": "insecure_controls.js:3:technical.weak_crypto.md5_hashing",
+        "file_context": "application",
+        "language": "JavaScript",
+        "subtype": "MD5 hashing",
+        "control_id": "DPDPA-TECH-002"
+      }
+    },
+    {
+      "kind": "insecure_transport",
+      "label": "Insecure HTTP endpoint detected",
+      "severity": "HIGH",
+      "source": "technical-control",
+      "detail": "Code or config references a non-local HTTP endpoint. If personal data flows here, transport protection is weak.",
+      "recommendation": "Use HTTPS/TLS for personal-data transport or document a tightly scoped internal exception.",
+      "file": "insecure_controls.js",
+      "line": 4,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.insecure_transport.http_endpoint",
+        "confidence": "high",
+        "evidence_ref": "insecure_controls.js:4:technical.insecure_transport.http_endpoint",
+        "file_context": "application",
+        "language": "JavaScript",
+        "control_id": "DPDPA-TECH-001",
+        "subtype": "HTTP endpoint"
+      }
+    },
+    {
+      "kind": "secret_exposure",
+      "label": "Hard-coded token",
+      "severity": "CRITICAL",
+      "source": "technical-control",
+      "detail": "Potential hard-coded secret or credential detected: Hard-coded token.",
+      "recommendation": "Remove the secret, rotate it, and use a managed secret store.",
+      "file": "insecure_controls.js",
+      "line": 5,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.secret_exposure.hard_coded_token",
+        "confidence": "high",
+        "evidence_ref": "insecure_controls.js:5:technical.secret_exposure.hard_coded_token",
+        "file_context": "application",
+        "language": "JavaScript",
+        "subtype": "Hard-coded token",
+        "control_id": "DPDPA-TECH-003"
+      }
+    },
+    {
+      "kind": "cloud_misconfiguration",
+      "label": "Public database exposure",
+      "severity": "HIGH",
+      "source": "technical-control",
+      "detail": "Cloud or infrastructure misconfiguration pattern detected: Public database exposure.",
+      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
+      "file": "risky_cloud.tf",
+      "line": 3,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.cloud_misconfiguration.public_database_exposure",
+        "confidence": "high",
+        "evidence_ref": "risky_cloud.tf:3:technical.cloud_misconfiguration.public_database_exposure",
+        "file_context": "application",
+        "language": "Terraform",
+        "subtype": "Public database exposure",
+        "control_id": "DPDPA-TECH-003"
+      }
+    },
+    {
+      "kind": "cloud_misconfiguration",
+      "label": "Storage encryption disabled",
+      "severity": "HIGH",
+      "source": "technical-control",
+      "detail": "Cloud or infrastructure misconfiguration pattern detected: Storage encryption disabled.",
+      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
+      "file": "risky_cloud.tf",
+      "line": 4,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.cloud_misconfiguration.storage_encryption_disabled",
+        "confidence": "high",
+        "evidence_ref": "risky_cloud.tf:4:technical.cloud_misconfiguration.storage_encryption_disabled",
+        "file_context": "application",
+        "language": "Terraform",
+        "subtype": "Storage encryption disabled",
+        "control_id": "DPDPA-TECH-003"
+      }
+    },
+    {
+      "kind": "cloud_misconfiguration",
+      "label": "Public storage ACL",
+      "severity": "HIGH",
+      "source": "technical-control",
+      "detail": "Cloud or infrastructure misconfiguration pattern detected: Public storage ACL.",
+      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
+      "file": "risky_cloud.tf",
+      "line": 9,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.cloud_misconfiguration.public_storage_acl",
+        "confidence": "high",
+        "evidence_ref": "risky_cloud.tf:9:technical.cloud_misconfiguration.public_storage_acl",
+        "file_context": "application",
+        "language": "Terraform",
+        "subtype": "Public storage ACL",
+        "control_id": "DPDPA-TECH-003"
+      }
+    },
+    {
+      "kind": "encryption_evidence",
+      "label": "Storage encryption evidence",
+      "severity": "LOW",
+      "source": "technical-control",
+      "detail": "Repository contains storage encryption evidence.",
+      "recommendation": "Confirm this protects personal-data systems in production and link it to the technical control register.",
+      "file": "risky_cloud.tf",
+      "line": null,
+      "category": "Security safeguards",
+      "metadata": {
+        "detector_id": "technical.encryption_evidence.storage_encryption",
+        "confidence": "medium",
+        "evidence_ref": "risky_cloud.tf:technical.encryption_evidence.storage_encryption",
+        "file_context": "application",
+        "language": "Terraform",
+        "subtype": "Storage encryption",
+        "positive_evidence": true
+      }
+    },
+    {
       "kind": "security_tooling",
       "label": "CodeQL evidence",
       "severity": "LOW",
@@ -4132,86 +4272,6 @@
         "file_context": "config",
         "language": "YAML",
         "subtype": "Runbook / escalation",
-        "positive_evidence": true
-      }
-    },
-    {
-      "kind": "cloud_misconfiguration",
-      "label": "Public database exposure",
-      "severity": "HIGH",
-      "source": "technical-control",
-      "detail": "Cloud or infrastructure misconfiguration pattern detected: Public database exposure.",
-      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
-      "file": "risky_cloud.tf",
-      "line": 3,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.cloud_misconfiguration.public_database_exposure",
-        "confidence": "high",
-        "evidence_ref": "risky_cloud.tf:3:technical.cloud_misconfiguration.public_database_exposure",
-        "file_context": "application",
-        "language": "Terraform",
-        "subtype": "Public database exposure",
-        "control_id": "DPDPA-TECH-003"
-      }
-    },
-    {
-      "kind": "cloud_misconfiguration",
-      "label": "Storage encryption disabled",
-      "severity": "HIGH",
-      "source": "technical-control",
-      "detail": "Cloud or infrastructure misconfiguration pattern detected: Storage encryption disabled.",
-      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
-      "file": "risky_cloud.tf",
-      "line": 4,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.cloud_misconfiguration.storage_encryption_disabled",
-        "confidence": "high",
-        "evidence_ref": "risky_cloud.tf:4:technical.cloud_misconfiguration.storage_encryption_disabled",
-        "file_context": "application",
-        "language": "Terraform",
-        "subtype": "Storage encryption disabled",
-        "control_id": "DPDPA-TECH-003"
-      }
-    },
-    {
-      "kind": "cloud_misconfiguration",
-      "label": "Public storage ACL",
-      "severity": "HIGH",
-      "source": "technical-control",
-      "detail": "Cloud or infrastructure misconfiguration pattern detected: Public storage ACL.",
-      "recommendation": "Review production exposure, restrict access, enable encryption, and attach cloud control evidence.",
-      "file": "risky_cloud.tf",
-      "line": 9,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.cloud_misconfiguration.public_storage_acl",
-        "confidence": "high",
-        "evidence_ref": "risky_cloud.tf:9:technical.cloud_misconfiguration.public_storage_acl",
-        "file_context": "application",
-        "language": "Terraform",
-        "subtype": "Public storage ACL",
-        "control_id": "DPDPA-TECH-003"
-      }
-    },
-    {
-      "kind": "encryption_evidence",
-      "label": "Storage encryption evidence",
-      "severity": "LOW",
-      "source": "technical-control",
-      "detail": "Repository contains storage encryption evidence.",
-      "recommendation": "Confirm this protects personal-data systems in production and link it to the technical control register.",
-      "file": "risky_cloud.tf",
-      "line": null,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.encryption_evidence.storage_encryption",
-        "confidence": "medium",
-        "evidence_ref": "risky_cloud.tf:technical.encryption_evidence.storage_encryption",
-        "file_context": "application",
-        "language": "Terraform",
-        "subtype": "Storage encryption",
         "positive_evidence": true
       }
     },
@@ -4336,66 +4396,6 @@
       }
     },
     {
-      "kind": "weak_crypto",
-      "label": "MD5 hashing",
-      "severity": "HIGH",
-      "source": "technical-control",
-      "detail": "Weak or legacy cryptography pattern detected: MD5 hashing.",
-      "recommendation": "Use modern, reviewed cryptography and document the control protecting personal data.",
-      "file": "insecure_controls.js",
-      "line": 3,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.weak_crypto.md5_hashing",
-        "confidence": "high",
-        "evidence_ref": "insecure_controls.js:3:technical.weak_crypto.md5_hashing",
-        "file_context": "application",
-        "language": "JavaScript",
-        "subtype": "MD5 hashing",
-        "control_id": "DPDPA-TECH-002"
-      }
-    },
-    {
-      "kind": "insecure_transport",
-      "label": "Insecure HTTP endpoint detected",
-      "severity": "HIGH",
-      "source": "technical-control",
-      "detail": "Code or config references a non-local HTTP endpoint. If personal data flows here, transport protection is weak.",
-      "recommendation": "Use HTTPS/TLS for personal-data transport or document a tightly scoped internal exception.",
-      "file": "insecure_controls.js",
-      "line": 4,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.insecure_transport.http_endpoint",
-        "confidence": "high",
-        "evidence_ref": "insecure_controls.js:4:technical.insecure_transport.http_endpoint",
-        "file_context": "application",
-        "language": "JavaScript",
-        "control_id": "DPDPA-TECH-001",
-        "subtype": "HTTP endpoint"
-      }
-    },
-    {
-      "kind": "secret_exposure",
-      "label": "Hard-coded token",
-      "severity": "CRITICAL",
-      "source": "technical-control",
-      "detail": "Potential hard-coded secret or credential detected: Hard-coded token.",
-      "recommendation": "Remove the secret, rotate it, and use a managed secret store.",
-      "file": "insecure_controls.js",
-      "line": 5,
-      "category": "Security safeguards",
-      "metadata": {
-        "detector_id": "technical.secret_exposure.hard_coded_token",
-        "confidence": "high",
-        "evidence_ref": "insecure_controls.js:5:technical.secret_exposure.hard_coded_token",
-        "file_context": "application",
-        "language": "JavaScript",
-        "subtype": "Hard-coded token",
-        "control_id": "DPDPA-TECH-003"
-      }
-    },
-    {
       "kind": "imported_security_finding",
       "label": "Trivy vulnerability: CVE-2026-0001",
       "severity": "HIGH",
@@ -4456,6 +4456,98 @@
   "ropa_starter": [
     {
       "record_id": "ROPA-001",
+      "activity": "Health personal-data processing",
+      "data_categories": "Health",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Application processing",
+        "Collection through product or website interface",
+        "Operational logging or debugging",
+        "Storage in application data store"
+      ],
+      "systems_or_sources": [
+        "django_patient.py",
+        "go_patient.go"
+      ],
+      "collection_points": [
+        "django_patient.py:13:code.collection_point.health",
+        "django_patient.py:13:semantic.python.request_source.health",
+        "go_patient.go:16:semantic.go.request_source.health"
+      ],
+      "storage_locations": [
+        "django_patient.py:10:semantic.python.model_field.health",
+        "django_patient.py:13:semantic.python.db_sink.health",
+        "django_patient.py:15:code.storage_point.health",
+        "django_patient.py:4:code.storage_point.health",
+        "django_patient.py:8:semantic.python.model_field.health",
+        "django_patient.py:9:semantic.python.model_field.health",
+        "go_patient.go:11:semantic.go.field.health",
+        "go_patient.go:17:code.storage_point.health",
+        "go_patient.go:18:semantic.go.storage_sink.health"
+      ],
+      "logging_locations": [
+        "go_patient.go:17:semantic.go.log_sink.health"
+      ],
+      "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
+      "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Strict access control, encryption, audit logging, and minimization review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
+      "dpdpa_notes": [
+        "Data minimization",
+        "Notice transparency",
+        "Security safeguards",
+        "Storage limitation"
+      ],
+      "evidence_refs": [
+        "django_patient.py:10:code.personal_data_reference.health",
+        "django_patient.py:10:semantic.python.model_field.health",
+        "django_patient.py:13:code.collection_point.health",
+        "django_patient.py:13:semantic.python.db_sink.health",
+        "django_patient.py:13:semantic.python.request_source.health",
+        "django_patient.py:15:code.storage_point.health",
+        "django_patient.py:19:code.personal_data_reference.health",
+        "django_patient.py:20:code.personal_data_reference.health",
+        "django_patient.py:21:code.personal_data_reference.health",
+        "django_patient.py:4:code.storage_point.health",
+        "django_patient.py:8:code.personal_data_reference.health",
+        "django_patient.py:8:semantic.python.model_field.health",
+        "django_patient.py:9:code.personal_data_reference.health",
+        "django_patient.py:9:semantic.python.model_field.health",
+        "go_patient.go:11:code.personal_data_reference.health",
+        "go_patient.go:11:semantic.go.field.health",
+        "go_patient.go:14:code.personal_data_reference.health",
+        "go_patient.go:15:code.personal_data_reference.health",
+        "go_patient.go:16:semantic.go.request_source.health",
+        "go_patient.go:17:code.storage_point.health",
+        "go_patient.go:17:semantic.go.log_sink.health",
+        "go_patient.go:18:semantic.go.storage_sink.health",
+        "go_patient.go:9:code.personal_data_reference.health"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "Go",
+        "Python"
+      ],
+      "frameworks": [
+        "Django",
+        "Flask"
+      ]
+    },
+    {
+      "record_id": "ROPA-002",
       "activity": "Identity personal-data processing",
       "data_categories": "Identity",
       "data_subjects": "Users / customers / website visitors",
@@ -4553,7 +4645,7 @@
       ]
     },
     {
-      "record_id": "ROPA-002",
+      "record_id": "ROPA-003",
       "activity": "Contact personal-data processing",
       "data_categories": "Contact",
       "data_subjects": "Users / customers / website visitors",
@@ -4702,7 +4794,7 @@
       ]
     },
     {
-      "record_id": "ROPA-003",
+      "record_id": "ROPA-004",
       "activity": "Location personal-data processing",
       "data_categories": "Location",
       "data_subjects": "Users / customers / website visitors",
@@ -4793,7 +4885,7 @@
       ]
     },
     {
-      "record_id": "ROPA-004",
+      "record_id": "ROPA-005",
       "activity": "Government ID personal-data processing",
       "data_categories": "Government ID",
       "data_subjects": "Users / customers / website visitors",
@@ -4887,7 +4979,7 @@
       ]
     },
     {
-      "record_id": "ROPA-005",
+      "record_id": "ROPA-006",
       "activity": "Financial personal-data processing",
       "data_categories": "Financial",
       "data_subjects": "Users / customers / website visitors",
@@ -4964,163 +5056,7 @@
       ]
     },
     {
-      "record_id": "ROPA-006",
-      "activity": "Device personal-data processing",
-      "data_categories": "Device",
-      "data_subjects": "Users / customers / website visitors",
-      "purposes": [
-        "Application processing",
-        "Collection through product or website interface",
-        "Storage in application data store"
-      ],
-      "systems_or_sources": [
-        "customer_schema.sql",
-        "k8s-deployment.yaml",
-        "react_signup.tsx"
-      ],
-      "collection_points": [
-        "react_signup.tsx:13:code.collection_point.device",
-        "react_signup.tsx:13:code.form_field.device"
-      ],
-      "storage_locations": [
-        "customer_schema.sql:10:semantic.sql.schema_field.device"
-      ],
-      "logging_locations": [],
-      "third_parties": [],
-      "dpdpa_basis": "Consent or legitimate use to be confirmed",
-      "consent_required": "To be confirmed",
-      "retention": "To be defined",
-      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
-      "security_measures": [
-        "Standard application access control and retention review"
-      ],
-      "notice_coverage": "To be compared",
-      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
-      "risk_tier": "High",
-      "owner": "Privacy / Product owner to assign",
-      "review_status": "Draft - scanner inferred",
-      "dpdpa_notes": [
-        "Notice transparency",
-        "Security safeguards",
-        "Storage limitation",
-        "Tracking and consent"
-      ],
-      "evidence_refs": [
-        "customer_schema.sql:10:code.personal_data_reference.device",
-        "customer_schema.sql:10:semantic.sql.schema_field.device",
-        "k8s-deployment.yaml:17:code.personal_data_reference.device",
-        "k8s-deployment.yaml:17:semantic.kubernetes.runtime_config.device",
-        "react_signup.tsx:13:code.collection_point.device",
-        "react_signup.tsx:13:code.form_field.device"
-      ],
-      "confidence": [
-        "high",
-        "low",
-        "medium"
-      ],
-      "languages": [
-        "React/TypeScript",
-        "SQL",
-        "YAML"
-      ],
-      "frameworks": [
-        "React"
-      ]
-    },
-    {
       "record_id": "ROPA-007",
-      "activity": "Health personal-data processing",
-      "data_categories": "Health",
-      "data_subjects": "Users / customers / website visitors",
-      "purposes": [
-        "Application processing",
-        "Collection through product or website interface",
-        "Operational logging or debugging",
-        "Storage in application data store"
-      ],
-      "systems_or_sources": [
-        "django_patient.py",
-        "go_patient.go"
-      ],
-      "collection_points": [
-        "django_patient.py:13:code.collection_point.health",
-        "django_patient.py:13:semantic.python.request_source.health",
-        "go_patient.go:16:semantic.go.request_source.health"
-      ],
-      "storage_locations": [
-        "django_patient.py:10:semantic.python.model_field.health",
-        "django_patient.py:13:semantic.python.db_sink.health",
-        "django_patient.py:15:code.storage_point.health",
-        "django_patient.py:4:code.storage_point.health",
-        "django_patient.py:8:semantic.python.model_field.health",
-        "django_patient.py:9:semantic.python.model_field.health",
-        "go_patient.go:11:semantic.go.field.health",
-        "go_patient.go:17:code.storage_point.health",
-        "go_patient.go:18:semantic.go.storage_sink.health"
-      ],
-      "logging_locations": [
-        "go_patient.go:17:semantic.go.log_sink.health"
-      ],
-      "third_parties": [],
-      "dpdpa_basis": "Consent or legitimate use to be confirmed",
-      "consent_required": "To be confirmed",
-      "retention": "To be defined",
-      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
-      "security_measures": [
-        "Strict access control, encryption, audit logging, and minimization review"
-      ],
-      "notice_coverage": "To be compared",
-      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
-      "risk_tier": "High",
-      "owner": "Privacy / Product owner to assign",
-      "review_status": "Draft - scanner inferred",
-      "dpdpa_notes": [
-        "Data minimization",
-        "Notice transparency",
-        "Security safeguards",
-        "Storage limitation"
-      ],
-      "evidence_refs": [
-        "django_patient.py:10:code.personal_data_reference.health",
-        "django_patient.py:10:semantic.python.model_field.health",
-        "django_patient.py:13:code.collection_point.health",
-        "django_patient.py:13:semantic.python.db_sink.health",
-        "django_patient.py:13:semantic.python.request_source.health",
-        "django_patient.py:15:code.storage_point.health",
-        "django_patient.py:19:code.personal_data_reference.health",
-        "django_patient.py:20:code.personal_data_reference.health",
-        "django_patient.py:21:code.personal_data_reference.health",
-        "django_patient.py:4:code.storage_point.health",
-        "django_patient.py:8:code.personal_data_reference.health",
-        "django_patient.py:8:semantic.python.model_field.health",
-        "django_patient.py:9:code.personal_data_reference.health",
-        "django_patient.py:9:semantic.python.model_field.health",
-        "go_patient.go:11:code.personal_data_reference.health",
-        "go_patient.go:11:semantic.go.field.health",
-        "go_patient.go:14:code.personal_data_reference.health",
-        "go_patient.go:15:code.personal_data_reference.health",
-        "go_patient.go:16:semantic.go.request_source.health",
-        "go_patient.go:17:code.storage_point.health",
-        "go_patient.go:17:semantic.go.log_sink.health",
-        "go_patient.go:18:semantic.go.storage_sink.health",
-        "go_patient.go:9:code.personal_data_reference.health"
-      ],
-      "confidence": [
-        "high",
-        "low",
-        "medium"
-      ],
-      "languages": [
-        "Go",
-        "Python"
-      ],
-      "frameworks": [
-        "Django",
-        "Flask"
-      ]
-    },
-    {
-      "record_id": "ROPA-008",
       "activity": "Children personal-data processing",
       "data_categories": "Children",
       "data_subjects": "Users / customers / website visitors",
@@ -5194,6 +5130,70 @@
       ],
       "frameworks": [
         "Rails",
+        "React"
+      ]
+    },
+    {
+      "record_id": "ROPA-008",
+      "activity": "Device personal-data processing",
+      "data_categories": "Device",
+      "data_subjects": "Users / customers / website visitors",
+      "purposes": [
+        "Application processing",
+        "Collection through product or website interface",
+        "Storage in application data store"
+      ],
+      "systems_or_sources": [
+        "customer_schema.sql",
+        "k8s-deployment.yaml",
+        "react_signup.tsx"
+      ],
+      "collection_points": [
+        "react_signup.tsx:13:code.collection_point.device",
+        "react_signup.tsx:13:code.form_field.device"
+      ],
+      "storage_locations": [
+        "customer_schema.sql:10:semantic.sql.schema_field.device"
+      ],
+      "logging_locations": [],
+      "third_parties": [],
+      "dpdpa_basis": "Consent or legitimate use to be confirmed",
+      "consent_required": "To be confirmed",
+      "retention": "To be defined",
+      "deletion_trigger": "Purpose completion / withdrawal / legal retention review",
+      "security_measures": [
+        "Standard application access control and retention review"
+      ],
+      "notice_coverage": "To be compared",
+      "rights_impact": "Access, correction, erasure, grievance, and nomination handling to be confirmed",
+      "risk_tier": "High",
+      "owner": "Privacy / Product owner to assign",
+      "review_status": "Draft - scanner inferred",
+      "dpdpa_notes": [
+        "Notice transparency",
+        "Security safeguards",
+        "Storage limitation",
+        "Tracking and consent"
+      ],
+      "evidence_refs": [
+        "customer_schema.sql:10:code.personal_data_reference.device",
+        "customer_schema.sql:10:semantic.sql.schema_field.device",
+        "k8s-deployment.yaml:17:code.personal_data_reference.device",
+        "k8s-deployment.yaml:17:semantic.kubernetes.runtime_config.device",
+        "react_signup.tsx:13:code.collection_point.device",
+        "react_signup.tsx:13:code.form_field.device"
+      ],
+      "confidence": [
+        "high",
+        "low",
+        "medium"
+      ],
+      "languages": [
+        "React/TypeScript",
+        "SQL",
+        "YAML"
+      ],
+      "frameworks": [
         "React"
       ]
     }
@@ -5493,19 +5493,19 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
+          45,
+          46,
           54,
-          55,
-          63,
+          57,
+          58,
+          59,
+          60,
+          61,
           66,
-          67,
           68,
           69,
-          70,
-          75,
-          77,
-          78,
-          140,
-          142
+          133,
+          135
         ]
       },
       {
@@ -5513,14 +5513,14 @@
         "target": "obligation:Children's data",
         "label": "triggers",
         "evidence_refs": [
+          45,
+          46,
           54,
-          55,
-          63,
+          57,
+          60,
           66,
-          69,
-          75,
-          77,
-          78
+          68,
+          69
         ]
       },
       {
@@ -5528,9 +5528,9 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          67,
-          68,
-          70
+          58,
+          59,
+          61
         ]
       },
       {
@@ -5538,7 +5538,7 @@
         "target": "obligation:Security safeguards",
         "label": "triggers",
         "evidence_refs": [
-          140
+          133
         ]
       },
       {
@@ -5546,7 +5546,7 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          142
+          135
         ]
       },
       {
@@ -5555,26 +5555,26 @@
         "label": "triggers",
         "evidence_refs": [
           2,
-          4,
-          9,
-          13,
-          15,
-          21,
-          23,
-          29,
+          3,
+          10,
+          11,
+          17,
+          19,
+          24,
+          28,
           30,
-          32,
           36,
-          41,
-          42,
-          49,
-          50,
-          62,
-          74,
-          76,
-          80,
-          84,
+          40,
+          44,
+          53,
+          65,
+          67,
+          71,
+          73,
+          79,
+          83,
           86,
+          87,
           90,
           92
         ]
@@ -5584,13 +5584,13 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          64,
-          65,
-          99,
-          100,
-          123,
-          134,
-          148,
+          55,
+          56,
+          104,
+          111,
+          112,
+          145,
+          153,
           157
         ]
       },
@@ -5599,9 +5599,9 @@
         "target": "obligation:Security safeguards",
         "label": "triggers",
         "evidence_refs": [
-          105,
-          120,
-          141
+          117,
+          134,
+          150
         ]
       },
       {
@@ -5609,16 +5609,16 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
+          99,
+          100,
           107,
-          113,
-          114,
-          126,
+          119,
+          125,
           129,
-          130,
-          137,
-          143,
-          145,
-          151,
+          136,
+          138,
+          139,
+          148,
           155
         ]
       },
@@ -5627,12 +5627,12 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          28,
-          31,
-          72,
-          73,
-          119,
-          121
+          63,
+          64,
+          78,
+          88,
+          144,
+          151
         ]
       },
       {
@@ -5640,7 +5640,7 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          73
+          64
         ]
       },
       {
@@ -5648,7 +5648,7 @@
         "target": "obligation:Security safeguards",
         "label": "triggers",
         "evidence_refs": [
-          121
+          151
         ]
       },
       {
@@ -5656,7 +5656,7 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          119
+          144
         ]
       },
       {
@@ -5664,9 +5664,9 @@
         "target": "obligation:Tracking and consent",
         "label": "triggers",
         "evidence_refs": [
-          28,
-          31,
-          72
+          63,
+          78,
+          88
         ]
       },
       {
@@ -5674,18 +5674,18 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          8,
-          19,
+          23,
           34,
-          35,
-          37,
+          38,
+          81,
           82,
-          104,
-          108,
-          124,
-          125,
+          84,
+          116,
+          120,
           127,
-          147
+          146,
+          147,
+          149
         ]
       },
       {
@@ -5693,8 +5693,8 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          104,
-          124
+          116,
+          146
         ]
       },
       {
@@ -5702,13 +5702,13 @@
         "target": "obligation:Security safeguards",
         "label": "triggers",
         "evidence_refs": [
-          8,
-          19,
+          23,
           34,
-          35,
-          37,
+          38,
+          81,
           82,
-          125
+          84,
+          147
         ]
       },
       {
@@ -5716,9 +5716,9 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          108,
+          120,
           127,
-          147
+          149
         ]
       },
       {
@@ -5726,24 +5726,24 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          7,
-          10,
-          18,
-          24,
+          22,
           25,
-          81,
-          83,
-          88,
+          33,
+          37,
+          42,
+          43,
+          74,
+          75,
           89,
-          103,
-          106,
-          109,
           115,
-          116,
-          146,
-          149,
-          152,
-          153,
+          118,
+          121,
+          126,
+          130,
+          131,
+          132,
+          140,
+          141,
           154
         ]
       },
@@ -5752,14 +5752,14 @@
         "target": "obligation:Data minimization",
         "label": "triggers",
         "evidence_refs": [
-          7,
-          10,
-          18,
-          24,
+          22,
           25,
-          81,
-          83,
-          88,
+          33,
+          37,
+          42,
+          43,
+          74,
+          75,
           89
         ]
       },
@@ -5768,9 +5768,9 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          103,
-          149,
-          153
+          115,
+          131,
+          154
         ]
       },
       {
@@ -5778,8 +5778,8 @@
         "target": "obligation:Security safeguards",
         "label": "triggers",
         "evidence_refs": [
-          106,
-          154
+          118,
+          132
         ]
       },
       {
@@ -5787,11 +5787,11 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          109,
-          115,
-          116,
-          146,
-          152
+          121,
+          126,
+          130,
+          140,
+          141
         ]
       },
       {
@@ -5799,25 +5799,25 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          39,
-          43,
-          44,
-          45,
-          46,
-          47,
-          51,
-          52,
-          53,
+          0,
+          4,
+          5,
+          6,
+          7,
+          8,
+          12,
+          13,
+          14,
           91,
           94,
           95,
           96,
           97,
-          131,
-          132,
-          133,
-          135,
-          138,
+          101,
+          102,
+          103,
+          105,
+          108,
           156,
           158,
           159,
@@ -5829,15 +5829,15 @@
         "target": "obligation:Data minimization",
         "label": "triggers",
         "evidence_refs": [
-          39,
-          43,
-          44,
-          45,
-          46,
-          47,
-          51,
-          52,
-          53,
+          0,
+          4,
+          5,
+          6,
+          7,
+          8,
+          12,
+          13,
+          14,
           91,
           94,
           95,
@@ -5850,7 +5850,7 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          135,
+          105,
           158
         ]
       },
@@ -5867,10 +5867,10 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          131,
-          132,
-          133,
-          138,
+          101,
+          102,
+          103,
+          108,
           156,
           160
         ]
@@ -5881,20 +5881,20 @@
         "label": "triggers",
         "evidence_refs": [
           1,
-          12,
-          20,
-          40,
+          9,
+          16,
+          27,
+          35,
+          39,
+          47,
           48,
-          56,
-          57,
-          58,
-          59,
-          60,
-          61,
-          79,
-          85,
-          98,
-          136
+          49,
+          50,
+          51,
+          52,
+          70,
+          106,
+          110
         ]
       },
       {
@@ -5902,12 +5902,12 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          110,
-          112,
+          98,
+          109,
+          122,
+          124,
           128,
-          139,
-          144,
-          150
+          137
         ]
       },
       {
@@ -5915,26 +5915,26 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          3,
-          5,
-          6,
-          11,
-          14,
-          16,
-          17,
-          22,
+          18,
+          20,
+          21,
           26,
-          27,
-          33,
-          38,
-          71,
-          87,
+          29,
+          31,
+          32,
+          41,
+          62,
+          72,
+          76,
+          77,
+          80,
+          85,
           93,
-          101,
-          102,
-          111,
-          117,
-          118
+          113,
+          114,
+          123,
+          142,
+          143
         ]
       },
       {
@@ -5942,8 +5942,8 @@
         "target": "obligation:Notice transparency",
         "label": "triggers",
         "evidence_refs": [
-          101,
-          102
+          113,
+          114
         ]
       },
       {
@@ -5951,20 +5951,20 @@
         "target": "obligation:Purpose limitation",
         "label": "triggers",
         "evidence_refs": [
-          3,
-          5,
-          6,
-          11,
-          14,
-          16,
-          17,
-          22,
+          18,
+          20,
+          21,
           26,
-          27,
-          33,
-          38,
-          71,
-          87,
+          29,
+          31,
+          32,
+          41,
+          62,
+          72,
+          76,
+          77,
+          80,
+          85,
           93
         ]
       },
@@ -5973,9 +5973,9 @@
         "target": "obligation:Storage limitation",
         "label": "triggers",
         "evidence_refs": [
-          111,
-          117,
-          118
+          123,
+          142,
+          143
         ]
       },
       {
@@ -5984,48 +5984,48 @@
         "label": "discloses",
         "evidence_refs": [
           2,
-          4,
-          9,
-          13,
-          15,
-          21,
-          23,
-          29,
+          3,
+          10,
+          11,
+          17,
+          19,
+          24,
+          28,
           30,
-          32,
           36,
-          41,
-          42,
-          49,
-          50,
-          62,
-          64,
+          40,
+          44,
+          53,
+          55,
+          56,
           65,
-          74,
-          76,
-          80,
-          84,
+          67,
+          71,
+          73,
+          79,
+          83,
           86,
+          87,
           90,
           92,
           99,
           100,
-          105,
+          104,
           107,
-          113,
-          114,
-          120,
-          123,
-          126,
+          111,
+          112,
+          117,
+          119,
+          125,
           129,
-          130,
           134,
-          137,
-          141,
-          143,
+          136,
+          138,
+          139,
           145,
           148,
-          151,
+          150,
+          153,
           155,
           157
         ]
@@ -6036,26 +6036,26 @@
         "label": "discloses",
         "evidence_refs": [
           1,
-          12,
-          20,
-          40,
+          9,
+          16,
+          27,
+          35,
+          39,
+          47,
           48,
-          56,
-          57,
-          58,
-          59,
-          60,
-          61,
-          79,
-          85,
+          49,
+          50,
+          51,
+          52,
+          70,
           98,
+          106,
+          109,
           110,
-          112,
+          122,
+          124,
           128,
-          136,
-          139,
-          144,
-          150
+          137
         ]
       },
       {
@@ -6063,8 +6063,8 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          86,
-          151
+          40,
+          129
         ]
       },
       {
@@ -6072,11 +6072,11 @@
         "target": "data:Government ID",
         "label": "contains",
         "evidence_refs": [
-          88,
-          89,
-          152,
-          153,
-          154
+          42,
+          43,
+          130,
+          131,
+          132
         ]
       },
       {
@@ -6084,8 +6084,8 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          85,
-          150
+          39,
+          128
         ]
       },
       {
@@ -6093,7 +6093,7 @@
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          87
+          41
         ]
       },
       {
@@ -6101,10 +6101,10 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          21,
-          23,
-          113,
-          114
+          71,
+          73,
+          138,
+          139
         ]
       },
       {
@@ -6112,8 +6112,8 @@
         "target": "data:Device",
         "label": "contains",
         "evidence_refs": [
-          28,
-          119
+          78,
+          144
         ]
       },
       {
@@ -6121,10 +6121,10 @@
         "target": "data:Government ID",
         "label": "contains",
         "evidence_refs": [
-          24,
-          25,
-          115,
-          116
+          74,
+          75,
+          140,
+          141
         ]
       },
       {
@@ -6132,8 +6132,8 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          20,
-          112
+          70,
+          137
         ]
       },
       {
@@ -6141,11 +6141,11 @@
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          22,
-          26,
-          27,
-          117,
-          118
+          72,
+          76,
+          77,
+          142,
+          143
         ]
       },
       {
@@ -6153,14 +6153,14 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          41,
-          42,
-          49,
-          50,
-          129,
-          130,
-          134,
-          137
+          2,
+          3,
+          10,
+          11,
+          99,
+          100,
+          104,
+          107
         ]
       },
       {
@@ -6168,20 +6168,20 @@
         "target": "data:Health",
         "label": "contains",
         "evidence_refs": [
-          39,
-          43,
-          44,
-          45,
-          46,
-          47,
-          51,
-          52,
-          53,
-          131,
-          132,
-          133,
-          135,
-          138
+          0,
+          4,
+          5,
+          6,
+          7,
+          8,
+          12,
+          13,
+          14,
+          101,
+          102,
+          103,
+          105,
+          108
         ]
       },
       {
@@ -6189,11 +6189,11 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          40,
-          48,
-          128,
-          136,
-          139
+          1,
+          9,
+          98,
+          106,
+          109
         ]
       },
       {
@@ -6201,15 +6201,15 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          2,
-          4,
-          9,
-          13,
-          15,
-          99,
-          100,
-          105,
-          107
+          17,
+          19,
+          24,
+          28,
+          30,
+          111,
+          112,
+          117,
+          119
         ]
       },
       {
@@ -6217,10 +6217,10 @@
         "target": "data:Financial",
         "label": "contains",
         "evidence_refs": [
-          8,
-          19,
-          104,
-          108
+          23,
+          34,
+          116,
+          120
         ]
       },
       {
@@ -6228,12 +6228,12 @@
         "target": "data:Government ID",
         "label": "contains",
         "evidence_refs": [
-          7,
-          10,
-          18,
-          103,
-          106,
-          109
+          22,
+          25,
+          33,
+          115,
+          118,
+          121
         ]
       },
       {
@@ -6241,10 +6241,10 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          1,
-          12,
-          98,
-          110
+          16,
+          27,
+          110,
+          122
         ]
       },
       {
@@ -6252,16 +6252,16 @@
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          3,
-          5,
-          6,
-          11,
-          14,
-          16,
-          17,
-          101,
-          102,
-          111
+          18,
+          20,
+          21,
+          26,
+          29,
+          31,
+          32,
+          113,
+          114,
+          123
         ]
       },
       {
@@ -6269,7 +6269,7 @@
         "target": "third_party:Razorpay",
         "label": "references",
         "evidence_refs": [
-          0
+          15
         ]
       },
       {
@@ -6311,7 +6311,7 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          90
+          44
         ]
       },
       {
@@ -6319,9 +6319,9 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          29,
-          30,
-          120
+          86,
+          87,
+          150
         ]
       },
       {
@@ -6329,8 +6329,8 @@
         "target": "data:Device",
         "label": "contains",
         "evidence_refs": [
-          31,
-          121
+          88,
+          151
         ]
       },
       {
@@ -6338,10 +6338,10 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          32,
-          36,
-          123,
-          126
+          79,
+          83,
+          145,
+          148
         ]
       },
       {
@@ -6349,12 +6349,12 @@
         "target": "data:Financial",
         "label": "contains",
         "evidence_refs": [
-          34,
-          35,
-          37,
-          124,
-          125,
-          127
+          81,
+          82,
+          84,
+          146,
+          147,
+          149
         ]
       },
       {
@@ -6362,8 +6362,8 @@
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          33,
-          38
+          80,
+          85
         ]
       },
       {
@@ -6371,8 +6371,8 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          84,
-          148
+          90,
+          153
         ]
       },
       {
@@ -6380,8 +6380,8 @@
         "target": "data:Government ID",
         "label": "contains",
         "evidence_refs": [
-          83,
-          149
+          89,
+          154
         ]
       },
       {
@@ -6389,64 +6389,32 @@
         "target": "data:Children",
         "label": "contains",
         "evidence_refs": [
-          75,
-          77,
-          78,
-          140,
-          142
-        ]
-      },
-      {
-        "source": "source:rails_students.rb",
-        "target": "data:Contact",
-        "label": "contains",
-        "evidence_refs": [
-          74,
-          76,
-          141,
-          143
-        ]
-      },
-      {
-        "source": "source:react_signup.tsx",
-        "target": "data:Children",
-        "label": "contains",
-        "evidence_refs": [
-          54,
-          55,
-          63,
           66,
-          67,
           68,
           69,
-          70
+          133,
+          135
         ]
       },
       {
-        "source": "source:react_signup.tsx",
+        "source": "source:rails_students.rb",
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          62,
-          64,
-          65
+          65,
+          67,
+          134,
+          136
         ]
       },
       {
         "source": "source:react_signup.tsx",
-        "target": "data:Device",
+        "target": "data:Children",
         "label": "contains",
         "evidence_refs": [
-          72,
-          73
-        ]
-      },
-      {
-        "source": "source:react_signup.tsx",
-        "target": "data:Identity",
-        "label": "contains",
-        "evidence_refs": [
-          56,
+          45,
+          46,
+          54,
           57,
           58,
           59,
@@ -6456,10 +6424,42 @@
       },
       {
         "source": "source:react_signup.tsx",
+        "target": "data:Contact",
+        "label": "contains",
+        "evidence_refs": [
+          53,
+          55,
+          56
+        ]
+      },
+      {
+        "source": "source:react_signup.tsx",
+        "target": "data:Device",
+        "label": "contains",
+        "evidence_refs": [
+          63,
+          64
+        ]
+      },
+      {
+        "source": "source:react_signup.tsx",
+        "target": "data:Identity",
+        "label": "contains",
+        "evidence_refs": [
+          47,
+          48,
+          49,
+          50,
+          51,
+          52
+        ]
+      },
+      {
+        "source": "source:react_signup.tsx",
         "target": "data:Location",
         "label": "contains",
         "evidence_refs": [
-          71
+          62
         ]
       },
       {
@@ -6467,8 +6467,8 @@
         "target": "data:Contact",
         "label": "contains",
         "evidence_refs": [
-          80,
-          145
+          36,
+          125
         ]
       },
       {
@@ -6476,8 +6476,8 @@
         "target": "data:Financial",
         "label": "contains",
         "evidence_refs": [
-          82,
-          147
+          38,
+          127
         ]
       },
       {
@@ -6485,8 +6485,8 @@
         "target": "data:Government ID",
         "label": "contains",
         "evidence_refs": [
-          81,
-          146
+          37,
+          126
         ]
       },
       {
@@ -6494,8 +6494,8 @@
         "target": "data:Identity",
         "label": "contains",
         "evidence_refs": [
-          79,
-          144
+          35,
+          124
         ]
       },
       {
@@ -6503,15 +6503,15 @@
         "target": "data:Children",
         "label": "collects",
         "evidence_refs": [
+          45,
+          46,
           54,
-          55,
-          63,
-          66,
-          67,
-          68,
-          69,
-          70,
-          75
+          57,
+          58,
+          59,
+          60,
+          61,
+          66
         ]
       },
       {
@@ -6519,9 +6519,9 @@
         "target": "data:Children",
         "label": "logs",
         "evidence_refs": [
-          77,
-          78,
-          140
+          68,
+          69,
+          133
         ]
       },
       {
@@ -6529,7 +6529,7 @@
         "target": "data:Children",
         "label": "stores",
         "evidence_refs": [
-          142
+          135
         ]
       },
       {
@@ -6537,18 +6537,18 @@
         "target": "data:Contact",
         "label": "collects",
         "evidence_refs": [
-          30,
-          32,
-          36,
-          62,
-          64,
+          53,
+          55,
+          56,
           65,
-          74,
-          99,
-          100,
-          123,
-          134,
-          148,
+          79,
+          83,
+          87,
+          104,
+          111,
+          112,
+          145,
+          153,
           157
         ]
       },
@@ -6557,10 +6557,10 @@
         "target": "data:Contact",
         "label": "logs",
         "evidence_refs": [
-          9,
-          76,
-          105,
-          141
+          24,
+          67,
+          117,
+          134
         ]
       },
       {
@@ -6569,22 +6569,22 @@
         "label": "processes",
         "evidence_refs": [
           2,
-          4,
-          13,
-          15,
-          21,
-          23,
-          29,
-          41,
-          42,
-          49,
-          50,
-          80,
-          84,
+          3,
+          10,
+          11,
+          17,
+          19,
+          28,
+          30,
+          36,
+          40,
+          44,
+          71,
+          73,
           86,
           90,
           92,
-          120
+          150
         ]
       },
       {
@@ -6592,16 +6592,16 @@
         "target": "data:Contact",
         "label": "stores",
         "evidence_refs": [
+          99,
+          100,
           107,
-          113,
-          114,
-          126,
+          119,
+          125,
           129,
-          130,
-          137,
-          143,
-          145,
-          151,
+          136,
+          138,
+          139,
+          148,
           155
         ]
       },
@@ -6610,8 +6610,8 @@
         "target": "data:Device",
         "label": "collects",
         "evidence_refs": [
-          72,
-          73
+          63,
+          64
         ]
       },
       {
@@ -6619,9 +6619,9 @@
         "target": "data:Device",
         "label": "processes",
         "evidence_refs": [
-          28,
-          31,
-          121
+          78,
+          88,
+          151
         ]
       },
       {
@@ -6629,7 +6629,7 @@
         "target": "data:Device",
         "label": "stores",
         "evidence_refs": [
-          119
+          144
         ]
       },
       {
@@ -6637,12 +6637,12 @@
         "target": "data:Financial",
         "label": "collects",
         "evidence_refs": [
-          8,
-          34,
-          35,
-          37,
-          104,
-          124
+          23,
+          81,
+          82,
+          84,
+          116,
+          146
         ]
       },
       {
@@ -6650,61 +6650,61 @@
         "target": "data:Financial",
         "label": "logs",
         "evidence_refs": [
-          125
-        ]
-      },
-      {
-        "source": "system:application",
-        "target": "data:Financial",
-        "label": "processes",
-        "evidence_refs": [
-          19,
-          82
-        ]
-      },
-      {
-        "source": "system:application",
-        "target": "data:Financial",
-        "label": "stores",
-        "evidence_refs": [
-          108,
-          127,
           147
         ]
       },
       {
         "source": "system:application",
-        "target": "data:Government ID",
-        "label": "collects",
+        "target": "data:Financial",
+        "label": "processes",
         "evidence_refs": [
-          103,
-          149,
-          153
+          34,
+          38
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Financial",
+        "label": "stores",
+        "evidence_refs": [
+          120,
+          127,
+          149
         ]
       },
       {
         "source": "system:application",
         "target": "data:Government ID",
-        "label": "logs",
+        "label": "collects",
         "evidence_refs": [
-          10,
-          89,
-          106,
+          115,
+          131,
           154
         ]
       },
       {
         "source": "system:application",
         "target": "data:Government ID",
+        "label": "logs",
+        "evidence_refs": [
+          25,
+          43,
+          118,
+          132
+        ]
+      },
+      {
+        "source": "system:application",
+        "target": "data:Government ID",
         "label": "processes",
         "evidence_refs": [
-          7,
-          18,
-          24,
-          25,
-          81,
-          83,
-          88
+          22,
+          33,
+          37,
+          42,
+          74,
+          75,
+          89
         ]
       },
       {
@@ -6712,11 +6712,11 @@
         "target": "data:Government ID",
         "label": "stores",
         "evidence_refs": [
-          109,
-          115,
-          116,
-          146,
-          152
+          121,
+          126,
+          130,
+          140,
+          141
         ]
       },
       {
@@ -6724,8 +6724,8 @@
         "target": "data:Health",
         "label": "collects",
         "evidence_refs": [
-          46,
-          135,
+          7,
+          105,
           158
         ]
       },
@@ -6742,12 +6742,12 @@
         "target": "data:Health",
         "label": "processes",
         "evidence_refs": [
-          43,
-          44,
-          45,
-          51,
-          52,
-          53,
+          4,
+          5,
+          6,
+          12,
+          13,
+          14,
           91,
           94,
           95,
@@ -6759,13 +6759,13 @@
         "target": "data:Health",
         "label": "stores",
         "evidence_refs": [
-          39,
-          47,
+          0,
+          8,
           97,
-          131,
-          132,
-          133,
-          138,
+          101,
+          102,
+          103,
+          108,
           156,
           160
         ]
@@ -6775,14 +6775,14 @@
         "target": "data:Identity",
         "label": "collects",
         "evidence_refs": [
-          56,
-          57,
-          58,
-          59,
-          60,
-          61,
-          98,
-          136
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          106,
+          110
         ]
       },
       {
@@ -6790,10 +6790,10 @@
         "target": "data:Identity",
         "label": "processes",
         "evidence_refs": [
-          1,
-          20,
-          79,
-          85
+          16,
+          35,
+          39,
+          70
         ]
       },
       {
@@ -6801,15 +6801,15 @@
         "target": "data:Identity",
         "label": "stores",
         "evidence_refs": [
-          12,
-          40,
-          48,
-          110,
-          112,
+          1,
+          9,
+          27,
+          98,
+          109,
+          122,
+          124,
           128,
-          139,
-          144,
-          150
+          137
         ]
       },
       {
@@ -6817,11 +6817,11 @@
         "target": "data:Location",
         "label": "collects",
         "evidence_refs": [
-          33,
-          38,
-          71,
-          101,
-          102
+          62,
+          80,
+          85,
+          113,
+          114
         ]
       },
       {
@@ -6829,7 +6829,7 @@
         "target": "data:Location",
         "label": "logs",
         "evidence_refs": [
-          11
+          26
         ]
       },
       {
@@ -6837,16 +6837,16 @@
         "target": "data:Location",
         "label": "processes",
         "evidence_refs": [
-          3,
-          5,
-          6,
-          14,
-          16,
-          17,
-          22,
-          26,
-          27,
-          87,
+          18,
+          20,
+          21,
+          29,
+          31,
+          32,
+          41,
+          72,
+          76,
+          77,
           93
         ]
       },
@@ -6855,9 +6855,9 @@
         "target": "data:Location",
         "label": "stores",
         "evidence_refs": [
-          111,
-          117,
-          118
+          123,
+          142,
+          143
         ]
       },
       {
@@ -6865,7 +6865,7 @@
         "target": "third_party:Razorpay",
         "label": "shares or may share data",
         "evidence_refs": [
-          0
+          15
         ]
       },
       {
@@ -6873,11 +6873,42 @@
         "target": "notice:privacy",
         "label": "missing disclosure",
         "evidence_refs": [
-          0
+          15
         ]
       }
     ],
     "data_flows": [
+      {
+        "data_category": "Health",
+        "collection_points": [
+          "django_patient.py",
+          "go_patient.go"
+        ],
+        "storage_points": [
+          "django_patient.py",
+          "go_patient.go"
+        ],
+        "logging_risks": [
+          "go_patient.go"
+        ],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Data minimization",
+          "Notice transparency",
+          "Security safeguards",
+          "Storage limitation"
+        ],
+        "dpdpa_references": [
+          "DPDP Act 2023, Sec. 5 (Notice)",
+          "DPDP Act 2023, Sec. 6(1) (consent limited to personal data necessary for the specified purpose)",
+          "DPDP Act 2023, Sec. 8(5) (Reasonable security safeguards)"
+        ],
+        "remediation": [
+          "Document strict purpose, retention, and access controls for Health.",
+          "Update privacy notice to disclose Health data."
+        ]
+      },
       {
         "data_category": "Identity",
         "collection_points": [
@@ -7045,63 +7076,6 @@
         ]
       },
       {
-        "data_category": "Device",
-        "collection_points": [
-          "react_signup.tsx"
-        ],
-        "storage_points": [
-          "customer_schema.sql"
-        ],
-        "logging_risks": [],
-        "third_parties": [],
-        "notice_status": "missing",
-        "dpdpa_obligations": [
-          "Notice transparency",
-          "Security safeguards",
-          "Storage limitation",
-          "Tracking and consent"
-        ],
-        "dpdpa_references": [
-          "DPDP Act 2023, Sec. 5 (Notice)",
-          "DPDP Act 2023, Sec. 6 (consent and withdrawal); Sec. 9(3) for tracking or behavioural monitoring of children",
-          "DPDP Act 2023, Sec. 8(5) (Reasonable security safeguards)"
-        ],
-        "remediation": [
-          "Update privacy notice to disclose Device data."
-        ]
-      },
-      {
-        "data_category": "Health",
-        "collection_points": [
-          "django_patient.py",
-          "go_patient.go"
-        ],
-        "storage_points": [
-          "django_patient.py",
-          "go_patient.go"
-        ],
-        "logging_risks": [
-          "go_patient.go"
-        ],
-        "third_parties": [],
-        "notice_status": "missing",
-        "dpdpa_obligations": [
-          "Data minimization",
-          "Notice transparency",
-          "Security safeguards",
-          "Storage limitation"
-        ],
-        "dpdpa_references": [
-          "DPDP Act 2023, Sec. 5 (Notice)",
-          "DPDP Act 2023, Sec. 6(1) (consent limited to personal data necessary for the specified purpose)",
-          "DPDP Act 2023, Sec. 8(5) (Reasonable security safeguards)"
-        ],
-        "remediation": [
-          "Document strict purpose, retention, and access controls for Health.",
-          "Update privacy notice to disclose Health data."
-        ]
-      },
-      {
         "data_category": "Children",
         "collection_points": [
           "rails_students.rb",
@@ -7130,6 +7104,32 @@
           "Document strict purpose, retention, and access controls for Children.",
           "Mask or remove Children data from logs in rails_students.rb.",
           "Update privacy notice to disclose Children data."
+        ]
+      },
+      {
+        "data_category": "Device",
+        "collection_points": [
+          "react_signup.tsx"
+        ],
+        "storage_points": [
+          "customer_schema.sql"
+        ],
+        "logging_risks": [],
+        "third_parties": [],
+        "notice_status": "missing",
+        "dpdpa_obligations": [
+          "Notice transparency",
+          "Security safeguards",
+          "Storage limitation",
+          "Tracking and consent"
+        ],
+        "dpdpa_references": [
+          "DPDP Act 2023, Sec. 5 (Notice)",
+          "DPDP Act 2023, Sec. 6 (consent and withdrawal); Sec. 9(3) for tracking or behavioural monitoring of children",
+          "DPDP Act 2023, Sec. 8(5) (Reasonable security safeguards)"
+        ],
+        "remediation": [
+          "Update privacy notice to disclose Device data."
         ]
       }
     ],
@@ -7999,17 +7999,17 @@
         "score": 80,
         "evidence_count": 0,
         "evidence_refs": [],
-        "reason": "Semantic parser coverage is 80% with engines: js_ts.endpoint_heuristic, schema.field_heuristic, kubernetes.manifest_heuristic, php.laravel_heuristic, python.ast, ruby.rails_heuristic, openapi.schema_heuristic, java.spring_heuristic, go.handler_heuristic.",
+        "reason": "Semantic parser coverage is 80% with engines: python.ast, js_ts.endpoint_heuristic, schema.field_heuristic, java.spring_heuristic, ruby.rails_heuristic, php.laravel_heuristic, kubernetes.manifest_heuristic, openapi.schema_heuristic, go.handler_heuristic.",
         "unknown_reason": "",
         "parser_engines": {
+          "python.ast": 1,
           "js_ts.endpoint_heuristic": 3,
           "schema.field_heuristic": 2,
-          "kubernetes.manifest_heuristic": 1,
-          "php.laravel_heuristic": 1,
-          "python.ast": 1,
-          "ruby.rails_heuristic": 1,
-          "openapi.schema_heuristic": 1,
           "java.spring_heuristic": 1,
+          "ruby.rails_heuristic": 1,
+          "php.laravel_heuristic": 1,
+          "kubernetes.manifest_heuristic": 1,
+          "openapi.schema_heuristic": 1,
           "go.handler_heuristic": 1
         }
       }
@@ -8029,14 +8029,14 @@
     "parsed_files": 12,
     "total_files": 15,
     "parser_engines": {
+      "python.ast": 1,
       "js_ts.endpoint_heuristic": 3,
       "schema.field_heuristic": 2,
-      "kubernetes.manifest_heuristic": 1,
-      "php.laravel_heuristic": 1,
-      "python.ast": 1,
-      "ruby.rails_heuristic": 1,
-      "openapi.schema_heuristic": 1,
       "java.spring_heuristic": 1,
+      "ruby.rails_heuristic": 1,
+      "php.laravel_heuristic": 1,
+      "kubernetes.manifest_heuristic": 1,
+      "openapi.schema_heuristic": 1,
       "go.handler_heuristic": 1
     },
     "parser_errors": [],

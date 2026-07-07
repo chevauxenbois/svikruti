@@ -70,3 +70,14 @@ svikruti-breach-readiness.md
 # Tracked launch screenshots
 !docs/assets/
 !docs/assets/*.png
+
+# Local scan outputs (never commit - may contain internal paths)
+guard0-*
+*-pack/
+*-ai-brief.md
+hrms/
+listmonk/
+excalidraw/
+*.html
+!site/*.html
+!examples/*.html

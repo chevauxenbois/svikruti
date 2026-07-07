@@ -10,6 +10,15 @@
   exposure). Benchmark: frappe/hrms dropped from 176 to 5 HIGH email
   literals, knadh/listmonk from 70 to 17 - the survivors are real.
 
+### Fixed
+
+- SARIF output: rule names are identifier-style (no spaces) and artifact
+  URIs use forward slashes on Windows, per the SARIF 2.1.0 spec.
+- Dashboard HTML escaping now covers single quotes.
+- Sample reports and the hosted demo regenerated with the current scanner
+  (README benchmark table re-verified: excalidraw 37/6, healthchecks 42/141,
+  saleor 60/678 - unchanged).
+
 ## 0.8.1 - 2026-07-04
 
 Benchmark release. Detectors, scoring, and docs calibrated against three real
