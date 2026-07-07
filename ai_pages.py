@@ -63,7 +63,7 @@ def _get_ai_engine(db, org_id: int):
 
         settings = get_ai_settings(db, org_id)
         if not settings or not settings.get("api_key"):
-            # Styled card for unconfigured AI
+            # Friendly first-run notice: AI is opt-in and bring-your-own-key.
             st.markdown("""
             <div style="
                 background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(59, 130, 246, 0.1));
@@ -72,12 +72,14 @@ def _get_ai_engine(db, org_id: int):
                 padding: 24px;
                 margin: 16px 0;
             ">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="font-size: 32px;">⚙️</div>
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                    <div style="font-size: 32px; line-height: 1;">⚙️</div>
                     <div>
-                        <p style="margin: 0; font-weight: 600; color: #14B8A6;">AI Configuration Required</p>
-                        <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px;">
-                            Please configure your AI settings first to use this feature.
+                        <p style="margin: 0; font-weight: 600; color: #14B8A6;">AI features are off until you add a key</p>
+                        <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px; line-height: 1.6;">
+                            AI is opt-in and bring-your-own-key. Nothing is sent anywhere until you configure a
+                            provider and use a feature — and then your data goes only to the provider you chose.
+                            Add your key on the <strong style="color: #14B8A6;">AI Configuration</strong> page to enable this feature.
                         </p>
                     </div>
                 </div>
@@ -177,7 +179,10 @@ def page_ai_chatbot(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    _render_styled_header("DPDPA AI Assistant", "Ask me anything about DPDPA compliance, data protection, and best practices")
+    _render_styled_header(
+        "DPDPA AI Assistant",
+        "Ask section-aware questions about the DPDP Act 2023 and Rules — answers reference sections and are not legal advice."
+    )
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
@@ -320,7 +325,10 @@ def page_smart_doc_drafter(db, org_id: int, user_info: Dict) -> None:
         st.error("This feature is available to admins and members only.")
         return
 
-    _render_styled_header("AI Document Drafter", "Generate compliance documents tailored to your organization using AI")
+    _render_styled_header(
+        "AI Document Drafter",
+        "Generate first drafts of DPDPA documents (privacy policy, DPA, breach notice) from your org data — review before use; not legal advice."
+    )
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
@@ -439,7 +447,10 @@ def page_gap_assessment_advisor(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    _render_styled_header("AI Compliance Advisor", "Get AI-powered recommendations to close compliance gaps")
+    _render_styled_header(
+        "AI Compliance Advisor",
+        "Turns your gap assessment into prioritized, section-aware remediation steps — guidance only, not legal advice."
+    )
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
@@ -585,7 +596,10 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
         st.error("This feature is available to admins and members only.")
         return
 
-    _render_styled_header("AI Breach Analyzer", "Analyze data breaches and generate required notifications")
+    _render_styled_header(
+        "AI Breach Analyzer",
+        "Classify a personal data breach by severity and draft Board and Data Principal notifications (DPDPA Section 8(6)) — review before sending; not legal advice."
+    )
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
@@ -707,7 +721,8 @@ def page_breach_classifier(db, org_id: int, user_info: Dict) -> None:
                 text-align: center;
             ">
                 <p style="margin: 0; color: #9CA3AF; font-size: 16px;">
-                    No breach incidents recorded yet.
+                    No breach incidents recorded yet. Use the <strong style="color: #14B8A6;">Analyze New Breach</strong>
+                    tab to describe an incident and get a severity classification and notification drafts.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -788,7 +803,10 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
         org_id: Organization ID
         user_info: Current user information
     """
-    _render_styled_header("AI Privacy Notice Reviewer", "Get AI feedback on your privacy policy or notice")
+    _render_styled_header(
+        "AI Privacy Notice Reviewer",
+        "Reviews a privacy notice against DPDPA Section 5 requirements and flags gaps in clarity and completeness — feedback only, not legal advice."
+    )
 
     # Initialize AI
     ai_engine = _get_ai_engine(db, org_id)
@@ -837,7 +855,8 @@ def page_privacy_notice_reviewer(db, org_id: int, user_info: Dict) -> None:
                 text-align: center;
             ">
                 <p style="margin: 0; color: #9CA3AF; font-size: 16px;">
-                    No privacy notices found. Create one first or paste text above.
+                    No saved privacy notices yet. Create one in the Privacy Notice Builder, or switch to
+                    <strong style="color: #14B8A6;">Paste Text</strong> above to review a draft right now.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -989,7 +1008,10 @@ def page_ai_settings(db, org_id: int, user_info: Dict) -> None:
         st.error("This page is available to admins only.")
         return
 
-    _render_styled_header("AI Configuration", "Configure your AI provider and monitor usage")
+    _render_styled_header(
+        "AI Configuration",
+        "AI is opt-in and bring-your-own-key: add a provider key here to enable AI features. Data is sent to your chosen provider only when you use a feature."
+    )
 
     try:
         from ai_engine import get_ai_settings, save_ai_settings, get_usage_stats

@@ -65,6 +65,12 @@ except (ImportError, Exception):
     NEW_PAGES_AVAILABLE = False
 
 try:
+    import scanner_import
+    SCANNER_IMPORT_AVAILABLE = True
+except (ImportError, Exception):
+    SCANNER_IMPORT_AVAILABLE = False
+
+try:
     from ai_pages import (
         page_ai_chatbot,
         page_smart_doc_drafter,
@@ -669,6 +675,7 @@ def render_sidebar():
         nav_sections = {
             "OVERVIEW": [
                 ("📊 Dashboard", "Dashboard"),
+                ("⬇️ Import from Scanner", "Import from Scanner"),
             ],
             "COMPLIANCE": [
                 ("🔍 Gap Assessment", "Gap Assessment"),
@@ -821,34 +828,76 @@ def page_dashboard():
         st.warning("Please log in to access the dashboard.")
         return
 
-    st.title(f"Welcome, {st.session_state.user_info['full_name']}")
+    st.title(f"Welcome, {html.escape(str(st.session_state.user_info['full_name']))}")
 
     org_id = st.session_state.org_id
-    stats = st.session_state.db.get_dashboard_stats(org_id)
+    stats = st.session_state.db.get_dashboard_stats(org_id) or {}
     org = st.session_state.db.get_organization(org_id) or {}
     latest_assessment = st.session_state.db.get_latest_assessment(org_id)
 
-    # Metric cards
-    col1, col2, col3, col4 = st.columns(4)
+    # Safe count extraction (empty org renders cleanly, no KeyError)
+    ropa_count = stats.get("ropa_entries", 0)
+    vendor_count = stats.get("vendors", 0)
+    pending_dsrs = stats.get("pending_dsrs", 0)
+    open_breaches = stats.get("open_breaches", 0)
+    overdue_tasks = stats.get("overdue_tasks", 0)
+    pending_tasks = stats.get("pending_tasks", 0)
+    docs = stats.get("total_documents", 0)
 
+    # Command-center: is this org effectively empty?
+    org_is_empty = (
+        latest_assessment is None
+        and ropa_count == 0
+        and vendor_count == 0
+        and pending_tasks == 0
+        and docs == 0
+    )
+
+    if org_is_empty:
+        st.markdown("""
+        <div class="card" style="border-left: 4px solid #14B8A6;">
+            <div class="card-header">Get started</div>
+            <div class="card-body">
+                Your workspace is empty. Two fast ways to populate it:
+                <br>• <strong>Run a scan and import</strong> — upload your Svikruti
+                <code>report.json</code> / <code>ropa.csv</code> on the
+                <em>Import from Scanner</em> page to auto-create your registries.
+                <br>• <strong>Take the gap assessment</strong> to get your first
+                compliance score and prioritized recommendations.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        cta1, cta2 = st.columns(2)
+        with cta1:
+            if st.button("⬇️ Import from Scanner", use_container_width=True, type="primary"):
+                st.session_state.page = "Import from Scanner"
+                st.rerun()
+        with cta2:
+            if st.button("🔍 Take Gap Assessment", use_container_width=True, type="secondary"):
+                st.session_state.page = "Gap Assessment"
+                st.rerun()
+        st.markdown("---")
+
+    # Command-center metric row
+    col1, col2, col3 = st.columns(3)
     with col1:
         if latest_assessment:
-            score = round(latest_assessment.get("overall_score", 0), 1)
+            score = round(latest_assessment.get("overall_score", 0) or 0, 1)
             st.metric("Compliance Score", f"{score}%", "out of 100")
         else:
             st.metric("Compliance Score", "—", "Not assessed")
-
     with col2:
-        pending_tasks = stats.get("pending_tasks", 0)
-        st.metric("Pending Tasks", pending_tasks, "to complete")
-
+        st.metric("RoPA Entries", ropa_count, "processing activities")
     with col3:
-        open_breaches = stats.get("open_breaches", 0)
-        st.metric("Open Breaches", open_breaches, "incidents")
+        st.metric("Vendors", vendor_count, "third parties")
 
+    col4, col5, col6 = st.columns(3)
     with col4:
-        docs = stats.get("total_documents", 0)
-        st.metric("Documents", docs, "generated")
+        st.metric("Open Rights Requests", pending_dsrs, "to resolve")
+    with col5:
+        st.metric("Open Breaches", open_breaches, "incidents")
+    with col6:
+        st.metric("Overdue Tasks", overdue_tasks, "past due date")
 
     st.markdown("---")
 
@@ -1841,7 +1890,232 @@ def page_settings():
         st.cache_data.clear()
         st.success("Cache cleared!")
 
+# ==================== PAGE: IMPORT FROM SCANNER ====================
+def page_scanner_import():
+    """Import RoPA / Vendor / Task records from the Svikruti CLI scanner output."""
+    if not st.session_state.org_id:
+        st.warning("Please log in to access this page.")
+        return
+
+    st.title("Import from Scanner")
+
+    st.markdown("""
+    <div class="card">
+        <div class="card-body">
+            Ran <code>svikruti scan</code>? Upload the evidence pack's
+            <strong>report.json</strong> or <strong>ropa.csv</strong> /
+            <strong>vendors.csv</strong> (and optionally <strong>actions.csv</strong>)
+            here to populate your registries automatically. Everything stays local —
+            nothing is uploaded to the internet.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if not SCANNER_IMPORT_AVAILABLE:
+        st.error("The scanner import module is unavailable. Please ensure scanner_import.py is installed.")
+        return
+
+    org_id = st.session_state.org_id
+
+    uploaded = st.file_uploader(
+        "Upload scanner output",
+        type=["json", "csv"],
+        accept_multiple_files=True,
+        help="Accepts report.json, ropa.csv, vendors.csv, and actions.csv.",
+    )
+
+    if not uploaded:
+        st.info("Select one or more scanner files above to preview what will be imported.")
+        return
+
+    parsed = {"ropa": [], "vendors": [], "actions": []}
+    parse_notes = []
+
+    for f in uploaded:
+        try:
+            raw = f.read()
+        except Exception:
+            parse_notes.append(f"Could not read '{f.name}'.")
+            continue
+
+        name = (f.name or "").lower()
+        try:
+            if name.endswith(".json"):
+                report = scanner_import.parse_report_json(raw)
+                parsed["ropa"].extend(report.get("ropa", []))
+                parsed["vendors"].extend(report.get("vendors", []))
+                parsed["actions"].extend(report.get("actions", []))
+                if report.get("note"):
+                    parse_notes.append(f"{f.name}: {report['note']}")
+            elif "vendor" in name:
+                rows = scanner_import.parse_vendors_csv(raw)
+                parsed["vendors"].extend(rows)
+                parse_notes.append(f"{f.name}: parsed {len(rows)} vendor row(s).")
+            elif "action" in name:
+                rows = scanner_import.parse_actions_csv(raw)
+                parsed["actions"].extend(rows)
+                parse_notes.append(f"{f.name}: parsed {len(rows)} action row(s).")
+            elif "ropa" in name or name.endswith(".csv"):
+                # Default any other CSV to RoPA (that is the primary registry).
+                rows = scanner_import.parse_ropa_csv(raw)
+                parsed["ropa"].extend(rows)
+                parse_notes.append(f"{f.name}: parsed {len(rows)} RoPA row(s).")
+            else:
+                parse_notes.append(f"{f.name}: unrecognized file type, skipped.")
+        except Exception as e:
+            parse_notes.append(f"{f.name}: parse error — {str(e)}")
+
+    for note in parse_notes:
+        st.caption(note)
+
+    existing_ropa = st.session_state.db.get_ropa_entries(org_id)
+    existing_vendors = st.session_state.db.get_vendors(org_id)
+    summary = scanner_import.import_summary(parsed, existing_ropa, existing_vendors)
+
+    total_found = summary["ropa"]["total"] + summary["vendors"]["total"] + summary["actions"]["total"]
+    if total_found == 0:
+        st.warning("No importable records were found in the uploaded file(s).")
+        return
+
+    st.markdown("### Preview")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("RoPA Entries", summary["ropa"]["total"],
+                  f"{summary['ropa']['new']} new / {summary['ropa']['duplicate']} dup")
+    with col2:
+        st.metric("Vendors", summary["vendors"]["total"],
+                  f"{summary['vendors']['new']} new / {summary['vendors']['duplicate']} dup")
+    with col3:
+        st.metric("Tasks", summary["actions"]["total"], "from actions")
+
+    if parsed["ropa"]:
+        with st.expander(f"RoPA preview ({summary['ropa']['total']})", expanded=True):
+            st.dataframe(
+                [{
+                    "Activity": r.get("activity_name"),
+                    "Data Categories": r.get("data_categories"),
+                    "Lawful Basis": r.get("lawful_basis"),
+                    "Risk Tier": r.get("_risk_tier", ""),
+                    "Status": "Duplicate" if str(r.get("activity_name", "")).strip().lower()
+                    in {x.get("activity_name", "").strip().lower() for x in existing_ropa}
+                    else "New",
+                } for r in parsed["ropa"]],
+                use_container_width=True,
+            )
+
+    if parsed["vendors"]:
+        with st.expander(f"Vendor preview ({summary['vendors']['total']})", expanded=True):
+            st.dataframe(
+                [{
+                    "Vendor": v.get("vendor_name"),
+                    "Service": v.get("service_type"),
+                    "Data Shared": v.get("data_shared"),
+                    "Risk": v.get("kwargs", {}).get("risk_level", ""),
+                    "Status": "Duplicate" if str(v.get("vendor_name", "")).strip().lower()
+                    in {x.get("vendor_name", "").strip().lower() for x in existing_vendors}
+                    else "New",
+                } for v in parsed["vendors"]],
+                use_container_width=True,
+            )
+
+    if parsed["actions"]:
+        with st.expander(f"Task preview ({summary['actions']['total']})", expanded=False):
+            st.dataframe(
+                [{
+                    "Title": a.get("title"),
+                    "Category": a.get("category"),
+                    "Priority": a.get("priority"),
+                } for a in parsed["actions"]],
+                use_container_width=True,
+            )
+
+    skip_dupes = st.checkbox("Skip duplicates", value=True,
+                             help="Skip RoPA activities and vendors that already exist (matched by name).")
+
+    if skip_dupes:
+        ropa_to_import = summary["ropa_new"]
+        vendors_to_import = summary["vendors_new"]
+    else:
+        ropa_to_import = parsed["ropa"]
+        vendors_to_import = parsed["vendors"]
+    actions_to_import = parsed["actions"]
+
+    import_count = len(ropa_to_import) + len(vendors_to_import) + len(actions_to_import)
+
+    if import_count == 0:
+        st.info("Nothing new to import (all records are duplicates). Uncheck 'Skip duplicates' to import anyway.")
+        return
+
+    if st.button(f"Import {import_count} record(s)", type="primary", use_container_width=True):
+        created = {"ropa": 0, "vendors": 0, "actions": 0}
+        errors = 0
+
+        for r in ropa_to_import:
+            try:
+                st.session_state.db.create_ropa_entry(
+                    org_id=org_id,
+                    activity_name=r["activity_name"],
+                    data_categories=r["data_categories"],
+                    data_subjects=r["data_subjects"],
+                    purpose=r["purpose"],
+                    lawful_basis=r["lawful_basis"],
+                    **r.get("kwargs", {}),
+                )
+                created["ropa"] += 1
+            except Exception:
+                errors += 1
+
+        for v in vendors_to_import:
+            try:
+                st.session_state.db.create_vendor(
+                    org_id=org_id,
+                    vendor_name=v["vendor_name"],
+                    service_type=v["service_type"],
+                    data_shared=v["data_shared"],
+                    **v.get("kwargs", {}),
+                )
+                created["vendors"] += 1
+            except Exception:
+                errors += 1
+
+        default_due = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+        for a in actions_to_import:
+            try:
+                st.session_state.db.create_task(
+                    org_id=org_id,
+                    title=a["title"],
+                    category=a.get("category", "Compliance"),
+                    priority=a.get("priority", "MEDIUM"),
+                    due_date=default_due,
+                    description=a.get("description", ""),
+                )
+                created["actions"] += 1
+            except Exception:
+                errors += 1
+
+        st.session_state.db.log_activity(
+            org_id, "SCANNER_IMPORT",
+            f"Imported {created['ropa']} RoPA, {created['vendors']} vendors, {created['actions']} tasks from scanner"
+        )
+
+        st.success(
+            f"Imported {created['ropa']} RoPA entr(ies), {created['vendors']} vendor(s), "
+            f"and {created['actions']} task(s)."
+        )
+        if errors:
+            st.warning(f"{errors} record(s) could not be imported and were skipped.")
+
+
 # ==================== PAGE ROUTING FUNCTIONS ====================
+def render_scanner_import_page():
+    if not st.session_state.org_id:
+        st.warning("Please log in.")
+        return
+    if SCANNER_IMPORT_AVAILABLE:
+        page_scanner_import()
+    else:
+        st.info("Import from Scanner is not available.")
+
 def render_ropa_page():
     if not st.session_state.org_id:
         st.warning("Please log in.")
@@ -1899,6 +2173,8 @@ def main():
 
     if st.session_state.page == "Dashboard":
         page_dashboard()
+    elif st.session_state.page == "Import from Scanner":
+        render_scanner_import_page()
     elif st.session_state.page == "Gap Assessment":
         page_gap_assessment()
     elif st.session_state.page == "RoPA Registry":

@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Governance app
+
+- New "Import from Scanner" module: upload the CLI scanner's report.json or
+  ropa.csv/vendors.csv evidence pack and auto-populate the RoPA registry,
+  vendor register, and task tracker (with duplicate detection). The scanner
+  and the workbench are now one workflow instead of two disconnected tools.
+- Home dashboard upgraded to a command center: compliance score, RoPA /
+  vendor / open-rights-request / open-breach / overdue-task counts, and a
+  first-run call-to-action for empty organizations.
+- Every module now has guidance-rich empty states citing the relevant DPDP
+  Act section and a concrete next step, plus a one-line description under
+  each page header. AI pages show a friendly opt-in / bring-your-own-key
+  notice when unconfigured instead of a dead form.
+
 ### Detection quality
 
 - Email literals in test files matched by NAME (test_*.py, *.spec.ts,

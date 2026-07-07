@@ -34,19 +34,59 @@ def _render_styled_container(content_func) -> None:
     st.markdown('</div>', unsafe_allow_html=True)
 
 
-def _render_empty_state(message: str, action_tab: str) -> None:
-    """Render styled empty state UI."""
+def _render_empty_state(
+    message: str,
+    action_tab: str,
+    next_step: Optional[str] = None,
+    tips: Optional[List[str]] = None,
+) -> None:
+    """Render styled empty state UI.
+
+    Args:
+        message: One-sentence explanation of what this registry is for.
+        action_tab: Name of the tab that lets the user get started.
+        next_step: Optional concrete next-step sentence shown below the message.
+        tips: Optional list of short quick-tip lines rendered as bullets.
+
+    Backward compatible with the original (message, action_tab) signature.
+    """
     st.markdown(
         '<div style="background: rgba(17,24,39,0.8); border: 1px dashed rgba(20,184,166,0.3); '
         'border-radius: 12px; padding: 40px; text-align: center; margin: 20px 0;">',
         unsafe_allow_html=True
     )
-    st.markdown(f'<p style="color: #A1A5B0; font-size: 16px; margin-bottom: 16px;">{message}</p>', unsafe_allow_html=True)
     st.markdown(
-        f'<p style="color: #14B8A6; font-size: 14px;">Use the <strong>{action_tab}</strong> tab to get started.</p>',
+        f'<p style="color: #A1A5B0; font-size: 16px; margin-bottom: 12px;">{html.escape(str(message))}</p>',
+        unsafe_allow_html=True
+    )
+    if next_step:
+        st.markdown(
+            f'<p style="color: #CBD5E1; font-size: 14px; margin-bottom: 16px;">{html.escape(str(next_step))}</p>',
+            unsafe_allow_html=True
+        )
+    if tips:
+        tips_html = "".join(
+            f'<li style="margin-bottom: 4px;">{html.escape(str(tip))}</li>' for tip in tips
+        )
+        st.markdown(
+            '<ul style="color: #A1A5B0; font-size: 13px; text-align: left; '
+            f'display: inline-block; margin: 0 0 16px 0;">{tips_html}</ul>',
+            unsafe_allow_html=True
+        )
+    st.markdown(
+        f'<p style="color: #14B8A6; font-size: 14px;">Use the <strong>{html.escape(str(action_tab))}</strong> tab to get started.</p>',
         unsafe_allow_html=True
     )
     st.markdown('</div>', unsafe_allow_html=True)
+
+
+def _render_page_caption(text: str) -> None:
+    """Render a subtle one-line 'what is this' caption under a page header."""
+    st.markdown(
+        f'<p style="color: #94A3B8; font-size: 15px; margin: -12px 0 20px 0; '
+        f'line-height: 1.5;">{html.escape(str(text))}</p>',
+        unsafe_allow_html=True
+    )
 
 
 def _safe_db_call(func, *args, **kwargs):
@@ -97,6 +137,10 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
     Full DPDPA compliance with activity registry, analytics, and role-based access.
     """
     _render_page_header("Records of Processing Activities")
+    _render_page_caption(
+        "Your RoPA is the central register of every purpose for which your organization "
+        "processes personal data — the foundation of Data Fiduciary accountability under DPDPA Section 8."
+    )
 
     # Fetch ROPA entries
     ropa_entries = _safe_db_call(db.get_ropa_entries, org_id) or []
@@ -275,8 +319,15 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                             st.rerun()
         else:
             _render_empty_state(
-                "No processing activities recorded yet.",
-                "Add Entry"
+                "Your Records of Processing Activities (RoPA) documents every purpose for which "
+                "you process personal data — the foundation of DPDPA Section 8 accountability.",
+                "Add Entry",
+                next_step="Add your first activity below, or import one automatically: "
+                          "run `svikruti scan` and use Import from Scanner.",
+                tips=[
+                    "Capture the purpose, data categories, and lawful basis (Section 6 consent or a Section 7 legitimate use).",
+                    "Record retention period and any cross-border transfer (mind the Section 16 negative list).",
+                ],
             )
 
     # TAB 2: Add Entry (admin/member only)
@@ -454,7 +505,11 @@ def page_ropa(db, org_id: int, user_info: Dict) -> None:
                 # Cross-border summary
                 st.metric("Cross-Border Transfers", cross_border_count)
             else:
-                _render_empty_state("No data to display yet.", "Add Entry")
+                _render_empty_state(
+                    "Analytics appear once your RoPA has activities to summarize.",
+                    "Add Entry",
+                    next_step="Add a processing activity, then return here for department and lawful-basis breakdowns.",
+                )
 
 
 # ============================================================================
@@ -467,6 +522,10 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
     Comprehensive consent lifecycle management with withdrawal tracking.
     """
     _render_page_header("Consent Management")
+    _render_page_caption(
+        "Record the consents you rely on as a lawful basis and verify each against the "
+        "DPDPA Section 6 checklist."
+    )
 
     st.markdown(
         '<div style="background: rgba(20,184,166,0.1); border-left: 4px solid #14B8A6; '
@@ -523,7 +582,13 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
 
             st.dataframe(table_data, use_container_width=True, hide_index=True)
         else:
-            _render_empty_state("No consent records yet.", "Add Consent")
+            _render_empty_state(
+                "Record the consents you rely on and verify them against the DPDPA Section 6 "
+                "checklist (free, specific, informed, unambiguous, withdrawable).",
+                "Add Consent",
+                next_step="Log your first consent when you collect it — capture the purpose, "
+                          "the consent text shown to the Data Principal, and how they can withdraw.",
+            )
 
     # TAB 2: Add Consent (admin/member only)
     if can_edit:
@@ -676,7 +741,12 @@ def page_consent_manager(db, org_id: int, user_info: Dict) -> None:
                         st.divider()
                         st.caption(f"Withdrawal: {consent.get('withdrawal_method', '')}")
             else:
-                _render_empty_state("No consent records to audit.", "Add Consent")
+                _render_empty_state(
+                    "The Section 6 compliance audit checks each recorded consent for the five "
+                    "statutory qualities (free, specific, informed, unambiguous, withdrawable).",
+                    "Add Consent",
+                    next_step="Add a consent record first, then return here to audit it against Section 6.",
+                )
 
 
 # ============================================================================
@@ -689,6 +759,10 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
     DPDPA Rule 2 compliance with plain-language notice rendering.
     """
     _render_page_header("Privacy Notice Builder")
+    _render_page_caption(
+        "Draft and version the privacy notices you give Data Principals — a DPDPA Section 5 "
+        "notice must state the data collected, the purpose, how to withdraw consent, and how to reach the Data Protection Board."
+    )
 
     # Fetch notices
     notices = _safe_db_call(db.get_privacy_notices, org_id) or []
@@ -730,7 +804,13 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
 
             st.dataframe(table_data, use_container_width=True, hide_index=True)
         else:
-            _render_empty_state("No privacy notices created yet.", "Create Notice")
+            _render_empty_state(
+                "Draft and version your privacy notices here. A DPDPA Section 5 notice must state "
+                "the data collected, the purpose, how to withdraw consent, and how to reach the Data Protection Board.",
+                "Create Notice",
+                next_step="Create your first notice — Data Principal rights (access Sec 11, "
+                          "correction/erasure Sec 12) and a grievance contact (Sec 13) are prefilled for you.",
+            )
 
     # TAB 2: Create Notice (admin/member only)
     if can_edit:
@@ -810,8 +890,8 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
                     "Right to Access (Section 11): Request a copy of your personal data.\n"
                     "Right to Correction (Section 12): Request corrections to inaccurate data.\n"
                     "Right to Erasure (Section 12): Request deletion of your data.\n"
-                    "Right to Nominate (Section 14(3)): Nominate another person to exercise rights.\n"
-                    "Right to Grievance (Section 14): Lodge a grievance with our Grievance Officer."
+                    "Right of Grievance Redressal (Section 13): Lodge a grievance with our Grievance Officer.\n"
+                    "Right to Nominate (Section 14): Nominate another person to exercise your rights."
                 )
                 st.text_area(
                     "Rights Information",
@@ -901,7 +981,11 @@ def page_privacy_notices(db, org_id: int, user_info: Dict) -> None:
 
                     st.markdown('</div>', unsafe_allow_html=True)
             else:
-                _render_empty_state("No notices to preview.", "Create Notice")
+                _render_empty_state(
+                    "Preview shows how a finished Section 5 notice reads to a Data Principal.",
+                    "Create Notice",
+                    next_step="Create a notice first, then select it here to preview the reader-facing version.",
+                )
 
 
 # ============================================================================
@@ -914,6 +998,10 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
     30-day DPDPA Rule 8 deadline tracking with SLA monitoring and status workflow.
     """
     _render_page_header("Data Principal Rights Requests")
+    _render_page_caption(
+        "Track Data Principal requests — access (Sec 11), correction/erasure (Sec 12), "
+        "grievances (Sec 13), and nomination (Sec 14) — and respond within your published timeline."
+    )
 
     st.markdown(
         '<div style="background: rgba(59,130,246,0.1); border-left: 4px solid #3B82F6; '
@@ -999,7 +1087,13 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
             if overdue_requests > 0:
                 st.error(f"⚠️ {overdue_requests} request(s) overdue - immediate action required!")
         else:
-            _render_empty_state("No rights requests yet.", "Log Request")
+            _render_empty_state(
+                "Track Data Principal requests — access (Sec 11), correction/erasure (Sec 12), "
+                "grievances (Sec 13), and nomination (Sec 14).",
+                "Log Request",
+                next_step="Log your first request when one arrives; DPDPA requires you to respond "
+                          "within your published timeline.",
+            )
 
     # TAB 2: Log Request (admin/member only)
     if can_edit:
@@ -1016,8 +1110,8 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                     request_type = st.selectbox(
                         "Request Type *",
                         ["Access Request - Section 11", "Correction Request - Section 12",
-                         "Erasure Request - Section 12", "Grievance - Section 14",
-                         "Nomination - Section 14(3)"],
+                         "Erasure Request - Section 12", "Grievance - Section 13",
+                         "Nomination - Section 14"],
                         help="What type of rights request is this?"
                     )
                     requester_name = st.text_input(
@@ -1146,7 +1240,11 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
                         )
                         st.success("Notes saved!")
             else:
-                _render_empty_state("No requests to manage.", "Log Request")
+                _render_empty_state(
+                    "Once requests are logged, manage their status and record your response here.",
+                    "Log Request",
+                    next_step="Log a request first, then update its status and add response notes as you resolve it.",
+                )
 
 
 # ============================================================================
@@ -1159,6 +1257,10 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
     Risk-rated vendor registry with certification tracking and overdue assessment alerts.
     """
     _render_page_header("Vendor & Processor Management")
+    _render_page_caption(
+        "Your processor register tracks every vendor you share personal data with, their DPA status, "
+        "and transfer location — evidence of your Data Fiduciary obligations under DPDPA Section 8."
+    )
 
     st.markdown(
         '<div style="background: rgba(168,85,247,0.1); border-left: 4px solid #A855F7; '
@@ -1166,8 +1268,8 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
         unsafe_allow_html=True
     )
     st.markdown(
-        'Track all third-party data processors. Data Processing Agreements (DPAs) required for all vendors '
-        'processing personal data per DPDPA Section 4.',
+        'Track all third-party data processors. A Data Fiduciary may only engage a processor under a valid '
+        'contract, and remains accountable for their processing under DPDPA Section 8(2).',
         unsafe_allow_html=True
     )
     st.markdown('</div>', unsafe_allow_html=True)
@@ -1237,7 +1339,16 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
             if overdue_assessments > 0:
                 st.warning(f"⚠️ {overdue_assessments} vendor assessment(s) overdue (>12 months)")
         else:
-            _render_empty_state("No vendors added yet.", "Add Vendor")
+            _render_empty_state(
+                "Your processor register tracks every vendor you share personal data with, their DPA "
+                "status, and transfer location — evidence you'll need for Section 8(2).",
+                "Add Vendor",
+                next_step="Add a vendor, or import detected third parties from a scanner run.",
+                tips=[
+                    "Capture the data categories shared and whether a Data Processing Agreement is signed.",
+                    "Flag cross-border transfers — the Section 16 negative list can restrict certain destinations.",
+                ],
+            )
 
     # TAB 2: Add Vendor (admin/member only)
     if can_edit:
@@ -1427,4 +1538,8 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 with col4:
                     st.metric("Avg Assessment Age (days)", avg_age)
             else:
-                _render_empty_state("No vendor data to display.", "Add Vendor")
+                _render_empty_state(
+                    "The risk dashboard summarizes DPA coverage and assessment status across your processors.",
+                    "Add Vendor",
+                    next_step="Add a vendor first, then return here for risk and DPA-status charts.",
+                )
