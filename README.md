@@ -414,7 +414,8 @@ Core modules:
 
 | Module | What it does |
 | --- | --- |
-| Dashboard | Compliance score, category posture, readiness metrics, activity overview |
+| Dashboard | Command center: compliance score, RoPA/vendor/rights-request/breach/overdue-task counts, and a first-run call-to-action for empty organizations |
+| Import from Scanner | Upload the CLI scanner's `report.json` or `ropa.csv`/`vendors.csv` evidence pack to auto-populate the RoPA registry, vendor register, and task tracker (with duplicate detection) |
 | Gap Assessment | Weighted DPDPA readiness assessment across major compliance categories |
 | RoPA Registry | Records of Processing Activities with purposes, data categories, recipients, retention, and safeguards |
 | Consent Manager | Consent record tracking, DPDPA consent checklist, children's data handling |
