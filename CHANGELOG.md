@@ -12,6 +12,10 @@
 
 ### Fixed
 
+- Secret detection no longer flags template/environment references
+  (`${{ secrets.X }}` in GitHub Actions, `${VAR}`, `{{ var }}`,
+  `process.env`, `os.environ`) as hard-coded credentials - referencing a
+  secret store is correct practice, not exposure.
 - SARIF output: rule names are identifier-style (no spaces) and artifact
   URIs use forward slashes on Windows, per the SARIF 2.1.0 spec.
 - Dashboard HTML escaping now covers single quotes.

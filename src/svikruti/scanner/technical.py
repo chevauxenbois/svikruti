@@ -96,6 +96,14 @@ SECRET_REGEXES = {
     ),
 }
 
+# Template/environment references are NOT hard-coded secrets:
+# ${{ secrets.X }} (GitHub Actions), ${VAR}/$VAR interpolation, {{ var }}
+# (Jinja/Helm), process.env / os.environ lookups. Benchmark: frappe/hrms
+# labeller.yml `repo-token: "${{ secrets.GITHUB_TOKEN }}"` flagged CRITICAL.
+SECRET_TEMPLATE_REFERENCE_RE = re.compile(
+    r"(\$\{\{|\$\{|\{\{|\bprocess\.env\b|\bos\.environ\b|\bENV\[|\bgetenv\b|\bsecrets\.)"
+)
+
 INSECURE_HTTP_RE = re.compile(r"http://([^\s\"'<>()\[\]]+)", re.IGNORECASE)
 
 # Non-risk http:// destinations: local/loopback, documentation placeholders,
@@ -319,25 +327,28 @@ def scan_technical_evidence(repo_path: str) -> List[Evidence]:
             # credentials in test configs are a classic leak), but at MEDIUM:
             # benchmark showed all 31 secret hits on a real ecommerce repo
             # were intentional fake keys in payment-gateway tests.
-            _append_regex_evidence(
-                evidence,
-                seen,
-                rel,
-                path,
-                file_context,
-                index,
-                line,
-                SECRET_REGEXES,
-                kind="secret_exposure",
-                severity="MEDIUM" if is_test_context else "CRITICAL",
-                category="Security safeguards",
-                detail_prefix=(
-                    "Potential hard-coded credential in TEST code (verify it is not a real key)"
-                    if is_test_context
-                    else "Potential hard-coded secret or credential detected"
-                ),
-                recommendation="Remove the secret, rotate it, and use a managed secret store.",
-            )
+            # Template/env references (${{ secrets.X }}, ${VAR}, {{ var }},
+            # process.env, os.environ) are correct practice, not exposure.
+            if not SECRET_TEMPLATE_REFERENCE_RE.search(line):
+                _append_regex_evidence(
+                    evidence,
+                    seen,
+                    rel,
+                    path,
+                    file_context,
+                    index,
+                    line,
+                    SECRET_REGEXES,
+                    kind="secret_exposure",
+                    severity="MEDIUM" if is_test_context else "CRITICAL",
+                    category="Security safeguards",
+                    detail_prefix=(
+                        "Potential hard-coded credential in TEST code (verify it is not a real key)"
+                        if is_test_context
+                        else "Potential hard-coded secret or credential detected"
+                    ),
+                    recommendation="Remove the secret, rotate it, and use a managed secret store.",
+                )
             http_match = None if is_test_context else INSECURE_HTTP_RE.search(line)
             if http_match and not _skip_insecure_http(line, http_match.group(1)):
                 key = f"insecure_transport:{rel}:{index}"
