@@ -234,7 +234,7 @@ _METADATA_FILENAME_PREFIXES = (
     "package.json", "package-lock.json", "setup.py", "setup.cfg",
     "pyproject.toml", "composer.json", "cargo.toml", "authors",
     "contributors", "changelog", "license", "notice", "codeowners",
-    "security.md", "humans.txt", ".mailmap",
+    "security.md", "humans.txt", ".mailmap", "code_of_conduct",
 )
 
 
@@ -245,7 +245,13 @@ def _email_literal_is_fixture(rel: str, line: str) -> bool:
     lowered_line = line.lower()
     if any("@" + domain in lowered_line or "." + domain in lowered_line for domain in EXAMPLE_EMAIL_DOMAINS):
         return True
-    parts = rel.replace("\\", "/").lower().split("/")
+    lowered_rel = rel.replace("\\", "/").lower()
+    # Test files by NAME (test_*.py, *.spec.ts, *.cy.js) count as fixtures
+    # too, not just test directories - benchmark: 100+ fixture emails in
+    # frappe/hrms doctype test files were reported at HIGH.
+    if _is_test_path(lowered_rel):
+        return True
+    parts = lowered_rel.split("/")
     if any(part in FIXTURE_PATH_SEGMENTS for part in parts):
         return True
     return parts[-1].startswith(_METADATA_FILENAME_PREFIXES)
@@ -373,7 +379,7 @@ def _file_context(rel_path: str, text: str) -> str:
     return "application"
 
 
-_TEST_PATH_SEGMENTS = {"test", "tests", "testing", "spec", "specs", "__tests__", "mocks", "fixtures"}
+_TEST_PATH_SEGMENTS = {"test", "tests", "testing", "spec", "specs", "__tests__", "mocks", "fixtures", "cypress", "e2e"}
 
 
 def _is_test_path(lowered_path: str) -> bool:
@@ -387,6 +393,7 @@ def _is_test_path(lowered_path: str) -> bool:
         or stem.endswith("_test")
         or ".spec." in filename
         or ".test." in filename
+        or ".cy." in filename
     )
 
 

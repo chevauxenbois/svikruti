@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-No unreleased changes yet.
+### Detection quality
+
+- Email literals in test files matched by NAME (test_*.py, *.spec.ts,
+  *.cy.js), in cypress/e2e directories, in i18n/locale translation files,
+  and in CODE_OF_CONDUCT files now report at LOW (fixture/UI copy, not
+  exposure). Benchmark: frappe/hrms dropped from 176 to 5 HIGH email
+  literals, knadh/listmonk from 70 to 17 - the survivors are real.
 
 ## 0.8.1 - 2026-07-04
 

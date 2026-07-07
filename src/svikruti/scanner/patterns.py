@@ -142,7 +142,7 @@ AADHAAR_CONTEXT_TOKENS = ("aadhaar", "aadhar", "uid", "uidai", "kyc", "identity_
 # Email literals in tests/fixtures/docs or on reserved example domains are
 # fixture data, not exposure: reported at LOW severity.
 EXAMPLE_EMAIL_DOMAINS = ("example.com", "example.org", "example.net", "example.in", "test.com", "email.com", "localhost", "invalid")
-FIXTURE_PATH_SEGMENTS = {"test", "tests", "testing", "fixture", "fixtures", "spec", "specs", "mock", "mocks", "docs", "doc", "samples", "sample_data", "__tests__"}
+FIXTURE_PATH_SEGMENTS = {"test", "tests", "testing", "fixture", "fixtures", "spec", "specs", "mock", "mocks", "docs", "doc", "samples", "sample_data", "__tests__", "cypress", "e2e", "i18n", "locales", "locale", "translations"}
 
 # Ubiquitous web-plumbing tokens: kept in the Device/Tracking category but
 # downgraded to LOW severity by code.py unless they co-occur with a
