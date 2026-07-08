@@ -15,7 +15,11 @@
 - Sidebar navigation now reruns on click, so the selected page renders
   immediately instead of one click behind (this also made imported RoPA/
   vendor data look "missing" when it was actually present).
-- Verified: all 19 app pages render without error via Streamlit AppTest.
+- Knowledge Base Checklist tab now renders the grouped checklist items
+  (category, item, priority, section reference) instead of dumping raw
+  Python dicts.
+- Verified: all 19 app pages render and all Knowledge Base tabs display
+  clean content (no raw-dict leakage) via Streamlit AppTest.
 
 ### Governance app
 

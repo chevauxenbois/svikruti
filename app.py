@@ -1766,10 +1766,24 @@ def page_knowledge_base():
     with kb_tabs[2]:
         st.subheader("Compliance Checklist")
 
-        checklist_items = list(COMPLIANCE_CHECKLIST.items())[:15]
-
-        for item, description in checklist_items:
-            st.write(f"☐ **{item}:** {description}")
+        for category, items in COMPLIANCE_CHECKLIST.items():
+            st.markdown(f"#### {category}")
+            if isinstance(items, dict):
+                items = [items]
+            for entry in (items or []):
+                if isinstance(entry, dict):
+                    title = entry.get("item", "")
+                    desc = entry.get("description", "")
+                    pri = entry.get("priority", "")
+                    ref = entry.get("section_reference", "")
+                    sdf = " · SDF only" if entry.get("is_sdf_only") else ""
+                    meta = " · ".join(x for x in [pri, ref] if x)
+                    st.markdown(f"- **{title}** — {desc}")
+                    if meta or sdf:
+                        st.caption(f"{meta}{sdf}")
+                else:
+                    st.markdown(f"- {entry}")
+            st.divider()
 
     with kb_tabs[3]:
         st.subheader("FAQs")
