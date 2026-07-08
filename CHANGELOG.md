@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Fixed (app rendering)
+
+- Knowledge Base page crashed (AttributeError) after the legal-content
+  rewrite changed FAQ/TIMELINE to lists and PENALTY_MATRIX/SECTOR_GUIDANCE
+  to new keys; all four tabs now read the current data shapes.
+- Vendor Management and Rights Requests crashed on processors/requests with
+  null date columns; all date parsing now tolerates missing/blank/invalid
+  values via a shared safe-date helper.
+- Settings crashed when an org's industry/size/SDF/compliance value was not
+  in the config enum; selectbox indices now fall back safely.
+- Sidebar navigation now reruns on click, so the selected page renders
+  immediately instead of one click behind (this also made imported RoPA/
+  vendor data look "missing" when it was actually present).
+- Verified: all 19 app pages render without error via Streamlit AppTest.
+
 ### Governance app
 
 - New "Import from Scanner" module: upload the CLI scanner's report.json or

@@ -724,6 +724,7 @@ def render_sidebar():
                 btn_type = "primary" if st.session_state.page == page_name else "secondary"
                 if st.button(label, key=f"nav_{page_name}", use_container_width=True, type=btn_type):
                     st.session_state.page = page_name
+                    st.rerun()
 
         st.markdown("---")
 
@@ -1773,17 +1774,20 @@ def page_knowledge_base():
     with kb_tabs[3]:
         st.subheader("FAQs")
 
-        for question, answer in list(FAQ.items())[:10]:
-            with st.expander(f"Q: {question}", expanded=False):
-                st.write(f"**A:** {answer}")
+        for faq in FAQ[:15]:
+            q = faq.get("question", "") if isinstance(faq, dict) else str(faq)
+            a = faq.get("answer", "") if isinstance(faq, dict) else ""
+            with st.expander(f"Q: {q}", expanded=False):
+                st.write(f"**A:** {a}")
 
     with kb_tabs[4]:
         st.subheader("Penalties")
 
-        for violation, penalty_info in list(PENALTY_MATRIX.items())[:10]:
+        for violation, penalty_info in list(PENALTY_MATRIX.items())[:12]:
             st.write(f"**{violation}**")
-            st.write(f"- ₹{penalty_info.get('amount', 'N/A')}")
-            st.write(f"- Section {penalty_info.get('section', 'N/A')}")
+            st.write(f"- Maximum penalty: {penalty_info.get('max_penalty', penalty_info.get('amount', 'N/A'))}")
+            st.write(f"- {penalty_info.get('section', 'N/A')}")
+            st.caption(penalty_info.get('description', ''))
             st.divider()
 
     with kb_tabs[5]:
@@ -1792,18 +1796,25 @@ def page_knowledge_base():
         sector = st.selectbox("Industry", list(SECTOR_GUIDANCE.keys()))
         guidance = SECTOR_GUIDANCE[sector]
 
-        st.write(guidance.get('overview', ''))
-
-        st.write("**Requirements:**")
-        for req in guidance.get('requirements', []):
+        considerations = guidance.get('special_considerations') or guidance.get('requirements') or []
+        st.write(guidance.get('overview', '') or "**Key considerations:**")
+        for req in considerations:
             st.write(f"- {req}")
+        for extra_key in ('key_obligations', 'recommended_actions'):
+            if guidance.get(extra_key):
+                st.write(f"**{extra_key.replace('_',' ').title()}:**")
+                for item in guidance[extra_key]:
+                    st.write(f"- {item}")
 
     with kb_tabs[6]:
         st.subheader("Timeline")
 
-        for event, date_info in TIMELINE.items():
-            st.write(f"**{event}:** {date_info.get('date', 'N/A')}")
-            st.caption(date_info.get('description', ''))
+        for entry in TIMELINE:
+            if isinstance(entry, dict):
+                st.write(f"**{entry.get('date','')}** — {entry.get('event','')}")
+                st.caption(entry.get('description', ''))
+            else:
+                st.write(f"- {entry}")
 
 # ==================== PAGE: SETTINGS ====================
 def page_settings():
@@ -1834,10 +1845,10 @@ def page_settings():
                 org = st.session_state.db.get_organization(org_id)
 
                 new_name = st.text_input("Name", org["name"])
-                new_industry = st.selectbox("Industry", config.INDUSTRY_TYPES, index=config.INDUSTRY_TYPES.index(org["industry"]))
-                new_size = st.selectbox("Size", config.ORG_SIZES, index=config.ORG_SIZES.index(org["size"]))
-                new_sdf = st.selectbox("SDF Status", config.SDF_STATUSES, index=config.SDF_STATUSES.index(org["sdf_status"]))
-                new_compliance = st.selectbox("Compliance Level", config.COMPLIANCE_LEVELS, index=config.COMPLIANCE_LEVELS.index(org["compliance_level"]))
+                new_industry = st.selectbox("Industry", config.INDUSTRY_TYPES, index=(config.INDUSTRY_TYPES.index(org["industry"]) if org.get("industry") in config.INDUSTRY_TYPES else 0))
+                new_size = st.selectbox("Size", config.ORG_SIZES, index=(config.ORG_SIZES.index(org["size"]) if org.get("size") in config.ORG_SIZES else 0))
+                new_sdf = st.selectbox("SDF Status", config.SDF_STATUSES, index=(config.SDF_STATUSES.index(org["sdf_status"]) if org.get("sdf_status") in config.SDF_STATUSES else 0))
+                new_compliance = st.selectbox("Compliance Level", config.COMPLIANCE_LEVELS, index=(config.COMPLIANCE_LEVELS.index(org["compliance_level"]) if org.get("compliance_level") in config.COMPLIANCE_LEVELS else 0))
 
                 if st.button("Save", use_container_width=True, type="primary"):
                     st.session_state.db.update_organization(

@@ -18,6 +18,17 @@ import plotly.graph_objects as go
 # UTILITY FUNCTIONS
 # ============================================================================
 
+def _safe_dt(value, fallback=None):
+    """Parse an ISO date string, tolerating None/empty/bad values (SQLite nulls)."""
+    from datetime import datetime as _dt
+    if value:
+        try:
+            return _dt.fromisoformat(str(value))
+        except (ValueError, TypeError):
+            pass
+    return fallback if fallback is not None else _dt.now()
+
+
 def _check_role_permission(user_info: Dict, required_roles: List[str]) -> bool:
     """Check if user has permission for an action based on role."""
     return user_info.get("role") in required_roles
@@ -1022,7 +1033,7 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
     open_requests = len([r for r in requests if r.get("status") in ["Received", "Identity Verification", "In Progress"]])
     completed_requests = len([r for r in requests if r.get("status") == "Completed"])
     overdue_requests = len([r for r in requests
-                           if (datetime.now() - datetime.fromisoformat(r.get("due_date", datetime.now().isoformat()))).days > 0
+                           if (datetime.now() - _safe_dt(r.get("due_date"))).days > 0
                            and r.get("status") != "Completed"])
 
     # Metrics Row
@@ -1038,7 +1049,7 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
         st.metric("Overdue", overdue_requests)
     with col5:
         avg_days = sum(
-            [(datetime.now() - datetime.fromisoformat(r.get("created_date", datetime.now().isoformat()))).days
+            [(datetime.now() - _safe_dt(r.get("created_date"))).days
              for r in requests if r.get("status") == "Completed"]
         ) / max(1, completed_requests) if completed_requests else 0
         st.metric("Avg Days to Complete", int(avg_days))
@@ -1058,8 +1069,8 @@ def page_rights_requests(db, org_id: int, user_info: Dict) -> None:
         if requests:
             table_data = []
             for r in requests:
-                created = datetime.fromisoformat(r.get("created_date", datetime.now().isoformat()))
-                due = datetime.fromisoformat(r.get("due_date", (created + timedelta(days=30)).isoformat()))
+                created = _safe_dt(r.get("created_date"))
+                due = _safe_dt(r.get("due_date"), created + timedelta(days=30))
                 days_left = (due - datetime.now()).days
 
                 # Color coding
@@ -1281,8 +1292,14 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
     high_risk = len([v for v in vendors if v.get("risk_level") in ["High", "Critical"]])
     dpas_signed = len([v for v in vendors if v.get("dpa_status") == "Signed"])
     iso_certified = len([v for v in vendors if v.get("iso_27001_certified")])
-    overdue_assessments = len([v for v in vendors
-                              if (datetime.now() - datetime.fromisoformat(v.get("last_assessment_date", datetime.now().isoformat()))).days > 365])
+    def _days_since(value):
+        if not value:
+            return 0
+        try:
+            return (datetime.now() - datetime.fromisoformat(str(value))).days
+        except (ValueError, TypeError):
+            return 0
+    overdue_assessments = len([v for v in vendors if _days_since(v.get("last_assessment_date")) > 365])
 
     # Metrics Row
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -1319,9 +1336,13 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                 dpa = v.get("dpa_status", "Not Started")
                 dpa_icon = {"Signed": "✅", "Expired": "⚠️", "Not Required": "⏭️"}.get(dpa, "❌")
 
-                assess_date = datetime.fromisoformat(v.get("last_assessment_date", datetime.now().isoformat()))
-                days_old = (datetime.now() - assess_date).days
-                assess_flag = "⚠️ OVERDUE" if days_old > 365 else f"{days_old}d ago"
+                days_old = _days_since(v.get("last_assessment_date"))
+                if not v.get("last_assessment_date"):
+                    assess_flag = "—"
+                elif days_old > 365:
+                    assess_flag = "⚠️ OVERDUE"
+                else:
+                    assess_flag = f"{days_old}d ago"
 
                 table_data.append({
                     "Vendor": v.get("vendor_name", "")[:25],
@@ -1532,8 +1553,7 @@ def page_vendor_management(db, org_id: int, user_info: Dict) -> None:
                     st.metric("Overdue Assessments", overdue_assessments)
 
                 avg_age = int(sum(
-                    [(datetime.now() - datetime.fromisoformat(v.get("last_assessment_date", datetime.now().isoformat()))).days
-                     for v in vendors]
+                    [_days_since(v.get("last_assessment_date")) for v in vendors]
                 ) / max(1, len(vendors)))
                 with col4:
                     st.metric("Avg Assessment Age (days)", avg_age)
