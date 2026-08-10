@@ -79,7 +79,10 @@ def scan_tree_sitter_evidence(
 
     try:
         parser = get_parser(language)
-        root = parser.parse(text).root_node()
+        source = text.encode("utf-8")
+        root = _attr(parser.parse(source), "root_node")
+        if root is None:
+            raise RuntimeError("tree-sitter returned no root node")
     except Exception as exc:  # pragma: no cover - optional backend path
         return [], None, {"file": rel, "engine": f"tree_sitter.{language}", "error": str(exc)}
 
@@ -88,7 +91,7 @@ def scan_tree_sitter_evidence(
     for node in _walk(root):
         if _kind(node) not in IDENTIFIER_KINDS:
             continue
-        token = _node_text(text, node)
+        token = _node_text(source, node)
         category = _category_for_text(token)
         if not category:
             continue
@@ -135,35 +138,70 @@ def scan_tree_sitter_evidence(
     return evidence, f"tree_sitter.{language}", None
 
 
+
+def _attr(obj: Any, *names: str) -> Any:
+    """Return an attribute whether the binding exposes it as a property or a method.
+
+    py-tree-sitter changed these from methods to properties; supporting both
+    keeps the backend working across binding versions.
+    """
+    for name in names:
+        if not hasattr(obj, name):
+            continue
+        value = getattr(obj, name)
+        if callable(value):
+            try:
+                return value()
+            except TypeError:
+                continue
+        return value
+    return None
+
+
 def _walk(node: Any) -> Iterable[Any]:
     yield node
-    try:
-        count = node.named_child_count()
-    except Exception:
-        return
-    for index in range(count):
-        child = node.named_child(index)
-        if child is not None:
-            yield from _walk(child)
+    children = _attr(node, "named_children")
+    if children is None:
+        count = _attr(node, "named_child_count")
+        if count is None:
+            return
+        children = []
+        for index in range(int(count)):
+            try:
+                child = node.named_child(index)
+            except Exception:
+                break
+            if child is not None:
+                children.append(child)
+    for child in children or []:
+        yield from _walk(child)
 
 
 def _kind(node: Any) -> str:
-    try:
-        return str(node.kind())
-    except Exception:
+    value = _attr(node, "type", "kind")
+    return str(value) if value is not None else ""
+
+
+def _node_text(source: bytes, node: Any) -> str:
+    start = _attr(node, "start_byte")
+    end = _attr(node, "end_byte")
+    if start is None or end is None:
         return ""
-
-
-def _node_text(text: str, node: Any) -> str:
     try:
-        return text[node.start_byte() : node.end_byte()]
+        return source[int(start) : int(end)].decode("utf-8", "replace")
     except Exception:
         return ""
 
 
 def _line_number(node: Any) -> int:
+    point = _attr(node, "start_point", "start_position")
+    if point is None:
+        return 1
+    row = getattr(point, "row", None)
+    if row is None and isinstance(point, (tuple, list)) and point:
+        row = point[0]
     try:
-        return int(node.start_position().row) + 1
+        return int(row) + 1
     except Exception:
         return 1
 
