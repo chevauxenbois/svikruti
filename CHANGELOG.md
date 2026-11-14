@@ -1,5 +1,130 @@
 # Changelog
 
+## 0.9.0 - Privacy as Code
+
+### Added
+
+- `privacy.yaml` manifest: processing activities bound to code paths, with
+  purposes, lawful basis (single or per framework), retention, processors,
+  DPIA reference, logging allowances, policies, time-boxed exceptions and
+  dated attestations. Validation reports every problem at once; unknown keys
+  are warnings.
+- `svikruti init`: generates the manifest from a scan, in sync with the code
+  by construction, with TODO placeholders for what code cannot know.
+- `svikruti check`: reconciles the manifest against scanner evidence.
+  Drift rules D001-D009 (shadow processing, undeclared category, undeclared
+  processor, stale declarations, incomplete records) and policy rules
+  P001-P005 (personal data in logs, forbidden categories, missing DPIA,
+  undocumented transfers, expired exceptions). Exit code 3 on findings at or
+  above `--fail-on` (default high).
+- Framework packs: 24 framework-neutral obligations mapped to DPDPA (Act and
+  Rules 2025), GDPR and ISO/IEC 27701:2025 (with 2019 legacy numbers). Custom
+  packs load from a YAML/JSON path. `svikruti frameworks` lists built-ins.
+- Obligation states: verified, failing, attested, not verified, not
+  applicable. Attestations go stale after `attestation_max_age_days` and never
+  override a failing check.
+- Report pack for `check`: self-contained HTML, Markdown, PR comment, JSON
+  (`svikruti-privacy-check-v1`), SARIF, compliance-matrix CSV and a
+  processing-record CSV verified against code.
+- Stable finding fingerprints (file, detector, normalised line; not line
+  number) on every evidence item and in SARIF `partialFingerprints`.
+- Baselines: `svikruti scan --baseline --fail-on-new`, `svikruti check
+  --baseline`, and `svikruti diff base.json head.json` with a semantic summary
+  (new data categories, new third parties, new logging flows).
+- Processor data flows (`processor_data_flow` evidence): follows a third-party
+  SDK from import to call and reports which data categories are passed to it
+  (direct arguments, constructed clients, endpoint URL constants, one
+  assignment hop; per file). Feeds the evidence graph, RoPA starter, `diff`
+  and the reconciled record. New rule D009: a declared processor receives a
+  category its record does not list. D003 now names the data sent.
+- `svikruti sync [--write] [--prune]`: updates `privacy.yaml` from drift as a
+  reviewable diff (categories, processor stubs and links, processor data,
+  activity stubs for unmapped paths). Text-level edits keep comments; the
+  result is re-parsed and verified before it is offered. YAML flow and block
+  lists and `privacy.json` are supported.
+- `svikruti scan` reconciles `privacy.yaml` automatically (`--manifest`,
+  `--no-manifest`): `privacy_as_code` block in the JSON, a Privacy as Code tab
+  in the HTML report and the dashboard, and `privacy-check/` in the evidence
+  pack. A broken manifest never fails a scan.
+- Framework packs: `iso27701_processor` (Tables A.2/A.3), `lgpd`, `ccpa`.
+  Packs map only obligations the framework has.
+- `release.yml`: tag-driven build, wheel test, build provenance and PyPI
+  trusted publishing (`docs/RELEASING.md`).
+- Cross-file processor flows: a function that passes its own parameter to a
+  vendor call is a wrapper, and calls to it are followed across files (up to
+  three levels) where the caller imports its module or shares its package.
+  Flows count call arguments only, ignore constant configuration pairs and
+  vendor responses, and skip test suites.
+- JSON Schema for the manifest (`svikruti schema`, `docs/privacy.schema.json`)
+  generated from the loader's key sets; `init` writes the editor hint.
+- `.pre-commit-hooks.yaml` with `svikruti-check` and `svikruti-sync`.
+- Governance app: Import from Scanner accepts `privacy.yaml` / `privacy.json`
+  and creates RoPA entries, vendors, and tasks for any TODO.
+- Field-level data inventory (`data-inventory.csv`, `scan --inventory-out`,
+  a section in the check report): table or model, field, category, activity,
+  and whether that category reaches logs or a processor.
+- Stored-field detection for Sequelize, Mongoose, Drizzle and
+  TypeORM/MikroORM models.
+- Processor flows follow instance-held and injected clients
+  (`self.client`, `this.stripe`, typed constructor and function parameters,
+  Java fields, Go struct fields).
+- `svikruti init-github-action --mode check`: pull-request gate that builds
+  its baseline from the base branch, posts a PR comment and uploads SARIF.
+- Worked example `examples/privacy-as-code` (passes), drift scenario
+  `examples/pac-scenarios/refund.js`, sample output
+  `examples/sample-privacy-check`.
+- `tests.yml` workflow running the suite on Python 3.9, 3.11 and 3.13.
+
+### Changed (risk score)
+
+- `risk_score` is now `risk_findings_score` + `risk_exposure_score`. Inventory
+  evidence (a field, form, storage point, third party or processor flow
+  exists) no longer counts as a finding; it feeds a data-exposure component
+  capped at 15, based on medium-or-better confidence categories. Only defects
+  (personal data in logs, secrets, weak crypto, cloud misconfiguration,
+  consent failures) can move a repository into HIGH or CRITICAL. A clean KYC
+  service that stores government IDs now scores LOW instead of HIGH. Scores
+  are not comparable with 0.8.x.
+
+### Changed (detection quality)
+
+- Manual review of every CRITICAL/HIGH defect finding on excalidraw,
+  healthchecks and saleor (44 before, 11 after) drove these fixes:
+  - A log call that had already closed was treated as still open for the
+    `def`, `raise` or call that followed it (bug in the multi-line log
+    detection added earlier in this release).
+  - Record references (`payment.id`, `order_id`, `{"payment_intent":
+    intent.id}`) no longer count as the data they point to, in logs or in
+    processor flows. Identifiers that are personal data (`upi_id`,
+    `device_id`) still count.
+  - Only the last attribute of an access chain is classified:
+    `payment_information.gateway` is a gateway name.
+  - Emails in documentation, author/licence lines and placeholders
+    (`you@yourdomain.com`, `a@b.com`) are LOW.
+  - A comment that mentions SHA-1 or MD5 is not a weak-crypto finding.
+  - References to a secret held elsewhere (`"env(VAR)"`, `<your-api-key>`,
+    `vault://`, `changeme`) are not hard-coded secrets.
+- Role and system mailboxes (`privacy@`, `support@`, `noreply@`, `bot@`) are
+  reported at LOW instead of HIGH.
+- Dependency lock files are no longer scanned (integrity hashes matched
+  Aadhaar-format literals; package names matched vendors).
+
+- Python log-sink detection now inspects the arguments of the logging call
+  (names, attributes, subscript keys, f-string expressions, one assignment
+  hop for whole-variable logging). Previously every category mentioned
+  anywhere in a function containing a log statement was flagged, so
+  `logger.info("created id=%s", user.id)` in a KYC handler was CRITICAL.
+- Line-level `logging_risk` no longer fires because a log statement sits on a
+  neighbouring line. Arguments of a multi-line log call are still detected.
+- A personal-data word inside a log message string ("could not send email")
+  is no longer a logging finding in any language; interpolated expressions
+  (f-strings, `${}`, `#{}`, `$var`) still are.
+- `privacy.yaml` and privacy-check outputs are excluded from scanning.
+
+### Dependencies
+
+- PyYAML is now a core dependency (manifest and framework packs).
+
 ## Unreleased
 
 ### Fixed (app rendering)

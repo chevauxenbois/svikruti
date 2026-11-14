@@ -1,0 +1,84 @@
+id: gdpr
+name: EU General Data Protection Regulation
+short_name: GDPR
+version: "Regulation (EU) 2016/679"
+verified: "2026-11-13"
+source: https://eur-lex.europa.eu/eli/reg/2016/679/oj
+terms: {controller: controller, processor: processor, subject: data subject, record: record of processing activities}
+legal_bases: [consent, contract, legal_obligation, vital_interests, public_task, legitimate_interests]
+notes: >
+  Article references point to the obligation a check supports. A passing check is
+  engineering evidence towards that article, never a finding of compliance.
+controls:
+  OBL-01:
+    - {ref: "Art. 30(1)", title: "Records of processing activities"}
+    - {ref: "Art. 5(2)", title: "Accountability"}
+  OBL-02:
+    - {ref: "Art. 5(1)(b)", title: "Purpose limitation"}
+    - {ref: "Art. 30(1)(b)", title: "Purposes of the processing recorded"}
+  OBL-03:
+    - {ref: "Art. 6(1)", title: "Lawfulness of processing"}
+    - {ref: "Art. 9(2)", title: "Condition for special categories, where they are processed"}
+  OBL-04:
+    - {ref: "Art. 5(1)(e)", title: "Storage limitation"}
+    - {ref: "Art. 30(1)(f)", title: "Envisaged time limits for erasure"}
+  OBL-05:
+    - {ref: "Art. 5(1)(c)", title: "Data minimisation"}
+    - {ref: "Art. 25(2)", title: "Data protection by default"}
+  OBL-06:
+    - {ref: "Art. 5(1)(c)", title: "Data minimisation"}
+    - {ref: "Art. 5(1)(f)", title: "Integrity and confidentiality"}
+    - {ref: "Art. 32(1)", title: "Security of processing"}
+  OBL-07:
+    - {ref: "Art. 13", title: "Information to be provided where data are collected from the data subject"}
+    - {ref: "Art. 14", title: "Information where data have not been obtained from the data subject"}
+    - {ref: "Art. 5(1)(a)", title: "Lawfulness, fairness and transparency"}
+  OBL-08:
+    - {ref: "Art. 28(1)", title: "Processors providing sufficient guarantees"}
+    - {ref: "Art. 28(3)", title: "Processing by a processor governed by a contract"}
+    - {ref: "Art. 30(1)(d)", title: "Categories of recipients recorded"}
+  OBL-09:
+    - {ref: "Art. 44", title: "General principle for transfers"}
+    - {ref: "Art. 46", title: "Transfers subject to appropriate safeguards"}
+    - {ref: "Art. 30(1)(e)", title: "Transfers to third countries recorded"}
+  OBL-10:
+    - {ref: "Art. 35(1)", title: "Data protection impact assessment"}
+    - {ref: "Art. 35(3)(b)", title: "DPIA for large-scale special category processing"}
+  OBL-11:
+    - {ref: "Art. 8", title: "Conditions applicable to child's consent"}
+  OBL-12:
+    - {ref: "Art. 32(1)(a)", title: "Pseudonymisation and encryption of personal data"}
+    - {ref: "Art. 5(1)(f)", title: "Integrity and confidentiality"}
+  OBL-13:
+    - {ref: "Art. 32(1)(a)", title: "Pseudonymisation and encryption of personal data"}
+  OBL-14:
+    - {ref: "Art. 32(1)(b)", title: "Ongoing confidentiality of processing systems"}
+  OBL-15:
+    - {ref: "Art. 32(1)(d)", title: "Regularly testing and evaluating security measures"}
+  OBL-16:
+    - {ref: "Art. 32(1)(b)", title: "Ongoing confidentiality, integrity, availability and resilience"}
+    - {ref: "Art. 33(1)", title: "Becoming aware of a personal data breach"}
+  OBL-17:
+    - {ref: "Art. 33", title: "Notification of a personal data breach to the supervisory authority"}
+    - {ref: "Art. 34", title: "Communication of a breach to the data subject"}
+  OBL-18:
+    - {ref: "Art. 32(1)(c)", title: "Ability to restore availability and access in a timely manner"}
+  OBL-19:
+    - {ref: "Art. 25(1)", title: "Data protection by design"}
+    - {ref: "Art. 32(1)(b)", title: "Ongoing confidentiality of processing systems"}
+  OBL-20:
+    - {ref: "Art. 6(1)(a)", title: "Consent as lawful basis"}
+    - {ref: "Art. 7", title: "Conditions for consent"}
+    - {ref: "Directive 2002/58/EC Art. 5(3)", title: "Storing or accessing information on terminal equipment (ePrivacy)"}
+  OBL-21:
+    - {ref: "Art. 12(3)", title: "Responding to data subject requests within one month"}
+    - {ref: "Arts. 15-22", title: "Rights of the data subject"}
+  OBL-22:
+    - {ref: "Art. 7(1)", title: "Demonstrating that consent was given"}
+    - {ref: "Art. 7(3)", title: "Withdrawal of consent as easy as giving it"}
+  OBL-23:
+    - {ref: "Art. 13(1)(a)-(b)", title: "Identity and contact details of the controller and DPO"}
+    - {ref: "Arts. 37-39", title: "Data protection officer, where designation is required"}
+  OBL-24:
+    - {ref: "Art. 33(1)", title: "Notification within 72 hours"}
+    - {ref: "Art. 33(5)", title: "Documenting personal data breaches"}

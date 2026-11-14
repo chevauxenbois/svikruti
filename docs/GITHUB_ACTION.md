@@ -115,3 +115,25 @@ detection, monitoring, incident response, backup, and impact mapping.
 For private repositories, review the generated report before sharing it outside
 the organization because it may contain file names, line numbers, and inferred
 data categories.
+
+## Privacy-as-code gate
+
+The workflow above publishes evidence. To block pull requests that make the
+code and `privacy.yaml` disagree, generate the gate workflow:
+
+```bash
+svikruti init-github-action --mode check
+```
+
+It writes `.github/workflows/svikruti-privacy-check.yml`, which:
+
+1. checks the base branch out into a worktree and runs `svikruti check` there
+   to produce a baseline;
+2. runs `svikruti check --baseline ... --fail-on high` on the pull request, so
+   only drift the pull request introduces can fail it;
+3. writes the verdict to the job summary and a pull-request comment;
+4. uploads `privacy-check.sarif` to code scanning and the report pack as an
+   artifact.
+
+Exit code 3 means the gate failed, 2 means the manifest is invalid. See
+[PRIVACY_AS_CODE.md](PRIVACY_AS_CODE.md) for rules and manifest reference.

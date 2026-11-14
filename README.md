@@ -1,16 +1,63 @@
 # Svikruti
 
-India-first open-source privacy engineering workbench for DPDPA readiness,
-engineering evidence, technical safeguards, consent governance, breach
-readiness, and review artifacts.
+Open-source privacy as code. The repository is the source of truth: Svikruti
+reads what your code does with personal data, reconciles it against a
+reviewed `privacy.yaml`, and fails the pull request when the two drift apart.
+One scan maps to DPDPA, GDPR and ISO/IEC 27701.
 
 [![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
-[![DPDPA](https://img.shields.io/badge/India-DPDPA_2023-047a78)](https://www.meity.gov.in/)
+[![Frameworks](https://img.shields.io/badge/Frameworks-DPDPA_·_GDPR_·_ISO_27701-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
 [![AI Optional](https://img.shields.io/badge/AI-optional_BYOK-6f42c1)](#ai-co-pilot)
 
 **Project page:** [chevauxenbois.com/projects/svikruti](https://chevauxenbois.com/projects/svikruti/)  
 **Launch site:** [chevauxenbois.github.io/svikruti](https://chevauxenbois.github.io/svikruti/)
+
+## Privacy as Code
+
+Privacy programmes run on documents: policies, a record of processing, DPIAs.
+Production runs code. Svikruti closes the gap in three commands.
+
+```bash
+svikruti init --repo .     # write privacy.yaml from what the code does today
+svikruti check --repo .    # reconcile code against the manifest; exit 3 on drift
+svikruti sync --repo .     # show the manifest changes the code now needs
+svikruti init-github-action --mode check   # gate every pull request
+```
+
+```text
+$ svikruti check --repo . --privacy-file privacy-notice.md
+  HIGH  D002  Activity 'repayments' processes Location data in code, but the record does not declare it.  [services/payments/refund.js:7]
+  HIGH  D003  Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor.  [services/payments/refund.js:9]
+  HIGH  P001  Contact data is written to logs in activity 'repayments' (1 location(s)).                   [services/payments/refund.js:8]
+  DPDPA      14/23 verified, 4 attested, 5 failing, 0 not verified
+  GDPR       14/23 verified, 4 attested, 5 failing, 0 not verified
+  ISO 27701  14/23 verified, 4 attested, 5 failing, 0 not verified
+Privacy gate failed: 3 finding(s) at HIGH or above
+```
+
+- **Drift detection.** Undeclared data categories, undeclared processors,
+  code outside any declared activity, stale declarations, incomplete records.
+- **Processor data flows.** Not just "this code uses Mixpanel" but which data
+  categories are passed to it, followed through wrapper functions across
+  files and checked against the processor's record.
+- **Policy as code.** No personal data in logs, forbidden categories, DPIA
+  required for high-risk data, transfer allow-list, time-boxed exceptions.
+- **One evidence base, many frameworks.** 24 framework-neutral obligations
+  mapped to DPDPA (Act and Rules 2025), GDPR, ISO/IEC 27701:2025 (controller
+  and processor), LGPD and CCPA/CPRA. A new framework is one YAML file.
+- **Honest states.** Verified, failing, attested, not verified, not
+  applicable. An attestation expires, and never overrides failing code.
+- **Self-maintaining.** `svikruti sync` turns drift into a reviewable patch
+  to `privacy.yaml`; what needs a person stays a TODO.
+- **Adoptable.** Baselines and line-independent fingerprints mean only what a
+  pull request introduces can block it.
+
+Worked example: [examples/privacy-as-code](examples/privacy-as-code) ·
+sample report: [examples/sample-privacy-check](examples/sample-privacy-check) ·
+full guide: [docs/PRIVACY_AS_CODE.md](docs/PRIVACY_AS_CODE.md)
+
+## What Else Is In The Box
 
 Svikruti helps teams answer one practical question:
 
@@ -283,6 +330,24 @@ OSS projects (July 2026, default install, no AI):
 | [excalidraw](https://github.com/excalidraw/excalidraw) | Drawing tool (almost no PII) | 750 | 37 MEDIUM | 6 | 1/6 (all 6 human-reviewed) |
 | [healthchecks](https://github.com/healthchecks/healthchecks) | Uptime alerting (real contact data) | 952 | 42 MEDIUM | 141 | ~84% (44 sampled) |
 | [saleor](https://github.com/saleor/saleor) | E-commerce platform (heavy PII) | 4,528 | 60 HIGH | 678 | ~80% (41 sampled) |
+
+Those figures are from 0.8.x. For 0.9.0 the same repositories were re-scanned
+and every CRITICAL and HIGH defect finding was read by hand (November 2026,
+default install). The review found a bug in multi-line log detection and
+three classes of false positive (record ids treated as data, placeholder and
+documentation emails, weak-hash names in comments). After fixing them:
+
+| Repository | Files | Risk score | CRITICAL+HIGH defects before the fixes | After | What remains |
+| --- | --- | --- | --- | --- | --- |
+| excalidraw | 838 | 25 MEDIUM | 4 | 1 | A search API key in docs config |
+| healthchecks | 958 | 23 LOW | 11 | 8 | SHA-1 hashing (6), wildcard CORS (2) |
+| saleor | 4,638 | 23 LOW | 29 | 2 | MD5 used for cache keys (2) |
+
+All 11 remaining findings match what the code does; whether SHA-1 or MD5 is
+acceptable in each place is a judgement call. Recall was not measured: a grep
+for logging calls that mention personal fields in saleor found none the
+scanner missed, which is weak evidence, not a recall figure. The risk score
+separates defects from data exposure and is not comparable with 0.8.x.
 
 How to read this:
 
@@ -660,10 +725,14 @@ Recent accuracy work makes findings harder to fake and easier to trust:
   they can escalate a scan to CRITICAL.
 - Heuristic parser engines report `medium` confidence; only Python AST
   evidence is reported as `high`.
-- The risk score is severity-tiered and bounded: each severity level saturates
-  independently, so volume of MEDIUM/LOW inventory findings can never push a
-  repository into the CRITICAL band - only real critical evidence can
-  and cross-layer deduplication, and excludes positive (passing) evidence.
+- The risk score separates what is wrong from what is merely sensitive.
+  Findings (personal data in logs, secrets, weak crypto, public storage,
+  tracking before consent) are severity-tiered and bounded. Inventory
+  evidence (a field, a form, a processor exists) only adds a data-exposure
+  component capped at 15, so a well-run service that stores government IDs
+  scores LOW and only real defects can push a repository into HIGH or
+  CRITICAL. The score uses cross-layer deduplication and excludes positive
+  (passing) evidence.
   Bands: LOW 0-24, MEDIUM 25-49, HIGH 50-74, CRITICAL 75-100.
 
 ## Project Structure

@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Svikruti privacy-as-code",
+          "version": "0.9.0",
+          "informationUri": "https://github.com/chevauxenbois/svikruti",
+          "rules": [
+            {
+              "id": "svikruti.pac.D001",
+              "name": "svikruti_pac_D001",
+              "shortDescription": {
+                "text": "Personal data processed outside any declared activity"
+              },
+              "help": {
+                "text": "Add the path to an existing processing activity in privacy.yaml, or declare a new one."
+              }
+            },
+            {
+              "id": "svikruti.pac.D002",
+              "name": "svikruti_pac_D002",
+              "shortDescription": {
+                "text": "Undeclared personal data category"
+              },
+              "help": {
+                "text": "Declare the category on the activity (and update the notice and legal basis), or remove the data from the code."
+              }
+            },
+            {
+              "id": "svikruti.pac.D003",
+              "name": "svikruti_pac_D003",
+              "shortDescription": {
+                "text": "Undeclared processor / third party"
+              },
+              "help": {
+                "text": "Add the processor with country and contract reference, link it to the activity, or remove the integration."
+              }
+            },
+            {
+              "id": "svikruti.pac.D004",
+              "name": "svikruti_pac_D004",
+              "shortDescription": {
+                "text": "Declared category no longer found in code"
+              },
+              "help": {
+                "text": "Remove the stale category from the activity so the record and the notice do not overstate processing."
+              }
+            },
+            {
+              "id": "svikruti.pac.D005",
+              "name": "svikruti_pac_D005",
+              "shortDescription": {
+                "text": "Declared processor no longer found in code"
+              },
+              "help": {
+                "text": "Confirm the integration is gone, then remove the processor and close out the contract and data return."
+              }
+            },
+            {
+              "id": "svikruti.pac.D006",
+              "name": "svikruti_pac_D006",
+              "shortDescription": {
+                "text": "Processing record is incomplete"
+              },
+              "help": {
+                "text": "Fill in the missing fields; code cannot tell you purpose, lawful basis or retention."
+              }
+            },
+            {
+              "id": "svikruti.pac.D007",
+              "name": "svikruti_pac_D007",
+              "shortDescription": {
+                "text": "Processor record is incomplete"
+              },
+              "help": {
+                "text": "Record the processor's country, purpose and contract / DPA reference."
+              }
+            },
+            {
+              "id": "svikruti.pac.D009",
+              "name": "svikruti_pac_D009",
+              "shortDescription": {
+                "text": "Processor receives data that is not declared for it"
+              },
+              "help": {
+                "text": "Add the category to the processor's data_categories (and check the contract covers it), or stop sending it."
+              }
+            },
+            {
+              "id": "svikruti.pac.D008",
+              "name": "svikruti_pac_D008",
+              "shortDescription": {
+                "text": "Declared activity matches no code"
+              },
+              "help": {
+                "text": "Fix the path globs after the refactor, or delete the activity if the processing was removed."
+              }
+            },
+            {
+              "id": "svikruti.pac.P001",
+              "name": "svikruti_pac_P001",
+              "shortDescription": {
+                "text": "Personal data written to logs"
+              },
+              "help": {
+                "text": "Remove or mask the field before logging, or record a time-boxed exception with a reason."
+              }
+            },
+            {
+              "id": "svikruti.pac.P002",
+              "name": "svikruti_pac_P002",
+              "shortDescription": {
+                "text": "Forbidden data category present"
+              },
+              "help": {
+                "text": "Remove the data: organisational policy says this category must not be processed here."
+              }
+            },
+            {
+              "id": "svikruti.pac.P003",
+              "name": "svikruti_pac_P003",
+              "shortDescription": {
+                "text": "High-risk processing without an impact assessment"
+              },
+              "help": {
+                "text": "Complete a DPIA and reference it in the activity's `dpia` field."
+              }
+            },
+            {
+              "id": "svikruti.pac.P004",
+              "name": "svikruti_pac_P004",
+              "shortDescription": {
+                "text": "Cross-border transfer without a recorded mechanism"
+              },
+              "help": {
+                "text": "Record the transfer mechanism on the processor, or add the country to allowed_transfer_countries after review."
+              }
+            },
+            {
+              "id": "svikruti.pac.P005",
+              "name": "svikruti_pac_P005",
+              "shortDescription": {
+                "text": "Exception has expired"
+              },
+              "help": {
+                "text": "Fix the underlying finding or renew the exception with a new review date."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "svikruti.pac.D002",
+          "level": "error",
+          "message": {
+            "text": "Activity 'repayments' processes Location data in code, but the record does not declare it. Fix: Declare the category on the activity (and update the notice and legal basis), or remove the data from the code."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "svikrutiFinding/v1": "svkd:136e6153e490c2f21bcb"
+          },
+          "properties": {
+            "severity": "HIGH",
+            "activity": "repayments",
+            "category": "location"
+          }
+        },
+        {
+          "ruleId": "svikruti.pac.D003",
+          "level": "error",
+          "message": {
+            "text": "Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor. Fix: Add the processor with country and contract reference, link it to the activity, or remove the integration."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "svikrutiFinding/v1": "svkd:18eb6630a9e087cc8ac7"
+          },
+          "properties": {
+            "severity": "HIGH",
+            "activity": "repayments",
+            "category": ""
+          }
+        },
+        {
+          "ruleId": "svikruti.pac.P001",
+          "level": "error",
+          "message": {
+            "text": "Contact data is written to logs in activity 'repayments' (1 location(s)). Fix: Remove or mask the field before logging, or record a time-boxed exception with a reason."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "svikrutiFinding/v1": "svkd:35069d7f9df3e044abd1"
+          },
+          "properties": {
+            "severity": "HIGH",
+            "activity": "repayments",
+            "category": "contact"
+          }
+        }
+      ]
+    }
+  ]
+}

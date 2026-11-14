@@ -1,10 +1,23 @@
 # Svikruti Roadmap
 
-Svikruti is an open-source privacy engineering workbench for DPDPA readiness.
+Svikruti is open-source privacy as code: the repository is the source of truth,
+reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 27701.
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.8.1
+## Current Release: 0.9.0
+
+- Privacy as code: `privacy.yaml` manifest, `svikruti init` / `check` / `diff`,
+  drift and policy rules, framework packs (DPDPA, GDPR, ISO/IEC 27701:2025),
+  baselines with stable fingerprints, a pull-request gate, `svikruti sync`,
+  and processor data flows (which data reaches which third party, followed
+  through wrapper functions across files).
+- Risk score split into defects and data exposure.
+- Manifest JSON Schema, pre-commit hooks, and manifest import in the
+  governance app.
+- Six framework packs: DPDPA, GDPR, ISO/IEC 27701 controller and processor,
+  LGPD, CCPA/CPRA.
+- Argument-level log-sink detection.
 
 - Local CLI scanner for repository, website, privacy notice, browser-consent,
   vendor, and security-evidence signals.
@@ -25,6 +38,14 @@ review-ready artifacts over generic compliance checklists.
 
 ## Near Term
 
+- More framework packs: SOC 2 Privacy criteria, RBI/SEBI sector overlays,
+  Singapore PDPA, UK GDPR deltas.
+- Deeper data flow: dependency injection, queues and event buses between the
+  caller and the processor (wrapper functions are already followed across
+  files).
+- Measure recall: seed known leaks into real repositories and count what the
+  scanner finds (precision was hand-reviewed for 0.9.0; recall was not).
+
 - Improve JavaScript/TypeScript, Java, Go, Ruby, and PHP semantic coverage with
   deeper tree-sitter packs.
 - Add more framework-specific detectors for Django, FastAPI, Express, Next.js,
@@ -35,16 +56,14 @@ review-ready artifacts over generic compliance checklists.
   (partially done: imported secret-scanner runs are redacted and imported
   messages truncated before report generation).
 - Improve report screenshots and launch demo artifacts.
-- Add signed release artifacts and PyPI publishing.
+- First PyPI release (the tag-driven workflow with build provenance is in place).
 - Add more realistic examples for fintech, healthcare, ecommerce, SaaS, BFSI,
   and edtech.
 
 ## Product Direction
 
-- CI release gates for privacy evidence regressions.
 - Consent journey capture with richer browser evidence.
 - Cloud evidence imports from common security and posture tools.
-- Evidence diffing between scans.
 - Hosted/self-hosted evidence vault with org dashboards.
 - Jira, Linear, GitHub Issues, Slack, and GRC integrations.
 - SSO, RBAC, audit logs, approvals, and exception workflows.

@@ -17,6 +17,7 @@ from svikruti.reports.exports import (
     write_github_action,
     write_issues_markdown,
     write_notice_patch,
+    write_privacy_check_action,
     write_ropa_csv,
     write_vendor_csv,
 )
@@ -26,16 +27,21 @@ from svikruti.reports.sarif import write_sarif
 from svikruti.scanner.runner import run_scan
 from svikruti.store import default_db_path, save_scan_result
 
+EXIT_OK, EXIT_ERROR, EXIT_USAGE, EXIT_GATE = 0, 1, 2, 3
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="svikruti",
-        description="Svikruti PrivacyOps: open-source DPDPA evidence scanner.",
+        description=(
+            "Svikruti: open-source privacy-as-code. Scan code for privacy evidence, reconcile it against "
+            "privacy.yaml, and map the result to DPDPA, GDPR and ISO/IEC 27701."
+        ),
     )
     parser.add_argument("--version", action="version", version=f"svikruti {__version__}")
 
     subparsers = parser.add_subparsers(dest="command")
-    scan = subparsers.add_parser("scan", help="Scan a repository and/or website for DPDPA privacy evidence.")
+    scan = subparsers.add_parser("scan", help="Scan a repository and/or website for privacy evidence.")
     scan.add_argument("--repo", help="Path to local repository to scan.")
     scan.add_argument("--url", help="Public website URL to scan.")
     scan.add_argument("--privacy-url", help="Explicit privacy notice URL for code-to-notice comparison.")
@@ -58,13 +64,14 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--breach-out", help="Optional breach-readiness Markdown output path.")
     scan.add_argument("--notice-patch-out", help="Optional privacy notice patch draft Markdown output path.")
     scan.add_argument("--issues-out", help="Optional copy-ready GitHub/Jira issue pack Markdown output path.")
+    scan.add_argument("--inventory-out", help="Optional field-level data inventory CSV (table/model, field, category, location).")
     scan.add_argument(
         "--evidence-pack",
         metavar="DIR",
         help=(
             "Write the full artifact set into DIR with default names (report.html, report.json, "
             "report.sarif, ropa.csv, actions.csv, vendors.csv, controls.csv, breach-readiness.md, "
-            "notice-patch.md, fix-pack.md). Explicit individual output flags override the matching pack file. "
+            "notice-patch.md, fix-pack.md, data-inventory.csv). Explicit individual output flags override the matching pack file. "
             "DIR is created if missing."
         ),
     )
@@ -98,9 +105,70 @@ def build_parser() -> argparse.ArgumentParser:
             "the CRITICAL band requires sustained critical evidence)."
         ),
     )
+    scan.add_argument(
+        "--manifest",
+        help="privacy.yaml to reconcile against this scan (default: auto-detected in --repo). The result is added to the report, JSON and evidence pack.",
+    )
+    scan.add_argument("--no-manifest", action="store_true", help="Do not reconcile a privacy.yaml even if the repository has one.")
+    scan.add_argument("--baseline", help="Previous Svikruti JSON report. Findings already in it are treated as existing backlog.")
+    scan.add_argument(
+        "--fail-on-new",
+        choices=["low", "medium", "high", "critical"],
+        help="With --baseline: exit with code 3 only when this scan introduces a finding at this severity or higher.",
+    )
+    scan.add_argument("--diff-out", help="With --baseline: write the new/resolved findings diff as Markdown.")
+
+    init_manifest = subparsers.add_parser("init", help="Generate privacy.yaml from what the code does today.")
+    init_manifest.add_argument("--repo", default=".", help="Repository to scan (default: current directory).")
+    init_manifest.add_argument("--out", help="Manifest path to write (default: <repo>/privacy.yaml).")
+    init_manifest.add_argument("--frameworks", default="", help="Comma-separated framework ids (default: dpdpa,gdpr,iso27701).")
+    init_manifest.add_argument("--organization", default="TODO", help="Organisation name to record.")
+    init_manifest.add_argument("--force", action="store_true", help="Overwrite an existing manifest.")
+
+    check = subparsers.add_parser("check", help="Reconcile privacy.yaml against the code and gate on drift.")
+    check.add_argument("--repo", default=".", help="Repository to scan (default: current directory).")
+    check.add_argument("--manifest", help="Manifest path (default: privacy.yaml in the repo).")
+    check.add_argument("--framework", action="append", default=[], help="Framework id or custom pack path. Repeatable. Overrides the manifest's list.")
+    check.add_argument("--url", help="Public website URL to include in the scan.")
+    check.add_argument("--privacy-url", help="Privacy notice URL for code-to-notice comparison.")
+    check.add_argument("--privacy-file", help="Local privacy notice file for code-to-notice comparison.")
+    check.add_argument("--browser-consent", action="store_true", help="Test the consent journey with Playwright (needs --url).")
+    check.add_argument("--security-evidence", action="append", default=[], help="SARIF/Trivy/Gitleaks/OSV output to import. Repeatable.")
+    check.add_argument("--baseline", help="Previous privacy-check.json. Only findings not in it can fail the gate.")
+    check.add_argument(
+        "--fail-on",
+        default="high",
+        choices=["low", "medium", "high", "critical", "none"],
+        help="Exit with code 3 when an open finding reaches this severity (default: high). 'none' reports only.",
+    )
+    check.add_argument("--out-dir", default="svikruti-check", help="Directory for the report pack (default: svikruti-check).")
+    check.add_argument("--scan-json-out", help="Also write the underlying scan report JSON (usable as a scan --baseline).")
+
+    sync = subparsers.add_parser("sync", help="Update privacy.yaml from the code: prints a diff, or writes it with --write.")
+    sync.add_argument("--repo", default=".", help="Repository to scan (default: current directory).")
+    sync.add_argument("--manifest", help="Manifest path (default: privacy.yaml in the repo).")
+    sync.add_argument("--write", action="store_true", help="Apply the changes to the manifest instead of printing a diff.")
+    sync.add_argument("--prune", action="store_true", help="Also remove declared categories and processors no longer found in code.")
+
+    diff = subparsers.add_parser("diff", help="Compare two Svikruti JSON scan reports.")
+    diff.add_argument("base", help="Baseline report JSON (for example from the main branch).")
+    diff.add_argument("head", help="New report JSON (for example from the pull request).")
+    diff.add_argument("--md-out", help="Write the diff as Markdown.")
+    diff.add_argument("--json-out", help="Write the diff as JSON.")
+    diff.add_argument("--fail-on-new", choices=["low", "medium", "high", "critical"], help="Exit with code 3 when a new finding reaches this severity.")
+
+    subparsers.add_parser("frameworks", help="List built-in framework packs.")
+    schema = subparsers.add_parser("schema", help="Print the JSON Schema for privacy.yaml (editor completion and validation).")
+    schema.add_argument("--out", help="Write the schema to a file instead of stdout.")
 
     init = subparsers.add_parser("init-github-action", help="Create a Svikruti GitHub Actions workflow.")
-    init.add_argument("--out", default=".github/workflows/svikruti.yml", help="Workflow file path to write.")
+    init.add_argument("--out", help="Workflow file path to write (default depends on --mode).")
+    init.add_argument(
+        "--mode",
+        choices=["scan", "check"],
+        default="scan",
+        help="scan: evidence-report workflow. check: privacy-as-code gate that reconciles privacy.yaml on every pull request.",
+    )
 
     dashboard = subparsers.add_parser("dashboard", help="Launch the interactive local Svikruti control room.")
     dashboard.add_argument("--db", default=str(default_db_path()), help="SQLite scan history DB path.")
@@ -115,8 +183,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "init-github-action":
+        if args.out is None:
+            args.out = ".github/workflows/svikruti-privacy-check.yml" if args.mode == "check" else ".github/workflows/svikruti.yml"
         try:
-            write_github_action(args.out)
+            (write_privacy_check_action if args.mode == "check" else write_github_action)(args.out)
         except Exception as exc:
             print(f"svikruti init-github-action failed: {exc}", file=sys.stderr)
             return 1
@@ -126,10 +196,36 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "dashboard":
         return _launch_dashboard(args.db, args.report, args.port, args.host)
 
+    if args.command == "init":
+        return _cmd_init(args)
+    if args.command == "check":
+        return _cmd_check(args)
+    if args.command == "diff":
+        return _cmd_diff(args)
+    if args.command == "sync":
+        return _cmd_sync(args)
+    if args.command == "frameworks":
+        return _cmd_frameworks()
+    if args.command == "schema":
+        import json
+
+        from svikruti.pac.schema import manifest_schema
+
+        text = json.dumps(manifest_schema(), indent=2) + "\n"
+        if args.out:
+            Path(args.out).write_text(text, encoding="utf-8")
+            print(f"Schema written: {Path(args.out).resolve()}")
+        else:
+            print(text, end="")
+        return EXIT_OK
+
     if args.command != "scan":
         parser.print_help()
         return 2
 
+    if args.fail_on_new and not args.baseline:
+        print("svikruti scan: --fail-on-new requires --baseline", file=sys.stderr)
+        return EXIT_USAGE
     pack_files = _apply_evidence_pack(args)
     if args.out is None:
         args.out = "svikruti-report.html"
@@ -147,6 +243,22 @@ def main(argv: list[str] | None = None) -> int:
             ai_provider=args.ai_provider,
             ai_model=args.ai_model,
         )
+        check_result = None
+        manifest_path = None
+        if not args.no_manifest:
+            from svikruti.pac.manifest import find_manifest
+
+            manifest_path = Path(args.manifest) if args.manifest else find_manifest(args.repo)
+            if args.manifest and not manifest_path.is_file():
+                raise ValueError(f"manifest not found: {args.manifest}")
+        if manifest_path is not None:
+            from svikruti.pac.engine import attach_check
+
+            check_result = attach_check(result, str(manifest_path))
+            if check_result is not None and args.evidence_pack:
+                from svikruti.pac.report import write_check_pack
+
+                write_check_pack(check_result, str(Path(args.evidence_pack) / "privacy-check"), "high")
         output_path = Path(args.out)
         write_html(result, str(output_path))
         if args.json_out:
@@ -167,6 +279,10 @@ def main(argv: list[str] | None = None) -> int:
             write_notice_patch(result, args.notice_patch_out)
         if args.issues_out:
             write_issues_markdown(result, args.issues_out)
+        if args.inventory_out:
+            from svikruti.pac.inventory import build_inventory, write_inventory_csv
+
+            write_inventory_csv(check_result.inventory if check_result is not None else build_inventory(result), args.inventory_out)
         if args.ai_out:
             write_ai_markdown(result, args.ai_out)
         if args.save_history:
@@ -181,13 +297,220 @@ def main(argv: list[str] | None = None) -> int:
         pack_summary = ", ".join(pack_files) if pack_files else "none (all outputs overridden by explicit flags)"
         print(f"Svikruti evidence pack written: {Path(args.evidence_pack).resolve()} [{pack_summary}]")
     print(
-        f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100), "
+        f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100 = "
+        f"{result.summary.risk_findings_score} findings + {result.summary.risk_exposure_score} data exposure), "
         f"evidence items: {len(result.evidence)}, files scanned: {result.summary.files_scanned}"
     )
+    if result.privacy_as_code.get("error"):
+        print(f"warning: privacy manifest not reconciled: {result.privacy_as_code['error']}", file=sys.stderr)
+    elif check_result is not None:
+        open_count = len(check_result.open_findings())
+        print(
+            f"Privacy manifest {manifest_path}: {open_count} open drift/policy finding(s). "
+            "`svikruti check` gates on them; `svikruti sync` updates the manifest."
+        )
+    exit_code = EXIT_OK
+    if args.baseline:
+        from svikruti.pac.fingerprint import diff_markdown, diff_reports, load_report, new_at_or_above
+
+        try:
+            diff = diff_reports(load_report(args.baseline), result.to_dict())
+        except Exception as exc:
+            print(f"svikruti scan: could not read baseline: {exc}", file=sys.stderr)
+            return EXIT_ERROR
+        if args.diff_out:
+            Path(args.diff_out).write_text(diff_markdown(diff), encoding="utf-8")
+        print(f"Against baseline: {len(diff['new'])} new, {len(diff['resolved'])} resolved, {diff['unchanged_count']} unchanged")
+        if args.fail_on_new:
+            blocking = new_at_or_above(diff, args.fail_on_new)
+            if blocking:
+                print(f"New-finding gate failed: {len(blocking)} new finding(s) at {args.fail_on_new.upper()} or above", file=sys.stderr)
+                for item in blocking[:10]:
+                    where = f"{item.get('file')}:{item.get('line')}" if item.get("line") else str(item.get("file") or item.get("source"))
+                    print(f"  {item.get('severity'):8} {where}  {item.get('label')}", file=sys.stderr)
+                exit_code = EXIT_GATE
     if args.fail_on and _reaches_threshold(result.summary.risk_level, args.fail_on):
         print(f"Risk gate failed: {result.summary.risk_level} >= {args.fail_on.upper()}", file=sys.stderr)
-        return 3
-    return 0
+        exit_code = EXIT_GATE
+    return exit_code
+
+
+def _cmd_init(args: argparse.Namespace) -> int:
+    from svikruti.pac.generate import generate_manifest
+    from svikruti.pac.frameworks import PackError, load_packs
+
+    out = Path(args.out) if args.out else Path(args.repo) / "privacy.yaml"
+    if out.exists() and not args.force:
+        print(f"svikruti init: {out} already exists (use --force to overwrite)", file=sys.stderr)
+        return EXIT_USAGE
+    frameworks = [item.strip() for item in args.frameworks.split(",") if item.strip()]
+    try:
+        load_packs(frameworks)
+        result = run_scan(args.repo, None)
+    except PackError as exc:
+        print(f"svikruti init: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    except Exception as exc:
+        print(f"svikruti init failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    text = generate_manifest(result, frameworks or None, args.organization)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    todo = text.count("TODO")
+    print(f"Svikruti manifest written: {out.resolve()}")
+    print(
+        f"Found {len(result.summary.personal_data_categories)} data categor(ies) and {len(result.summary.third_parties)} third part(ies) "
+        f"across {result.summary.files_scanned} files. {todo} TODO field(s) need a human."
+    )
+    print("Next: fill in the TODOs, commit the file, then run `svikruti check`.")
+    return EXIT_OK
+
+
+def _cmd_check(args: argparse.Namespace) -> int:
+    from svikruti.pac.engine import run_check
+    from svikruti.pac.frameworks import PackError
+    from svikruti.pac.manifest import ManifestError, find_manifest, load_manifest
+    from svikruti.pac.report import write_check_pack
+
+    manifest_path = Path(args.manifest) if args.manifest else find_manifest(args.repo)
+    if manifest_path is None:
+        print(f"svikruti check: no privacy.yaml found in {args.repo}. Run `svikruti init` first, or pass --manifest.", file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        manifest = load_manifest(manifest_path)
+    except ManifestError as exc:
+        print(f"svikruti check: invalid manifest {manifest_path}:", file=sys.stderr)
+        for error in exc.errors:
+            print(f"  - {error}", file=sys.stderr)
+        return EXIT_USAGE
+    baseline = None
+    if args.baseline:
+        try:
+            import json
+
+            baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+            if not isinstance(baseline, dict) or "findings" not in baseline:
+                raise ValueError("not a privacy-check.json file (no 'findings' key)")
+        except Exception as exc:
+            print(f"svikruti check: could not read baseline: {exc}", file=sys.stderr)
+            return EXIT_ERROR
+    try:
+        scan = run_scan(
+            args.repo,
+            args.url,
+            privacy_url=args.privacy_url,
+            privacy_file=args.privacy_file,
+            browser_consent=args.browser_consent,
+            security_evidence=args.security_evidence,
+        )
+        result = run_check(scan, manifest, frameworks=args.framework or None, baseline=baseline)
+        files = write_check_pack(result, args.out_dir, args.fail_on)
+        if args.scan_json_out:
+            write_json(scan, args.scan_json_out)
+    except PackError as exc:
+        print(f"svikruti check: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    except Exception as exc:
+        print(f"svikruti check failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+
+    for warning in manifest.warnings:
+        print(f"warning: {warning}", file=sys.stderr)
+    open_findings = result.open_findings()
+    print(f"Svikruti privacy check: {manifest_path} vs {len(result.model.files)} file(s) with personal-data evidence")
+    for finding in open_findings[:20]:
+        marker = " (new)" if baseline is not None and result.is_new(finding) else ""
+        where = finding.refs[0] if finding.refs else "privacy.yaml"
+        print(f"  {finding.severity:8} {finding.rule}{marker}  {finding.detail}  [{where}]")
+    if len(open_findings) > 20:
+        print(f"  ...and {len(open_findings) - 20} more (see {files['markdown']})")
+    for pack in result.packs:
+        summary = result.framework_summary(pack)
+        counts = summary["counts"]
+        print(
+            f"  {summary['short_name']:10} {counts['pass']}/{summary['applicable']} verified, "
+            f"{counts['attested']} attested, {counts['fail']} failing, {counts['manual']} not verified"
+        )
+    print(f"Report pack written: {Path(args.out_dir).resolve()}")
+    if args.fail_on != "none":
+        gating = result.gating_findings(args.fail_on)
+        if gating:
+            scope = "new " if baseline is not None else ""
+            print(f"Privacy gate failed: {len(gating)} {scope}finding(s) at {args.fail_on.upper()} or above", file=sys.stderr)
+            return EXIT_GATE
+    return EXIT_OK
+
+
+def _cmd_sync(args: argparse.Namespace) -> int:
+    from svikruti.pac.engine import run_check
+    from svikruti.pac.manifest import ManifestError, find_manifest, load_manifest
+    from svikruti.pac.sync import SyncError, sync_manifest, unified_diff
+
+    manifest_path = Path(args.manifest) if args.manifest else find_manifest(args.repo)
+    if manifest_path is None:
+        print(f"svikruti sync: no privacy.yaml found in {args.repo}. Run `svikruti init` first.", file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        manifest = load_manifest(manifest_path)
+    except ManifestError as exc:
+        print(f"svikruti sync: invalid manifest {manifest_path}: " + "; ".join(exc.errors), file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        result = run_check(run_scan(args.repo, None), manifest)
+        plan, original, updated = sync_manifest(result, prune=args.prune)
+    except SyncError as exc:
+        print(f"svikruti sync: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    except Exception as exc:
+        print(f"svikruti sync failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    if plan.empty():
+        print("privacy.yaml already matches the code. Nothing to sync.")
+    elif args.write:
+        manifest_path.write_text(updated, encoding="utf-8")
+        print(f"Updated {manifest_path}:")
+        for line in plan.summary():
+            print(f"  {line}")
+        print("Review the change, fill in any TODO, and commit it with the code.")
+    else:
+        print(unified_diff(original, updated, manifest_path.name), end="")
+        print(f"\n# {len(plan.summary())} change(s). Re-run with --write to apply.")
+    for note in plan.notes:
+        print(f"note: {note}")
+    return EXIT_OK
+
+
+def _cmd_diff(args: argparse.Namespace) -> int:
+    import json
+
+    from svikruti.pac.fingerprint import diff_markdown, diff_reports, load_report, new_at_or_above
+
+    try:
+        diff = diff_reports(load_report(args.base), load_report(args.head))
+    except Exception as exc:
+        print(f"svikruti diff failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    markdown = diff_markdown(diff)
+    if args.md_out:
+        Path(args.md_out).write_text(markdown, encoding="utf-8")
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(diff, indent=2), encoding="utf-8")
+    print(markdown, end="")
+    if args.fail_on_new and new_at_or_above(diff, args.fail_on_new):
+        print(f"New-finding gate failed at {args.fail_on_new.upper()} or above", file=sys.stderr)
+        return EXIT_GATE
+    return EXIT_OK
+
+
+def _cmd_frameworks() -> int:
+    from svikruti.pac.frameworks import builtin_pack_ids, load_pack
+
+    for pack_id in builtin_pack_ids():
+        pack = load_pack(pack_id)
+        clauses = sum(len(refs) for refs in pack.controls.values())
+        print(f"{pack.id:19} {pack.name}  [{pack.version}; {len(pack.controls)} obligations -> {clauses} clause references; verified {pack.verified}]")
+    print("Custom packs: pass a YAML/JSON path to --framework or list it under `frameworks:` in privacy.yaml.")
+    return EXIT_OK
 
 
 _EVIDENCE_PACK_DEFAULTS = (
@@ -201,6 +524,7 @@ _EVIDENCE_PACK_DEFAULTS = (
     ("breach_out", "breach-readiness.md"),
     ("notice_patch_out", "notice-patch.md"),
     ("issues_out", "fix-pack.md"),
+    ("inventory_out", "data-inventory.csv"),
 )
 
 

@@ -9,6 +9,10 @@ produces:
     - vendors.csv  (third-party processors)
     - actions.csv  (remediation tasks)
 
+It also reads the privacy-as-code manifest (privacy.yaml / privacy.json), so
+the reviewed record that lives in the repository and the registries in this
+app are the same record rather than two that drift apart.
+
 This module is intentionally PURE (no Streamlit, no database imports) so the
 parse functions are unit-testable and safe to import anywhere. The Streamlit
 page that consumes these functions lives in app.py.
@@ -288,6 +292,187 @@ def _normalize_risk(value: str) -> str:
     if "LOW" in text:
         return "LOW"
     return "MEDIUM"
+
+
+# ==================== privacy.yaml (privacy-as-code manifest) ====================
+
+_HIGH_RISK_CATEGORIES = {"health", "children", "government_id", "biometric"}
+
+
+def looks_like_manifest(file_bytes_or_text: Union[bytes, str, None]) -> bool:
+    """True when a JSON/YAML upload is a privacy manifest rather than a scan report."""
+    text = _to_text(file_bytes_or_text)
+    # Attestations in a manifest carry an "evidence" link, so that key cannot
+    # tell the two apart; a scan report always has "ropa_starter".
+    return "processing_activities" in text and "ropa_starter" not in text
+
+
+def _label(slug: Any) -> str:
+    return str(slug).replace("_", " ").strip().title() if slug else ""
+
+
+def _todo(value: Any) -> str:
+    """Manifest placeholders ('TODO', '[TODO]') count as empty."""
+    if isinstance(value, (list, tuple)):
+        return ", ".join(part for part in (_todo(item) for item in value) if part)
+    text = _clean(value)
+    return "" if text.lower().startswith("todo") else text
+
+
+def parse_privacy_manifest(file_bytes_or_text: Union[bytes, str, None]) -> Dict[str, Any]:
+    """
+    Turn privacy.yaml into RoPA and vendor records.
+
+    Each processing activity becomes a RoPA entry; each processor becomes a
+    vendor. Unlike a scan report, these carry the fields a human reviewed:
+    purpose, lawful basis, retention, contract and country.
+
+    Returns {'ropa': [...], 'vendors': [...], 'actions': [...], 'note': str}.
+    A TODO left in the manifest becomes a task instead of a made-up value.
+    """
+    empty = {"ropa": [], "vendors": [], "actions": [], "note": ""}
+    text = _to_text(file_bytes_or_text)
+    if not text.strip():
+        return dict(empty, note="The manifest file is empty.")
+    try:
+        if text.lstrip().startswith("{"):
+            data = json.loads(text)
+        else:
+            import yaml  # PyYAML ships with the svikruti package and requirements.txt
+
+            data = yaml.safe_load(text)
+    except Exception as exc:
+        return dict(empty, note=f"Could not parse the manifest: {exc}")
+    if not isinstance(data, dict) or not isinstance(data.get("processing_activities", []), list):
+        return dict(empty, note="This file is not a privacy manifest (no processing_activities list).")
+
+    processors: Dict[str, Dict[str, Any]] = {}
+    for raw in data.get("processors") or []:
+        if isinstance(raw, dict) and (raw.get("id") or raw.get("name")):
+            processors[str(raw.get("id") or raw.get("name")).strip().lower()] = raw
+    policies = data.get("policies") if isinstance(data.get("policies"), dict) else {}
+    allowed = {str(code).upper() for code in (policies.get("allowed_transfer_countries") or [])}
+
+    ropa: List[Dict[str, Any]] = []
+    actions: List[Dict[str, Any]] = []
+    for raw in data.get("processing_activities") or []:
+        if not isinstance(raw, dict):
+            continue
+        activity_id = _clean(raw.get("id")) or _clean(raw.get("name"))
+        name = _clean(raw.get("name")) or activity_id
+        if not name:
+            continue
+        categories = [str(item) for item in (raw.get("data_categories") or [])]
+        basis = raw.get("legal_basis")
+        if isinstance(basis, dict):
+            basis_text = "; ".join(f"{str(key).upper()}: {_label(value)}" for key, value in basis.items() if _todo(value))
+        else:
+            basis_text = _label(_todo(basis))
+        linked = [processors.get(str(pid).strip().lower(), {"name": pid}) for pid in (raw.get("processors") or [])]
+        countries = sorted({_todo(p.get("country")).upper() for p in linked if _todo(p.get("country"))})
+        cross_border = int(bool(allowed and any(country not in allowed for country in countries)))
+        purpose, retention = _todo(raw.get("purposes")), _todo(raw.get("retention"))
+        missing = [label for label, value in (("purpose", purpose), ("lawful basis", basis_text), ("retention", retention), ("owner", _todo(raw.get("owner")))) if not value]
+        if missing:
+            actions.append({
+                "title": f"Complete the processing record for {name}"[:200],
+                "category": "RoPA",
+                "priority": "HIGH" if set(categories) & _HIGH_RISK_CATEGORIES else "MEDIUM",
+                "description": f"privacy.yaml activity '{activity_id}' is missing: {', '.join(missing)}. Fill these in the manifest and re-import.",
+            })
+        ropa.append({
+            "activity_name": name,
+            "data_categories": ", ".join(_label(item) for item in categories) or "Not specified",
+            "data_subjects": _todo(raw.get("data_subjects")) or "Not specified",
+            "purpose": purpose or "Not specified",
+            "lawful_basis": basis_text or "To be confirmed",
+            "kwargs": _filter_ropa_kwargs({
+                "department": _todo(raw.get("owner")),
+                "retention_period": retention,
+                "data_processor": ", ".join(_clean(p.get("name")) for p in linked if _clean(p.get("name"))),
+                "processing_location": ", ".join(countries),
+                "security_measures": f"DPIA: {_todo(raw.get('dpia'))}" if _todo(raw.get("dpia")) else "",
+                "cross_border": cross_border,
+            }),
+            "_risk_tier": "High" if set(categories) & _HIGH_RISK_CATEGORIES else "Medium",
+            "_evidence": ", ".join(str(path) for path in (raw.get("paths") or [])),
+        })
+
+    vendors: List[Dict[str, Any]] = []
+    for raw in processors.values():
+        name = _clean(raw.get("name")) or _clean(raw.get("id"))
+        if not name:
+            continue
+        contract, country = _todo(raw.get("contract")), _todo(raw.get("country")).upper()
+        categories = [str(item) for item in (raw.get("data_categories") or [])]
+        note_parts = [part for part in (
+            f"Contract: {contract}" if contract else "",
+            f"Country: {country}" if country else "",
+            f"Transfer mechanism: {_todo(raw.get('transfer_mechanism'))}" if _todo(raw.get("transfer_mechanism")) else "",
+            "Source: privacy.yaml",
+        ) if part]
+        vendors.append({
+            "vendor_name": name,
+            "service_type": _todo(raw.get("purpose")) or "Not specified",
+            "data_shared": ", ".join(_label(item) for item in categories) or "Not specified",
+            "kwargs": _filter_vendor_kwargs({
+                "dpa_status": "COMPLETED" if contract else "NOT_STARTED",
+                "risk_level": "HIGH" if set(categories) & _HIGH_RISK_CATEGORIES or (allowed and country and country not in allowed) else "MEDIUM",
+                "notes": " | ".join(note_parts),
+            }),
+            "_transfer_location": country,
+        })
+        if not contract:
+            actions.append({
+                "title": f"Record the contract / DPA for {name}"[:200],
+                "category": "Vendor Management",
+                "priority": "HIGH",
+                "description": f"privacy.yaml lists {name} as a processor with no contract reference.",
+            })
+
+    return {
+        "ropa": ropa,
+        "vendors": vendors,
+        "actions": actions,
+        "note": f"privacy manifest: {len(ropa)} processing activit(ies), {len(vendors)} processor(s), {len(actions)} follow-up task(s).",
+    }
+
+
+def parse_upload(filename: str, file_bytes_or_text: Union[bytes, str, None]) -> Dict[str, Any]:
+    """
+    Route one uploaded file to the right parser by name and content.
+
+    Returns {'ropa': [...], 'vendors': [...], 'actions': [...], 'note': str}.
+    Kept here (not in the Streamlit page) so the routing is unit-tested:
+    privacy.yaml / privacy.json -> manifest, other .json -> scan report,
+    *vendor*.csv -> vendors, *action*.csv -> tasks, any other .csv -> RoPA.
+    """
+    name = (filename or "").lower()
+    out: Dict[str, Any] = {"ropa": [], "vendors": [], "actions": [], "note": ""}
+    try:
+        if name.endswith((".yaml", ".yml")) or (name.endswith(".json") and looks_like_manifest(file_bytes_or_text)):
+            parsed = parse_privacy_manifest(file_bytes_or_text)
+            out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
+            out["note"] = parsed.get("note", "")
+        elif name.endswith(".json"):
+            parsed = parse_report_json(file_bytes_or_text)
+            out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
+            out["note"] = parsed.get("note", "")
+        elif name.endswith(".csv") and "vendor" in name:
+            out["vendors"] = parse_vendors_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['vendors'])} vendor row(s)."
+        elif name.endswith(".csv") and "action" in name:
+            out["actions"] = parse_actions_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['actions'])} action row(s)."
+        elif name.endswith(".csv"):
+            # Any other CSV is treated as RoPA: that is the primary registry.
+            out["ropa"] = parse_ropa_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['ropa'])} RoPA row(s)."
+        else:
+            out["note"] = "unrecognized file type, skipped."
+    except Exception as exc:  # a bad upload must never take the page down
+        out["note"] = f"parse error - {exc}"
+    return out
 
 
 # ==================== report.json ====================

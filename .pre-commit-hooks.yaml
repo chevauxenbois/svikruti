@@ -1,0 +1,24 @@
+# Use from another repository's .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/chevauxenbois/svikruti
+#       rev: v0.9.0
+#       hooks:
+#         - id: svikruti-check
+#
+- id: svikruti-check
+  name: Svikruti privacy check (code vs privacy.yaml)
+  description: Fails when the code and privacy.yaml disagree at HIGH severity or above.
+  entry: svikruti check --repo . --fail-on high --out-dir .svikruti/check
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [pre-push]
+- id: svikruti-sync
+  name: Svikruti manifest sync (show the privacy.yaml patch the code needs)
+  entry: svikruti sync --repo .
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [manual]
+  verbose: true

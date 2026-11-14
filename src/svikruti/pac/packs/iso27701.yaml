@@ -1,0 +1,82 @@
+id: iso27701
+name: "ISO/IEC 27701:2025 Privacy information management systems"
+short_name: ISO 27701
+version: "ISO/IEC 27701:2025 (Annex A)"
+verified: "2026-11-13"
+source: https://www.iso.org/standard/27701
+terms: {controller: PII controller, processor: PII processor, subject: PII principal, record: records related to processing PII}
+legal_bases: []
+notes: >
+  Control numbers follow the 2025 edition. `legacy` gives the 2019 edition's Annex A
+  number for organisations still certified against ISO/IEC 27701:2019. Titles are
+  paraphrased; consult the licensed standard for normative text. Table A.1 applies to
+  PII controllers; processors should add Table A.2 controls via a custom pack.
+controls:
+  OBL-01:
+    - {ref: "A.1.2.9", title: "Records related to processing PII", legacy: "A.7.2.8"}
+  OBL-02:
+    - {ref: "A.1.2.2", title: "Identify and document purpose", legacy: "A.7.2.1"}
+  OBL-03:
+    - {ref: "A.1.2.3", title: "Identify lawful basis", legacy: "A.7.2.2"}
+  OBL-04:
+    - {ref: "A.1.4.8", title: "Retention", legacy: "A.7.4.7"}
+    - {ref: "A.1.4.6", title: "PII de-identification and deletion at the end of processing", legacy: "A.7.4.5"}
+  OBL-05:
+    - {ref: "A.1.4.2", title: "Limit collection", legacy: "A.7.4.1"}
+    - {ref: "A.1.4.5", title: "PII minimization objectives", legacy: "A.7.4.4"}
+  OBL-06:
+    - {ref: "A.1.4.3", title: "Limit processing", legacy: "A.7.4.2"}
+    - {ref: "A.1.4.5", title: "PII minimization objectives", legacy: "A.7.4.4"}
+    - {ref: "A.3.25", title: "Logging"}
+  OBL-07:
+    - {ref: "A.1.3.3", title: "Determining information for PII principals", legacy: "A.7.3.2"}
+    - {ref: "A.1.3.4", title: "Providing information to PII principals", legacy: "A.7.3.3"}
+  OBL-08:
+    - {ref: "A.1.2.7", title: "Contracts with PII processors", legacy: "A.7.2.6"}
+    - {ref: "A.1.5.5", title: "Records of PII disclosures to third parties", legacy: "A.7.5.4"}
+    - {ref: "A.3.10", title: "Addressing information security within supplier agreements"}
+  OBL-09:
+    - {ref: "A.1.5.2", title: "Identify basis for PII transfer between jurisdictions", legacy: "A.7.5.1"}
+    - {ref: "A.1.5.3", title: "Countries and international organizations to which PII can be transferred", legacy: "A.7.5.2"}
+    - {ref: "A.1.5.4", title: "Records of transfer of PII", legacy: "A.7.5.3"}
+  OBL-10:
+    - {ref: "A.1.2.6", title: "Privacy impact assessment", legacy: "A.7.2.5"}
+  OBL-11:
+    - {ref: "A.1.2.4", title: "Determine when and how consent is to be obtained", legacy: "A.7.2.3"}
+    - {ref: "A.1.2.6", title: "Privacy impact assessment", legacy: "A.7.2.5"}
+  OBL-12:
+    - {ref: "A.1.4.10", title: "PII transmission controls", legacy: "A.7.4.9"}
+    - {ref: "A.3.26", title: "Use of cryptography"}
+  OBL-13:
+    - {ref: "A.3.26", title: "Use of cryptography"}
+  OBL-14:
+    - {ref: "A.3.23", title: "Secure authentication"}
+    - {ref: "A.3.27", title: "Secure development life cycle"}
+  OBL-15:
+    - {ref: "A.3.27", title: "Secure development life cycle"}
+    - {ref: "A.3.28", title: "Application security requirements"}
+  OBL-16:
+    - {ref: "A.3.25", title: "Logging"}
+    - {ref: "A.3.11", title: "Information security incident management planning and preparation"}
+  OBL-17:
+    - {ref: "A.3.11", title: "Information security incident management planning and preparation"}
+    - {ref: "A.3.12", title: "Response to information security incidents"}
+  OBL-18:
+    - {ref: "A.3.24", title: "Information backup"}
+  OBL-19:
+    - {ref: "A.3.29", title: "Secure system architecture and engineering principles"}
+  OBL-20:
+    - {ref: "A.1.2.4", title: "Determine when and how consent is to be obtained", legacy: "A.7.2.3"}
+    - {ref: "A.1.2.5", title: "Obtain and record consent", legacy: "A.7.2.4"}
+  OBL-21:
+    - {ref: "A.1.3.2", title: "Determining and fulfilling obligations to PII principals", legacy: "A.7.3.1"}
+    - {ref: "A.1.3.7", title: "Access, correction or erasure", legacy: "A.7.3.6"}
+    - {ref: "A.1.3.10", title: "Handling requests", legacy: "A.7.3.9"}
+  OBL-22:
+    - {ref: "A.1.2.5", title: "Obtain and record consent", legacy: "A.7.2.4"}
+    - {ref: "A.1.3.5", title: "Providing mechanism to modify or withdraw consent", legacy: "A.7.3.4"}
+  OBL-23:
+    - {ref: "A.1.3.4", title: "Providing information to PII principals", legacy: "A.7.3.3"}
+    - {ref: "A.3.4", title: "Information security roles and responsibilities"}
+  OBL-24:
+    - {ref: "A.3.12", title: "Response to information security incidents"}

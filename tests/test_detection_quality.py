@@ -30,7 +30,7 @@ def _write(root: str, name: str, content: str) -> Path:
 
 def _risk_item(severity: str, category: str) -> Evidence:
     return Evidence(
-        kind="collection_point",
+        kind="logging_risk",  # a defect; inventory kinds (collection_point, ...) only add exposure
         label=f"{category} data signal",
         severity=severity,
         source="code",
@@ -266,7 +266,7 @@ class RiskScoringTests(unittest.TestCase):
 
         summary = summarize(items, 10, 0)
 
-        # Severity-tiered model: 55*(1-e^-3/2.5) + 35*(1-e^-5/8) ~= 55.
+        # Severity-tiered model: 55*(1-e^-3/2.5) + 35*(1-e^-5/12) ~= 50, plus exposure (max 15).
         self.assertGreaterEqual(summary.risk_score, 45)
         self.assertLessEqual(summary.risk_score, 70)
         self.assertEqual(summary.risk_level, "HIGH")

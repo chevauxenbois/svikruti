@@ -50,6 +50,40 @@ NON_RISK_EVIDENCE_KINDS = {
 }
 
 
+# Evidence kinds that record that personal data or a third party EXISTS in the
+# product: an inventory, not a defect. A KYC service that stores Aadhaar
+# numbers correctly is sensitive, not broken. These kinds feed the bounded
+# exposure component of the score and never the findings component, so a
+# well-run codebase handling high-risk data scores LOW and only things that
+# are actually wrong (data in logs, secrets, weak crypto, public buckets,
+# tracking before consent) can move it into HIGH or CRITICAL.
+INVENTORY_EVIDENCE_KINDS = {
+    "personal_data_reference",
+    "collection_point",
+    "storage_point",
+    "form_field",
+    "website_form_field",
+    "semantic_collection_point",
+    "semantic_storage_field",
+    "semantic_storage_sink",
+    "processor_data_flow",
+    "third_party",
+    "website_third_party",
+    "website_third_party_script",
+    "browser_known_vendor",
+    "privacy_text",
+    "privacy_notice_found",
+}
+HIGH_EXPOSURE_CATEGORIES = {"Government ID", "Health", "Children", "Biometric"}
+EXPOSURE_CAP = 15
+
+
+def _exposure_score(categories: Set[str], third_parties: Set[str]) -> int:
+    """0-15: 4 per high-risk category, 1 per other category, 1 per third party (max 4)."""
+    points = 4 * len(categories & HIGH_EXPOSURE_CATEGORIES) + len(categories - HIGH_EXPOSURE_CATEGORIES) + min(len(third_parties), 4)
+    return min(EXPOSURE_CAP, points)
+
+
 def _risk_level(score: int) -> str:
     """Map a 0-100 risk score to a band.
 
@@ -129,7 +163,7 @@ def _risk_score(scorable: List[Evidence]) -> int:
     Calibration (deduped, risk-only counts; benchmarked on real OSS repos):
       - 0 findings                      -> 0
       - 3 CRITICAL + 5 HIGH             -> ~50 (HIGH band: block-launch review)
-      - 100s of MEDIUM inventory items  -> at most +6 (they inform, not alarm)
+      - inventory evidence (data exists) -> never counted here; see _exposure_score
       - CRITICAL band (75+) requires ~5+ CRITICAL findings alongside a real
         HIGH tail; volume of lower-severity findings can never reach it.
     """
@@ -149,19 +183,27 @@ def summarize(evidence: Iterable[Evidence], files_scanned: int, pages_scanned: i
     categories: Set[str] = set()
     third_parties: Set[str] = set()
 
+    exposure_categories: Set[str] = set()
     for item in items:
         data_category = item.metadata.get("data_category")
         if data_category:
             categories.add(str(data_category))
+            # A lone low-confidence keyword ("health" in a health-check service)
+            # is listed in the inventory but does not raise the exposure score.
+            if str(item.metadata.get("confidence", "medium")) != "low":
+                exposure_categories.add(str(data_category))
         if item.kind in {"third_party", "website_third_party", "website_third_party_script"}:
             third_party = item.metadata.get("third_party") or item.metadata.get("domain")
             if third_party:
                 third_parties.add(str(third_party))
 
-    # Score only genuine risk evidence, deduplicated across detector layers.
-    risk_items = [item for item in items if _is_risk_evidence(item)]
+    # Findings: genuine defects only, deduplicated across detector layers.
+    # Inventory evidence (data exists) is scored separately as bounded exposure.
+    risk_items = [item for item in items if _is_risk_evidence(item) and item.kind not in INVENTORY_EVIDENCE_KINDS]
     scorable = _mark_scoring_duplicates(risk_items)
-    score = _risk_score(scorable)
+    findings_score = _risk_score(scorable)
+    exposure_score = _exposure_score(exposure_categories, third_parties)
+    score = min(100, findings_score + exposure_score)
 
     return ScanSummary(
         files_scanned=files_scanned,
@@ -170,6 +212,8 @@ def summarize(evidence: Iterable[Evidence], files_scanned: int, pages_scanned: i
         third_parties=sorted(third_parties),
         risk_score=score,
         risk_level=_risk_level(score),
+        risk_findings_score=findings_score,
+        risk_exposure_score=exposure_score,
     )
 
 
@@ -353,6 +397,10 @@ def build_evidence_graph(result: ScanResult, privacy_notice_text: str) -> Eviden
         third_party = item.metadata.get("third_party") or item.metadata.get("domain")
         if third_party:
             third_node = add_node(f"third_party:{third_party}", str(third_party), "third_party")
+            if data_category and item.kind == "processor_data_flow":
+                # A proven hand-off: this category is an argument of a call to this vendor.
+                add_edge(f"data:{data_category}", third_node, "sent to", index)
+                data_flows[str(data_category)]["third_parties"].add(str(third_party))
             add_edge(source_node, third_node, "references", index)
             add_edge(app_node, third_node, "shares or may share data", index)
             if not _notice_mentions_third_party(str(third_party), notice_lower):

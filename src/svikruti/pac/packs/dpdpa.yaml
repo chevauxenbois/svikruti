@@ -1,0 +1,84 @@
+id: dpdpa
+name: India Digital Personal Data Protection Act, 2023 and DPDP Rules, 2025
+short_name: DPDPA
+version: "Act 22 of 2023; Rules notified 13 Nov 2025 (G.S.R. 846(E))"
+verified: "2026-11-13"
+source: https://www.meity.gov.in/
+terms: {controller: Data Fiduciary, processor: Data Processor, subject: Data Principal, record: processing record}
+legal_bases: [consent, legitimate_use]
+notes: >
+  Rules 3, 5-16, 22 and 23 take effect 13 May 2027. The Act has no standalone
+  record-of-processing duty; OBL-01 is mapped to the accountability provision it supports.
+controls:
+  OBL-01:
+    - {ref: "Sec. 8(1)", title: "Data Fiduciary responsible for compliance, including processing by its Data Processors"}
+    - {ref: "Sec. 10(2)(c)", title: "Significant Data Fiduciary: DPIA and periodic audit rely on an accurate processing record"}
+  OBL-02:
+    - {ref: "Sec. 4(1)", title: "Processing only for a lawful purpose"}
+    - {ref: "Sec. 5(1)(i)", title: "Notice states the personal data and the purpose of processing"}
+  OBL-03:
+    - {ref: "Sec. 4(1)", title: "Processing only with consent or for certain legitimate uses"}
+    - {ref: "Sec. 6", title: "Consent"}
+    - {ref: "Sec. 7", title: "Certain legitimate uses"}
+  OBL-04:
+    - {ref: "Sec. 8(7)", title: "Erasure when the specified purpose is no longer served or consent is withdrawn"}
+    - {ref: "Rule 8", title: "Time period for the specified purpose to be deemed no longer served"}
+  OBL-05:
+    - {ref: "Sec. 6(1)", title: "Consent limited to personal data necessary for the specified purpose"}
+  OBL-06:
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards to prevent personal data breach"}
+    - {ref: "Rule 6", title: "Security safeguards: encryption, obfuscation, masking or virtual tokens"}
+  OBL-07:
+    - {ref: "Sec. 5", title: "Notice"}
+    - {ref: "Rule 3", title: "Notice given by Data Fiduciary to Data Principal"}
+  OBL-08:
+    - {ref: "Sec. 8(2)", title: "Engaging a Data Processor only under a valid contract"}
+    - {ref: "Rule 6", title: "Security safeguards: contractual provisions with Data Processors"}
+  OBL-09:
+    - {ref: "Sec. 16", title: "Processing of personal data outside India"}
+    - {ref: "Rule 15", title: "Transfer of personal data outside India"}
+  OBL-10:
+    - {ref: "Sec. 10(2)(c)(i)", title: "Periodic Data Protection Impact Assessment (Significant Data Fiduciary)"}
+    - {ref: "Rule 13", title: "Additional obligations of Significant Data Fiduciary"}
+  OBL-11:
+    - {ref: "Sec. 9", title: "Processing of personal data of children"}
+    - {ref: "Rule 10", title: "Verifiable consent for processing personal data of a child"}
+  OBL-12:
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+    - {ref: "Rule 6", title: "Security safeguards: encryption of personal data"}
+  OBL-13:
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+    - {ref: "Rule 6", title: "Security safeguards: encryption of personal data"}
+  OBL-14:
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+    - {ref: "Rule 6", title: "Security safeguards: control of access to computer resources"}
+  OBL-15:
+    - {ref: "Sec. 8(4)", title: "Appropriate technical and organisational measures"}
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+  OBL-16:
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+    - {ref: "Rule 6", title: "Security safeguards: logs, monitoring and review to detect unauthorised access; logs retained for one year"}
+  OBL-17:
+    - {ref: "Sec. 8(6)", title: "Intimation of personal data breach to the Board and affected Data Principals"}
+    - {ref: "Rule 7", title: "Intimation of personal data breach"}
+  OBL-18:
+    - {ref: "Rule 6", title: "Security safeguards: continued processing after compromise, including data backups"}
+  OBL-19:
+    - {ref: "Sec. 8(4)", title: "Appropriate technical and organisational measures"}
+    - {ref: "Sec. 8(5)", title: "Reasonable security safeguards"}
+  OBL-20:
+    - {ref: "Sec. 6(1)", title: "Free, specific, informed, unconditional and unambiguous consent"}
+    - {ref: "Sec. 9(3)", title: "No tracking, behavioural monitoring or targeted advertising directed at children"}
+  OBL-21:
+    - {ref: "Secs. 11-14", title: "Rights of Data Principal: access, correction and erasure, grievance redressal, nomination"}
+    - {ref: "Rule 14", title: "Rights of Data Principals"}
+  OBL-22:
+    - {ref: "Sec. 6(4)", title: "Right to withdraw consent, with ease comparable to giving it"}
+    - {ref: "Sec. 6(10)", title: "Data Fiduciary to prove that notice was given and consent obtained"}
+  OBL-23:
+    - {ref: "Sec. 8(9)", title: "Publish business contact information of the DPO or person answering on behalf of the Data Fiduciary"}
+    - {ref: "Sec. 8(10)", title: "Effective mechanism to redress grievances"}
+    - {ref: "Rule 9", title: "Contact information of person to answer questions about processing"}
+  OBL-24:
+    - {ref: "Sec. 8(6)", title: "Intimation of personal data breach"}
+    - {ref: "Rule 7", title: "Detailed report to the Board within seventy-two hours"}

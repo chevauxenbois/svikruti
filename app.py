@@ -1930,7 +1930,9 @@ def page_scanner_import():
             Ran <code>svikruti scan</code>? Upload the evidence pack's
             <strong>report.json</strong> or <strong>ropa.csv</strong> /
             <strong>vendors.csv</strong> (and optionally <strong>actions.csv</strong>)
-            here to populate your registries automatically. Everything stays local —
+            here to populate your registries automatically. If the repository has a
+            reviewed <strong>privacy.yaml</strong>, upload that instead: its purposes,
+            lawful bases, retention and contracts come across as written. Everything stays local —
             nothing is uploaded to the internet.
         </div>
     </div>
@@ -1944,9 +1946,9 @@ def page_scanner_import():
 
     uploaded = st.file_uploader(
         "Upload scanner output",
-        type=["json", "csv"],
+        type=["json", "csv", "yaml", "yml"],
         accept_multiple_files=True,
-        help="Accepts report.json, ropa.csv, vendors.csv, and actions.csv.",
+        help="Accepts privacy.yaml / privacy.json, report.json, ropa.csv, vendors.csv, and actions.csv.",
     )
 
     if not uploaded:
@@ -1963,32 +1965,12 @@ def page_scanner_import():
             parse_notes.append(f"Could not read '{f.name}'.")
             continue
 
-        name = (f.name or "").lower()
-        try:
-            if name.endswith(".json"):
-                report = scanner_import.parse_report_json(raw)
-                parsed["ropa"].extend(report.get("ropa", []))
-                parsed["vendors"].extend(report.get("vendors", []))
-                parsed["actions"].extend(report.get("actions", []))
-                if report.get("note"):
-                    parse_notes.append(f"{f.name}: {report['note']}")
-            elif "vendor" in name:
-                rows = scanner_import.parse_vendors_csv(raw)
-                parsed["vendors"].extend(rows)
-                parse_notes.append(f"{f.name}: parsed {len(rows)} vendor row(s).")
-            elif "action" in name:
-                rows = scanner_import.parse_actions_csv(raw)
-                parsed["actions"].extend(rows)
-                parse_notes.append(f"{f.name}: parsed {len(rows)} action row(s).")
-            elif "ropa" in name or name.endswith(".csv"):
-                # Default any other CSV to RoPA (that is the primary registry).
-                rows = scanner_import.parse_ropa_csv(raw)
-                parsed["ropa"].extend(rows)
-                parse_notes.append(f"{f.name}: parsed {len(rows)} RoPA row(s).")
-            else:
-                parse_notes.append(f"{f.name}: unrecognized file type, skipped.")
-        except Exception as e:
-            parse_notes.append(f"{f.name}: parse error — {str(e)}")
+        routed = scanner_import.parse_upload(f.name or "", raw)
+        parsed["ropa"].extend(routed["ropa"])
+        parsed["vendors"].extend(routed["vendors"])
+        parsed["actions"].extend(routed["actions"])
+        if routed["note"]:
+            parse_notes.append(f"{f.name}: {routed['note']}")
 
     for note in parse_notes:
         st.caption(note)

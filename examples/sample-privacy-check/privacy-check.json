@@ -1,0 +1,2395 @@
+{
+  "schema_version": "svikruti-privacy-check-v1",
+  "generated_at": "2026-11-13T08:53:49.629005+00:00",
+  "manifest": "privacy.yaml",
+  "repo": ".",
+  "summary": {
+    "activities": 3,
+    "processors": 2,
+    "files_with_personal_data": 7,
+    "open_findings": 3,
+    "open_by_severity": {
+      "CRITICAL": 0,
+      "HIGH": 3,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "excepted_findings": 0,
+    "new_findings": null,
+    "detected_categories": [
+      "contact",
+      "financial",
+      "government_id",
+      "identity",
+      "location"
+    ],
+    "detected_processors": [
+      "MSG91",
+      "Mixpanel",
+      "Razorpay"
+    ],
+    "detected_flows": {
+      "mixpanel": [
+        "contact",
+        "location"
+      ],
+      "msg91": [
+        "contact"
+      ],
+      "razorpay": [
+        "contact"
+      ]
+    }
+  },
+  "frameworks": [
+    {
+      "id": "dpdpa",
+      "name": "India Digital Personal Data Protection Act, 2023 and DPDP Rules, 2025",
+      "short_name": "DPDPA",
+      "version": "Act 22 of 2023; Rules notified 13 Nov 2025 (G.S.R. 846(E))",
+      "verified": "2026-11-13",
+      "obligations": 24,
+      "applicable": 23,
+      "counts": {
+        "pass": 14,
+        "fail": 5,
+        "attested": 4,
+        "manual": 0,
+        "not_applicable": 1
+      },
+      "code_verified_percent": 61,
+      "covered_percent": 78
+    },
+    {
+      "id": "gdpr",
+      "name": "EU General Data Protection Regulation",
+      "short_name": "GDPR",
+      "version": "Regulation (EU) 2016/679",
+      "verified": "2026-11-13",
+      "obligations": 24,
+      "applicable": 23,
+      "counts": {
+        "pass": 14,
+        "fail": 5,
+        "attested": 4,
+        "manual": 0,
+        "not_applicable": 1
+      },
+      "code_verified_percent": 61,
+      "covered_percent": 78
+    },
+    {
+      "id": "iso27701",
+      "name": "ISO/IEC 27701:2025 Privacy information management systems",
+      "short_name": "ISO 27701",
+      "version": "ISO/IEC 27701:2025 (Annex A)",
+      "verified": "2026-11-13",
+      "obligations": 24,
+      "applicable": 23,
+      "counts": {
+        "pass": 14,
+        "fail": 5,
+        "attested": 4,
+        "manual": 0,
+        "not_applicable": 1
+      },
+      "code_verified_percent": 61,
+      "covered_percent": 78
+    }
+  ],
+  "findings": [
+    {
+      "rule": "D002",
+      "kind": "drift",
+      "severity": "HIGH",
+      "title": "Undeclared personal data category",
+      "detail": "Activity 'repayments' processes Location data in code, but the record does not declare it.",
+      "fix": "Declare the category on the activity (and update the notice and legal basis), or remove the data from the code.",
+      "activity": "repayments",
+      "category": "location",
+      "processor": "",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:7",
+        "services/payments/refund.js:9",
+        "services/payments/refund.js:10"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:136e6153e490c2f21bcb",
+      "new": true
+    },
+    {
+      "rule": "D003",
+      "kind": "drift",
+      "severity": "HIGH",
+      "title": "Undeclared processor / third party",
+      "detail": "Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor.",
+      "fix": "Add the processor with country and contract reference, link it to the activity, or remove the integration.",
+      "activity": "repayments",
+      "category": "",
+      "processor": "mixpanel",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:9"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:18eb6630a9e087cc8ac7",
+      "new": true
+    },
+    {
+      "rule": "P001",
+      "kind": "policy",
+      "severity": "HIGH",
+      "title": "Personal data written to logs",
+      "detail": "Contact data is written to logs in activity 'repayments' (1 location(s)).",
+      "fix": "Remove or mask the field before logging, or record a time-boxed exception with a reason.",
+      "activity": "repayments",
+      "category": "contact",
+      "processor": "",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:8"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:35069d7f9df3e044abd1",
+      "new": true
+    }
+  ],
+  "obligations": [
+    {
+      "id": "OBL-01",
+      "title": "The processing record matches the code",
+      "question": "Is every place the code handles personal data, and every processor it calls, covered by a declared processing activity?",
+      "proof": "code",
+      "status": "fail",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party",
+      "findings": [
+        "svkd:136e6153e490c2f21bcb",
+        "svkd:18eb6630a9e087cc8ac7"
+      ],
+      "evidence": [
+        "services/payments/refund.js:10",
+        "services/payments/refund.js:7",
+        "services/payments/refund.js:9"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-02",
+      "title": "Every activity has a specified purpose",
+      "question": "Does each processing activity state why the data is processed?",
+      "proof": "manifest",
+      "status": "pass",
+      "summary": "Every activity states its purposes.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-03",
+      "title": "Every activity has a lawful basis",
+      "question": "Does each processing activity record a lawful basis valid under the selected frameworks?",
+      "proof": "manifest",
+      "status": "pass",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-04",
+      "title": "Retention is defined",
+      "question": "Does each processing activity state how long data is kept or what triggers erasure?",
+      "proof": "manifest",
+      "status": "pass",
+      "summary": "Every activity defines retention.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-05",
+      "title": "Only declared data is collected",
+      "question": "Is the code free of personal data categories that were never declared or that policy forbids?",
+      "proof": "code",
+      "status": "fail",
+      "summary": "1 open finding(s): Undeclared personal data category",
+      "findings": [
+        "svkd:136e6153e490c2f21bcb"
+      ],
+      "evidence": [
+        "services/payments/refund.js:10",
+        "services/payments/refund.js:7",
+        "services/payments/refund.js:9"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-06",
+      "title": "No personal data in logs",
+      "question": "Is personal data kept out of application logs unless explicitly allowed?",
+      "proof": "code",
+      "status": "fail",
+      "summary": "1 open finding(s): Personal data written to logs",
+      "findings": [
+        "svkd:35069d7f9df3e044abd1"
+      ],
+      "evidence": [
+        "services/payments/refund.js:8"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-07",
+      "title": "The privacy notice matches actual processing",
+      "question": "Does the published notice cover every data category and recipient found in code?",
+      "proof": "code",
+      "status": "fail",
+      "summary": "The notice omits 1 item(s) the code processes.",
+      "findings": [],
+      "evidence": [
+        "Detected third party 'Mixpanel', but the privacy notice does not clearly mention it or its category."
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-08",
+      "title": "Processors are identified and under contract",
+      "question": "Is every third party the code sends data to declared, with a contract reference?",
+      "proof": "code",
+      "status": "fail",
+      "summary": "1 open finding(s): Undeclared processor / third party",
+      "findings": [
+        "svkd:18eb6630a9e087cc8ac7"
+      ],
+      "evidence": [
+        "services/payments/refund.js:9"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-09",
+      "title": "Cross-border transfers are documented",
+      "question": "Is each processor's country recorded, with a transfer mechanism where policy requires one?",
+      "proof": "manifest",
+      "status": "pass",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-10",
+      "title": "High-risk processing has an impact assessment",
+      "question": "Does every activity touching high-risk data reference a completed DPIA?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "Every activity handling high-risk data references an impact assessment.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-11",
+      "title": "Children's data has verifiable safeguards",
+      "question": "Where children's data is processed, is verifiable parental consent in place and tracking disabled?",
+      "proof": "attestation",
+      "status": "not_applicable",
+      "summary": "No children's data is declared or detected.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-12",
+      "title": "Encryption in transit",
+      "question": "Is personal data transported only over TLS?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "2 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "services/notifications/sms.py:technical.encryption_evidence.tls_enforced",
+        "web/signup.tsx:technical.encryption_evidence.tls_enforced"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-13",
+      "title": "Encryption at rest and key management",
+      "question": "Is stored personal data encrypted with managed keys and no weak cryptography?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "5 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.encryption_evidence.kms_managed_keys",
+        "infra/main.tf:technical.encryption_evidence.secret_manager",
+        "infra/main.tf:technical.encryption_evidence.storage_encryption",
+        "services/onboarding/models.py:technical.encryption_evidence.modern_encryption",
+        "services/onboarding/vault.py:technical.encryption_evidence.modern_encryption"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-14",
+      "title": "Secrets and credential hygiene",
+      "question": "Is the repository free of hard-coded credentials?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "1 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.encryption_evidence.secret_manager"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-15",
+      "title": "Vulnerability management",
+      "question": "Do security scanners run on this code, with no unresolved critical findings?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "3 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        ".github/workflows/security.yml:technical.security_tooling.code_ql",
+        ".github/workflows/security.yml:technical.security_tooling.gitleaks",
+        ".github/workflows/security.yml:technical.security_tooling.semgrep"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-16",
+      "title": "Security monitoring and logging",
+      "question": "Is there monitoring that would detect unauthorised access to personal data?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "2 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.endpoint_security.guard_duty",
+        "infra/main.tf:technical.security_monitoring.cloud_watch"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-17",
+      "title": "Breach response readiness",
+      "question": "Is there an incident / breach runbook with owners and escalation?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "1 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.incident_readiness.runbook_escalation"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-18",
+      "title": "Backup and recovery",
+      "question": "Is there evidence of backup, restore and recovery for personal-data stores?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "1 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.resilience_evidence.backup_restore_retention"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-19",
+      "title": "Infrastructure guardrails",
+      "question": "Is infrastructure-as-code free of public storage, public databases and disabled encryption?",
+      "proof": "code",
+      "status": "pass",
+      "summary": "1 piece(s) of repository evidence.",
+      "findings": [],
+      "evidence": [
+        "infra/main.tf:technical.cloud_security_evidence.s3_public_access_block"
+      ],
+      "attestation": null
+    },
+    {
+      "id": "OBL-20",
+      "title": "Tracking waits for consent",
+      "question": "Do non-essential trackers stay off until the visitor consents, and after they reject?",
+      "proof": "code",
+      "status": "attested",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.",
+      "findings": [],
+      "evidence": [],
+      "attestation": {
+        "statement": "The marketing site loads no non-essential trackers; verified with a browser consent scan each release.",
+        "evidence": "https://wiki.lendflow.example/privacy/consent-scan",
+        "owner": "web-platform",
+        "reviewed": "2026-10-20",
+        "fresh": true
+      }
+    },
+    {
+      "id": "OBL-21",
+      "title": "Individuals' rights requests are handled",
+      "question": "Is there an operating process for access, correction and erasure requests?",
+      "proof": "attestation",
+      "status": "attested",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days.",
+      "findings": [],
+      "evidence": [],
+      "attestation": {
+        "statement": "Access, correction and erasure requests are handled by the support desk within 30 days.",
+        "evidence": "https://wiki.lendflow.example/privacy/rights-runbook",
+        "owner": "privacy-office",
+        "reviewed": "2026-10-01",
+        "fresh": true
+      }
+    },
+    {
+      "id": "OBL-22",
+      "title": "Consent is recorded and withdrawable",
+      "question": "Is consent stored as a provable record, with withdrawal as easy as giving it?",
+      "proof": "attestation",
+      "status": "attested",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.",
+      "findings": [],
+      "evidence": [],
+      "attestation": {
+        "statement": "Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.",
+        "evidence": "https://wiki.lendflow.example/privacy/consent-ledger",
+        "owner": "lending-platform",
+        "reviewed": "2026-10-01",
+        "fresh": true
+      }
+    },
+    {
+      "id": "OBL-23",
+      "title": "A privacy contact is published",
+      "question": "Is there a named contact or DPO for privacy questions and grievances?",
+      "proof": "manifest",
+      "status": "pass",
+      "summary": "Privacy contact recorded: privacy@lendflow.example.",
+      "findings": [],
+      "evidence": [],
+      "attestation": null
+    },
+    {
+      "id": "OBL-24",
+      "title": "Breach notification procedure exists",
+      "question": "Is there a tested procedure to notify the regulator and affected individuals within statutory timelines?",
+      "proof": "attestation",
+      "status": "attested",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.",
+      "findings": [],
+      "evidence": [],
+      "attestation": {
+        "statement": "Breach notification procedure tested in the September tabletop exercise.",
+        "evidence": "docs/incident-runbook.md",
+        "owner": "security",
+        "reviewed": "2026-09-15",
+        "fresh": true
+      }
+    }
+  ],
+  "matrix": [
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(1)",
+      "legacy_ref": "",
+      "control": "Data Fiduciary responsible for compliance, including processing by its Data Processors",
+      "obligation": "OBL-01",
+      "obligation_title": "The processing record matches the code",
+      "status": "fail",
+      "proof": "code",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 10(2)(c)",
+      "legacy_ref": "",
+      "control": "Significant Data Fiduciary: DPIA and periodic audit rely on an accurate processing record",
+      "obligation": "OBL-01",
+      "obligation_title": "The processing record matches the code",
+      "status": "fail",
+      "proof": "code",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 4(1)",
+      "legacy_ref": "",
+      "control": "Processing only for a lawful purpose",
+      "obligation": "OBL-02",
+      "obligation_title": "Every activity has a specified purpose",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity states its purposes."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 5(1)(i)",
+      "legacy_ref": "",
+      "control": "Notice states the personal data and the purpose of processing",
+      "obligation": "OBL-02",
+      "obligation_title": "Every activity has a specified purpose",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity states its purposes."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 4(1)",
+      "legacy_ref": "",
+      "control": "Processing only with consent or for certain legitimate uses",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 6",
+      "legacy_ref": "",
+      "control": "Consent",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 7",
+      "legacy_ref": "",
+      "control": "Certain legitimate uses",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(7)",
+      "legacy_ref": "",
+      "control": "Erasure when the specified purpose is no longer served or consent is withdrawn",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 8",
+      "legacy_ref": "",
+      "control": "Time period for the specified purpose to be deemed no longer served",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 6(1)",
+      "legacy_ref": "",
+      "control": "Consent limited to personal data necessary for the specified purpose",
+      "obligation": "OBL-05",
+      "obligation_title": "Only declared data is collected",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared personal data category"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards to prevent personal data breach",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: encryption, obfuscation, masking or virtual tokens",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 5",
+      "legacy_ref": "",
+      "control": "Notice",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 3",
+      "legacy_ref": "",
+      "control": "Notice given by Data Fiduciary to Data Principal",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(2)",
+      "legacy_ref": "",
+      "control": "Engaging a Data Processor only under a valid contract",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: contractual provisions with Data Processors",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 16",
+      "legacy_ref": "",
+      "control": "Processing of personal data outside India",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 15",
+      "legacy_ref": "",
+      "control": "Transfer of personal data outside India",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 10(2)(c)(i)",
+      "legacy_ref": "",
+      "control": "Periodic Data Protection Impact Assessment (Significant Data Fiduciary)",
+      "obligation": "OBL-10",
+      "obligation_title": "High-risk processing has an impact assessment",
+      "status": "pass",
+      "proof": "code",
+      "summary": "Every activity handling high-risk data references an impact assessment."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 13",
+      "legacy_ref": "",
+      "control": "Additional obligations of Significant Data Fiduciary",
+      "obligation": "OBL-10",
+      "obligation_title": "High-risk processing has an impact assessment",
+      "status": "pass",
+      "proof": "code",
+      "summary": "Every activity handling high-risk data references an impact assessment."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 9",
+      "legacy_ref": "",
+      "control": "Processing of personal data of children",
+      "obligation": "OBL-11",
+      "obligation_title": "Children's data has verifiable safeguards",
+      "status": "not_applicable",
+      "proof": "attestation",
+      "summary": "No children's data is declared or detected."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 10",
+      "legacy_ref": "",
+      "control": "Verifiable consent for processing personal data of a child",
+      "obligation": "OBL-11",
+      "obligation_title": "Children's data has verifiable safeguards",
+      "status": "not_applicable",
+      "proof": "attestation",
+      "summary": "No children's data is declared or detected."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: encryption of personal data",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-13",
+      "obligation_title": "Encryption at rest and key management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "5 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: encryption of personal data",
+      "obligation": "OBL-13",
+      "obligation_title": "Encryption at rest and key management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "5 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-14",
+      "obligation_title": "Secrets and credential hygiene",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: control of access to computer resources",
+      "obligation": "OBL-14",
+      "obligation_title": "Secrets and credential hygiene",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(4)",
+      "legacy_ref": "",
+      "control": "Appropriate technical and organisational measures",
+      "obligation": "OBL-15",
+      "obligation_title": "Vulnerability management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "3 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-15",
+      "obligation_title": "Vulnerability management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "3 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: logs, monitoring and review to detect unauthorised access; logs retained for one year",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(6)",
+      "legacy_ref": "",
+      "control": "Intimation of personal data breach to the Board and affected Data Principals",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 7",
+      "legacy_ref": "",
+      "control": "Intimation of personal data breach",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 6",
+      "legacy_ref": "",
+      "control": "Security safeguards: continued processing after compromise, including data backups",
+      "obligation": "OBL-18",
+      "obligation_title": "Backup and recovery",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(4)",
+      "legacy_ref": "",
+      "control": "Appropriate technical and organisational measures",
+      "obligation": "OBL-19",
+      "obligation_title": "Infrastructure guardrails",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(5)",
+      "legacy_ref": "",
+      "control": "Reasonable security safeguards",
+      "obligation": "OBL-19",
+      "obligation_title": "Infrastructure guardrails",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 6(1)",
+      "legacy_ref": "",
+      "control": "Free, specific, informed, unconditional and unambiguous consent",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 9(3)",
+      "legacy_ref": "",
+      "control": "No tracking, behavioural monitoring or targeted advertising directed at children",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Secs. 11-14",
+      "legacy_ref": "",
+      "control": "Rights of Data Principal: access, correction and erasure, grievance redressal, nomination",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 14",
+      "legacy_ref": "",
+      "control": "Rights of Data Principals",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 6(4)",
+      "legacy_ref": "",
+      "control": "Right to withdraw consent, with ease comparable to giving it",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 6(10)",
+      "legacy_ref": "",
+      "control": "Data Fiduciary to prove that notice was given and consent obtained",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(9)",
+      "legacy_ref": "",
+      "control": "Publish business contact information of the DPO or person answering on behalf of the Data Fiduciary",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(10)",
+      "legacy_ref": "",
+      "control": "Effective mechanism to redress grievances",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 9",
+      "legacy_ref": "",
+      "control": "Contact information of person to answer questions about processing",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Sec. 8(6)",
+      "legacy_ref": "",
+      "control": "Intimation of personal data breach",
+      "obligation": "OBL-24",
+      "obligation_title": "Breach notification procedure exists",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise."
+    },
+    {
+      "framework": "dpdpa",
+      "ref": "Rule 7",
+      "legacy_ref": "",
+      "control": "Detailed report to the Board within seventy-two hours",
+      "obligation": "OBL-24",
+      "obligation_title": "Breach notification procedure exists",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 30(1)",
+      "legacy_ref": "",
+      "control": "Records of processing activities",
+      "obligation": "OBL-01",
+      "obligation_title": "The processing record matches the code",
+      "status": "fail",
+      "proof": "code",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(2)",
+      "legacy_ref": "",
+      "control": "Accountability",
+      "obligation": "OBL-01",
+      "obligation_title": "The processing record matches the code",
+      "status": "fail",
+      "proof": "code",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(b)",
+      "legacy_ref": "",
+      "control": "Purpose limitation",
+      "obligation": "OBL-02",
+      "obligation_title": "Every activity has a specified purpose",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity states its purposes."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 30(1)(b)",
+      "legacy_ref": "",
+      "control": "Purposes of the processing recorded",
+      "obligation": "OBL-02",
+      "obligation_title": "Every activity has a specified purpose",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity states its purposes."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 6(1)",
+      "legacy_ref": "",
+      "control": "Lawfulness of processing",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 9(2)",
+      "legacy_ref": "",
+      "control": "Condition for special categories, where they are processed",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(e)",
+      "legacy_ref": "",
+      "control": "Storage limitation",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 30(1)(f)",
+      "legacy_ref": "",
+      "control": "Envisaged time limits for erasure",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(c)",
+      "legacy_ref": "",
+      "control": "Data minimisation",
+      "obligation": "OBL-05",
+      "obligation_title": "Only declared data is collected",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared personal data category"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 25(2)",
+      "legacy_ref": "",
+      "control": "Data protection by default",
+      "obligation": "OBL-05",
+      "obligation_title": "Only declared data is collected",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared personal data category"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(c)",
+      "legacy_ref": "",
+      "control": "Data minimisation",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(f)",
+      "legacy_ref": "",
+      "control": "Integrity and confidentiality",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)",
+      "legacy_ref": "",
+      "control": "Security of processing",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 13",
+      "legacy_ref": "",
+      "control": "Information to be provided where data are collected from the data subject",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 14",
+      "legacy_ref": "",
+      "control": "Information where data have not been obtained from the data subject",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(a)",
+      "legacy_ref": "",
+      "control": "Lawfulness, fairness and transparency",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 28(1)",
+      "legacy_ref": "",
+      "control": "Processors providing sufficient guarantees",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 28(3)",
+      "legacy_ref": "",
+      "control": "Processing by a processor governed by a contract",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 30(1)(d)",
+      "legacy_ref": "",
+      "control": "Categories of recipients recorded",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 44",
+      "legacy_ref": "",
+      "control": "General principle for transfers",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 46",
+      "legacy_ref": "",
+      "control": "Transfers subject to appropriate safeguards",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 30(1)(e)",
+      "legacy_ref": "",
+      "control": "Transfers to third countries recorded",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 35(1)",
+      "legacy_ref": "",
+      "control": "Data protection impact assessment",
+      "obligation": "OBL-10",
+      "obligation_title": "High-risk processing has an impact assessment",
+      "status": "pass",
+      "proof": "code",
+      "summary": "Every activity handling high-risk data references an impact assessment."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 35(3)(b)",
+      "legacy_ref": "",
+      "control": "DPIA for large-scale special category processing",
+      "obligation": "OBL-10",
+      "obligation_title": "High-risk processing has an impact assessment",
+      "status": "pass",
+      "proof": "code",
+      "summary": "Every activity handling high-risk data references an impact assessment."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 8",
+      "legacy_ref": "",
+      "control": "Conditions applicable to child's consent",
+      "obligation": "OBL-11",
+      "obligation_title": "Children's data has verifiable safeguards",
+      "status": "not_applicable",
+      "proof": "attestation",
+      "summary": "No children's data is declared or detected."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(a)",
+      "legacy_ref": "",
+      "control": "Pseudonymisation and encryption of personal data",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 5(1)(f)",
+      "legacy_ref": "",
+      "control": "Integrity and confidentiality",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(a)",
+      "legacy_ref": "",
+      "control": "Pseudonymisation and encryption of personal data",
+      "obligation": "OBL-13",
+      "obligation_title": "Encryption at rest and key management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "5 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(b)",
+      "legacy_ref": "",
+      "control": "Ongoing confidentiality of processing systems",
+      "obligation": "OBL-14",
+      "obligation_title": "Secrets and credential hygiene",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(d)",
+      "legacy_ref": "",
+      "control": "Regularly testing and evaluating security measures",
+      "obligation": "OBL-15",
+      "obligation_title": "Vulnerability management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "3 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(b)",
+      "legacy_ref": "",
+      "control": "Ongoing confidentiality, integrity, availability and resilience",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 33(1)",
+      "legacy_ref": "",
+      "control": "Becoming aware of a personal data breach",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 33",
+      "legacy_ref": "",
+      "control": "Notification of a personal data breach to the supervisory authority",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 34",
+      "legacy_ref": "",
+      "control": "Communication of a breach to the data subject",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(c)",
+      "legacy_ref": "",
+      "control": "Ability to restore availability and access in a timely manner",
+      "obligation": "OBL-18",
+      "obligation_title": "Backup and recovery",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 25(1)",
+      "legacy_ref": "",
+      "control": "Data protection by design",
+      "obligation": "OBL-19",
+      "obligation_title": "Infrastructure guardrails",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 32(1)(b)",
+      "legacy_ref": "",
+      "control": "Ongoing confidentiality of processing systems",
+      "obligation": "OBL-19",
+      "obligation_title": "Infrastructure guardrails",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 6(1)(a)",
+      "legacy_ref": "",
+      "control": "Consent as lawful basis",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 7",
+      "legacy_ref": "",
+      "control": "Conditions for consent",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Directive 2002/58/EC Art. 5(3)",
+      "legacy_ref": "",
+      "control": "Storing or accessing information on terminal equipment (ePrivacy)",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 12(3)",
+      "legacy_ref": "",
+      "control": "Responding to data subject requests within one month",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Arts. 15-22",
+      "legacy_ref": "",
+      "control": "Rights of the data subject",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 7(1)",
+      "legacy_ref": "",
+      "control": "Demonstrating that consent was given",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 7(3)",
+      "legacy_ref": "",
+      "control": "Withdrawal of consent as easy as giving it",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 13(1)(a)-(b)",
+      "legacy_ref": "",
+      "control": "Identity and contact details of the controller and DPO",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Arts. 37-39",
+      "legacy_ref": "",
+      "control": "Data protection officer, where designation is required",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 33(1)",
+      "legacy_ref": "",
+      "control": "Notification within 72 hours",
+      "obligation": "OBL-24",
+      "obligation_title": "Breach notification procedure exists",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise."
+    },
+    {
+      "framework": "gdpr",
+      "ref": "Art. 33(5)",
+      "legacy_ref": "",
+      "control": "Documenting personal data breaches",
+      "obligation": "OBL-24",
+      "obligation_title": "Breach notification procedure exists",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.9",
+      "legacy_ref": "A.7.2.8",
+      "control": "Records related to processing PII",
+      "obligation": "OBL-01",
+      "obligation_title": "The processing record matches the code",
+      "status": "fail",
+      "proof": "code",
+      "summary": "2 open finding(s): Undeclared personal data category; Undeclared processor / third party"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.2",
+      "legacy_ref": "A.7.2.1",
+      "control": "Identify and document purpose",
+      "obligation": "OBL-02",
+      "obligation_title": "Every activity has a specified purpose",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity states its purposes."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.3",
+      "legacy_ref": "A.7.2.2",
+      "control": "Identify lawful basis",
+      "obligation": "OBL-03",
+      "obligation_title": "Every activity has a lawful basis",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity records a lawful basis valid under the selected frameworks."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.8",
+      "legacy_ref": "A.7.4.7",
+      "control": "Retention",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.6",
+      "legacy_ref": "A.7.4.5",
+      "control": "PII de-identification and deletion at the end of processing",
+      "obligation": "OBL-04",
+      "obligation_title": "Retention is defined",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every activity defines retention."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.2",
+      "legacy_ref": "A.7.4.1",
+      "control": "Limit collection",
+      "obligation": "OBL-05",
+      "obligation_title": "Only declared data is collected",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared personal data category"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.5",
+      "legacy_ref": "A.7.4.4",
+      "control": "PII minimization objectives",
+      "obligation": "OBL-05",
+      "obligation_title": "Only declared data is collected",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared personal data category"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.3",
+      "legacy_ref": "A.7.4.2",
+      "control": "Limit processing",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.5",
+      "legacy_ref": "A.7.4.4",
+      "control": "PII minimization objectives",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.25",
+      "legacy_ref": "",
+      "control": "Logging",
+      "obligation": "OBL-06",
+      "obligation_title": "No personal data in logs",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Personal data written to logs"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.3",
+      "legacy_ref": "A.7.3.2",
+      "control": "Determining information for PII principals",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.4",
+      "legacy_ref": "A.7.3.3",
+      "control": "Providing information to PII principals",
+      "obligation": "OBL-07",
+      "obligation_title": "The privacy notice matches actual processing",
+      "status": "fail",
+      "proof": "code",
+      "summary": "The notice omits 1 item(s) the code processes."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.7",
+      "legacy_ref": "A.7.2.6",
+      "control": "Contracts with PII processors",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.5.5",
+      "legacy_ref": "A.7.5.4",
+      "control": "Records of PII disclosures to third parties",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.10",
+      "legacy_ref": "",
+      "control": "Addressing information security within supplier agreements",
+      "obligation": "OBL-08",
+      "obligation_title": "Processors are identified and under contract",
+      "status": "fail",
+      "proof": "code",
+      "summary": "1 open finding(s): Undeclared processor / third party"
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.5.2",
+      "legacy_ref": "A.7.5.1",
+      "control": "Identify basis for PII transfer between jurisdictions",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.5.3",
+      "legacy_ref": "A.7.5.2",
+      "control": "Countries and international organizations to which PII can be transferred",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.5.4",
+      "legacy_ref": "A.7.5.3",
+      "control": "Records of transfer of PII",
+      "obligation": "OBL-09",
+      "obligation_title": "Cross-border transfers are documented",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Every processor has a recorded country and, where required, a transfer mechanism."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.6",
+      "legacy_ref": "A.7.2.5",
+      "control": "Privacy impact assessment",
+      "obligation": "OBL-10",
+      "obligation_title": "High-risk processing has an impact assessment",
+      "status": "pass",
+      "proof": "code",
+      "summary": "Every activity handling high-risk data references an impact assessment."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.4",
+      "legacy_ref": "A.7.2.3",
+      "control": "Determine when and how consent is to be obtained",
+      "obligation": "OBL-11",
+      "obligation_title": "Children's data has verifiable safeguards",
+      "status": "not_applicable",
+      "proof": "attestation",
+      "summary": "No children's data is declared or detected."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.6",
+      "legacy_ref": "A.7.2.5",
+      "control": "Privacy impact assessment",
+      "obligation": "OBL-11",
+      "obligation_title": "Children's data has verifiable safeguards",
+      "status": "not_applicable",
+      "proof": "attestation",
+      "summary": "No children's data is declared or detected."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.4.10",
+      "legacy_ref": "A.7.4.9",
+      "control": "PII transmission controls",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.26",
+      "legacy_ref": "",
+      "control": "Use of cryptography",
+      "obligation": "OBL-12",
+      "obligation_title": "Encryption in transit",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.26",
+      "legacy_ref": "",
+      "control": "Use of cryptography",
+      "obligation": "OBL-13",
+      "obligation_title": "Encryption at rest and key management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "5 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.23",
+      "legacy_ref": "",
+      "control": "Secure authentication",
+      "obligation": "OBL-14",
+      "obligation_title": "Secrets and credential hygiene",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.27",
+      "legacy_ref": "",
+      "control": "Secure development life cycle",
+      "obligation": "OBL-14",
+      "obligation_title": "Secrets and credential hygiene",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.27",
+      "legacy_ref": "",
+      "control": "Secure development life cycle",
+      "obligation": "OBL-15",
+      "obligation_title": "Vulnerability management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "3 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.28",
+      "legacy_ref": "",
+      "control": "Application security requirements",
+      "obligation": "OBL-15",
+      "obligation_title": "Vulnerability management",
+      "status": "pass",
+      "proof": "code",
+      "summary": "3 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.25",
+      "legacy_ref": "",
+      "control": "Logging",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.11",
+      "legacy_ref": "",
+      "control": "Information security incident management planning and preparation",
+      "obligation": "OBL-16",
+      "obligation_title": "Security monitoring and logging",
+      "status": "pass",
+      "proof": "code",
+      "summary": "2 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.11",
+      "legacy_ref": "",
+      "control": "Information security incident management planning and preparation",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.12",
+      "legacy_ref": "",
+      "control": "Response to information security incidents",
+      "obligation": "OBL-17",
+      "obligation_title": "Breach response readiness",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.24",
+      "legacy_ref": "",
+      "control": "Information backup",
+      "obligation": "OBL-18",
+      "obligation_title": "Backup and recovery",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.29",
+      "legacy_ref": "",
+      "control": "Secure system architecture and engineering principles",
+      "obligation": "OBL-19",
+      "obligation_title": "Infrastructure guardrails",
+      "status": "pass",
+      "proof": "code",
+      "summary": "1 piece(s) of repository evidence."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.4",
+      "legacy_ref": "A.7.2.3",
+      "control": "Determine when and how consent is to be obtained",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.5",
+      "legacy_ref": "A.7.2.4",
+      "control": "Obtain and record consent",
+      "obligation": "OBL-20",
+      "obligation_title": "Tracking waits for consent",
+      "status": "attested",
+      "proof": "code",
+      "summary": "Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.2",
+      "legacy_ref": "A.7.3.1",
+      "control": "Determining and fulfilling obligations to PII principals",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.7",
+      "legacy_ref": "A.7.3.6",
+      "control": "Access, correction or erasure",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.10",
+      "legacy_ref": "A.7.3.9",
+      "control": "Handling requests",
+      "obligation": "OBL-21",
+      "obligation_title": "Individuals' rights requests are handled",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.2.5",
+      "legacy_ref": "A.7.2.4",
+      "control": "Obtain and record consent",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.5",
+      "legacy_ref": "A.7.3.4",
+      "control": "Providing mechanism to modify or withdraw consent",
+      "obligation": "OBL-22",
+      "obligation_title": "Consent is recorded and withdrawable",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.1.3.4",
+      "legacy_ref": "A.7.3.3",
+      "control": "Providing information to PII principals",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.4",
+      "legacy_ref": "",
+      "control": "Information security roles and responsibilities",
+      "obligation": "OBL-23",
+      "obligation_title": "A privacy contact is published",
+      "status": "pass",
+      "proof": "manifest",
+      "summary": "Privacy contact recorded: privacy@lendflow.example."
+    },
+    {
+      "framework": "iso27701",
+      "ref": "A.3.12",
+      "legacy_ref": "",
+      "control": "Response to information security incidents",
+      "obligation": "OBL-24",
+      "obligation_title": "Breach notification procedure exists",
+      "status": "attested",
+      "proof": "attestation",
+      "summary": "Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise."
+    }
+  ],
+  "activities": [
+    {
+      "id": "applicant_onboarding",
+      "name": "Loan applicant onboarding and KYC",
+      "owner": "lending-platform",
+      "purposes": [
+        "credit assessment",
+        "KYC under the PML Rules"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legal_obligation"
+      },
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "data_subjects": [
+        "loan applicants"
+      ],
+      "dpia": "DPIA-2026-003",
+      "declared_categories": [
+        "Identity",
+        "Contact",
+        "Government ID"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Government ID",
+        "Identity"
+      ],
+      "logged_categories": [],
+      "declared_processors": [],
+      "detected_processors": [],
+      "detected_flows": [],
+      "paths": [
+        "services/onboarding/**",
+        "web/**"
+      ],
+      "files": [
+        "services/onboarding/kyc.py",
+        "services/onboarding/models.py",
+        "web/signup.tsx"
+      ],
+      "in_sync": true,
+      "open_rules": []
+    },
+    {
+      "id": "repayments",
+      "name": "EMI repayment collection",
+      "owner": "payments",
+      "purposes": [
+        "repayment collection"
+      ],
+      "legal_basis": {
+        "dpdpa": "legitimate_use",
+        "gdpr": "contract"
+      },
+      "retention": "8 years after loan closure (tax and PML records)",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact",
+        "Financial"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Financial",
+        "Location"
+      ],
+      "logged_categories": [
+        "Contact"
+      ],
+      "declared_processors": [
+        {
+          "name": "Razorpay",
+          "country": "IN",
+          "contract": "DPA-2025-011",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "Mixpanel",
+        "Razorpay"
+      ],
+      "detected_flows": [
+        {
+          "processor": "Mixpanel",
+          "categories": [
+            "Contact",
+            "Location"
+          ]
+        },
+        {
+          "processor": "Razorpay",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/payments/**"
+      ],
+      "files": [
+        "services/payments/checkout.js",
+        "services/payments/models.js",
+        "services/payments/refund.js"
+      ],
+      "in_sync": false,
+      "open_rules": [
+        "D002",
+        "D003",
+        "P001"
+      ]
+    },
+    {
+      "id": "reminders",
+      "name": "Repayment reminders",
+      "owner": "growth",
+      "purposes": [
+        "repayment reminders"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legitimate_interests"
+      },
+      "retention": "Message logs kept 90 days",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact"
+      ],
+      "detected_categories": [
+        "Contact"
+      ],
+      "logged_categories": [],
+      "declared_processors": [
+        {
+          "name": "MSG91",
+          "country": "IN",
+          "contract": "DPA-2025-019",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "MSG91"
+      ],
+      "detected_flows": [
+        {
+          "processor": "MSG91",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/notifications/**"
+      ],
+      "files": [
+        "services/notifications/sms.py"
+      ],
+      "in_sync": true,
+      "open_rules": []
+    }
+  ],
+  "inventory": [
+    {
+      "store": "Applicant",
+      "field": "full_name",
+      "data_category": "Identity",
+      "high_risk": false,
+      "file": "services/onboarding/models.py",
+      "line": 8,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Applicant",
+      "field": "email",
+      "data_category": "Contact",
+      "high_risk": false,
+      "file": "services/onboarding/models.py",
+      "line": 9,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Applicant",
+      "field": "phone_number",
+      "data_category": "Contact",
+      "high_risk": false,
+      "file": "services/onboarding/models.py",
+      "line": 10,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Applicant",
+      "field": "date_of_birth",
+      "data_category": "Identity",
+      "high_risk": false,
+      "file": "services/onboarding/models.py",
+      "line": 11,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Applicant",
+      "field": "aadhaar",
+      "data_category": "Government ID",
+      "high_risk": true,
+      "file": "services/onboarding/models.py",
+      "line": 12,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Applicant",
+      "field": "pan_number",
+      "data_category": "Government ID",
+      "high_risk": true,
+      "file": "services/onboarding/models.py",
+      "line": 13,
+      "activity": "applicant_onboarding",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "parser": "python.ast",
+      "confidence": "high"
+    },
+    {
+      "store": "Repayment",
+      "field": "email",
+      "data_category": "Contact",
+      "high_risk": false,
+      "file": "services/payments/models.js",
+      "line": 5,
+      "activity": "repayments",
+      "declared": true,
+      "reaches_logs": true,
+      "sent_to": [
+        "Mixpanel",
+        "Razorpay"
+      ],
+      "retention": "8 years after loan closure (tax and PML records)",
+      "parser": "js_ts.endpoint_heuristic",
+      "confidence": "medium"
+    },
+    {
+      "store": "Repayment",
+      "field": "phone_number",
+      "data_category": "Contact",
+      "high_risk": false,
+      "file": "services/payments/models.js",
+      "line": 6,
+      "activity": "repayments",
+      "declared": true,
+      "reaches_logs": true,
+      "sent_to": [
+        "Mixpanel",
+        "Razorpay"
+      ],
+      "retention": "8 years after loan closure (tax and PML records)",
+      "parser": "js_ts.endpoint_heuristic",
+      "confidence": "medium"
+    },
+    {
+      "store": "Repayment",
+      "field": "upi_id",
+      "data_category": "Financial",
+      "high_risk": false,
+      "file": "services/payments/models.js",
+      "line": 7,
+      "activity": "repayments",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (tax and PML records)",
+      "parser": "js_ts.endpoint_heuristic",
+      "confidence": "medium"
+    },
+    {
+      "store": "Repayment",
+      "field": "razorpay_order",
+      "data_category": "Financial",
+      "high_risk": false,
+      "file": "services/payments/models.js",
+      "line": 8,
+      "activity": "repayments",
+      "declared": true,
+      "reaches_logs": false,
+      "sent_to": [],
+      "retention": "8 years after loan closure (tax and PML records)",
+      "parser": "js_ts.endpoint_heuristic",
+      "confidence": "medium"
+    }
+  ],
+  "manifest_warnings": [],
+  "scan_summary": {
+    "files_scanned": 12,
+    "website_pages_scanned": 0,
+    "personal_data_categories": [
+      "Contact",
+      "Financial",
+      "Government ID",
+      "Identity",
+      "Location"
+    ],
+    "third_parties": [
+      "MSG91",
+      "Mixpanel",
+      "Razorpay"
+    ],
+    "risk_score": 14,
+    "risk_level": "LOW",
+    "risk_findings_score": 3,
+    "risk_exposure_score": 11
+  },
+  "disclaimers": [
+    "Engineering evidence, not legal advice or a certification. A passing check supports a clause; it does not establish compliance with it.",
+    "Static analysis sees the repository, not production. Attested and manual items need review by a privacy professional."
+  ]
+}

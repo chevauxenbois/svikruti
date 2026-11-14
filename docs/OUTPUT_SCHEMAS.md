@@ -148,10 +148,14 @@ Use it for:
 
 ### Risk Score
 
-The summary `risk_score` (0-100) is a severity-tiered bounded model: each
-severity tier saturates independently (CRITICAL cap 55, HIGH 35, MEDIUM 6,
-LOW 1), with cross-layer
-deduplication. Positive (passing) evidence does not increase the score.
+The summary `risk_score` (0-100) is `risk_findings_score` +
+`risk_exposure_score`. Findings are defects (personal data in logs, secrets,
+weak crypto, cloud misconfiguration, consent failures) scored with a
+severity-tiered bounded model: each tier saturates independently (CRITICAL
+cap 55, HIGH 35, MEDIUM 6, LOW 1), with cross-layer deduplication. Exposure
+(0-15) reflects how sensitive the handled data is: 4 per high-risk category,
+1 per other category, 1 per third party up to 4. Inventory evidence (data or
+a processor exists) never counts as a finding. Positive (passing) evidence does not increase the score.
 
 | Band | Level |
 | --- | --- |

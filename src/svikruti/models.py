@@ -34,6 +34,11 @@ class ScanSummary:
     third_parties: List[str] = field(default_factory=list)
     risk_score: int = 0
     risk_level: str = "LOW"
+    # risk_score = risk_findings_score + risk_exposure_score (capped at 100).
+    # Findings: things that are wrong (personal data in logs, secrets, weak crypto, ...).
+    # Exposure: how sensitive the data handled is, however well it is handled (max 15).
+    risk_findings_score: int = 0
+    risk_exposure_score: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -94,6 +99,8 @@ class ScanResult:
     breach_readiness: Dict[str, Any] = field(default_factory=dict)
     assurance_profile: Dict[str, Any] = field(default_factory=dict)
     scan_quality: Dict[str, Any] = field(default_factory=dict)
+    # Result of reconciling privacy.yaml against this scan (empty when the repo has no manifest).
+    privacy_as_code: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def empty(cls, repo_path: Optional[str], url: Optional[str]) -> "ScanResult":
@@ -136,4 +143,5 @@ class ScanResult:
             "breach_readiness": self.breach_readiness,
             "assurance_profile": self.assurance_profile,
             "scan_quality": self.scan_quality,
+            "privacy_as_code": self.privacy_as_code,
         }

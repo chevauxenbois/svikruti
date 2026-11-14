@@ -1,0 +1,70 @@
+id: lgpd
+name: Brazil Lei Geral de Proteção de Dados Pessoais
+short_name: LGPD
+version: "Lei nº 13.709/2018"
+verified: "2026-11-13"
+source: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm
+terms: {controller: controlador, processor: operador, subject: titular, record: registro das operações de tratamento}
+legal_bases: [consent, legal_obligation, public_policy, research, contract, legal_proceedings, protection_of_life, health_protection, legitimate_interests, credit_protection]
+notes: >
+  Article references point to the obligation a check supports. Lawful bases follow Art. 7;
+  sensitive personal data is governed by Art. 11 and needs its own basis.
+controls:
+  OBL-01:
+    - {ref: "Art. 37", title: "Record of personal data processing operations"}
+  OBL-02:
+    - {ref: "Art. 6, I", title: "Purpose principle (finalidade)"}
+    - {ref: "Art. 9, I", title: "Specific purpose of the processing disclosed to the data subject"}
+  OBL-03:
+    - {ref: "Art. 7", title: "Legal bases for processing personal data"}
+    - {ref: "Art. 11", title: "Legal bases for processing sensitive personal data"}
+  OBL-04:
+    - {ref: "Art. 15", title: "End of processing"}
+    - {ref: "Art. 16", title: "Elimination of personal data after the end of processing"}
+  OBL-05:
+    - {ref: "Art. 6, III", title: "Necessity principle (necessidade)"}
+  OBL-06:
+    - {ref: "Art. 6, III", title: "Necessity principle (necessidade)"}
+    - {ref: "Art. 46", title: "Security, technical and administrative measures"}
+  OBL-07:
+    - {ref: "Art. 9", title: "Data subject's right to information about the processing"}
+    - {ref: "Art. 6, VI", title: "Transparency principle"}
+  OBL-08:
+    - {ref: "Art. 39", title: "Operator processes according to the controller's instructions"}
+  OBL-09:
+    - {ref: "Art. 33", title: "International transfer of personal data"}
+  OBL-10:
+    - {ref: "Art. 38", title: "Personal data protection impact report (RIPD)"}
+  OBL-11:
+    - {ref: "Art. 14", title: "Processing of personal data of children and adolescents"}
+  OBL-12:
+    - {ref: "Art. 46", title: "Security, technical and administrative measures"}
+  OBL-13:
+    - {ref: "Art. 46", title: "Security, technical and administrative measures"}
+  OBL-14:
+    - {ref: "Art. 46", title: "Security, technical and administrative measures"}
+  OBL-15:
+    - {ref: "Art. 49", title: "Systems structured to meet security requirements"}
+  OBL-16:
+    - {ref: "Art. 46", title: "Security, technical and administrative measures"}
+  OBL-17:
+    - {ref: "Art. 48", title: "Communication of a security incident to the ANPD and the data subject"}
+  OBL-18:
+    - {ref: "Art. 46", title: "Protection against accidental destruction or loss"}
+  OBL-19:
+    - {ref: "Art. 46, §2", title: "Measures observed from design to execution"}
+    - {ref: "Art. 49", title: "Systems structured to meet security requirements"}
+  OBL-20:
+    - {ref: "Art. 7, I", title: "Consent as legal basis"}
+    - {ref: "Art. 8", title: "Form and conditions of consent"}
+  OBL-21:
+    - {ref: "Art. 18", title: "Rights of the data subject"}
+    - {ref: "Art. 19", title: "Confirmation of existence of and access to personal data"}
+  OBL-22:
+    - {ref: "Art. 8, §2", title: "Controller bears the burden of proving consent"}
+    - {ref: "Art. 8, §5", title: "Consent may be revoked at any time"}
+  OBL-23:
+    - {ref: "Art. 41", title: "Data protection officer (encarregado), identity and contact made public"}
+  OBL-24:
+    - {ref: "Art. 48", title: "Communication of a security incident"}
+    - {ref: "Resolução CD/ANPD nº 15/2024", title: "Security incident communication regulation (three business days)"}
