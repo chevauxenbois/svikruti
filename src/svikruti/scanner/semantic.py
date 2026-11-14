@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
-from svikruti.scanner.code import _code_outside_strings, _file_context, _language_for, iter_source_files
+from svikruti.scanner.code import _ID_SUFFIX_RE, _code_outside_strings, _drop_record_identifiers, _file_context, _language_for, iter_source_files
 from svikruti.scanner.patterns import (
     AMBIGUOUS_SENSITIVE_TERMS,
     CATEGORY_SEVERITY,
@@ -139,6 +139,7 @@ def scan_semantic_evidence(repo_path: str) -> SemanticScanResult:
                 parsed_files += 1
             parser_engines["js_ts.endpoint_heuristic"] = parser_engines.get("js_ts.endpoint_heuristic", 0) + 1
             evidence.extend(_scan_js_ts_semantics(text, rel, path, file_context, seen))
+            evidence.extend(_scan_js_orm_models(text, rel, path, file_context, seen))
         elif suffix == ".java":
             if not tree_engine:
                 parsed_files += 1
@@ -322,7 +323,8 @@ def _python_logged_text(call: ast.Call, assignments: Dict[str, str]) -> Tuple[st
     def visit(node: ast.AST, whole: bool) -> None:
         if isinstance(node, ast.Name):
             direct.append(node.id)
-            if whole and node.id in assignments:
+            # A variable named like a record id is not expanded to what it was read from.
+            if whole and node.id in assignments and not _ID_SUFFIX_RE.fullmatch(node.id):
                 one_hop.append(assignments[node.id])
         elif isinstance(node, ast.Attribute):
             direct.append(node.attr)
@@ -349,13 +351,19 @@ def _python_logged_text(call: ast.Call, assignments: Dict[str, str]) -> Tuple[st
                 visit(child, whole)
         elif isinstance(node, ast.Dict):
             for key, value in zip(node.keys, node.values):
-                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                names_a_record = (isinstance(value, ast.Attribute) and value.attr in {"id", "pk", "uuid"}) or (
+                    isinstance(value, ast.Name) and bool(_ID_SUFFIX_RE.fullmatch(value.id))
+                )
+                if isinstance(key, ast.Constant) and isinstance(key.value, str) and not names_a_record:
                     direct.append(key.value)
                 visit(value, whole)
 
     for value in values:
         visit(value, True)
-    return " ".join(direct), " ".join(one_hop)
+    # `payment.id` contributes "id"; `payment_intent_id` and {"payment": p.id} name a record, not its data.
+    # In the one-hop text, CamelCase names are classes and enums (PaymentMethodResult), not values.
+    hop_text = re.sub(r"\b[A-Z][a-z0-9]+(?:[A-Z][A-Za-z0-9]*)+\b", " ", " ".join(one_hop))
+    return _drop_record_identifiers(" ".join(direct)), _drop_record_identifiers(hop_text)
 
 
 def _python_log_sinks(
@@ -525,7 +533,7 @@ def _scan_js_ts_semantics(
             )
         log_match = JS_LOG_RE.search(line)
         if log_match:
-            for category in _categories_for_text(_code_outside_strings(log_match.group(2))):
+            for category in _categories_for_text(_drop_record_identifiers(_code_outside_strings(log_match.group(2)))):
                 key = f"semantic_js_log:{rel}:{line_number}:{category}"
                 if key in seen:
                     continue
@@ -601,6 +609,84 @@ def _nearest_js_route(prefix: str) -> str:
     return route
 
 
+# ORM model declarations in JS/TS: the object literal (or decorated class) that
+# defines what a table or collection stores.
+_JS_MODEL_BLOCK_RES = (
+    re.compile(r"\.define\(\s*[\"'`](?P<name>\w+)[\"'`]\s*,\s*\{"),                                  # sequelize.define("User", {
+    re.compile(r"\b(?P<name>\w+)\.init\(\s*\{"),                                                    # User.init({ ... }, { sequelize })
+    re.compile(r"\b(?:const|let|var)\s+(?P<name>\w+?)(?:Schema)?\s*=\s*new\s+(?:\w+\.)?Schema\s*(?:<[^>]*>)?\(\s*\{"),  # new mongoose.Schema({
+    re.compile(r"\b(?:pg|mysql|sqlite)Table\(\s*[\"'`](?P<name>\w+)[\"'`]\s*,\s*\{"),                 # drizzle pgTable("users", {
+)
+_JS_DECORATED_FIELD_RE = re.compile(r"@(?:Column|PrimaryColumn|PrimaryGeneratedColumn|Property|Prop)\b[^\n]*\n?\s*(?:(?:public|private|protected|readonly)\s+)*(\w+)\s*[!?]?\s*[:;=]")
+_JS_ENTITY_CLASS_RE = re.compile(r"@(?:Entity|Schema|Table)\b[^\n]*\n(?:\s*@[^\n]*\n)*\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+(\w+)")
+_JS_KEY_RE = re.compile(r"^\s*[\"'`]?([A-Za-z_]\w*)[\"'`]?\s*:")
+
+
+def _scan_js_orm_models(
+    text: str,
+    rel: str,
+    path: Path,
+    file_context: str,
+    seen: Set[str],
+) -> List[Evidence]:
+    """Stored fields declared in Sequelize, Mongoose, Drizzle and TypeORM/MikroORM models."""
+    fields: List[Tuple[str, str, int]] = []  # (model, field, line)
+    for pattern in _JS_MODEL_BLOCK_RES:
+        for match in pattern.finditer(text):
+            depth, position, line = 1, match.end(), text.count("\n", 0, match.end()) + 1
+            line_start = position
+            while position < len(text) and depth > 0:
+                char = text[position]
+                if char in "{[(":
+                    depth += 1
+                elif char in "}])":
+                    depth -= 1
+                elif char == "\n":
+                    line += 1
+                    line_start = position + 1
+                    # A key at the top level of the model literal is a column / path.
+                    if depth == 1:
+                        end = text.find("\n", line_start)
+                        key = _JS_KEY_RE.match(text[line_start : end if end != -1 else len(text)])
+                        if key:
+                            fields.append((match.group("name"), key.group(1), line))
+                position += 1
+            first = _JS_KEY_RE.match(text[match.end() : text.find("\n", match.end()) if "\n" in text[match.end() :] else len(text)])
+            if first:  # sequelize.define("User", { email: DataTypes.STRING, ...
+                fields.append((match.group("name"), first.group(1), text.count("\n", 0, match.end()) + 1))
+    entities = [(m.start(), m.group(1)) for m in _JS_ENTITY_CLASS_RE.finditer(text)]
+    for match in _JS_DECORATED_FIELD_RE.finditer(text):
+        owner = next((name for start, name in reversed(entities) if start < match.start()), "")
+        fields.append((owner, match.group(1), text.count("\n", 0, match.start(1)) + 1))
+
+    evidence: List[Evidence] = []
+    for model, field, line_number in fields:
+        category = _category_for_text(field)
+        if not category:
+            continue
+        key = f"semantic_js_model:{rel}:{model}:{field}"
+        if key in seen:
+            continue
+        seen.add(key)
+        evidence.append(
+            _evidence(
+                kind="semantic_storage_field",
+                label=f"{category} model field",
+                severity=_severity_for_category(category),
+                rel=rel,
+                path=path,
+                line=line_number,
+                category="Storage limitation",
+                detail=f"ORM model `{model or 'entity'}` declares `{field}` as a stored personal-data field.",
+                recommendation="Map this model field to purpose, retention, access control, deletion, and production data-store evidence.",
+                file_context=file_context,
+                detector_id=f"semantic.js.model_field.{normalize_text(category)}",
+                extra={"data_category": category, "field": field, "class": model, "semantic_role": "storage_field"},
+            )
+        )
+    return evidence
+
+
 def _scan_c_style_semantics(
     text: str,
     rel: str,
@@ -674,7 +760,7 @@ def _scan_c_style_semantics(
                 _semantic_context_evidence(
                     # Identifiers and interpolations only: the word "email"
                     # in a log message is not an email address.
-                    _code_outside_strings(line),
+                    _drop_record_identifiers(_code_outside_strings(line)),
                     rel,
                     path,
                     line_number,
@@ -751,7 +837,7 @@ def _scan_dynamic_web_semantics(
                 _semantic_context_evidence(
                     # Identifiers and interpolations only: the word "email"
                     # in a log message is not an email address.
-                    _code_outside_strings(line),
+                    _drop_record_identifiers(_code_outside_strings(line)),
                     rel,
                     path,
                     line_number,

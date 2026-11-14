@@ -290,6 +290,43 @@ class LogSinkPrecisionTests(unittest.TestCase):
         self.assertEqual(self._log_categories("function f(u) {\n  console.log(`sending email to ${u.email}`);\n}\n", "f.js"), ["Contact"])
         self.assertEqual(self._log_categories("def f(user)\n  Rails.logger.info \"phone=#{user.phone_number}\"\nend\n", "f.rb"), ["Contact"])
 
+    def test_closed_log_call_does_not_claim_later_lines(self):
+        # Found by reviewing real findings on saleor: a log call that had already
+        # closed was "still open" for the def / raise / call that followed it.
+        source = (
+            "def f(order, user_email):\n"
+            "    logger.warning('Multiple users returned for single sub ID')\n"
+            "    user = User.objects.get_or_create(\n"
+            "        email=user_email,\n"
+            "    )\n"
+            "    logger.warning(\n"
+            "        'Failed to complete checkout %s.', order.pk\n"
+            "    )\n"
+            "\n"
+            "def g(\n"
+            "    phone_number: str, home_address: str\n"
+            "):\n"
+            "    pass\n"
+        )
+        self.assertEqual(self._log_categories(source), [])
+
+    def test_record_ids_and_owner_names_are_not_the_data(self):
+        ids = (
+            "def f(payment, payment_intent_id, payment_information):\n"
+            "    logger.warning('not found', extra={'payment_intent': payment_intent_id})\n"
+            "    logger.exception('void failed %s, %s', payment.id, payment.psp_reference)\n"
+            "    logger.info('order', extra={'order_id': payment.order_id})\n"
+            "    logger.error(\n"
+            "        'gateway %s unavailable',\n"
+            "        payment_information.gateway,\n"
+            "    )\n"
+        )
+        self.assertEqual(self._log_categories(ids), [])
+        self.assertEqual(self._log_categories("function f(payment) {\n  console.log('paid', payment.id, payment.orderId);\n}\n", "f.js"), [])
+        # Identifiers that are themselves personal data still count, and so does the leaf of a chain.
+        real = "def f(user, order):\n    logger.info('upi %s device %s', user.upi_id, user.device_id)\n    print(order.customer.email)\n"
+        self.assertEqual(self._log_categories(real), ["Contact", "Device", "Financial"])
+
     def test_multiline_log_call_is_flagged_and_neighbour_line_is_not(self):
         flagged = "function f(req) {\n  console.log(\n    'refund',\n    req.body.phone_number\n  );\n}\n"
         self.assertEqual(self._log_categories(flagged, "f.js"), ["Contact"])
@@ -336,6 +373,40 @@ class ProcessorFlowTests(unittest.TestCase):
             }
         )
         self.assertEqual(flows, [("b.py", 6, "Contact", "Razorpay", "one_hop"), ("s.py", 5, "Contact", "MSG91", "direct")])
+
+    def test_injected_and_instance_held_clients(self):
+        flows = self._flows(
+            {
+                "pay.py": 'import razorpay\n\nclass Gateway:\n    def __init__(self):\n        self.client = razorpay.Client(auth=(K, S))\n\n    def charge(self, user):\n        self.client.order.create({"email": user.email, "amount": 1})\n',
+                "svc.ts": 'import Stripe from "stripe";\n\nexport class Billing {\n  constructor(private readonly stripe: Stripe, private db: Db) {}\n\n  async createCustomer(user: User) {\n    return this.stripe.customers.create({ email: user.email, name: user.full_name });\n  }\n}\n',
+                "Svc.java": 'import com.razorpay.RazorpayClient;\n\npublic class PayService {\n  private final RazorpayClient razorpayClient;\n\n  public void pay(User u) {\n    razorpayClient.orders.create(Map.of("email", u.getEmail()));\n  }\n}\n',
+                "inj.py": 'from mixpanel import Mixpanel\n\ndef track_signup(mp: Mixpanel, user):\n    mp.track(user.id, "signup", {"email": user.email})\n',
+                "h.go": 'package x\nimport razorpay "github.com/razorpay/razorpay-go"\ntype Svc struct {\n\trzp *razorpay.Client\n}\nfunc (s *Svc) Pay(u User) {\n\ts.rzp.Order.Create(map[string]interface{}{"phone_number": u.Phone}, nil)\n}\n',
+            }
+        )
+        self.assertEqual(
+            [(f[0], f[2], f[3]) for f in flows],
+            [
+                ("Svc.java", "Contact", "Razorpay"),
+                ("h.go", "Contact", "Razorpay"),
+                ("inj.py", "Contact", "Mixpanel"),
+                ("pay.py", "Contact", "Razorpay"),
+                ("svc.ts", "Contact", "Stripe"),
+                ("svc.ts", "Identity", "Stripe"),
+            ],
+        )
+
+    def test_vendor_data_objects_and_record_ids_are_not_flows(self):
+        # A parameter typed as the vendor's data object is a response, not a client;
+        # passing an id is not passing the record.
+        flows = self._flows(
+            {
+                "hooks.py": "import stripe\nfrom stripe.stripe_object import StripeObject\n\ndef handle(payment_intent: StripeObject, payment):\n"
+                "    update(payment, payment_intent.amount)\n    stripe.PaymentIntent.retrieve(payment_intent_id)\n"
+                "    stripe.Refund.create(payment_intent=payment.intent_id, metadata={'payment': payment.id})\n"
+            }
+        )
+        self.assertEqual(flows, [])
 
     def test_vendor_response_is_not_followed(self):
         # `order` is what Razorpay returned. Saving it next to an email is not sending the email to Razorpay.
@@ -458,6 +529,29 @@ class RiskScoreTests(unittest.TestCase):
         bad = run_scan("examples/realistic", None).summary
         self.assertIn(bad.risk_level, {"HIGH", "CRITICAL"})
         self.assertGreater(bad.risk_findings_score, 50)
+
+    def test_documentation_placeholders_attribution_and_comments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "README.md").write_text("Send pings to `your-uuid-here@your-hc-domain.com`. Ask priya.sharma@lentra-demo.io.\n", encoding="utf-8")
+            (Path(tmp) / "wasm.ts").write_text(
+                "/**\n * @author Ebrahim B <ebrahim@gnu.org>\n */\n// length 40 to align with the HEX length of SHA-1 (which is 160 bit)\n"
+                "const sample = 'a@b.com';\nconst owner = 'priya.sharma@lentra-demo.io';\nconst digest = crypto.createHash('sha1');\n",
+                encoding="utf-8",
+            )
+            scan = run_scan(tmp, None)
+            literals = {(item.file, item.line): item.severity for item in scan.evidence if item.kind == "literal_personal_data"}
+            self.assertEqual(literals, {("README.md", 1): "LOW", ("wasm.ts", 2): "LOW", ("wasm.ts", 5): "LOW", ("wasm.ts", 6): "HIGH"})
+            self.assertEqual([item.line for item in scan.evidence if item.kind == "weak_crypto"], [7])
+
+    def test_secret_references_are_not_secrets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "config.toml").write_text(
+                'secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"\napi_key = "<your-api-key>"\nclient_secret = "changeme"\n'
+                'client_secret = "q7Rk2Vt9Xw4Lm8Pz3Hn6Bc1Dj5Fg0Ys"\n',
+                encoding="utf-8",
+            )
+            lines = sorted(item.line for item in run_scan(tmp, None).evidence if item.kind == "secret_exposure")
+            self.assertEqual(lines, [4])
 
     def test_role_mailboxes_and_lock_files_are_not_exposure(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -647,6 +741,65 @@ class FingerprintTests(unittest.TestCase):
         self.assertEqual((diff["new"], diff["resolved"]), ([], []))
 
 
+class InventoryTests(unittest.TestCase):
+    """Which table, which column, and where that category goes."""
+
+    def test_inventory_joins_fields_to_the_record(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            shutil.copy(DRIFT_FILE, repo / "services/payments/refund.js")
+            result = _check(repo)
+            rows = {(row["store"], row["field"]): row for row in result.inventory}
+            aadhaar = rows[("Applicant", "aadhaar")]
+            self.assertEqual((aadhaar["data_category"], aadhaar["high_risk"], aadhaar["activity"], aadhaar["declared"]), ("Government ID", True, "applicant_onboarding", True))
+            self.assertEqual(aadhaar["file"], "services/onboarding/models.py")
+            email = rows[("Repayment", "email")]   # Sequelize model in a .js file
+            self.assertEqual((email["activity"], email["reaches_logs"], email["sent_to"]), ("repayments", True, ["Mixpanel", "Razorpay"]))
+            files = write_check_pack(result, str(Path(tmp) / "out"))
+            csv_text = Path(files["inventory"]).read_text(encoding="utf-8")
+            self.assertIn("Applicant,pan_number,Government ID,yes,services/onboarding/models.py", csv_text)
+            self.assertIn("Data inventory (", render_check_html(result))
+
+    def test_inventory_without_manifest_and_container_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "inv.csv"
+            self.assertEqual(main(["scan", "--repo", "examples/realistic", "--no-manifest", "--out", str(Path(tmp) / "r.html"), "--inventory-out", str(out)]), 0)
+            text = out.read_text(encoding="utf-8")
+            self.assertIn("customers,aadhaar_number,Government ID,yes,customer_schema.sql", text)   # table name from CREATE TABLE
+            self.assertIn("Patient,diagnosis,Health,yes,django_patient.py", text)
+            self.assertIn("no manifest", text)
+
+    def test_js_orm_models_are_stored_fields(self):
+        from svikruti.scanner.semantic import scan_semantic_evidence
+
+        files = {
+            "seq.js": 'const Repayment = sequelize.define("Repayment", {\n  email: DataTypes.STRING,\n  phone_number: { type: DataTypes.STRING, allowNull: false },\n  amount: DataTypes.INTEGER,\n});\n',
+            "mongo.ts": "const userSchema = new mongoose.Schema({\n  full_name: String,\n  aadhaar: { type: String, select: false },\n});\n",
+            "drizzle.ts": 'export const users = pgTable("users", {\n  id: serial("id"),\n  email: text("email").notNull(),\n});\n',
+            "entity.ts": "@Entity()\nexport class Patient {\n  @Column()\n  email: string;\n\n  @Column({ nullable: true })\n  diagnosis?: string;\n\n  notStored: string;\n}\n",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, text in files.items():
+                (Path(tmp) / name).write_text(text, encoding="utf-8")
+            found = sorted(
+                (e.file, e.metadata.get("class"), e.metadata["field"], e.metadata["data_category"])
+                for e in scan_semantic_evidence(tmp).evidence
+                if e.metadata.get("semantic_role") == "storage_field"
+            )
+        self.assertEqual(
+            found,
+            [
+                ("drizzle.ts", "users", "email", "Contact"),
+                ("entity.ts", "Patient", "diagnosis", "Health"),
+                ("entity.ts", "Patient", "email", "Contact"),
+                ("mongo.ts", "user", "aadhaar", "Government ID"),
+                ("mongo.ts", "user", "full_name", "Identity"),
+                ("seq.js", "Repayment", "email", "Contact"),
+                ("seq.js", "Repayment", "phone_number", "Contact"),
+            ],
+        )
+
+
 class SchemaAndToolingTests(unittest.TestCase):
     def test_committed_schema_matches_the_loader(self):
         from svikruti.pac.schema import manifest_schema
@@ -719,6 +872,18 @@ class GovernanceAppImportTests(unittest.TestCase):
         self.assertTrue(any(title.startswith("Complete the processing record") for title in titles))
         self.assertIn("Record the contract / DPA for Razorpay", titles)
         self.assertTrue(all(v["kwargs"]["dpa_status"] == "NOT_STARTED" for v in parsed["vendors"]))
+
+    def test_upload_routing(self):
+        route = self.module.parse_upload
+        self.assertEqual(len(route("privacy.yaml", (EXAMPLE / "privacy.yaml").read_bytes())["ropa"]), 3)
+        as_json = json.dumps(__import__("yaml").safe_load((EXAMPLE / "privacy.yaml").read_text(encoding="utf-8")), default=str)
+        self.assertEqual(len(route("privacy.json", as_json)["vendors"]), 2)
+        report = route("report.json", Path("examples/sample-report.json").read_bytes())
+        self.assertGreaterEqual(len(report["ropa"]), 1)
+        self.assertGreaterEqual(len(route("sample-vendors.csv", Path("examples/sample-vendors.csv").read_bytes())["vendors"]), 1)
+        self.assertGreaterEqual(len(route("sample-actions.csv", Path("examples/sample-actions.csv").read_bytes())["actions"]), 1)
+        self.assertGreaterEqual(len(route("sample-ropa.csv", Path("examples/sample-ropa.csv").read_bytes())["ropa"]), 1)
+        self.assertIn("unrecognized", route("notes.docx", b"x")["note"])
 
     def test_manifest_detection_and_bad_input(self):
         self.assertTrue(self.module.looks_like_manifest('{"version": 1, "processing_activities": []}'))

@@ -1,0 +1,11 @@
+Store (table / model),Field,Data Category,High Risk,File,Line,Processing Activity,Category Declared,Category Reaches Logs (activity),Category Sent To (activity),Retention,Parser,Confidence
+Applicant,full_name,Identity,no,services/onboarding/models.py,8,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Applicant,email,Contact,no,services/onboarding/models.py,9,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Applicant,phone_number,Contact,no,services/onboarding/models.py,10,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Applicant,date_of_birth,Identity,no,services/onboarding/models.py,11,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Applicant,aadhaar,Government ID,yes,services/onboarding/models.py,12,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Applicant,pan_number,Government ID,yes,services/onboarding/models.py,13,applicant_onboarding,yes,no,,"8 years after loan closure (PML Rules), then erased",python.ast,high
+Repayment,email,Contact,no,services/payments/models.js,5,repayments,yes,yes,Mixpanel; Razorpay,8 years after loan closure (tax and PML records),js_ts.endpoint_heuristic,medium
+Repayment,phone_number,Contact,no,services/payments/models.js,6,repayments,yes,yes,Mixpanel; Razorpay,8 years after loan closure (tax and PML records),js_ts.endpoint_heuristic,medium
+Repayment,upi_id,Financial,no,services/payments/models.js,7,repayments,yes,no,,8 years after loan closure (tax and PML records),js_ts.endpoint_heuristic,medium
+Repayment,razorpay_order,Financial,no,services/payments/models.js,8,repayments,yes,no,,8 years after loan closure (tax and PML records),js_ts.endpoint_heuristic,medium

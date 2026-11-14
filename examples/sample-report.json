@@ -1,6 +1,6 @@
 {
   "product": "Svikruti PrivacyOps Evidence Scanner",
-  "generated_at": "2026-11-13T08:32:58.296907+00:00",
+  "generated_at": "2026-11-13T08:54:33.832536+00:00",
   "repo_path": "examples/realistic",
   "url": null,
   "summary": {
@@ -19,9 +19,9 @@
     "third_parties": [
       "Razorpay"
     ],
-    "risk_score": 90,
+    "risk_score": 85,
     "risk_level": "CRITICAL",
-    "risk_findings_score": 75,
+    "risk_findings_score": 70,
     "risk_exposure_score": 15
   },
   "evidence": [
@@ -938,46 +938,46 @@
       }
     },
     {
-      "kind": "logging_risk",
+      "kind": "storage_point",
       "label": "Identity data signal",
       "severity": "MEDIUM",
       "source": "code",
       "detail": "Detected terms full_name in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "recommendation": "Document storage location, retention, access controls, and deletion process for this data category.",
       "file": "express_checkout.js",
       "line": 19,
       "category": "Notice transparency",
       "metadata": {
-        "detector_id": "code.logging_risk.identity",
-        "confidence": "high",
-        "evidence_ref": "express_checkout.js:19:code.logging_risk.identity",
+        "detector_id": "code.storage_point.identity",
+        "confidence": "medium",
+        "evidence_ref": "express_checkout.js:19:code.storage_point.identity",
         "file_context": "application",
         "language": "JavaScript",
         "data_category": "Identity",
         "matched_terms": [
           "full_name"
         ],
-        "context_type": "logging_risk",
+        "context_type": "storage_point",
         "frameworks": [
           "Express"
         ],
-        "fingerprint": "svk1:8413408d0a073a89b5fcdc14"
+        "fingerprint": "svk1:bd586271779b4dd08e85808f"
       }
     },
     {
-      "kind": "logging_risk",
+      "kind": "personal_data_reference",
       "label": "Contact data signal",
-      "severity": "HIGH",
+      "severity": "MEDIUM",
       "source": "code",
       "detail": "Detected terms email, email_address in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
       "file": "express_checkout.js",
       "line": 20,
       "category": "Consent and notice",
       "metadata": {
-        "detector_id": "code.logging_risk.contact",
-        "confidence": "high",
-        "evidence_ref": "express_checkout.js:20:code.logging_risk.contact",
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "express_checkout.js:20:code.personal_data_reference.contact",
         "file_context": "application",
         "language": "JavaScript",
         "data_category": "Contact",
@@ -985,54 +985,54 @@
           "email",
           "email_address"
         ],
-        "context_type": "logging_risk",
+        "context_type": "personal_data_reference",
         "frameworks": [
           "Express"
         ],
-        "fingerprint": "svk1:8a4cc4fc7f5dfa8f1194b1ef"
+        "fingerprint": "svk1:2e017eb20546d68b541a832b-1"
       }
     },
     {
-      "kind": "logging_risk",
+      "kind": "personal_data_reference",
       "label": "Location data signal",
-      "severity": "HIGH",
+      "severity": "MEDIUM",
       "source": "code",
       "detail": "Detected terms address in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
       "file": "express_checkout.js",
       "line": 20,
       "category": "Purpose limitation",
       "metadata": {
-        "detector_id": "code.logging_risk.location",
-        "confidence": "high",
-        "evidence_ref": "express_checkout.js:20:code.logging_risk.location",
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "low",
+        "evidence_ref": "express_checkout.js:20:code.personal_data_reference.location",
         "file_context": "application",
         "language": "JavaScript",
         "data_category": "Location",
         "matched_terms": [
           "address"
         ],
-        "context_type": "logging_risk",
+        "context_type": "personal_data_reference",
         "frameworks": [
           "Express"
         ],
-        "fingerprint": "svk1:3185c5c45246bec365d2754a"
+        "fingerprint": "svk1:ab83653e364802d25dd26813-1"
       }
     },
     {
-      "kind": "logging_risk",
+      "kind": "personal_data_reference",
       "label": "Contact data signal",
-      "severity": "HIGH",
+      "severity": "MEDIUM",
       "source": "code",
       "detail": "Detected terms mobile, mobile_number in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
       "file": "express_checkout.js",
       "line": 21,
       "category": "Consent and notice",
       "metadata": {
-        "detector_id": "code.logging_risk.contact",
-        "confidence": "high",
-        "evidence_ref": "express_checkout.js:21:code.logging_risk.contact",
+        "detector_id": "code.personal_data_reference.contact",
+        "confidence": "medium",
+        "evidence_ref": "express_checkout.js:21:code.personal_data_reference.contact",
         "file_context": "application",
         "language": "JavaScript",
         "data_category": "Contact",
@@ -1040,27 +1040,27 @@
           "mobile",
           "mobile_number"
         ],
-        "context_type": "logging_risk",
+        "context_type": "personal_data_reference",
         "frameworks": [
           "Express"
         ],
-        "fingerprint": "svk1:bab1b98b098a826282675fcf"
+        "fingerprint": "svk1:90db92896ba651181809e4c3-1"
       }
     },
     {
-      "kind": "logging_risk",
+      "kind": "personal_data_reference",
       "label": "Location data signal",
-      "severity": "HIGH",
+      "severity": "MEDIUM",
       "source": "code",
       "detail": "Detected terms address, address_line in code context.",
-      "recommendation": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention.",
+      "recommendation": "Review purpose, notice coverage, retention, access controls, and minimization for this data element.",
       "file": "express_checkout.js",
       "line": 22,
       "category": "Purpose limitation",
       "metadata": {
-        "detector_id": "code.logging_risk.location",
-        "confidence": "high",
-        "evidence_ref": "express_checkout.js:22:code.logging_risk.location",
+        "detector_id": "code.personal_data_reference.location",
+        "confidence": "medium",
+        "evidence_ref": "express_checkout.js:22:code.personal_data_reference.location",
         "file_context": "application",
         "language": "JavaScript",
         "data_category": "Location",
@@ -1068,11 +1068,11 @@
           "address",
           "address_line"
         ],
-        "context_type": "logging_risk",
+        "context_type": "personal_data_reference",
         "frameworks": [
           "Express"
         ],
-        "fingerprint": "svk1:4d54be20f79403a80ea0dd03"
+        "fingerprint": "svk1:98695b60ced84a38f5fe519c-1"
       }
     },
     {
@@ -4691,7 +4691,6 @@
       "purposes": [
         "Application processing",
         "Collection through product or website interface",
-        "Operational logging or debugging",
         "Storage in application data store"
       ],
       "systems_or_sources": [
@@ -4718,11 +4717,10 @@
         "django_patient.py:5:code.storage_point.identity",
         "django_patient.py:5:semantic.python.model_field.identity",
         "express_checkout.js:18:semantic.js.db_sink.identity",
+        "express_checkout.js:19:code.storage_point.identity",
         "schema.prisma:3:semantic.prisma.schema_field.identity"
       ],
-      "logging_locations": [
-        "express_checkout.js:19:code.logging_risk.identity"
-      ],
+      "logging_locations": [],
       "third_parties": [],
       "dpdpa_basis": "Consent or legitimate use to be confirmed",
       "consent_required": "To be confirmed",
@@ -4751,7 +4749,7 @@
         "django_patient.py:5:code.storage_point.identity",
         "django_patient.py:5:semantic.python.model_field.identity",
         "express_checkout.js:18:semantic.js.db_sink.identity",
-        "express_checkout.js:19:code.logging_risk.identity",
+        "express_checkout.js:19:code.storage_point.identity",
         "express_checkout.js:6:semantic.js.request_body.identity",
         "express_checkout.js:7:code.personal_data_reference.identity",
         "react_signup.tsx:8:code.collection_point.identity",
@@ -4837,8 +4835,6 @@
       "logging_locations": [
         "express_checkout.js:16:code.logging_risk.contact",
         "express_checkout.js:16:semantic.js.log_sink.contact",
-        "express_checkout.js:20:code.logging_risk.contact",
-        "express_checkout.js:21:code.logging_risk.contact",
         "rails_students.rb:3:code.logging_risk.contact",
         "rails_students.rb:3:semantic.ruby.log_sink.contact"
       ],
@@ -4879,8 +4875,8 @@
         "express_checkout.js:16:code.logging_risk.contact",
         "express_checkout.js:16:semantic.js.log_sink.contact",
         "express_checkout.js:18:semantic.js.db_sink.contact",
-        "express_checkout.js:20:code.logging_risk.contact",
-        "express_checkout.js:21:code.logging_risk.contact",
+        "express_checkout.js:20:code.personal_data_reference.contact",
+        "express_checkout.js:21:code.personal_data_reference.contact",
         "express_checkout.js:6:semantic.js.request_body.contact",
         "express_checkout.js:8:code.personal_data_reference.contact",
         "express_checkout.js:9:code.personal_data_reference.contact",
@@ -5044,9 +5040,7 @@
         "express_checkout.js:18:semantic.js.db_sink.location"
       ],
       "logging_locations": [
-        "express_checkout.js:16:code.logging_risk.location",
-        "express_checkout.js:20:code.logging_risk.location",
-        "express_checkout.js:22:code.logging_risk.location"
+        "express_checkout.js:16:code.logging_risk.location"
       ],
       "third_parties": [],
       "dpdpa_basis": "Consent or legitimate use to be confirmed",
@@ -5077,8 +5071,8 @@
         "express_checkout.js:11:code.personal_data_reference.location",
         "express_checkout.js:16:code.logging_risk.location",
         "express_checkout.js:18:semantic.js.db_sink.location",
-        "express_checkout.js:20:code.logging_risk.location",
-        "express_checkout.js:22:code.logging_risk.location",
+        "express_checkout.js:20:code.personal_data_reference.location",
+        "express_checkout.js:22:code.personal_data_reference.location",
         "express_checkout.js:23:code.personal_data_reference.location",
         "express_checkout.js:6:semantic.js.request_body.location",
         "express_checkout.js:8:code.personal_data_reference.location",
@@ -6710,8 +6704,6 @@
         "evidence_refs": [
           17,
           30,
-          34,
-          36,
           111,
           121
         ]
@@ -6728,6 +6720,8 @@
           20,
           23,
           25,
+          34,
+          36,
           42,
           47,
           49,
@@ -6939,14 +6933,6 @@
       {
         "source": "system:application",
         "target": "data:Identity",
-        "label": "logs",
-        "evidence_refs": [
-          33
-        ]
-      },
-      {
-        "source": "system:application",
-        "target": "data:Identity",
         "label": "processes",
         "evidence_refs": [
           22,
@@ -6962,6 +6948,7 @@
         "evidence_refs": [
           1,
           9,
+          33,
           98,
           109,
           126,
@@ -6987,9 +6974,7 @@
         "target": "data:Location",
         "label": "logs",
         "evidence_refs": [
-          32,
-          35,
-          37
+          32
         ]
       },
       {
@@ -7000,6 +6985,8 @@
           24,
           26,
           27,
+          35,
+          37,
           38,
           43,
           48,
@@ -7081,9 +7068,7 @@
           "express_checkout.js",
           "schema.prisma"
         ],
-        "logging_risks": [
-          "express_checkout.js"
-        ],
+        "logging_risks": [],
         "third_parties": [],
         "notice_status": "covered",
         "dpdpa_obligations": [
@@ -7093,9 +7078,7 @@
         "dpdpa_references": [
           "DPDP Act 2023, Sec. 5 (Notice)"
         ],
-        "remediation": [
-          "Mask or remove Identity data from logs in express_checkout.js."
-        ]
+        "remediation": []
       },
       {
         "data_category": "Contact",
@@ -7501,26 +7484,6 @@
         ],
         "artifact": "Logging redaction control",
         "priority": "P0",
-        "acceptance_criteria": [
-          "Personal data is masked, hashed, removed, or justified in logs.",
-          "Log retention is documented.",
-          "Regression test or code review evidence is attached."
-        ]
-      },
-      {
-        "title": "Reduce Identity logging exposure",
-        "control_area": "Security safeguards",
-        "dpdpa_reference": "DPDP Act 2023, Sec. 8(5) (Reasonable security safeguards)",
-        "severity": "HIGH",
-        "owner": "Engineering / Security",
-        "status": "Open",
-        "due": "Before launch / next release",
-        "why": "Personal data appears near logging statements.",
-        "evidence": [
-          "express_checkout.js"
-        ],
-        "artifact": "Logging redaction control",
-        "priority": "P1",
         "acceptance_criteria": [
           "Personal data is masked, hashed, removed, or justified in logs.",
           "Log retention is documented.",

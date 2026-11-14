@@ -986,7 +986,7 @@ def _top_metrics(st: Any, report: Dict[str, Any]) -> None:
     failing = sum(1 for item in controls if item.get("status") == "fail")
     missing = sum(1 for item in controls if item.get("status") == "missing")
     metrics = [
-        ("Risk", summary.get("risk_level", "UNKNOWN"), f"{summary.get('risk_score', 0)}/100", _metric_tone(str(summary.get("risk_level", "")))),
+        ("Risk", summary.get("risk_level", "UNKNOWN"), f"{summary.get('risk_score', 0)}/100 ({summary.get('risk_findings_score', 0)} findings + {summary.get('risk_exposure_score', 0)} exposure)", _metric_tone(str(summary.get("risk_level", "")))),
         ("Breach", str(breach.get("posture", "unknown")).replace("_", " ").title(), f"{breach.get('score', 'n/a')}/100", "sv-metric-fail" if breach.get("posture") != "ready" else "sv-metric-pass"),
         ("Controls", len(controls), f"{failing} fail / {missing} missing", "sv-metric-fail" if failing else "sv-metric-missing" if missing else "sv-metric-pass"),
         ("Evidence", len(report.get("evidence", [])), "items", "sv-metric-pass"),

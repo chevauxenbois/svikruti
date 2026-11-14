@@ -64,13 +64,14 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--breach-out", help="Optional breach-readiness Markdown output path.")
     scan.add_argument("--notice-patch-out", help="Optional privacy notice patch draft Markdown output path.")
     scan.add_argument("--issues-out", help="Optional copy-ready GitHub/Jira issue pack Markdown output path.")
+    scan.add_argument("--inventory-out", help="Optional field-level data inventory CSV (table/model, field, category, location).")
     scan.add_argument(
         "--evidence-pack",
         metavar="DIR",
         help=(
             "Write the full artifact set into DIR with default names (report.html, report.json, "
             "report.sarif, ropa.csv, actions.csv, vendors.csv, controls.csv, breach-readiness.md, "
-            "notice-patch.md, fix-pack.md). Explicit individual output flags override the matching pack file. "
+            "notice-patch.md, fix-pack.md, data-inventory.csv). Explicit individual output flags override the matching pack file. "
             "DIR is created if missing."
         ),
     )
@@ -278,6 +279,10 @@ def main(argv: list[str] | None = None) -> int:
             write_notice_patch(result, args.notice_patch_out)
         if args.issues_out:
             write_issues_markdown(result, args.issues_out)
+        if args.inventory_out:
+            from svikruti.pac.inventory import build_inventory, write_inventory_csv
+
+            write_inventory_csv(check_result.inventory if check_result is not None else build_inventory(result), args.inventory_out)
         if args.ai_out:
             write_ai_markdown(result, args.ai_out)
         if args.save_history:
@@ -519,6 +524,7 @@ _EVIDENCE_PACK_DEFAULTS = (
     ("breach_out", "breach-readiness.md"),
     ("notice_patch_out", "notice-patch.md"),
     ("issues_out", "fix-pack.md"),
+    ("inventory_out", "data-inventory.csv"),
 )
 
 

@@ -331,15 +331,23 @@ OSS projects (July 2026, default install, no AI):
 | [healthchecks](https://github.com/healthchecks/healthchecks) | Uptime alerting (real contact data) | 952 | 42 MEDIUM | 141 | ~84% (44 sampled) |
 | [saleor](https://github.com/saleor/saleor) | E-commerce platform (heavy PII) | 4,528 | 60 HIGH | 678 | ~80% (41 sampled) |
 
-Those figures are from 0.8.x. The 0.9.0 risk score separates defects from
-data exposure, so its numbers are lower and not comparable (November 2026,
-default install, finding counts and precision not re-reviewed):
+Those figures are from 0.8.x. For 0.9.0 the same repositories were re-scanned
+and every CRITICAL and HIGH defect finding was read by hand (November 2026,
+default install). The review found a bug in multi-line log detection and
+three classes of false positive (record ids treated as data, placeholder and
+documentation emails, weak-hash names in comments). After fixing them:
 
-| Repository | Files | Risk score (0.9.0) | Findings + exposure |
-| --- | --- | --- | --- |
-| excalidraw | 838 | 33 MEDIUM | 27 + 6 |
-| healthchecks | 958 | 27 MEDIUM | 22 + 5 |
-| saleor | 4,638 | 49 MEDIUM | 37 + 12 |
+| Repository | Files | Risk score | CRITICAL+HIGH defects before the fixes | After | What remains |
+| --- | --- | --- | --- | --- | --- |
+| excalidraw | 838 | 25 MEDIUM | 4 | 1 | A search API key in docs config |
+| healthchecks | 958 | 23 LOW | 11 | 8 | SHA-1 hashing (6), wildcard CORS (2) |
+| saleor | 4,638 | 23 LOW | 29 | 2 | MD5 used for cache keys (2) |
+
+All 11 remaining findings match what the code does; whether SHA-1 or MD5 is
+acceptable in each place is a judgement call. Recall was not measured: a grep
+for logging calls that mention personal fields in saleor found none the
+scanner missed, which is weak evidence, not a recall figure. The risk score
+separates defects from data exposure and is not comparable with 0.8.x.
 
 How to read this:
 

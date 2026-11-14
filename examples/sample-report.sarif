@@ -217,19 +217,6 @@
               }
             },
             {
-              "id": "svikruti.logging_risk.notice_transparency",
-              "name": "svikruti_logging_risk_notice_transparency",
-              "shortDescription": {
-                "text": "Identity data signal"
-              },
-              "fullDescription": {
-                "text": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
-              },
-              "help": {
-                "text": "Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
-              }
-            },
-            {
               "id": "svikruti.personal_data_reference.security_safeguards",
               "name": "svikruti_personal_data_reference_security_safeguards",
               "shortDescription": {
@@ -1424,10 +1411,10 @@
           }
         },
         {
-          "ruleId": "svikruti.logging_risk.notice_transparency",
+          "ruleId": "svikruti.storage_point.notice_transparency",
           "level": "warning",
           "message": {
-            "text": "Detected terms full_name in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+            "text": "Detected terms full_name in code context. Recommendation: Document storage location, retention, access controls, and deletion process for this data category."
           },
           "locations": [
             {
@@ -1442,19 +1429,19 @@
             }
           ],
           "partialFingerprints": {
-            "svikrutiFinding/v1": "svk1:8413408d0a073a89b5fcdc14"
+            "svikrutiFinding/v1": "svk1:bd586271779b4dd08e85808f"
           },
           "properties": {
             "severity": "MEDIUM",
             "source": "code",
-            "kind": "logging_risk"
+            "kind": "storage_point"
           }
         },
         {
-          "ruleId": "svikruti.logging_risk.consent_and_notice",
-          "level": "error",
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
           "message": {
-            "text": "Detected terms email, email_address in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+            "text": "Detected terms email, email_address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
@@ -1469,19 +1456,19 @@
             }
           ],
           "partialFingerprints": {
-            "svikrutiFinding/v1": "svk1:8a4cc4fc7f5dfa8f1194b1ef"
+            "svikrutiFinding/v1": "svk1:2e017eb20546d68b541a832b-1"
           },
           "properties": {
-            "severity": "HIGH",
+            "severity": "MEDIUM",
             "source": "code",
-            "kind": "logging_risk"
+            "kind": "personal_data_reference"
           }
         },
         {
-          "ruleId": "svikruti.logging_risk.purpose_limitation",
-          "level": "error",
+          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
+          "level": "warning",
           "message": {
-            "text": "Detected terms address in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+            "text": "Detected terms address in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
@@ -1496,19 +1483,19 @@
             }
           ],
           "partialFingerprints": {
-            "svikrutiFinding/v1": "svk1:3185c5c45246bec365d2754a"
+            "svikrutiFinding/v1": "svk1:ab83653e364802d25dd26813-1"
           },
           "properties": {
-            "severity": "HIGH",
+            "severity": "MEDIUM",
             "source": "code",
-            "kind": "logging_risk"
+            "kind": "personal_data_reference"
           }
         },
         {
-          "ruleId": "svikruti.logging_risk.consent_and_notice",
-          "level": "error",
+          "ruleId": "svikruti.personal_data_reference.consent_and_notice",
+          "level": "warning",
           "message": {
-            "text": "Detected terms mobile, mobile_number in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+            "text": "Detected terms mobile, mobile_number in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
@@ -1523,19 +1510,19 @@
             }
           ],
           "partialFingerprints": {
-            "svikrutiFinding/v1": "svk1:bab1b98b098a826282675fcf"
+            "svikrutiFinding/v1": "svk1:90db92896ba651181809e4c3-1"
           },
           "properties": {
-            "severity": "HIGH",
+            "severity": "MEDIUM",
             "source": "code",
-            "kind": "logging_risk"
+            "kind": "personal_data_reference"
           }
         },
         {
-          "ruleId": "svikruti.logging_risk.purpose_limitation",
-          "level": "error",
+          "ruleId": "svikruti.personal_data_reference.purpose_limitation",
+          "level": "warning",
           "message": {
-            "text": "Detected terms address, address_line in code context. Recommendation: Avoid logging personal data unless strictly necessary; mask or hash values and define retention."
+            "text": "Detected terms address, address_line in code context. Recommendation: Review purpose, notice coverage, retention, access controls, and minimization for this data element."
           },
           "locations": [
             {
@@ -1550,12 +1537,12 @@
             }
           ],
           "partialFingerprints": {
-            "svikrutiFinding/v1": "svk1:4d54be20f79403a80ea0dd03"
+            "svikrutiFinding/v1": "svk1:98695b60ced84a38f5fe519c-1"
           },
           "properties": {
-            "severity": "HIGH",
+            "severity": "MEDIUM",
             "source": "code",
-            "kind": "logging_risk"
+            "kind": "personal_data_reference"
           }
         },
         {

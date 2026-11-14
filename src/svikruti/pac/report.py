@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 from svikruti import __version__
 from svikruti.pac.engine import CheckResult
+from svikruti.pac.inventory import write_inventory_csv
 from svikruti.pac.reconcile import RULES, Finding
 from svikruti.reports.exports import _join, _write_rows
 
@@ -317,6 +318,17 @@ def render_check_html(result: CheckResult, threshold: str = "high") -> str:
             f"<td>{_e(', '.join(activity['purposes']))}</td><td>{_e(basis_text)}</td><td>{_e(activity['retention'])}</td>"
             f"<td>{_pill('pass', 'in sync') if activity['in_sync'] else _pill('fail', 'drifted')}</td></tr>"
         )
+    inventory_rows = []
+    for row in result.inventory[:300]:
+        state = '<span class="mute">-</span>' if row["declared"] is None else (_pill("pass", "declared") if row["declared"] else _pill("fail", "undeclared"))
+        flags = (_pill("fail", "in logs") if row["reaches_logs"] else "") + "".join(f'<span class="chip">{_e(name)}</span>' for name in row["sent_to"])
+        inventory_rows.append(
+            f"<tr><td><b>{_e(row['store'] or '-')}</b></td><td><code>{_e(row['field'])}</code></td>"
+            f"<td>{_e(row['data_category'])}{' ' + _pill('HIGH', 'high risk') if row['high_risk'] else ''}</td>"
+            f"<td><code>{_e(row['file'])}:{_e(row['line'])}</code></td><td>{_e(row['activity'] or '-')}</td><td>{state}</td><td>{flags or '<span class=mute>-</span>'}</td></tr>"
+        )
+    more_inventory = f'<p class="legend">Showing 300 of {len(result.inventory)} fields. The full list is in data-inventory.csv.</p>' if len(result.inventory) > 300 else ""
+    no_inventory = '<tr><td colspan="7">No model or schema fields with personal data were found.</td></tr>'
     pack_heads = "".join(f"<th>{_e(pack.short_name)}</th>" for pack in result.packs)
     obligation_rows = []
     for assessment in result.assessments:
@@ -338,6 +350,9 @@ def render_check_html(result: CheckResult, threshold: str = "high") -> str:
 <h2>Processing record, reconciled with code</h2>
 <div class="wrap"><table><thead><tr><th>Activity</th><th>Data categories</th><th>Processors</th><th>Purposes</th><th>Lawful basis</th><th>Retention</th><th>State</th></tr></thead><tbody>{"".join(activity_rows)}</tbody></table></div>
 <p class="legend"><span class="chip">declared and found</span><span class="chip miss">+ in code, not declared</span><span class="chip stale">declared, not in code</span></p>
+<h2>Data inventory ({len(result.inventory)} stored fields)</h2>
+<div class="wrap"><table><thead><tr><th>Table / model</th><th>Field</th><th>Category</th><th>Where</th><th>Activity</th><th>Record</th><th>Category also goes to</th></tr></thead><tbody>{"".join(inventory_rows) or no_inventory}</tbody></table></div>
+{more_inventory}
 <h2>Obligation crosswalk</h2>
 <div class="wrap"><table><thead><tr><th>Result</th><th>Obligation</th>{pack_heads}<th>Evidence</th></tr></thead><tbody>{"".join(obligation_rows)}</tbody></table></div>
 <footer>{"<br>".join(_e(text) for text in data["disclaimers"])}</footer>
@@ -360,6 +375,7 @@ def write_check_pack(result: CheckResult, directory: str, threshold: str = "high
         "sarif": out / "privacy-check.sarif",
         "matrix": out / "compliance-matrix.csv",
         "record": out / "processing-record.csv",
+        "inventory": out / "data-inventory.csv",
     }
     write_check_json(result, str(files["json"]))
     files["markdown"].write_text(check_markdown(result, threshold), encoding="utf-8")
@@ -368,4 +384,5 @@ def write_check_pack(result: CheckResult, directory: str, threshold: str = "high
     write_check_sarif(result, str(files["sarif"]))
     write_matrix_csv(result, str(files["matrix"]))
     write_record_csv(result, str(files["record"]))
+    write_inventory_csv(result.inventory, str(files["inventory"]))
     return {key: str(value) for key, value in files.items()}

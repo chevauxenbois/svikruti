@@ -205,9 +205,38 @@ def _code_outside_strings(line: str) -> str:
     return _STRING_LITERAL_RE.sub(replace, line)
 
 
+_ALL_TERM_TOKENS = {normalize_text(term) for pattern in PERSONAL_DATA_PATTERNS for term in pattern.terms}
+_ID_SUFFIX_RE = re.compile(r"(?<![\w$])[A-Za-z_$][\w$]*?(?:_id|Id|ID|_pk|_uuid|Uuid|_ref|_reference|_key|_slug)(?![\w$])")
+_ID_ATTRIBUTE_RE = re.compile(r"(?<![\w$])[A-Za-z_$][\w$]*(?:\(\))?(?:\??\.|->)(?:id|pk|uuid|ID|Id|getId\(\)|psp_reference|token)(?![\w$(])")
+_ID_PAIR_RE = re.compile(r"""["']?[A-Za-z_$][\w$-]*["']?\s*(?::|=>|=)\s*(?=(?:[A-Za-z_$][\w$]*(?:\??\.|->))*(?:id|pk|uuid|ID|Id|[A-Za-z_$][\w$]*?(?:_id|Id|_pk))(?![\w$(]))""")
+
+
+_ACCESS_CHAIN_RE = re.compile(r"(?<![\w$])(?:[A-Za-z_$][\w$]*(?:\(\))?(?:\??\.|->|::))+([A-Za-z_$][\w$]*)(?![\w$])(?!\s*\()")
+
+
+def _drop_record_identifiers(text: str) -> str:
+    """Remove references that name a record, not the data in it.
+
+    `payment.id`, `order_id`, `{"payment_intent": intent.id}` identify a row.
+    Logging or sending them does not disclose payment details. Identifiers
+    that are themselves personal data (`upi_id`, `device_id`, `voter_id`)
+    are kept because the whole name is a listed term.
+    """
+
+    def keep_listed(match: "re.Match[str]") -> str:
+        return match.group(0) if normalize_text(match.group(0)) in _ALL_TERM_TOKENS else " "
+
+    text = _ID_PAIR_RE.sub(" ", text)
+    text = _ID_ATTRIBUTE_RE.sub(" ", text)
+    # `payment_information.gateway` is a gateway name: the owner object's
+    # name says nothing about the value. Keep only the last attribute.
+    text = _ACCESS_CHAIN_RE.sub(lambda match: " " + match.group(1), text)
+    return _ID_SUFFIX_RE.sub(keep_listed, text)
+
+
 def _logged_terms(line: str, matched_terms: List[str]) -> List[str]:
-    """Matched personal-data terms that are identifiers on the line, not message prose."""
-    return _matched_terms(normalize_text(_code_outside_strings(line)), matched_terms)
+    """Matched personal-data terms that are identifiers on the line, not message prose or record ids."""
+    return _matched_terms(normalize_text(_drop_record_identifiers(_code_outside_strings(line))), matched_terms)
 
 
 def _inside_open_log_call(lines: List[str], index: int, lookback: int = 6) -> bool:
@@ -219,6 +248,11 @@ def _inside_open_log_call(lines: List[str], index: int, lookback: int = 6) -> bo
         for offset in range(start, index):
             text = lines[offset]
             depth += text.count("(") - text.count(")")
+            if depth <= 0:
+                # The log call closed before reaching this line. Whatever
+                # opens a bracket afterwards (a def, a raise, another call)
+                # is not an argument of it.
+                return False
         return depth > 0
     return False
 
@@ -320,6 +354,19 @@ _ROLE_MAILBOX_RE = re.compile(
     r"notifications?|alerts?|mailer|system|root|feedback|enquir(?:y|ies)|office)(?:[+._-][\w.+-]*)?@",
     re.IGNORECASE,
 )
+
+
+_PLACEHOLDER_EMAIL_RE = re.compile(
+    r"your|placeholder|sample|dummy|fake|foo|bar\b|baz|xxx|someone|somebody|anyone|user(?:name)?@|name@|email@|me@|you@|"
+    r"john\.?doe|jane\.?doe|-here|my-|mydomain|yourdomain|domain\.|company\.|[0-9a-f]{8}-[0-9a-f]{4}-",
+    re.IGNORECASE,
+)
+_ATTRIBUTION_LINE_RE = re.compile(r"@author|copyright|\(c\)|maintainer|signed-off-by|co-authored-by|contributors?\b|license", re.IGNORECASE)
+
+
+def _email_is_placeholder(value: str) -> bool:
+    local, _, domain = value.partition("@")
+    return bool(_PLACEHOLDER_EMAIL_RE.search(value)) or len(local) == 1 or len(domain.split(".")[0]) == 1
 
 
 def _only_role_mailboxes(matches: List[str]) -> bool:
@@ -622,6 +669,10 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                     severity = "LOW"
                     label_text = "Email literal (shared mailbox)"
                     detail = "Role or system mailbox (support@, privacy@, noreply@, bot@): it identifies a function, not a person."
+                elif "Email" in literal_label and (is_prose or _ATTRIBUTION_LINE_RE.search(line) or all(_email_is_placeholder(str(value)) for value in matches)):
+                    severity = "LOW"
+                    label_text = "Email literal (documentation, attribution or placeholder)"
+                    detail = "Email in documentation, an author/licence line, or a placeholder such as you@yourdomain.com: not personal data held by the product."
                 elif "Email" in literal_label and _email_literal_is_fixture(rel, line):
                     severity = "LOW"
                     label_text = "Email literal (test/example context)"

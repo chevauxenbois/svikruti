@@ -43,9 +43,8 @@ review-ready artifacts over generic compliance checklists.
 - Deeper data flow: dependency injection, queues and event buses between the
   caller and the processor (wrapper functions are already followed across
   files).
-- Re-run the real-repository precision review against the 0.9.0 detectors.
-- Data-model sources: SQL migrations, ORM models and OpenAPI schemas as
-  first-class inputs to the manifest (field-level inventory).
+- Measure recall: seed known leaks into real repositories and count what the
+  scanner finds (precision was hand-reviewed for 0.9.0; recall was not).
 
 - Improve JavaScript/TypeScript, Java, Go, Ruby, and PHP semantic coverage with
   deeper tree-sitter packs.

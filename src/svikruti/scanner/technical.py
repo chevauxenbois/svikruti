@@ -101,7 +101,11 @@ SECRET_REGEXES = {
 # (Jinja/Helm), process.env / os.environ lookups. Benchmark: frappe/hrms
 # labeller.yml `repo-token: "${{ secrets.GITHUB_TOKEN }}"` flagged CRITICAL.
 SECRET_TEMPLATE_REFERENCE_RE = re.compile(
-    r"(\$\{\{|\$\{|\{\{|\bprocess\.env\b|\bos\.environ\b|\bENV\[|\bgetenv\b|\bsecrets\.)"
+    # References to a secret held elsewhere, not the secret: ${VAR}, {{ var }},
+    # process.env, "env(VAR)" (Supabase/Prisma), System.getenv, <placeholder>,
+    # vault:/ssm:/arn: paths, and obvious fill-me-in values.
+    r"(\$\{\{|\$\{|\{\{|\bprocess\.env\b|\bos\.environ\b|\bENV\[|\bgetenv\b|\bsecrets\.|[\"']env\(|\benv\(\s*[\"']?[A-Z_]+|"
+    r"[\"']<[^>\"']+>[\"']|[\"'](?:vault|ssm|arn|sm|op)://?|[\"'](?:changeme|change-me|your[-_ ]|xxx+|todo|replace[-_ ]?me|example|dummy|placeholder))"
 )
 
 INSECURE_HTTP_RE = re.compile(r"http://([^\s\"'<>()\[\]]+)", re.IGNORECASE)
@@ -677,6 +681,9 @@ def _append_regex_evidence(
     context_regexes: Optional[Dict[str, re.Pattern[str]]] = None,
     severity_overrides: Optional[Dict[str, str]] = None,
 ) -> None:
+    # A comment that mentions SHA-1 or MD5 is not a use of it.
+    if kind == "weak_crypto" and line.lstrip().startswith(COMMENT_LINE_PREFIXES):
+        return
     for subtype, regex in regexes.items():
         if not regex.search(line):
             continue

@@ -1,0 +1,24 @@
+Store (table / model),Field,Data Category,High Risk,File,Line,Processing Activity,Category Declared,Category Reaches Logs (activity),Category Sent To (activity),Retention,Parser,Confidence
+CustomerPayload,fullName,Identity,no,SpringCustomerController.java,5,,no manifest,no,,,java.spring_heuristic,medium
+CustomerPayload,emailAddress,Contact,no,SpringCustomerController.java,6,,no manifest,no,,,java.spring_heuristic,medium
+CustomerPayload,panNumber,Government ID,yes,SpringCustomerController.java,7,,no manifest,no,,,java.spring_heuristic,medium
+customers,full_name,Identity,no,customer_schema.sql,3,,no manifest,no,,,schema.field_heuristic,medium
+customers,email_address,Contact,no,customer_schema.sql,4,,no manifest,no,,,schema.field_heuristic,medium
+customers,mobile_number,Contact,no,customer_schema.sql,5,,no manifest,no,,,schema.field_heuristic,medium
+customers,aadhaar_number,Government ID,yes,customer_schema.sql,6,,no manifest,no,,,schema.field_heuristic,medium
+customers,pan_number,Government ID,yes,customer_schema.sql,7,,no manifest,no,,,schema.field_heuristic,medium
+customers,address_line,Location,no,customer_schema.sql,8,,no manifest,no,,,schema.field_heuristic,medium
+customers,pincode,Location,no,customer_schema.sql,9,,no manifest,no,,,schema.field_heuristic,medium
+customers,device_id,Device,no,customer_schema.sql,10,,no manifest,no,,,schema.field_heuristic,medium
+Patient,full_name,Identity,no,django_patient.py,5,,no manifest,no,,,python.ast,high
+Patient,email,Contact,no,django_patient.py,6,,no manifest,no,,,python.ast,high
+Patient,phone_number,Contact,no,django_patient.py,7,,no manifest,no,,,python.ast,high
+Patient,diagnosis,Health,yes,django_patient.py,8,,no manifest,no,,,python.ast,high
+Patient,prescription,Health,yes,django_patient.py,9,,no manifest,no,,,python.ast,high
+Patient,blood_group,Health,yes,django_patient.py,10,,no manifest,no,,,python.ast,high
+PatientRequest,email_address,Contact,no,go_patient.go,10,,no manifest,no,,,go.handler_heuristic,medium
+PatientRequest,diagnosis,Health,yes,go_patient.go,11,,no manifest,no,,,go.handler_heuristic,medium
+Customer,full_name,Identity,no,schema.prisma,3,,no manifest,no,,,schema.field_heuristic,medium
+Customer,email,Contact,no,schema.prisma,4,,no manifest,no,,,schema.field_heuristic,medium
+Customer,pan_number,Government ID,yes,schema.prisma,5,,no manifest,no,,,schema.field_heuristic,medium
+Customer,upi_id,Financial,no,schema.prisma,6,,no manifest,no,,,schema.field_heuristic,medium

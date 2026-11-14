@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
-from svikruti.scanner.code import _code_outside_strings, _file_context, _is_fixture_file, _language_for, iter_source_files
+from svikruti.scanner.code import _code_outside_strings, _drop_record_identifiers, _file_context, _is_fixture_file, _language_for, iter_source_files
 from svikruti.scanner.patterns import CATEGORY_SEVERITY, THIRD_PARTY_PATTERNS, normalize_text
 from svikruti.scanner.semantic import _categories_for_text
 
@@ -51,6 +51,9 @@ _BINDING_RES = (
     re.compile(rf"^\s*import\s+\S+\s+as\s+({_IDENT})"),                                         # import x.y as z
     re.compile(rf"^\s*(?:self\.|this\.|@|\$)?({_IDENT})\s*(?::[^=]+)?=(?!=)"),                  # x = / self.x = / $x =
     re.compile(rf"^\s*({_IDENT})\s*:="),                                                        # x := (Go)
+    re.compile(r"^\s*import\s+(?:static\s+)?[\w.]+\.([A-Z]\w*)\s*;"),                             # import com.vendor.Client; (Java/Kotlin)
+    re.compile(r"^\s*use\s+[\w\\]+\\(\w+)\s*;"),                                                # use Vendor\Api\Client; (PHP)
+    re.compile(rf"^\s*import\s+({_IDENT})\s+\""),                                                # import alias "pkg" (Go)
 )
 _KEY_RE = re.compile(r"""["']([A-Za-z_][\w-]*)["']\s*(?::|=>)""")
 _IMPORT_LINE_RE = re.compile(r"^\s*(?:import\b|from\s+\S+\s+import\b|use\s|require_once|require\s*\(|#include)|\brequire\s*\(", re.IGNORECASE)
@@ -115,6 +118,8 @@ _AGGREGATE_BUILDERS = ("dict(", "Object.assign(", "JSON.stringify(", "json.dumps
 def _argument_text(statement: str) -> str:
     """Identifiers, interpolations and object/dict keys in a statement; message prose and constants dropped."""
     statement = _CONSTANT_PAIR_RE.sub(" ", statement)
+    # Passing `customer_id` or `intent.id` hands over a record reference, not the record's data.
+    statement = _drop_record_identifiers(statement)
     return _code_outside_strings(statement) + " " + " ".join(_KEY_RE.findall(statement))
 
 
@@ -164,6 +169,7 @@ def _handles_for(lines: List[str], needles: List[str]) -> Set[str]:
             lowered_literal = literal.lower()
             if any(needle in lowered_literal for needle in lowered_needles) and ("/" in literal or "." in literal):
                 handles.update(_bound_names(line.split(literal)[0]))
+    handles |= _typed_as(lines, handles | _needle_handles(needles))
     seeds = handles | _needle_handles(needles)
     # Construction: client = razorpay.Client(...), const rzp = new Razorpay({...}), mp = Mixpanel(token)
     for _ in range(2):
@@ -181,6 +187,38 @@ def _handles_for(lines: List[str], needles: List[str]) -> Set[str]:
         if len(handles) == before:
             break
     return {handle for handle in handles if handle not in _SKIP_HANDLES and len(handle) > 1}
+
+
+def _typed_as(lines: List[str], types: Set[str]) -> Set[str]:
+    """Names declared with a vendor type: injected clients, fields and parameters.
+
+        constructor(private readonly stripe: Stripe)     TypeScript / Kotlin
+        def track(mp: Mixpanel, user)                    Python annotations
+        private final RazorpayClient razorpayClient;     Java
+        rzp *razorpay.Client                             Go struct field or parameter
+    """
+    # Only client-like types. `StripeObject`, `PaymentIntent` and `Event` are the
+    # vendor's data, and a variable holding one is a response, not a client.
+    client_like = re.compile(r"(?:Client|Api|API|Sdk|SDK|Service|Gateway|Instance|Connection)$")
+    types = {name for name in types if len(name) > 2 and (client_like.search(name) or not re.search(r"[a-z][A-Z]", name))}
+    if not types:
+        return set()
+    alternation = "|".join(re.escape(name) for name in sorted(types, key=len, reverse=True))
+    patterns = (
+        re.compile(rf"({_IDENT})\s*\??\s*:\s*(?:Optional\[|\"|')?(?:[\w$]+\.)*(?:{alternation})\b(?!\s*[.(])"),   # name: Type
+        re.compile(rf"\b(?:{alternation})(?:<[^>]*>)?\s+({_IDENT})\s*(?=[;,)=])"),                              # Type name
+        re.compile(rf"({_IDENT})\s+\*?(?:{alternation})\.[A-Z]\w*\b(?!\s*\()"),                               # name *pkg.Type
+    )
+    names: Set[str] = set()
+    for line in lines:
+        if _IMPORT_LINE_RE.search(line):
+            continue
+        for pattern in patterns:
+            for match in pattern.finditer(line):
+                name = match.group(1)
+                if name not in _SKIP_HANDLES and name not in {"return", "new", "case", "throw", "else", "public", "private", "protected", "static", "final", "readonly"}:
+                    names.add(name)
+    return names
 
 
 def _statement_starts(lines: List[str]) -> List[int]:
@@ -527,7 +565,11 @@ def _call_sites(source: _SourceFile, handles: Set[str], call_targets: Set[str]) 
     lines = source.lines
     alternation = "|".join(re.escape(handle) for handle in sorted(call_targets, key=len, reverse=True))
     # handle.method(  /  handle(  /  new Handle(  /  Handle::method(  /  handle->method(
-    target_re = re.compile(rf"(?<![\w.])(?:{alternation})\s*(?:\.|\(|::|->)", re.IGNORECASE)
+    # An SDK held on the instance counts too: self.client.x(  this.stripe.x(  $this->api->x(  s.rzp.X(
+    target_re = re.compile(
+        rf"(?:(?<![\w.>])|(?<=\bself\.)|(?<=\bthis\.)|(?<=\$this->)|(?<=@)|(?<=(?<![\w.])[a-z]\.))(?:{alternation})\s*(?:\.|\(|::|->)",
+        re.IGNORECASE,
+    )
     # A handle passed as an argument: requests.post(VENDOR_URL, json=...), fetch(vendorUrl, {{...}})
     argument_re = (
         re.compile(rf"(?:[(,]\s*|^\s*)(?:{'|'.join(re.escape(h) for h in sorted(handles, key=len, reverse=True))})\s*(?:[,)]|$)")

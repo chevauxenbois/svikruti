@@ -202,27 +202,7 @@ go_patient.go
 - [ ] Log retention is documented.
 - [ ] Regression test or code review evidence is attached.
 
-## 11. [P1] Reduce Identity logging exposure
-
-**Severity:** HIGH
-**Control Area:** Security safeguards
-**Owner:** Engineering / Security
-**Status:** Open
-**Due:** Before launch / next release
-**Artifact:** Logging redaction control
-
-### Why
-Personal data appears near logging statements.
-
-### Evidence
-express_checkout.js
-
-### Acceptance Criteria
-- [ ] Personal data is masked, hashed, removed, or justified in logs.
-- [ ] Log retention is documented.
-- [ ] Regression test or code review evidence is attached.
-
-## 12. [P1] Update privacy notice for Location
+## 11. [P1] Update privacy notice for Location
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -242,7 +222,7 @@ customer_schema.sql; express_checkout.js; laravel_checkout.php; react_signup.tsx
 - [ ] Purpose, retention, rights path, and withdrawal/complaint path are reviewed.
 - [ ] Svikruti scan is rerun and attached to the ticket.
 
-## 13. [P1] Reduce Location logging exposure
+## 12. [P1] Reduce Location logging exposure
 
 **Severity:** HIGH
 **Control Area:** Security safeguards
@@ -262,7 +242,7 @@ express_checkout.js
 - [ ] Log retention is documented.
 - [ ] Regression test or code review evidence is attached.
 
-## 14. [P1] Add withdrawal language to privacy notice
+## 13. [P1] Add withdrawal language to privacy notice
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -281,7 +261,7 @@ privacy notice text
 - [ ] Notice includes reviewed withdrawal language.
 - [ ] Language is understandable and reachable from product/privacy paths.
 
-## 15. [P1] Add rights language to privacy notice
+## 14. [P1] Add rights language to privacy notice
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -300,7 +280,7 @@ privacy notice text
 - [ ] Notice includes reviewed rights language.
 - [ ] Language is understandable and reachable from product/privacy paths.
 
-## 16. [P1] Add children language to privacy notice
+## 15. [P1] Add children language to privacy notice
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -319,7 +299,7 @@ privacy notice text
 - [ ] Notice includes reviewed children language.
 - [ ] Language is understandable and reachable from product/privacy paths.
 
-## 17. [P1] Add retention language to privacy notice
+## 16. [P1] Add retention language to privacy notice
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -338,7 +318,7 @@ privacy notice text
 - [ ] Notice includes reviewed retention language.
 - [ ] Language is understandable and reachable from product/privacy paths.
 
-## 18. [P1] Add third parties language to privacy notice
+## 17. [P1] Add third parties language to privacy notice
 
 **Severity:** HIGH
 **Control Area:** Notice transparency
@@ -357,7 +337,7 @@ privacy notice text
 - [ ] Notice includes reviewed third parties language.
 - [ ] Language is understandable and reachable from product/privacy paths.
 
-## 19. [P1] Disclose processor/vendor categories
+## 18. [P1] Disclose processor/vendor categories
 
 **Severity:** HIGH
 **Control Area:** Vendor governance

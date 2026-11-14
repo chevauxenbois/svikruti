@@ -177,13 +177,39 @@ What counts, and what does not:
   then `portal.create(customer=customer)` sends an id, not the email.
 - A call to a same-named function counts only where the caller imports the
   wrapper's module, or shares its package in Go, Java, Kotlin, Ruby and PHP.
+- A record reference is not the record: passing `customer_id` or
+  `intent.id` is not a flow of personal data.
+- Clients held on an instance or injected by type are followed:
+  `self.client.orders.create(...)`, `constructor(private stripe: Stripe)`,
+  `mp: Mixpanel`, a Java `RazorpayClient` field, a Go `*razorpay.Client`
+  struct field. A parameter typed as the vendor's data object
+  (`StripeObject`) is a response, not a client.
 - Test suites are skipped.
 
-Limits: dependency injection, dynamic dispatch, queues and event buses
-between the caller and the vendor are not followed. On saleor (4,600 files)
-the detector reports 23 Stripe flows in under a second; on a Next.js
-subscription starter it reports 7. A spot check of those found them correct,
-but that is two repositories, not a precision benchmark.
+Limits: dynamic dispatch, service locators, queues and event buses between
+the caller and the vendor are not followed. On saleor (4,600 files) the
+detector reports 13 Stripe flows in under a second, on a Next.js subscription
+starter 6. Reading them by hand, each passes a customer email, name, address
+or payment-method detail to Stripe. That is two repositories with one vendor,
+not a precision benchmark.
+
+## Data inventory
+
+`svikruti check` also writes `data-inventory.csv`: one row per stored
+personal-data field, taken from ORM models and schemas (Django and SQLAlchemy
+models, SQL `CREATE TABLE`, Prisma, Sequelize, Mongoose, Drizzle, TypeORM,
+Java and Go structs).
+
+| Table / model | Field | Category | Where | Activity | Declared | Reaches logs | Sent to |
+|---|---|---|---|---|---|---|---|
+| Applicant | aadhaar | Government ID | services/onboarding/models.py:12 | applicant_onboarding | yes | no | |
+| Repayment | email | Contact | services/payments/models.js:5 | repayments | yes | yes | Razorpay |
+
+"Reaches logs" and "Sent to" are at category level within the same activity:
+the row says contact data from this activity reaches Razorpay, not that this
+exact column does. Use it to answer a rights request ("where do we hold
+email?"), scope a breach, or seed a DPIA. `svikruti scan --inventory-out`
+produces the same file without a manifest.
 
 ## Keeping the manifest current: `svikruti sync`
 
@@ -303,6 +329,7 @@ become vendors, and any TODO becomes a task instead of an invented value.
 | `privacy-check.sarif` | Drift findings for GitHub code scanning, with stable fingerprints |
 | `compliance-matrix.csv` | One row per framework clause: status, proof type, summary |
 | `processing-record.csv` | Record of processing built from the manifest and verified against code |
+| `data-inventory.csv` | Every stored personal-data field: table or model, column, category, activity, where the category goes |
 
 Exit codes: `0` passed, `1` error, `2` usage or invalid manifest, `3` gate failed.
 

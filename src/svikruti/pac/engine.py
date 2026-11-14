@@ -28,6 +28,7 @@ class CheckResult:
     generated_at: str
     baseline_fingerprints: Optional[set] = None
     activities_view: List[Dict[str, Any]] = field(default_factory=list)
+    inventory: List[Dict[str, Any]] = field(default_factory=list)
 
     # -- findings ---------------------------------------------------------
     def open_findings(self) -> List[Finding]:
@@ -103,6 +104,7 @@ class CheckResult:
             "obligations": [assessment.to_dict() for assessment in self.assessments],
             "matrix": [row for pack in self.packs for row in self.framework_matrix(pack)],
             "activities": self.activities_view,
+            "inventory": self.inventory,
             "manifest_warnings": self.manifest.warnings,
             "scan_summary": self.scan.summary.to_dict(),
             "disclaimers": [
@@ -130,7 +132,9 @@ def run_check(
     baseline_fingerprints = None
     if baseline is not None:
         baseline_fingerprints = {item.get("fingerprint") for item in baseline.get("findings", []) if item.get("status", "open") == "open"}
-    return CheckResult(
+    from svikruti.pac.inventory import build_inventory
+
+    result = CheckResult(
         manifest=manifest,
         packs=packs,
         model=model,
@@ -141,6 +145,8 @@ def run_check(
         baseline_fingerprints=baseline_fingerprints,
         activities_view=_activities_view(manifest, model, findings),
     )
+    result.inventory = build_inventory(scan, result)
+    return result
 
 
 def attach_check(scan: ScanResult, manifest_path: str, frameworks: Optional[List[str]] = None) -> Optional[CheckResult]:

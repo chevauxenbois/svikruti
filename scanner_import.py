@@ -302,7 +302,9 @@ _HIGH_RISK_CATEGORIES = {"health", "children", "government_id", "biometric"}
 def looks_like_manifest(file_bytes_or_text: Union[bytes, str, None]) -> bool:
     """True when a JSON/YAML upload is a privacy manifest rather than a scan report."""
     text = _to_text(file_bytes_or_text)
-    return "processing_activities" in text and '"evidence"' not in text
+    # Attestations in a manifest carry an "evidence" link, so that key cannot
+    # tell the two apart; a scan report always has "ropa_starter".
+    return "processing_activities" in text and "ropa_starter" not in text
 
 
 def _label(slug: Any) -> str:
@@ -434,6 +436,43 @@ def parse_privacy_manifest(file_bytes_or_text: Union[bytes, str, None]) -> Dict[
         "actions": actions,
         "note": f"privacy manifest: {len(ropa)} processing activit(ies), {len(vendors)} processor(s), {len(actions)} follow-up task(s).",
     }
+
+
+def parse_upload(filename: str, file_bytes_or_text: Union[bytes, str, None]) -> Dict[str, Any]:
+    """
+    Route one uploaded file to the right parser by name and content.
+
+    Returns {'ropa': [...], 'vendors': [...], 'actions': [...], 'note': str}.
+    Kept here (not in the Streamlit page) so the routing is unit-tested:
+    privacy.yaml / privacy.json -> manifest, other .json -> scan report,
+    *vendor*.csv -> vendors, *action*.csv -> tasks, any other .csv -> RoPA.
+    """
+    name = (filename or "").lower()
+    out: Dict[str, Any] = {"ropa": [], "vendors": [], "actions": [], "note": ""}
+    try:
+        if name.endswith((".yaml", ".yml")) or (name.endswith(".json") and looks_like_manifest(file_bytes_or_text)):
+            parsed = parse_privacy_manifest(file_bytes_or_text)
+            out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
+            out["note"] = parsed.get("note", "")
+        elif name.endswith(".json"):
+            parsed = parse_report_json(file_bytes_or_text)
+            out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
+            out["note"] = parsed.get("note", "")
+        elif name.endswith(".csv") and "vendor" in name:
+            out["vendors"] = parse_vendors_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['vendors'])} vendor row(s)."
+        elif name.endswith(".csv") and "action" in name:
+            out["actions"] = parse_actions_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['actions'])} action row(s)."
+        elif name.endswith(".csv"):
+            # Any other CSV is treated as RoPA: that is the primary registry.
+            out["ropa"] = parse_ropa_csv(file_bytes_or_text)
+            out["note"] = f"parsed {len(out['ropa'])} RoPA row(s)."
+        else:
+            out["note"] = "unrecognized file type, skipped."
+    except Exception as exc:  # a bad upload must never take the page down
+        out["note"] = f"parse error - {exc}"
+    return out
 
 
 # ==================== report.json ====================

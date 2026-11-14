@@ -60,6 +60,14 @@
 - `.pre-commit-hooks.yaml` with `svikruti-check` and `svikruti-sync`.
 - Governance app: Import from Scanner accepts `privacy.yaml` / `privacy.json`
   and creates RoPA entries, vendors, and tasks for any TODO.
+- Field-level data inventory (`data-inventory.csv`, `scan --inventory-out`,
+  a section in the check report): table or model, field, category, activity,
+  and whether that category reaches logs or a processor.
+- Stored-field detection for Sequelize, Mongoose, Drizzle and
+  TypeORM/MikroORM models.
+- Processor flows follow instance-held and injected clients
+  (`self.client`, `this.stripe`, typed constructor and function parameters,
+  Java fields, Go struct fields).
 - `svikruti init-github-action --mode check`: pull-request gate that builds
   its baseline from the base branch, posts a PR comment and uploads SARIF.
 - Worked example `examples/privacy-as-code` (passes), drift scenario
@@ -80,6 +88,22 @@
 
 ### Changed (detection quality)
 
+- Manual review of every CRITICAL/HIGH defect finding on excalidraw,
+  healthchecks and saleor (44 before, 11 after) drove these fixes:
+  - A log call that had already closed was treated as still open for the
+    `def`, `raise` or call that followed it (bug in the multi-line log
+    detection added earlier in this release).
+  - Record references (`payment.id`, `order_id`, `{"payment_intent":
+    intent.id}`) no longer count as the data they point to, in logs or in
+    processor flows. Identifiers that are personal data (`upi_id`,
+    `device_id`) still count.
+  - Only the last attribute of an access chain is classified:
+    `payment_information.gateway` is a gateway name.
+  - Emails in documentation, author/licence lines and placeholders
+    (`you@yourdomain.com`, `a@b.com`) are LOW.
+  - A comment that mentions SHA-1 or MD5 is not a weak-crypto finding.
+  - References to a secret held elsewhere (`"env(VAR)"`, `<your-api-key>`,
+    `vault://`, `changeme`) are not hard-coded secrets.
 - Role and system mailboxes (`privacy@`, `support@`, `noreply@`, `bot@`) are
   reported at LOW instead of HIGH.
 - Dependency lock files are no longer scanned (integrity hashes matched
