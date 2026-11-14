@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/chevauxenbois/svikruti/main/docs/privacy.schema.json
 # LendFlow: a worked example of privacy as code.
 # `svikruti check --repo . --privacy-file privacy-notice.md` passes on this tree.
 version: 1

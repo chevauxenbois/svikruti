@@ -361,6 +361,115 @@ class ProcessorFlowTests(unittest.TestCase):
             self.assertIn({"processor": "Mixpanel", "categories": ["Contact", "Location"]}, flows)
 
 
+class CrossFileFlowTests(unittest.TestCase):
+    """Data that reaches a vendor through a wrapper defined somewhere else."""
+
+    FILES = {
+        "lib/notify.py": 'import requests\nMSG91_URL = "https://control.msg91.com/api/v5/flow/"\n\ndef send_sms(phone, text):\n    requests.post(\n        MSG91_URL,\n        json={"mobiles": phone, "body": text},\n    )\n\ndef healthcheck():\n    requests.get(MSG91_URL)\n',
+        "app/signup.py": 'from lib.notify import send_sms\n\ndef signup(user):\n    send_sms(user.phone_number, "welcome")\n    audit(user.aadhaar)\n',
+        "app/other.py": "def send_sms(a, b):\n    pass\n\ndef x(user):\n    send_sms(user.email, 1)\n",
+        "app/reminders.py": 'from lib import notify\n\ndef remind_all(users):\n    for u in users:\n        notify_user(u.mobile_number)\n\ndef notify_user(number):\n    notify.send_sms(number, "due")\n',
+        "web/analytics.ts": 'import mixpanel from "mixpanel-browser";\n\nexport const track = (event: string, props: Record<string, unknown>) => {\n  mixpanel.track(event, props);\n};\n\nexport function identify(userId: string, traits: object) {\n  mixpanel.people.set(traits);\n}\n',
+        "web/checkout.tsx": 'import { track, identify } from "./analytics";\n\nexport function Checkout({ user }) {\n  track("checkout", { email: user.email, pincode: user.pincode });\n  identify(user.id, {\n    full_name: user.full_name,\n  });\n  return null;\n}\n',
+        "web/unrelated.tsx": 'const track = (a, b) => {};\ntrack("x", { email: 1 });\n',
+        "svc/sms.go": 'package svc\n\nconst exotelURL = "https://api.exotel.com/v1/Accounts/x/Sms/send"\n\nfunc SendOTP(phoneNumber string, otp string) error {\n\t_, err := http.PostForm(exotelURL, url.Values{"To": {phoneNumber}, "Body": {otp}})\n\treturn err\n}\n',
+        "svc/login.go": "package svc\n\nfunc Login(u User) {\n\tSendOTP(u.PhoneNumber, gen())\n}\n",
+        "php/Crm.php": '<?php\nclass Crm {\n  public function pushContact($email, $name) {\n    $hubspot = \\HubSpot\\Factory::createWithAccessToken($t);\n    $hubspot->crm()->contacts()->basicApi()->create(["e" => $email]);\n  }\n}\n',
+        "php/Register.php": "<?php\nclass Register {\n  function handle($req) {\n    $crm->pushContact($req->email, $req->full_name);\n  }\n}\n",
+    }
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        for name, text in self.FILES.items():
+            path = Path(self.tmp.name) / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        self.flows = {
+            (e.file, e.line, e.metadata["data_category"], e.metadata["third_party"]): e.metadata for e in scan_processor_flows(self.tmp.name)
+        }
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_wrapper_calls_are_followed_across_files(self):
+        self.assertEqual(self.flows[("app/signup.py", 4, "Contact", "MSG91")]["via"], "lib/notify.py:4:send_sms")
+        self.assertEqual(self.flows[("web/checkout.tsx", 4, "Contact", "Mixpanel")]["flow"], "wrapper")
+        self.assertIn(("web/checkout.tsx", 4, "Location", "Mixpanel"), self.flows)
+        self.assertEqual(self.flows[("web/checkout.tsx", 5, "Identity", "Mixpanel")]["via"], "web/analytics.ts:7:identify")
+        self.assertIn(("svc/login.go", 4, "Contact", "Exotel"), self.flows)       # same Go package, no import needed
+        self.assertIn(("php/Register.php", 4, "Contact", "HubSpot"), self.flows)
+
+    def test_wrapper_of_a_wrapper(self):
+        flow = self.flows[("app/reminders.py", 5, "Contact", "MSG91")]
+        self.assertEqual((flow["via"], flow["wrapper_depth"]), ("app/reminders.py:7:notify_user", 2))
+
+    def test_same_name_without_an_import_is_not_the_wrapper(self):
+        files = {key[0] for key in self.flows}
+        self.assertNotIn("app/other.py", files)
+        self.assertNotIn("web/unrelated.tsx", files)
+        # Aadhaar goes to audit(), not to send_sms().
+        self.assertFalse(any(key[2] == "Government ID" for key in self.flows))
+
+    def test_arguments_only_and_no_config_constants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "pay.py").write_text(
+                'import stripe\n\ndef f(pm_id, user):\n    payment_method = stripe.PaymentMethod.retrieve(pm_id)\n'
+                '    session = stripe.checkout.Session.create(mode="payment", billing_address_collection="required", customer_update={"address": "auto"})\n'
+                "    customer = create_customer(user.email)\n    stripe.billing_portal.Session.create(customer=customer)\n",
+                encoding="utf-8",
+            )
+            (Path(tmp) / "tests").mkdir()
+            (Path(tmp) / "tests" / "test_pay.py").write_text("import stripe\n\ndef test_x(user):\n    stripe.Customer.create(email=user.email)\n", encoding="utf-8")
+            self.assertEqual(scan_processor_flows(tmp), [])
+
+    def test_cross_file_flow_reaches_the_processor_record(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            (repo / "services/onboarding/welcome.py").write_text(
+                "from services.notifications.sms import send_reminder\n\ndef welcome(applicant):\n    send_reminder(applicant.phone_number, 'welcome')\n    send_reminder(applicant.aadhaar, 'kyc')\n",
+                encoding="utf-8",
+            )
+            result = _check(repo)
+            finding = next(f for f in result.open_findings() if f.rule == "D009")
+            self.assertEqual((finding.processor, finding.category, finding.severity), ("msg91", "government_id", "CRITICAL"))
+            self.assertEqual(finding.refs, ["services/onboarding/welcome.py:5"])
+            link = next(f for f in result.open_findings() if f.rule == "D003")
+            self.assertEqual((link.activity, link.processor, link.severity), ("applicant_onboarding", "msg91", "MEDIUM"))
+
+
+class RiskScoreTests(unittest.TestCase):
+    """Sensitive is not the same as broken."""
+
+    def test_clean_service_with_government_ids_scores_low(self):
+        summary = run_scan(str(EXAMPLE), None).summary
+        self.assertEqual(summary.risk_level, "LOW")
+        self.assertEqual(summary.risk_findings_score, 0)
+        self.assertGreater(summary.risk_exposure_score, 0)
+        self.assertLessEqual(summary.risk_exposure_score, 15)
+        self.assertEqual(summary.risk_score, summary.risk_findings_score + summary.risk_exposure_score)
+
+    def test_defects_drive_the_score(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            before = run_scan(str(repo), None).summary
+            shutil.copy(DRIFT_FILE, repo / "services/payments/refund.js")
+            after = run_scan(str(repo), None).summary
+            self.assertGreater(after.risk_findings_score, before.risk_findings_score)
+        bad = run_scan("examples/realistic", None).summary
+        self.assertIn(bad.risk_level, {"HIGH", "CRITICAL"})
+        self.assertGreater(bad.risk_findings_score, 50)
+
+    def test_role_mailboxes_and_lock_files_are_not_exposure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "ci.yml").write_text("run: git config user.email 'bot@acme.io'\ncontact: privacy@acme.io\nowner: priya.sharma@acme.io\n", encoding="utf-8")
+            (Path(tmp) / "yarn.lock").write_text('"stripe@^1.0.0":\n  integrity sha512-234567890123 2345 6789 0123\n', encoding="utf-8")
+            scan = run_scan(tmp, None)
+            literals = {(item.line, item.severity) for item in scan.evidence if item.kind == "literal_personal_data"}
+            self.assertEqual(literals, {(1, "LOW"), (2, "LOW"), (3, "HIGH")})
+            self.assertFalse(any(item.file == "yarn.lock" for item in scan.evidence))
+            self.assertEqual(scan.summary.third_parties, [])
+
+
 class SyncTests(unittest.TestCase):
     def _drifted(self, tmp):
         repo = _copy_example(tmp)
@@ -536,6 +645,86 @@ class FingerprintTests(unittest.TestCase):
         diff = diff_reports(base, run_scan(str(EXAMPLE), None).to_dict())
         self.assertEqual(diff["matching"], "legacy-position-free")
         self.assertEqual((diff["new"], diff["resolved"]), ([], []))
+
+
+class SchemaAndToolingTests(unittest.TestCase):
+    def test_committed_schema_matches_the_loader(self):
+        from svikruti.pac.schema import manifest_schema
+
+        schema = manifest_schema()
+        committed = json.loads(Path("docs/privacy.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(committed, json.loads(json.dumps(schema)), "run `svikruti schema --out docs/privacy.schema.json`")
+        activity = schema["properties"]["processing_activities"]["items"]
+        self.assertEqual(activity["required"], ["id", "paths"])
+        self.assertIn("lgpd", schema["properties"]["frameworks"]["items"]["anyOf"][0]["enum"])
+        self.assertIn("D009", schema["properties"]["exceptions"]["items"]["properties"]["rule"]["enum"])
+
+    def test_example_validates_against_schema(self):
+        try:
+            import jsonschema
+        except ImportError:
+            self.skipTest("jsonschema not installed")
+        import yaml
+
+        schema = json.loads(Path("docs/privacy.schema.json").read_text(encoding="utf-8"))
+        data = json.loads(json.dumps(yaml.safe_load((EXAMPLE / "privacy.yaml").read_text(encoding="utf-8")), default=str))
+        validator = jsonschema.Draft7Validator(schema)
+        self.assertEqual([e.message for e in validator.iter_errors(data)], [])
+        data["processing_activites"] = []
+        self.assertEqual(len(list(validator.iter_errors(data))), 1)
+
+    def test_init_writes_editor_hint_and_precommit_hooks_parse(self):
+        import yaml
+
+        text = generate_manifest(run_scan(str(EXAMPLE), None))
+        self.assertTrue(text.startswith("# yaml-language-server: $schema=https://"))
+        hooks = yaml.safe_load(Path(".pre-commit-hooks.yaml").read_text(encoding="utf-8"))
+        self.assertEqual([hook["id"] for hook in hooks], ["svikruti-check", "svikruti-sync"])
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "schema.json"
+            self.assertEqual(main(["schema", "--out", str(out)]), 0)
+            self.assertEqual(json.loads(out.read_text(encoding="utf-8"))["title"], "Svikruti privacy.yaml")
+
+
+class GovernanceAppImportTests(unittest.TestCase):
+    """The Streamlit workbench reads the same manifest the CI gate enforces."""
+
+    def setUp(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("scanner_import", Path("scanner_import.py").resolve())
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def test_manifest_becomes_ropa_and_vendor_records(self):
+        parsed = self.module.parse_privacy_manifest((EXAMPLE / "privacy.yaml").read_bytes())
+        self.assertEqual([r["activity_name"] for r in parsed["ropa"]], ["Loan applicant onboarding and KYC", "EMI repayment collection", "Repayment reminders"])
+        repayments = parsed["ropa"][1]
+        self.assertEqual(repayments["lawful_basis"], "DPDPA: Legitimate Use; GDPR: Contract")
+        self.assertEqual(repayments["kwargs"]["data_processor"], "Razorpay")
+        self.assertEqual(repayments["kwargs"]["retention_period"], "8 years after loan closure (tax and PML records)")
+        self.assertEqual(parsed["ropa"][0]["_risk_tier"], "High")
+        self.assertEqual(parsed["ropa"][0]["kwargs"]["security_measures"], "DPIA: DPIA-2026-003")
+        razorpay = parsed["vendors"][0]
+        self.assertEqual((razorpay["vendor_name"], razorpay["data_shared"], razorpay["kwargs"]["dpa_status"]), ("Razorpay", "Contact", "COMPLETED"))
+        self.assertEqual(parsed["actions"], [])
+        summary = self.module.import_summary(parsed, existing_ropa=[{"activity_name": "repayment reminders"}])
+        self.assertEqual(summary["ropa"], {"new": 2, "duplicate": 1, "total": 3})
+
+    def test_todos_become_tasks_not_made_up_values(self):
+        text = generate_manifest(run_scan(str(EXAMPLE), None))
+        parsed = self.module.parse_privacy_manifest(text)
+        self.assertTrue(all(r["purpose"] == "Not specified" and r["lawful_basis"] == "To be confirmed" for r in parsed["ropa"]))
+        titles = [a["title"] for a in parsed["actions"]]
+        self.assertTrue(any(title.startswith("Complete the processing record") for title in titles))
+        self.assertIn("Record the contract / DPA for Razorpay", titles)
+        self.assertTrue(all(v["kwargs"]["dpa_status"] == "NOT_STARTED" for v in parsed["vendors"]))
+
+    def test_manifest_detection_and_bad_input(self):
+        self.assertTrue(self.module.looks_like_manifest('{"version": 1, "processing_activities": []}'))
+        self.assertFalse(self.module.looks_like_manifest(Path("examples/sample-report.json").read_text(encoding="utf-8")))
+        self.assertIn("not a privacy manifest", self.module.parse_privacy_manifest("- just\n- a list\n")["note"])
+        self.assertIn("Could not parse", self.module.parse_privacy_manifest("a: [unclosed")["note"])
 
 
 class InitTests(unittest.TestCase):

@@ -157,6 +157,8 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("--fail-on-new", choices=["low", "medium", "high", "critical"], help="Exit with code 3 when a new finding reaches this severity.")
 
     subparsers.add_parser("frameworks", help="List built-in framework packs.")
+    schema = subparsers.add_parser("schema", help="Print the JSON Schema for privacy.yaml (editor completion and validation).")
+    schema.add_argument("--out", help="Write the schema to a file instead of stdout.")
 
     init = subparsers.add_parser("init-github-action", help="Create a Svikruti GitHub Actions workflow.")
     init.add_argument("--out", help="Workflow file path to write (default depends on --mode).")
@@ -203,6 +205,18 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_sync(args)
     if args.command == "frameworks":
         return _cmd_frameworks()
+    if args.command == "schema":
+        import json
+
+        from svikruti.pac.schema import manifest_schema
+
+        text = json.dumps(manifest_schema(), indent=2) + "\n"
+        if args.out:
+            Path(args.out).write_text(text, encoding="utf-8")
+            print(f"Schema written: {Path(args.out).resolve()}")
+        else:
+            print(text, end="")
+        return EXIT_OK
 
     if args.command != "scan":
         parser.print_help()
@@ -278,7 +292,8 @@ def main(argv: list[str] | None = None) -> int:
         pack_summary = ", ".join(pack_files) if pack_files else "none (all outputs overridden by explicit flags)"
         print(f"Svikruti evidence pack written: {Path(args.evidence_pack).resolve()} [{pack_summary}]")
     print(
-        f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100), "
+        f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100 = "
+        f"{result.summary.risk_findings_score} findings + {result.summary.risk_exposure_score} data exposure), "
         f"evidence items: {len(result.evidence)}, files scanned: {result.summary.files_scanned}"
     )
     if result.privacy_as_code.get("error"):

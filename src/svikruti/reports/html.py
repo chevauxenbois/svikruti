@@ -1674,9 +1674,9 @@ def render_html(result: ScanResult) -> str:
   <header>
     <div class="header-grid">
       <div>
-        <div class="eyebrow">India-first PrivacyOps evidence workbench</div>
+        <div class="eyebrow">Privacy as code · evidence workbench</div>
         <h1>Svikruti Evidence Workbench</h1>
-        <p>Engineering evidence for DPDPA readiness: code, website, consent, controls, artifacts, tickets, and optional AI synthesis. Generated {escape(generated_at)}.</p>
+        <p>Engineering evidence for privacy readiness (DPDPA, GDPR, ISO/IEC 27701): code, data flows, website, consent, controls, artifacts, tickets, and optional AI synthesis. Generated {escape(generated_at)}.</p>
       </div>
       <div class="header-stat"><span>Risk level</span><strong>{escape(summary.risk_level)}</strong></div>
     </div>
@@ -1704,7 +1704,7 @@ def render_html(result: ScanResult) -> str:
       {_decision_brief(result)}
       <section class="grid">
         <div class="metric"><div class="label">Risk level</div><div class="value">{escape(summary.risk_level)}</div></div>
-        <div class="metric"><div class="label">Risk score</div><div class="value">{summary.risk_score}/100</div></div>
+        <div class="metric"><div class="label">Risk score</div><div class="value">{summary.risk_score}/100</div><div class="small">{summary.risk_findings_score} findings + {summary.risk_exposure_score} data exposure</div></div>
         <div class="metric"><div class="label">Files scanned</div><div class="value">{summary.files_scanned}</div></div>
         <div class="metric"><div class="label">Breach score</div><div class="value">{escape(str((result.breach_readiness or {}).get("score", "n/a")))}/100</div></div>
       </section>

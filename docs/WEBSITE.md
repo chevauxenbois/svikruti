@@ -10,6 +10,11 @@ It is intentionally plain HTML/CSS:
 - no Streamlit dependency
 - no JavaScript framework
 
+`site/demo-report.html` is a copy of `examples/sample-report.html` and
+`site/privacy-check-demo.html` a copy of
+`examples/sample-privacy-check/privacy-check.html`. Regenerate the examples
+and copy them across when detectors or report layout change.
+
 ## Local Preview
 
 From the repository root:

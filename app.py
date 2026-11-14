@@ -1930,7 +1930,9 @@ def page_scanner_import():
             Ran <code>svikruti scan</code>? Upload the evidence pack's
             <strong>report.json</strong> or <strong>ropa.csv</strong> /
             <strong>vendors.csv</strong> (and optionally <strong>actions.csv</strong>)
-            here to populate your registries automatically. Everything stays local —
+            here to populate your registries automatically. If the repository has a
+            reviewed <strong>privacy.yaml</strong>, upload that instead: its purposes,
+            lawful bases, retention and contracts come across as written. Everything stays local —
             nothing is uploaded to the internet.
         </div>
     </div>
@@ -1944,9 +1946,9 @@ def page_scanner_import():
 
     uploaded = st.file_uploader(
         "Upload scanner output",
-        type=["json", "csv"],
+        type=["json", "csv", "yaml", "yml"],
         accept_multiple_files=True,
-        help="Accepts report.json, ropa.csv, vendors.csv, and actions.csv.",
+        help="Accepts privacy.yaml / privacy.json, report.json, ropa.csv, vendors.csv, and actions.csv.",
     )
 
     if not uploaded:
@@ -1965,7 +1967,14 @@ def page_scanner_import():
 
         name = (f.name or "").lower()
         try:
-            if name.endswith(".json"):
+            if name.endswith((".yaml", ".yml")) or (name.endswith(".json") and scanner_import.looks_like_manifest(raw)):
+                manifest = scanner_import.parse_privacy_manifest(raw)
+                parsed["ropa"].extend(manifest.get("ropa", []))
+                parsed["vendors"].extend(manifest.get("vendors", []))
+                parsed["actions"].extend(manifest.get("actions", []))
+                if manifest.get("note"):
+                    parse_notes.append(f"{f.name}: {manifest['note']}")
+            elif name.endswith(".json"):
                 report = scanner_import.parse_report_json(raw)
                 parsed["ropa"].extend(report.get("ropa", []))
                 parsed["vendors"].extend(report.get("vendors", []))

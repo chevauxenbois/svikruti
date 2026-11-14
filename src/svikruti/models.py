@@ -34,6 +34,11 @@ class ScanSummary:
     third_parties: List[str] = field(default_factory=list)
     risk_score: int = 0
     risk_level: str = "LOW"
+    # risk_score = risk_findings_score + risk_exposure_score (capped at 100).
+    # Findings: things that are wrong (personal data in logs, secrets, weak crypto, ...).
+    # Exposure: how sensitive the data handled is, however well it is handled (max 15).
+    risk_findings_score: int = 0
+    risk_exposure_score: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

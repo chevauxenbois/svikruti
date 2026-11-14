@@ -50,6 +50,16 @@
   Packs map only obligations the framework has.
 - `release.yml`: tag-driven build, wheel test, build provenance and PyPI
   trusted publishing (`docs/RELEASING.md`).
+- Cross-file processor flows: a function that passes its own parameter to a
+  vendor call is a wrapper, and calls to it are followed across files (up to
+  three levels) where the caller imports its module or shares its package.
+  Flows count call arguments only, ignore constant configuration pairs and
+  vendor responses, and skip test suites.
+- JSON Schema for the manifest (`svikruti schema`, `docs/privacy.schema.json`)
+  generated from the loader's key sets; `init` writes the editor hint.
+- `.pre-commit-hooks.yaml` with `svikruti-check` and `svikruti-sync`.
+- Governance app: Import from Scanner accepts `privacy.yaml` / `privacy.json`
+  and creates RoPA entries, vendors, and tasks for any TODO.
 - `svikruti init-github-action --mode check`: pull-request gate that builds
   its baseline from the base branch, posts a PR comment and uploads SARIF.
 - Worked example `examples/privacy-as-code` (passes), drift scenario
@@ -57,7 +67,23 @@
   `examples/sample-privacy-check`.
 - `tests.yml` workflow running the suite on Python 3.9, 3.11 and 3.13.
 
+### Changed (risk score)
+
+- `risk_score` is now `risk_findings_score` + `risk_exposure_score`. Inventory
+  evidence (a field, form, storage point, third party or processor flow
+  exists) no longer counts as a finding; it feeds a data-exposure component
+  capped at 15, based on medium-or-better confidence categories. Only defects
+  (personal data in logs, secrets, weak crypto, cloud misconfiguration,
+  consent failures) can move a repository into HIGH or CRITICAL. A clean KYC
+  service that stores government IDs now scores LOW instead of HIGH. Scores
+  are not comparable with 0.8.x.
+
 ### Changed (detection quality)
+
+- Role and system mailboxes (`privacy@`, `support@`, `noreply@`, `bot@`) are
+  reported at LOW instead of HIGH.
+- Dependency lock files are no longer scanned (integrity hashes matched
+  Aadhaar-format literals; package names matched vendors).
 
 - Python log-sink detection now inspects the arguments of the logging call
   (names, attributes, subscript keys, f-string expressions, one assignment

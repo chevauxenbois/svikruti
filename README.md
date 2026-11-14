@@ -39,7 +39,8 @@ Privacy gate failed: 3 finding(s) at HIGH or above
 - **Drift detection.** Undeclared data categories, undeclared processors,
   code outside any declared activity, stale declarations, incomplete records.
 - **Processor data flows.** Not just "this code uses Mixpanel" but which data
-  categories are passed to it, checked against the processor's record.
+  categories are passed to it, followed through wrapper functions across
+  files and checked against the processor's record.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations
@@ -329,6 +330,16 @@ OSS projects (July 2026, default install, no AI):
 | [excalidraw](https://github.com/excalidraw/excalidraw) | Drawing tool (almost no PII) | 750 | 37 MEDIUM | 6 | 1/6 (all 6 human-reviewed) |
 | [healthchecks](https://github.com/healthchecks/healthchecks) | Uptime alerting (real contact data) | 952 | 42 MEDIUM | 141 | ~84% (44 sampled) |
 | [saleor](https://github.com/saleor/saleor) | E-commerce platform (heavy PII) | 4,528 | 60 HIGH | 678 | ~80% (41 sampled) |
+
+Those figures are from 0.8.x. The 0.9.0 risk score separates defects from
+data exposure, so its numbers are lower and not comparable (November 2026,
+default install, finding counts and precision not re-reviewed):
+
+| Repository | Files | Risk score (0.9.0) | Findings + exposure |
+| --- | --- | --- | --- |
+| excalidraw | 838 | 33 MEDIUM | 27 + 6 |
+| healthchecks | 958 | 27 MEDIUM | 22 + 5 |
+| saleor | 4,638 | 49 MEDIUM | 37 + 12 |
 
 How to read this:
 
@@ -706,10 +717,14 @@ Recent accuracy work makes findings harder to fake and easier to trust:
   they can escalate a scan to CRITICAL.
 - Heuristic parser engines report `medium` confidence; only Python AST
   evidence is reported as `high`.
-- The risk score is severity-tiered and bounded: each severity level saturates
-  independently, so volume of MEDIUM/LOW inventory findings can never push a
-  repository into the CRITICAL band - only real critical evidence can
-  and cross-layer deduplication, and excludes positive (passing) evidence.
+- The risk score separates what is wrong from what is merely sensitive.
+  Findings (personal data in logs, secrets, weak crypto, public storage,
+  tracking before consent) are severity-tiered and bounded. Inventory
+  evidence (a field, a form, a processor exists) only adds a data-exposure
+  component capped at 15, so a well-run service that stores government IDs
+  scores LOW and only real defects can push a repository into HIGH or
+  CRITICAL. The score uses cross-layer deduplication and excludes positive
+  (passing) evidence.
   Bands: LOW 0-24, MEDIUM 25-49, HIGH 50-74, CRITICAL 75-100.
 
 ## Project Structure

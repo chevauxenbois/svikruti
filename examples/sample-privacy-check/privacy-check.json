@@ -1,6 +1,6 @@
 {
   "schema_version": "svikruti-privacy-check-v1",
-  "generated_at": "2026-11-13T08:21:05.595011+00:00",
+  "generated_at": "2026-11-13T08:32:58.515578+00:00",
   "manifest": "privacy.yaml",
   "repo": ".",
   "summary": {
@@ -2225,8 +2225,10 @@
       "Mixpanel",
       "Razorpay"
     ],
-    "risk_score": 76,
-    "risk_level": "CRITICAL"
+    "risk_score": 14,
+    "risk_level": "LOW",
+    "risk_findings_score": 3,
+    "risk_exposure_score": 11
   },
   "disclaimers": [
     "Engineering evidence, not legal advice or a certification. A passing check supports a clause; it does not establish compliance with it.",

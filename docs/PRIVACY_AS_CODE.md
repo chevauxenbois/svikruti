@@ -161,10 +161,29 @@ These flows appear as `processor_data_flow` evidence, in the evidence graph
 data is now sent to Mixpanel") and in the reconciled record. Rule D009 fires
 when a declared processor receives a category its record does not list.
 
-Limits: the analysis is per file. It follows imports, constructed clients,
-endpoint URL constants and one variable assignment. It does not follow the
-vendor's response object, and it does not see data that reaches a vendor
-through a wrapper defined in another file.
+Wrappers are followed across files. If `lib/notify.py` defines
+`send_sms(phone, text)` and that function posts to MSG91, then
+`send_sms(user.phone_number, ...)` in any file that imports it is reported as
+Contact -> MSG91, with the wrapper named in the finding. Chains up to three
+wrappers deep are followed.
+
+What counts, and what does not:
+
+- Only call arguments count. `stripe.PaymentMethod.retrieve(pm_id)` sends an
+  id, whatever the method is called.
+- A key set to a constant (`address: "auto"`, `mode="payment"`) is
+  configuration, not data.
+- The vendor's answer is not followed: `customer = create_customer(email)`
+  then `portal.create(customer=customer)` sends an id, not the email.
+- A call to a same-named function counts only where the caller imports the
+  wrapper's module, or shares its package in Go, Java, Kotlin, Ruby and PHP.
+- Test suites are skipped.
+
+Limits: dependency injection, dynamic dispatch, queues and event buses
+between the caller and the vendor are not followed. On saleor (4,600 files)
+the detector reports 23 Stripe flows in under a second; on a Next.js
+subscription starter it reports 7. A spot check of those found them correct,
+but that is two repositories, not a precision benchmark.
 
 ## Keeping the manifest current: `svikruti sync`
 
@@ -248,6 +267,28 @@ svikruti check --framework gdpr --framework packs/acme-privacy-standard.yaml
 ```
 
 A new law or an internal standard is a data file. No scanner change is needed.
+
+## Editor and local tooling
+
+`svikruti init` starts the manifest with a `yaml-language-server` schema
+comment, so editors with YAML support complete keys, category names, rule ids
+and obligation ids, and flag typos as you type. `svikruti schema` prints the
+JSON Schema ([docs/privacy.schema.json](privacy.schema.json)); it is generated
+from the loader's own key sets.
+
+Pre-commit users can run the gate before a push:
+
+```yaml
+repos:
+  - repo: https://github.com/chevauxenbois/svikruti
+    rev: v0.9.0
+    hooks:
+      - id: svikruti-check
+```
+
+The governance workbench (`streamlit run app.py`) imports `privacy.yaml` on
+its Import from Scanner page: activities become RoPA entries, processors
+become vendors, and any TODO becomes a task instead of an invented value.
 
 ## Outputs
 

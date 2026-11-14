@@ -312,6 +312,20 @@ _NON_EMAIL_DOMAIN_SUFFIXES = (
 )
 
 
+# Shared mailboxes identify a function, not a person. `privacy@acme.com` in a
+# notice or `bot@project.org` in a CI config is not personal-data exposure.
+_ROLE_MAILBOX_RE = re.compile(
+    r"(?<![\w.+-])(?:no-?reply|do-?not-?reply|bot|ci|build|git|github|actions|support|help|info|hello|contact|sales|billing|admin|"
+    r"security|privacy|legal|dpo|grievance|compliance|abuse|postmaster|webmaster|team|dev|developers?|opensource|oss|press|careers|jobs|"
+    r"notifications?|alerts?|mailer|system|root|feedback|enquir(?:y|ies)|office)(?:[+._-][\w.+-]*)?@",
+    re.IGNORECASE,
+)
+
+
+def _only_role_mailboxes(matches: List[str]) -> bool:
+    return bool(matches) and all(_ROLE_MAILBOX_RE.match(value) for value in matches)
+
+
 def _filter_email_candidates(line: str, matches: List[str]) -> List[str]:
     """Drop email-shaped matches that are not emails.
 
@@ -604,6 +618,10 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                         severity = "MEDIUM"
                         label_text = "Possible Aadhaar-format literal"
                         detail = "Verhoeff-valid 12-digit value with no Aadhaar/KYC context nearby; may be an unrelated numeric ID. Verify manually."
+                elif "Email" in literal_label and _only_role_mailboxes([str(value) for value in matches]):
+                    severity = "LOW"
+                    label_text = "Email literal (shared mailbox)"
+                    detail = "Role or system mailbox (support@, privacy@, noreply@, bot@): it identifies a function, not a person."
                 elif "Email" in literal_label and _email_literal_is_fixture(rel, line):
                     severity = "LOW"
                     label_text = "Email literal (test/example context)"

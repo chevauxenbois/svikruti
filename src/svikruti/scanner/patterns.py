@@ -428,6 +428,23 @@ IGNORED_FILE_PATTERNS = (
     ".sarif",
     "svikruti-report.html",
     "svikruti-report.json",
+    # Dependency lock files are hashes and version pins: integrity digests
+    # collide with Aadhaar/PAN/phone formats, and a package named after a
+    # vendor is not a use of that vendor.
+    "yarn.lock",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "npm-shrinkwrap.json",
+    "bun.lock",
+    "poetry.lock",
+    "uv.lock",
+    "Pipfile.lock",
+    "Cargo.lock",
+    "Gemfile.lock",
+    "composer.lock",
+    "go.sum",
+    "packages.lock.json",
+    "gradle.lockfile",
     # The privacy-as-code manifest and its reports describe processing; they
     # are not processing. Scanning them would make a declared processor look
     # "detected in code" forever.
@@ -444,6 +461,8 @@ IGNORED_FILE_PATTERNS = (
 
 IGNORED_DIRS = {
     ".git",
+    ".svikruti",
+    "svikruti-check",
     "__pycache__",
     ".venv",
     "venv",

@@ -10,7 +10,11 @@ review-ready artifacts over generic compliance checklists.
 - Privacy as code: `privacy.yaml` manifest, `svikruti init` / `check` / `diff`,
   drift and policy rules, framework packs (DPDPA, GDPR, ISO/IEC 27701:2025),
   baselines with stable fingerprints, a pull-request gate, `svikruti sync`,
-  and processor data flows (which data reaches which third party).
+  and processor data flows (which data reaches which third party, followed
+  through wrapper functions across files).
+- Risk score split into defects and data exposure.
+- Manifest JSON Schema, pre-commit hooks, and manifest import in the
+  governance app.
 - Six framework packs: DPDPA, GDPR, ISO/IEC 27701 controller and processor,
   LGPD, CCPA/CPRA.
 - Argument-level log-sink detection.
@@ -36,8 +40,10 @@ review-ready artifacts over generic compliance checklists.
 
 - More framework packs: SOC 2 Privacy criteria, RBI/SEBI sector overlays,
   Singapore PDPA, UK GDPR deltas.
-- Cross-file data flow: follow personal data through wrappers and service
-  layers to the processor call (today's flow analysis is per file).
+- Deeper data flow: dependency injection, queues and event buses between the
+  caller and the processor (wrapper functions are already followed across
+  files).
+- Re-run the real-repository precision review against the 0.9.0 detectors.
 - Data-model sources: SQL migrations, ORM models and OpenAPI schemas as
   first-class inputs to the manifest (field-level inventory).
 
