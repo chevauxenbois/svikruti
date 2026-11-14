@@ -1,0 +1,141 @@
+Framework,Clause / Control,Legacy Ref,Control Title,Obligation,Obligation Title,Status,Proof Type,Summary
+dpdpa,Sec. 8(1),,"Data Fiduciary responsible for compliance, including processing by its Data Processors",OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
+dpdpa,Sec. 10(2)(c),,Significant Data Fiduciary: DPIA and periodic audit rely on an accurate processing record,OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
+dpdpa,Sec. 4(1),,Processing only for a lawful purpose,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
+dpdpa,Sec. 5(1)(i),,Notice states the personal data and the purpose of processing,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
+dpdpa,Sec. 4(1),,Processing only with consent or for certain legitimate uses,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+dpdpa,Sec. 6,,Consent,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+dpdpa,Sec. 7,,Certain legitimate uses,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+dpdpa,Sec. 8(7),,Erasure when the specified purpose is no longer served or consent is withdrawn,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+dpdpa,Rule 8,,Time period for the specified purpose to be deemed no longer served,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+dpdpa,Sec. 6(1),,Consent limited to personal data necessary for the specified purpose,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
+dpdpa,Sec. 8(5),,Reasonable security safeguards to prevent personal data breach,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+dpdpa,Rule 6,,"Security safeguards: encryption, obfuscation, masking or virtual tokens",OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+dpdpa,Sec. 5,,Notice,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+dpdpa,Rule 3,,Notice given by Data Fiduciary to Data Principal,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+dpdpa,Sec. 8(2),,Engaging a Data Processor only under a valid contract,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+dpdpa,Rule 6,,Security safeguards: contractual provisions with Data Processors,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+dpdpa,Sec. 16,,Processing of personal data outside India,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+dpdpa,Rule 15,,Transfer of personal data outside India,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+dpdpa,Sec. 10(2)(c)(i),,Periodic Data Protection Impact Assessment (Significant Data Fiduciary),OBL-10,High-risk processing has an impact assessment,Verified,code,Every activity handling high-risk data references an impact assessment.
+dpdpa,Rule 13,,Additional obligations of Significant Data Fiduciary,OBL-10,High-risk processing has an impact assessment,Verified,code,Every activity handling high-risk data references an impact assessment.
+dpdpa,Sec. 9,,Processing of personal data of children,OBL-11,Children's data has verifiable safeguards,Not applicable,attestation,No children's data is declared or detected.
+dpdpa,Rule 10,,Verifiable consent for processing personal data of a child,OBL-11,Children's data has verifiable safeguards,Not applicable,attestation,No children's data is declared or detected.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+dpdpa,Rule 6,,Security safeguards: encryption of personal data,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-13,Encryption at rest and key management,Verified,code,5 piece(s) of repository evidence.
+dpdpa,Rule 6,,Security safeguards: encryption of personal data,OBL-13,Encryption at rest and key management,Verified,code,5 piece(s) of repository evidence.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-14,Secrets and credential hygiene,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Rule 6,,Security safeguards: control of access to computer resources,OBL-14,Secrets and credential hygiene,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Sec. 8(4),,Appropriate technical and organisational measures,OBL-15,Vulnerability management,Verified,code,3 piece(s) of repository evidence.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-15,Vulnerability management,Verified,code,3 piece(s) of repository evidence.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+dpdpa,Rule 6,,"Security safeguards: logs, monitoring and review to detect unauthorised access; logs retained for one year",OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+dpdpa,Sec. 8(6),,Intimation of personal data breach to the Board and affected Data Principals,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Rule 7,,Intimation of personal data breach,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Rule 6,,"Security safeguards: continued processing after compromise, including data backups",OBL-18,Backup and recovery,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Sec. 8(4),,Appropriate technical and organisational measures,OBL-19,Infrastructure guardrails,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Sec. 8(5),,Reasonable security safeguards,OBL-19,Infrastructure guardrails,Verified,code,1 piece(s) of repository evidence.
+dpdpa,Sec. 6(1),,"Free, specific, informed, unconditional and unambiguous consent",OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+dpdpa,Sec. 9(3),,"No tracking, behavioural monitoring or targeted advertising directed at children",OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+dpdpa,Secs. 11-14,,"Rights of Data Principal: access, correction and erasure, grievance redressal, nomination",OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+dpdpa,Rule 14,,Rights of Data Principals,OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+dpdpa,Sec. 6(4),,"Right to withdraw consent, with ease comparable to giving it",OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+dpdpa,Sec. 6(10),,Data Fiduciary to prove that notice was given and consent obtained,OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+dpdpa,Sec. 8(9),,Publish business contact information of the DPO or person answering on behalf of the Data Fiduciary,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+dpdpa,Sec. 8(10),,Effective mechanism to redress grievances,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+dpdpa,Rule 9,,Contact information of person to answer questions about processing,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+dpdpa,Sec. 8(6),,Intimation of personal data breach,OBL-24,Breach notification procedure exists,Attested,attestation,Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.
+dpdpa,Rule 7,,Detailed report to the Board within seventy-two hours,OBL-24,Breach notification procedure exists,Attested,attestation,Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.
+gdpr,Art. 30(1),,Records of processing activities,OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
+gdpr,Art. 5(2),,Accountability,OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
+gdpr,Art. 5(1)(b),,Purpose limitation,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
+gdpr,Art. 30(1)(b),,Purposes of the processing recorded,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
+gdpr,Art. 6(1),,Lawfulness of processing,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+gdpr,Art. 9(2),,"Condition for special categories, where they are processed",OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+gdpr,Art. 5(1)(e),,Storage limitation,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+gdpr,Art. 30(1)(f),,Envisaged time limits for erasure,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+gdpr,Art. 5(1)(c),,Data minimisation,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
+gdpr,Art. 25(2),,Data protection by default,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
+gdpr,Art. 5(1)(c),,Data minimisation,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+gdpr,Art. 5(1)(f),,Integrity and confidentiality,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+gdpr,Art. 32(1),,Security of processing,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+gdpr,Art. 13,,Information to be provided where data are collected from the data subject,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+gdpr,Art. 14,,Information where data have not been obtained from the data subject,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+gdpr,Art. 5(1)(a),,"Lawfulness, fairness and transparency",OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+gdpr,Art. 28(1),,Processors providing sufficient guarantees,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+gdpr,Art. 28(3),,Processing by a processor governed by a contract,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+gdpr,Art. 30(1)(d),,Categories of recipients recorded,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+gdpr,Art. 44,,General principle for transfers,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+gdpr,Art. 46,,Transfers subject to appropriate safeguards,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+gdpr,Art. 30(1)(e),,Transfers to third countries recorded,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+gdpr,Art. 35(1),,Data protection impact assessment,OBL-10,High-risk processing has an impact assessment,Verified,code,Every activity handling high-risk data references an impact assessment.
+gdpr,Art. 35(3)(b),,DPIA for large-scale special category processing,OBL-10,High-risk processing has an impact assessment,Verified,code,Every activity handling high-risk data references an impact assessment.
+gdpr,Art. 8,,Conditions applicable to child's consent,OBL-11,Children's data has verifiable safeguards,Not applicable,attestation,No children's data is declared or detected.
+gdpr,Art. 32(1)(a),,Pseudonymisation and encryption of personal data,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+gdpr,Art. 5(1)(f),,Integrity and confidentiality,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+gdpr,Art. 32(1)(a),,Pseudonymisation and encryption of personal data,OBL-13,Encryption at rest and key management,Verified,code,5 piece(s) of repository evidence.
+gdpr,Art. 32(1)(b),,Ongoing confidentiality of processing systems,OBL-14,Secrets and credential hygiene,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 32(1)(d),,Regularly testing and evaluating security measures,OBL-15,Vulnerability management,Verified,code,3 piece(s) of repository evidence.
+gdpr,Art. 32(1)(b),,"Ongoing confidentiality, integrity, availability and resilience",OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+gdpr,Art. 33(1),,Becoming aware of a personal data breach,OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+gdpr,Art. 33,,Notification of a personal data breach to the supervisory authority,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 34,,Communication of a breach to the data subject,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 32(1)(c),,Ability to restore availability and access in a timely manner,OBL-18,Backup and recovery,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 25(1),,Data protection by design,OBL-19,Infrastructure guardrails,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 32(1)(b),,Ongoing confidentiality of processing systems,OBL-19,Infrastructure guardrails,Verified,code,1 piece(s) of repository evidence.
+gdpr,Art. 6(1)(a),,Consent as lawful basis,OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+gdpr,Art. 7,,Conditions for consent,OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+gdpr,Directive 2002/58/EC Art. 5(3),,Storing or accessing information on terminal equipment (ePrivacy),OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+gdpr,Art. 12(3),,Responding to data subject requests within one month,OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+gdpr,Arts. 15-22,,Rights of the data subject,OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+gdpr,Art. 7(1),,Demonstrating that consent was given,OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+gdpr,Art. 7(3),,Withdrawal of consent as easy as giving it,OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+gdpr,Art. 13(1)(a)-(b),,Identity and contact details of the controller and DPO,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+gdpr,Arts. 37-39,,"Data protection officer, where designation is required",OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+gdpr,Art. 33(1),,Notification within 72 hours,OBL-24,Breach notification procedure exists,Attested,attestation,Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.
+gdpr,Art. 33(5),,Documenting personal data breaches,OBL-24,Breach notification procedure exists,Attested,attestation,Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.
+iso27701,A.1.2.9,A.7.2.8,Records related to processing PII,OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
+iso27701,A.1.2.2,A.7.2.1,Identify and document purpose,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
+iso27701,A.1.2.3,A.7.2.2,Identify lawful basis,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
+iso27701,A.1.4.8,A.7.4.7,Retention,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+iso27701,A.1.4.6,A.7.4.5,PII de-identification and deletion at the end of processing,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+iso27701,A.1.4.2,A.7.4.1,Limit collection,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
+iso27701,A.1.4.5,A.7.4.4,PII minimization objectives,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
+iso27701,A.1.4.3,A.7.4.2,Limit processing,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+iso27701,A.1.4.5,A.7.4.4,PII minimization objectives,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+iso27701,A.3.25,,Logging,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
+iso27701,A.1.3.3,A.7.3.2,Determining information for PII principals,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+iso27701,A.1.3.4,A.7.3.3,Providing information to PII principals,OBL-07,The privacy notice matches actual processing,Failing,code,The notice omits 1 item(s) the code processes.
+iso27701,A.1.2.7,A.7.2.6,Contracts with PII processors,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+iso27701,A.1.5.5,A.7.5.4,Records of PII disclosures to third parties,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+iso27701,A.3.10,,Addressing information security within supplier agreements,OBL-08,Processors are identified and under contract,Failing,code,1 open finding(s): Undeclared processor / third party
+iso27701,A.1.5.2,A.7.5.1,Identify basis for PII transfer between jurisdictions,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+iso27701,A.1.5.3,A.7.5.2,Countries and international organizations to which PII can be transferred,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+iso27701,A.1.5.4,A.7.5.3,Records of transfer of PII,OBL-09,Cross-border transfers are documented,Verified,manifest,"Every processor has a recorded country and, where required, a transfer mechanism."
+iso27701,A.1.2.6,A.7.2.5,Privacy impact assessment,OBL-10,High-risk processing has an impact assessment,Verified,code,Every activity handling high-risk data references an impact assessment.
+iso27701,A.1.2.4,A.7.2.3,Determine when and how consent is to be obtained,OBL-11,Children's data has verifiable safeguards,Not applicable,attestation,No children's data is declared or detected.
+iso27701,A.1.2.6,A.7.2.5,Privacy impact assessment,OBL-11,Children's data has verifiable safeguards,Not applicable,attestation,No children's data is declared or detected.
+iso27701,A.1.4.10,A.7.4.9,PII transmission controls,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+iso27701,A.3.26,,Use of cryptography,OBL-12,Encryption in transit,Verified,code,2 piece(s) of repository evidence.
+iso27701,A.3.26,,Use of cryptography,OBL-13,Encryption at rest and key management,Verified,code,5 piece(s) of repository evidence.
+iso27701,A.3.23,,Secure authentication,OBL-14,Secrets and credential hygiene,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.3.27,,Secure development life cycle,OBL-14,Secrets and credential hygiene,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.3.27,,Secure development life cycle,OBL-15,Vulnerability management,Verified,code,3 piece(s) of repository evidence.
+iso27701,A.3.28,,Application security requirements,OBL-15,Vulnerability management,Verified,code,3 piece(s) of repository evidence.
+iso27701,A.3.25,,Logging,OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+iso27701,A.3.11,,Information security incident management planning and preparation,OBL-16,Security monitoring and logging,Verified,code,2 piece(s) of repository evidence.
+iso27701,A.3.11,,Information security incident management planning and preparation,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.3.12,,Response to information security incidents,OBL-17,Breach response readiness,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.3.24,,Information backup,OBL-18,Backup and recovery,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.3.29,,Secure system architecture and engineering principles,OBL-19,Infrastructure guardrails,Verified,code,1 piece(s) of repository evidence.
+iso27701,A.1.2.4,A.7.2.3,Determine when and how consent is to be obtained,OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+iso27701,A.1.2.5,A.7.2.4,Obtain and record consent,OBL-20,Tracking waits for consent,Attested,code,Attested by web-platform on 2026-10-20: The marketing site loads no non-essential trackers; verified with a browser consent scan each release.
+iso27701,A.1.3.2,A.7.3.1,Determining and fulfilling obligations to PII principals,OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+iso27701,A.1.3.7,A.7.3.6,"Access, correction or erasure",OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+iso27701,A.1.3.10,A.7.3.9,Handling requests,OBL-21,Individuals' rights requests are handled,Attested,attestation,"Attested by privacy-office on 2026-10-01: Access, correction and erasure requests are handled by the support desk within 30 days."
+iso27701,A.1.2.5,A.7.2.4,Obtain and record consent,OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+iso27701,A.1.3.5,A.7.3.4,Providing mechanism to modify or withdraw consent,OBL-22,Consent is recorded and withdrawable,Attested,attestation,Attested by lending-platform on 2026-10-01: Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app.
+iso27701,A.1.3.4,A.7.3.3,Providing information to PII principals,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+iso27701,A.3.4,,Information security roles and responsibilities,OBL-23,A privacy contact is published,Verified,manifest,Privacy contact recorded: privacy@lendflow.example.
+iso27701,A.3.12,,Response to information security incidents,OBL-24,Breach notification procedure exists,Attested,attestation,Attested by security on 2026-09-15: Breach notification procedure tested in the September tabletop exercise.

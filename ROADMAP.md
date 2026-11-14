@@ -1,10 +1,16 @@
 # Svikruti Roadmap
 
-Svikruti is an open-source privacy engineering workbench for DPDPA readiness.
+Svikruti is open-source privacy as code: the repository is the source of truth,
+reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 27701.
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.8.1
+## Current Release: 0.9.0
+
+- Privacy as code: `privacy.yaml` manifest, `svikruti init` / `check` / `diff`,
+  drift and policy rules, framework packs (DPDPA, GDPR, ISO/IEC 27701:2025),
+  baselines with stable fingerprints, and a pull-request gate.
+- Argument-level log-sink detection.
 
 - Local CLI scanner for repository, website, privacy notice, browser-consent,
   vendor, and security-evidence signals.
@@ -25,6 +31,16 @@ review-ready artifacts over generic compliance checklists.
 
 ## Near Term
 
+- Privacy as code: surface the check result in the HTML evidence report and
+  the Streamlit dashboard; `svikruti check --fix` to add newly detected
+  categories and processors to the manifest as a reviewable patch.
+- More framework packs: CCPA/CPRA, LGPD, ISO/IEC 27701 Table A.2 (processors),
+  SOC 2 Privacy criteria, RBI/SEBI sector overlays.
+- Inter-procedural data-flow (source to sink across functions and files) so
+  processor findings say which data categories reach which third party.
+- Data-model sources: SQL migrations, ORM models and OpenAPI schemas as
+  first-class inputs to the manifest (field-level inventory).
+
 - Improve JavaScript/TypeScript, Java, Go, Ruby, and PHP semantic coverage with
   deeper tree-sitter packs.
 - Add more framework-specific detectors for Django, FastAPI, Express, Next.js,
@@ -41,10 +57,8 @@ review-ready artifacts over generic compliance checklists.
 
 ## Product Direction
 
-- CI release gates for privacy evidence regressions.
 - Consent journey capture with richer browser evidence.
 - Cloud evidence imports from common security and posture tools.
-- Evidence diffing between scans.
 - Hosted/self-hosted evidence vault with org dashboards.
 - Jira, Linear, GitHub Issues, Slack, and GRC integrations.
 - SSO, RBAC, audit logs, approvals, and exception workflows.

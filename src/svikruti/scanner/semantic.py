@@ -14,10 +14,10 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
-from svikruti.scanner.code import _file_context, _language_for, iter_source_files
+from svikruti.scanner.code import _code_outside_strings, _file_context, _language_for, iter_source_files
 from svikruti.scanner.patterns import (
     AMBIGUOUS_SENSITIVE_TERMS,
     CATEGORY_SEVERITY,
@@ -287,6 +287,77 @@ def _python_request_sources(
     return evidence
 
 
+_PY_LOG_METHODS = {"debug", "info", "warning", "warn", "error", "exception", "critical", "fatal", "log"}
+_PY_LOGGER_NAMES = {"logger", "logging", "log", "_logger", "_log"}
+
+
+def _is_python_log_call(call: ast.Call) -> bool:
+    func = call.func
+    if isinstance(func, ast.Name):
+        return func.id in {"print", "pprint"}
+    if not isinstance(func, ast.Attribute) or func.attr not in _PY_LOG_METHODS:
+        return False
+    # logger.info / logging.error / self.logger.warning / app.logger.info / log.debug
+    owner = func.value
+    while isinstance(owner, ast.Attribute):
+        if owner.attr.lower() in _PY_LOGGER_NAMES or owner.attr.lower().endswith("logger"):
+            return True
+        owner = owner.value
+    return isinstance(owner, ast.Name) and (owner.id.lower() in _PY_LOGGER_NAMES or owner.id.lower().endswith("logger"))
+
+
+def _python_logged_text(call: ast.Call, assignments: Dict[str, str]) -> Tuple[str, str]:
+    """Return (direct, one_hop) text for what a logging call actually emits.
+
+    ``direct`` covers identifiers, attribute names, subscript keys and
+    f-string expressions passed to the call. ``one_hop`` adds the right-hand
+    side of a local assignment when a whole variable is logged
+    (``payload = request.json`` then ``logger.info(payload)``). Logging
+    ``applicant.id`` never expands ``applicant``: only the attribute is emitted.
+    """
+    direct: List[str] = []
+    one_hop: List[str] = []
+    values = list(call.args) + [keyword.value for keyword in call.keywords]
+
+    def visit(node: ast.AST, whole: bool) -> None:
+        if isinstance(node, ast.Name):
+            direct.append(node.id)
+            if whole and node.id in assignments:
+                one_hop.append(assignments[node.id])
+        elif isinstance(node, ast.Attribute):
+            direct.append(node.attr)
+        elif isinstance(node, ast.Subscript):
+            key = node.slice
+            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                direct.append(key.value)
+            else:
+                visit(node.value, whole)
+        elif isinstance(node, ast.JoinedStr):
+            for part in node.values:
+                if isinstance(part, ast.FormattedValue):
+                    visit(part.value, whole)
+        elif isinstance(node, ast.FormattedValue):
+            visit(node.value, whole)
+        elif isinstance(node, ast.Call):
+            # str(email), mask(phone), json.dumps(payload), "..".format(email)
+            for child in list(node.args) + [keyword.value for keyword in node.keywords]:
+                visit(child, whole)
+            if isinstance(node.func, ast.Attribute):
+                visit(node.func.value, False)
+        elif isinstance(node, (ast.BinOp, ast.BoolOp, ast.Tuple, ast.List, ast.Set, ast.IfExp, ast.Starred)):
+            for child in ast.iter_child_nodes(node):
+                visit(child, whole)
+        elif isinstance(node, ast.Dict):
+            for key, value in zip(node.keys, node.values):
+                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    direct.append(key.value)
+                visit(value, whole)
+
+    for value in values:
+        visit(value, True)
+    return " ".join(direct), " ".join(one_hop)
+
+
 def _python_log_sinks(
     node: ast.AST,
     body_text: str,
@@ -296,30 +367,57 @@ def _python_log_sinks(
     seen: Set[str],
     endpoint_hint: str,
 ) -> List[Evidence]:
-    if not any(hint in body_text for hint in PY_LOG_HINTS):
+    """Flag personal data that is actually passed to a logging call.
+
+    Earlier releases flagged every category mentioned anywhere in a function
+    that also contained a log statement. That made `logger.info("created id=%s",
+    obj.id)` a CRITICAL finding in any KYC handler, which no CI gate survives.
+    This inspects the call's arguments instead.
+    """
+    if not any(hint in body_text for hint in PY_LOG_HINTS) and "log" not in body_text:
         return []
+    assignments: Dict[str, str] = {}
+    for child in ast.walk(node):
+        if isinstance(child, ast.Assign) and len(child.targets) == 1 and isinstance(child.targets[0], ast.Name):
+            try:
+                assignments[child.targets[0].id] = ast.unparse(child.value)
+            except Exception:  # pragma: no cover - unparse is best effort
+                continue
     evidence: List[Evidence] = []
-    for category in _categories_for_text(body_text):
-        key = f"semantic_python_log:{rel}:{getattr(node, 'lineno', 0)}:{category}"
-        if key in seen:
+    for call in ast.walk(node):
+        if not isinstance(call, ast.Call) or not _is_python_log_call(call):
             continue
-        seen.add(key)
-        evidence.append(
-            _evidence(
+        direct, one_hop = _python_logged_text(call, assignments)
+        direct_categories = set(_categories_for_text(direct))
+        hop_categories = set(_categories_for_text(one_hop)) - direct_categories
+        line = getattr(call, "lineno", getattr(node, "lineno", None))
+        for category in sorted(direct_categories | hop_categories):
+            key = f"semantic_python_log:{rel}:{line}:{category}"
+            if key in seen:
+                continue
+            seen.add(key)
+            via_variable = category in hop_categories
+            item = _evidence(
                 kind="semantic_logging_sink",
                 label=f"{category} logging sink",
                 severity="CRITICAL" if category in {"Government ID", "Health", "Children"} else "HIGH",
                 rel=rel,
                 path=path,
-                line=getattr(node, "lineno", None),
+                line=line,
                 category="Security safeguards",
-                detail=f"Parser identified logging/printing near {category} data in `{getattr(node, 'name', 'function')}`.",
+                detail=(
+                    f"`{getattr(node, 'name', 'function')}` logs a variable assigned from {category} data."
+                    if via_variable
+                    else f"`{getattr(node, 'name', 'function')}` passes {category} data to a logging call."
+                ),
                 recommendation="Mask, remove, hash, or justify personal data in logs and attach log-retention evidence.",
                 file_context=file_context,
                 detector_id=f"semantic.python.log_sink.{normalize_text(category)}",
-                extra={"data_category": category, "endpoint_hint": endpoint_hint, "semantic_role": "log_sink"},
+                extra={"data_category": category, "endpoint_hint": endpoint_hint, "semantic_role": "log_sink", "flow": "one_hop" if via_variable else "direct"},
             )
-        )
+            if via_variable:
+                item.metadata["confidence"] = "medium"
+            evidence.append(item)
     return evidence
 
 
@@ -427,7 +525,7 @@ def _scan_js_ts_semantics(
             )
         log_match = JS_LOG_RE.search(line)
         if log_match:
-            for category in _categories_for_text(log_match.group(2)):
+            for category in _categories_for_text(_code_outside_strings(log_match.group(2))):
                 key = f"semantic_js_log:{rel}:{line_number}:{category}"
                 if key in seen:
                     continue
@@ -574,7 +672,9 @@ def _scan_c_style_semantics(
         if log_re.search(line):
             evidence.extend(
                 _semantic_context_evidence(
-                    line,
+                    # Identifiers and interpolations only: the word "email"
+                    # in a log message is not an email address.
+                    _code_outside_strings(line),
                     rel,
                     path,
                     line_number,
@@ -649,7 +749,9 @@ def _scan_dynamic_web_semantics(
         if log_re.search(line):
             evidence.extend(
                 _semantic_context_evidence(
-                    line,
+                    # Identifiers and interpolations only: the word "email"
+                    # in a log message is not an email address.
+                    _code_outside_strings(line),
                     rel,
                     path,
                     line_number,

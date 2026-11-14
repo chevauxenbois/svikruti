@@ -56,6 +56,12 @@ def write_sarif(result: ScanResult, output_path: str) -> None:
                         }
                     }
                 ],
+                # Lets GitHub code scanning track a finding across line shifts.
+                **(
+                    {"partialFingerprints": {"svikrutiFinding/v1": item.metadata["fingerprint"]}}
+                    if item.metadata.get("fingerprint")
+                    else {}
+                ),
                 "properties": {
                     "severity": item.severity,
                     "source": item.source,

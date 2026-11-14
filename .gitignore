@@ -81,3 +81,4 @@ excalidraw/
 *.html
 !site/*.html
 !examples/*.html
+svikruti-check/

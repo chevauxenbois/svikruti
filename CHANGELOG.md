@@ -1,5 +1,61 @@
 # Changelog
 
+## 0.9.0 - Privacy as Code
+
+### Added
+
+- `privacy.yaml` manifest: processing activities bound to code paths, with
+  purposes, lawful basis (single or per framework), retention, processors,
+  DPIA reference, logging allowances, policies, time-boxed exceptions and
+  dated attestations. Validation reports every problem at once; unknown keys
+  are warnings.
+- `svikruti init`: generates the manifest from a scan, in sync with the code
+  by construction, with TODO placeholders for what code cannot know.
+- `svikruti check`: reconciles the manifest against scanner evidence.
+  Drift rules D001-D008 (shadow processing, undeclared category, undeclared
+  processor, stale declarations, incomplete records) and policy rules
+  P001-P005 (personal data in logs, forbidden categories, missing DPIA,
+  undocumented transfers, expired exceptions). Exit code 3 on findings at or
+  above `--fail-on` (default high).
+- Framework packs: 24 framework-neutral obligations mapped to DPDPA (Act and
+  Rules 2025), GDPR and ISO/IEC 27701:2025 (with 2019 legacy numbers). Custom
+  packs load from a YAML/JSON path. `svikruti frameworks` lists built-ins.
+- Obligation states: verified, failing, attested, not verified, not
+  applicable. Attestations go stale after `attestation_max_age_days` and never
+  override a failing check.
+- Report pack for `check`: self-contained HTML, Markdown, PR comment, JSON
+  (`svikruti-privacy-check-v1`), SARIF, compliance-matrix CSV and a
+  processing-record CSV verified against code.
+- Stable finding fingerprints (file, detector, normalised line; not line
+  number) on every evidence item and in SARIF `partialFingerprints`.
+- Baselines: `svikruti scan --baseline --fail-on-new`, `svikruti check
+  --baseline`, and `svikruti diff base.json head.json` with a semantic summary
+  (new data categories, new third parties, new logging flows).
+- `svikruti init-github-action --mode check`: pull-request gate that builds
+  its baseline from the base branch, posts a PR comment and uploads SARIF.
+- Worked example `examples/privacy-as-code` (passes), drift scenario
+  `examples/pac-scenarios/refund.js`, sample output
+  `examples/sample-privacy-check`.
+- `tests.yml` workflow running the suite on Python 3.9, 3.11 and 3.13.
+
+### Changed (detection quality)
+
+- Python log-sink detection now inspects the arguments of the logging call
+  (names, attributes, subscript keys, f-string expressions, one assignment
+  hop for whole-variable logging). Previously every category mentioned
+  anywhere in a function containing a log statement was flagged, so
+  `logger.info("created id=%s", user.id)` in a KYC handler was CRITICAL.
+- Line-level `logging_risk` no longer fires because a log statement sits on a
+  neighbouring line. Arguments of a multi-line log call are still detected.
+- A personal-data word inside a log message string ("could not send email")
+  is no longer a logging finding in any language; interpolated expressions
+  (f-strings, `${}`, `#{}`, `$var`) still are.
+- `privacy.yaml` and privacy-check outputs are excluded from scanning.
+
+### Dependencies
+
+- PyYAML is now a core dependency (manifest and framework packs).
+
 ## Unreleased
 
 ### Fixed (app rendering)

@@ -1,0 +1,86 @@
+# LendFlow: a worked example of privacy as code.
+# `svikruti check --repo . --privacy-file privacy-notice.md` passes on this tree.
+version: 1
+
+organization:
+  name: LendFlow Financial Services
+  role: controller
+  privacy_contact: privacy@lendflow.example
+
+frameworks: [dpdpa, gdpr, iso27701]
+
+policies:
+  personal_data_in_logs: deny
+  forbidden_categories: [health, children, biometric]
+  allowed_transfer_countries: [IN]
+
+processing_activities:
+  - id: applicant_onboarding
+    name: Loan applicant onboarding and KYC
+    owner: lending-platform
+    paths: ["services/onboarding/**", "web/**"]
+    data_categories: [identity, contact, government_id]
+    data_subjects: [loan applicants]
+    purposes: [credit assessment, KYC under the PML Rules]
+    legal_basis: {dpdpa: consent, gdpr: legal_obligation}
+    retention: "8 years after loan closure (PML Rules), then erased"
+    dpia: DPIA-2026-003
+    processors: []
+
+  - id: repayments
+    name: EMI repayment collection
+    owner: payments
+    paths: ["services/payments/**"]
+    data_categories: [contact, financial]
+    data_subjects: [borrowers]
+    purposes: [repayment collection]
+    legal_basis: {dpdpa: legitimate_use, gdpr: contract}
+    retention: "8 years after loan closure (tax and PML records)"
+    processors: [razorpay]
+
+  - id: reminders
+    name: Repayment reminders
+    owner: growth
+    paths: ["services/notifications/**"]
+    data_categories: [contact]
+    data_subjects: [borrowers]
+    purposes: [repayment reminders]
+    legal_basis: {dpdpa: consent, gdpr: legitimate_interests}
+    retention: "Message logs kept 90 days"
+    processors: [msg91]
+
+processors:
+  - id: razorpay
+    name: Razorpay
+    purpose: Payment processing
+    country: IN
+    contract: DPA-2025-011
+  - id: msg91
+    name: MSG91
+    purpose: Transactional SMS
+    country: IN
+    contract: DPA-2025-019
+
+exceptions: []
+
+attestations:
+  - obligation: OBL-20
+    statement: "The marketing site loads no non-essential trackers; verified with a browser consent scan each release."
+    evidence: https://wiki.lendflow.example/privacy/consent-scan
+    owner: web-platform
+    reviewed: 2026-10-20
+  - obligation: OBL-21
+    statement: "Access, correction and erasure requests are handled by the support desk within 30 days."
+    evidence: https://wiki.lendflow.example/privacy/rights-runbook
+    owner: privacy-office
+    reviewed: 2026-10-01
+  - obligation: OBL-22
+    statement: "Consent is stored as an append-only ledger with timestamp and notice version; withdrawal is one tap in the app."
+    evidence: https://wiki.lendflow.example/privacy/consent-ledger
+    owner: lending-platform
+    reviewed: 2026-10-01
+  - obligation: OBL-24
+    statement: "Breach notification procedure tested in the September tabletop exercise."
+    evidence: docs/incident-runbook.md
+    owner: security
+    reviewed: 2026-09-15

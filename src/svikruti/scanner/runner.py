@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 
 from svikruti.ai import generate_ai_insights
 from svikruti.models import Evidence, ScanResult
+from svikruti.pac.fingerprint import assign_fingerprints
 from svikruti.scanner.assurance import build_assurance_profile
 from svikruti.scanner.browser import scan_consent_journey
 from svikruti.scanner.code import MAX_FILE_BYTES, scan_repo
@@ -110,6 +111,9 @@ def run_scan(
                     },
                 )
             )
+
+    # Stable, line-number-independent identity for baselines and SARIF.
+    assign_fingerprints(result.evidence, repo)
 
     result.summary = summarize(result.evidence, files_scanned, pages_scanned)
     result.ropa_starter = build_ropa_starter(result.evidence)

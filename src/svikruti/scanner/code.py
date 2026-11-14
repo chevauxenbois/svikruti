@@ -176,6 +176,53 @@ def _is_logging_context(context: str) -> bool:
     return any(pattern.search(lowered) for pattern in LOGGING_HINT_PATTERNS)
 
 
+_STRING_LITERAL_RE = re.compile(r"""([A-Za-z]{0,2})("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)""")
+_INTERPOLATION_RES = (
+    re.compile(r"\$\{([^}]*)\}"),      # JS/TS/Kotlin/Groovy template: ${expr}
+    re.compile(r"#\{([^}]*)\}"),        # Ruby: #{expr}
+    re.compile(r"\$([A-Za-z_]\w*)"),    # PHP/Kotlin/shell: $var
+)
+_FSTRING_INTERPOLATION_RE = re.compile(r"\{([^{}]*)\}")
+
+
+def _code_outside_strings(line: str) -> str:
+    """Drop the prose inside string literals but keep interpolated expressions.
+
+    `logger.exception("Exception while parsing email")` logs the *word* email,
+    not an email address. `logger.info(f"signup {user.email}")` logs the value.
+    """
+
+    def replace(match: "re.Match[str]") -> str:
+        prefix, literal = match.group(1), match.group(2)
+        body = literal[1:-1]
+        kept: List[str] = []
+        for pattern in _INTERPOLATION_RES:
+            kept.extend(pattern.findall(body))
+        if "f" in prefix.lower():
+            kept.extend(_FSTRING_INTERPOLATION_RE.findall(body))
+        return " " + " ".join(kept) + " "
+
+    return _STRING_LITERAL_RE.sub(replace, line)
+
+
+def _logged_terms(line: str, matched_terms: List[str]) -> List[str]:
+    """Matched personal-data terms that are identifiers on the line, not message prose."""
+    return _matched_terms(normalize_text(_code_outside_strings(line)), matched_terms)
+
+
+def _inside_open_log_call(lines: List[str], index: int, lookback: int = 6) -> bool:
+    """True when line ``index`` is an argument of a logging call opened above it."""
+    for start in range(index - 1, max(index - lookback, 0) - 1, -1):
+        if not _is_logging_context(lines[start]):
+            continue
+        depth = 0
+        for offset in range(start, index):
+            text = lines[offset]
+            depth += text.count("(") - text.count(")")
+        return depth > 0
+    return False
+
+
 # Underscores are word characters, so plain \b misses snake_case usage like
 # "customer_aadhaar" or "pan_number". Treat letters/digits as the only
 # boundary-blocking characters so snake_case identifiers count as context.
@@ -615,21 +662,25 @@ def scan_repo(repo_path: str) -> CodeScanResult:
 
                 # Classification precedence (most specific evidence wins):
                 #   line logging > line storage > line collection
-                #   > context logging > context storage > context collection.
+                #   > context storage > context collection.
                 # A hint on the flagged line itself always beats a hint that
                 # only appears in adjacent lines, so a print() next door can
                 # no longer hijack a storage/collection classification. (The
                 # old code checked context-collection before context-logging
                 # and re-checked logging in a dead elif branch.)
                 context_type = "personal_data_reference"
-                if _is_logging_context(line):
+                # A line that is an argument of a multi-line log call
+                # (logger.info(\n  email,\n)) is a log sink no matter what
+                # else it mentions. A log statement that merely sits on a
+                # neighbouring line is NOT a logging risk for this line: that
+                # proximity rule produced false CRITICALs that made CI gating
+                # unusable.
+                if (_is_logging_context(line) or _inside_open_log_call(lines, index)) and _logged_terms(line, matched_terms):
                     context_type = "logging_risk"
                 elif _is_storage_context(line):
                     context_type = "storage_point"
                 elif _is_collection_context(line):
                     context_type = "collection_point"
-                elif _is_logging_context(context):
-                    context_type = "logging_risk"
                 elif _is_storage_context(context):
                     context_type = "storage_point"
                 elif _is_collection_context(context):

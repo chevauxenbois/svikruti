@@ -532,3 +532,85 @@ jobs:
 """,
         encoding="utf-8",
     )
+
+
+PRIVACY_CHECK_WORKFLOW = """name: Svikruti Privacy Check
+
+# Privacy as code: fail the pull request when code and privacy.yaml drift apart.
+# Only findings the pull request introduces block it; the existing backlog does not.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  privacy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Svikruti
+        run: python -m pip install "svikruti[parsers] @ git+https://github.com/chevauxenbois/svikruti"
+
+      - name: Baseline from the base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          git worktree add ../svikruti-base "origin/${{ github.base_ref }}"
+          if [ -f ../svikruti-base/privacy.yaml ]; then
+            svikruti check --repo ../svikruti-base --out-dir ../svikruti-base-check --fail-on none || true
+          fi
+
+      - name: Privacy check
+        run: |
+          BASELINE=""
+          if [ -f ../svikruti-base-check/privacy-check.json ]; then
+            BASELINE="--baseline ../svikruti-base-check/privacy-check.json"
+          fi
+          # Add --privacy-file or --privacy-url to compare the code with your published notice.
+          svikruti check --repo . --out-dir svikruti-check --fail-on high $BASELINE
+
+      - name: Job summary
+        if: always()
+        run: cat svikruti-check/pr-comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment on the pull request
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true  # forks get a read-only token
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --edit-last --body-file svikruti-check/pr-comment.md \\
+            || gh pr comment "${{ github.event.pull_request.number }}" --body-file svikruti-check/pr-comment.md
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: svikruti-check/privacy-check.sarif
+          category: svikruti-privacy-as-code
+
+      - name: Upload report pack
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: svikruti-privacy-check
+          path: svikruti-check/
+"""
+
+
+def write_privacy_check_action(output_path: str = ".github/workflows/svikruti-privacy-check.yml") -> None:
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(PRIVACY_CHECK_WORKFLOW, encoding="utf-8")

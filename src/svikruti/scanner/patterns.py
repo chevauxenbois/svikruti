@@ -428,6 +428,18 @@ IGNORED_FILE_PATTERNS = (
     ".sarif",
     "svikruti-report.html",
     "svikruti-report.json",
+    # The privacy-as-code manifest and its reports describe processing; they
+    # are not processing. Scanning them would make a declared processor look
+    # "detected in code" forever.
+    "privacy.yaml",
+    "privacy.yml",
+    "privacy.json",
+    "privacy-check.json",
+    "privacy-check.md",
+    "privacy-check.html",
+    "pr-comment.md",
+    "compliance-matrix.csv",
+    "processing-record.csv",
 )
 
 IGNORED_DIRS = {

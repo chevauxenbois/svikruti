@@ -1,16 +1,57 @@
 # Svikruti
 
-India-first open-source privacy engineering workbench for DPDPA readiness,
-engineering evidence, technical safeguards, consent governance, breach
-readiness, and review artifacts.
+Open-source privacy as code. The repository is the source of truth: Svikruti
+reads what your code does with personal data, reconciles it against a
+reviewed `privacy.yaml`, and fails the pull request when the two drift apart.
+One scan maps to DPDPA, GDPR and ISO/IEC 27701.
 
 [![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
-[![DPDPA](https://img.shields.io/badge/India-DPDPA_2023-047a78)](https://www.meity.gov.in/)
+[![Frameworks](https://img.shields.io/badge/Frameworks-DPDPA_·_GDPR_·_ISO_27701-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
 [![AI Optional](https://img.shields.io/badge/AI-optional_BYOK-6f42c1)](#ai-co-pilot)
 
 **Project page:** [chevauxenbois.com/projects/svikruti](https://chevauxenbois.com/projects/svikruti/)  
 **Launch site:** [chevauxenbois.github.io/svikruti](https://chevauxenbois.github.io/svikruti/)
+
+## Privacy as Code
+
+Privacy programmes run on documents: policies, a record of processing, DPIAs.
+Production runs code. Svikruti closes the gap in three commands.
+
+```bash
+svikruti init --repo .     # write privacy.yaml from what the code does today
+svikruti check --repo .    # reconcile code against the manifest; exit 3 on drift
+svikruti init-github-action --mode check   # gate every pull request
+```
+
+```text
+$ svikruti check --repo . --privacy-file privacy-notice.md
+  HIGH  D002  Activity 'repayments' processes Location data in code, but the record does not declare it.  [services/payments/refund.js:7]
+  HIGH  D003  Activity 'repayments' sends data to Mixpanel, which is not a declared processor.            [services/payments/refund.js]
+  HIGH  P001  Contact data is written to logs in activity 'repayments' (1 location(s)).                   [services/payments/refund.js:8]
+  DPDPA      14/23 verified, 4 attested, 5 failing, 0 not verified
+  GDPR       14/23 verified, 4 attested, 5 failing, 0 not verified
+  ISO 27701  14/23 verified, 4 attested, 5 failing, 0 not verified
+Privacy gate failed: 3 finding(s) at HIGH or above
+```
+
+- **Drift detection.** Undeclared data categories, undeclared processors,
+  code outside any declared activity, stale declarations, incomplete records.
+- **Policy as code.** No personal data in logs, forbidden categories, DPIA
+  required for high-risk data, transfer allow-list, time-boxed exceptions.
+- **One evidence base, many frameworks.** 24 framework-neutral obligations
+  mapped to DPDPA (Act and Rules 2025), GDPR and ISO/IEC 27701:2025. A new
+  framework is one YAML file.
+- **Honest states.** Verified, failing, attested, not verified, not
+  applicable. An attestation expires, and never overrides failing code.
+- **Adoptable.** Baselines and line-independent fingerprints mean only what a
+  pull request introduces can block it.
+
+Worked example: [examples/privacy-as-code](examples/privacy-as-code) ·
+sample report: [examples/sample-privacy-check](examples/sample-privacy-check) ·
+full guide: [docs/PRIVACY_AS_CODE.md](docs/PRIVACY_AS_CODE.md)
+
+## What Else Is In The Box
 
 Svikruti helps teams answer one practical question:
 
