@@ -113,9 +113,9 @@ def is_risk(item: Dict[str, Any]) -> bool:
     return item.get("kind") not in _NON_RISK_KINDS and not metadata.get("positive_evidence")
 
 
-def _facts(report: Dict[str, Any]) -> Tuple[set, set, set]:
-    """(categories, third parties, (category, file) logging flows) present in a report."""
-    categories, third_parties, log_flows = set(), set(), set()
+def _facts(report: Dict[str, Any]) -> Tuple[set, set, set, set]:
+    """(categories, third parties, logging flows, processor flows) present in a report."""
+    categories, third_parties, log_flows, processor_flows = set(), set(), set(), set()
     for item in report.get("evidence") or []:
         metadata = item.get("metadata") or {}
         category = metadata.get("data_category")
@@ -126,7 +126,9 @@ def _facts(report: Dict[str, Any]) -> Tuple[set, set, set]:
         third_party = metadata.get("third_party") or (metadata.get("domain") if "third_party" in str(item.get("kind")) else None)
         if third_party:
             third_parties.add(str(third_party))
-    return categories, third_parties, log_flows
+        if item.get("kind") == "processor_data_flow" and category and metadata.get("third_party"):
+            processor_flows.add((str(category), str(metadata["third_party"])))
+    return categories, third_parties, log_flows, processor_flows
 
 
 def diff_reports(base: Dict[str, Any], head: Dict[str, Any]) -> Dict[str, Any]:
@@ -147,8 +149,8 @@ def diff_reports(base: Dict[str, Any], head: Dict[str, Any]) -> Dict[str, Any]:
 
     new = ordered([item for key, item in head_index.items() if key not in base_index and is_risk(item)])
     resolved = ordered([item for key, item in base_index.items() if key not in head_index and is_risk(item)])
-    base_categories, base_third, base_logs = _facts(base)
-    head_categories, head_third, head_logs = _facts(head)
+    base_categories, base_third, base_logs, base_flows = _facts(base)
+    head_categories, head_third, head_logs, head_flows = _facts(head)
     return {
         "schema_version": "svikruti-diff-v1",
         "matching": "legacy-position-free" if legacy else "fingerprint",
@@ -162,6 +164,7 @@ def diff_reports(base: Dict[str, Any], head: Dict[str, Any]) -> Dict[str, Any]:
         "new_third_parties": sorted(head_third - base_third),
         "removed_third_parties": sorted(base_third - head_third),
         "new_logging_flows": [{"data_category": c, "file": f} for c, f in sorted(head_logs - base_logs)],
+        "new_processor_flows": [{"data_category": c, "third_party": t} for c, t in sorted(head_flows - base_flows)],
         "risk_score_delta": (head.get("summary") or {}).get("risk_score", 0) - (base.get("summary") or {}).get("risk_score", 0),
     }
 
@@ -186,6 +189,8 @@ def diff_markdown(diff: Dict[str, Any], limit: int = 25) -> str:
         headline.append(f"- New third parties / processors: **{', '.join(diff['new_third_parties'])}**")
     for flow in diff.get("new_logging_flows", [])[:10]:
         headline.append(f"- {flow['data_category']} data now reaches logs in `{flow['file']}`")
+    for flow in diff.get("new_processor_flows", [])[:10]:
+        headline.append(f"- {flow['data_category']} data is now sent to **{flow['third_party']}**")
     if diff.get("removed_data_categories"):
         headline.append(f"- No longer detected: {', '.join(diff['removed_data_categories'])}")
     if headline:

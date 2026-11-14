@@ -53,11 +53,13 @@ processors:
   - id: razorpay
     name: Razorpay
     purpose: Payment processing
+    data_categories: [contact]      # what the code passes to Razorpay
     country: IN
     contract: DPA-2025-011
   - id: msg91
     name: MSG91
     purpose: Transactional SMS
+    data_categories: [contact]
     country: IN
     contract: DPA-2025-019
 

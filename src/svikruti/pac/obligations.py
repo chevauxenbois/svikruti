@@ -174,7 +174,11 @@ def _obl08(a: Assessment, c: Context) -> None:
     if not c.manifest.processors and not c.model.processors():
         a.status, a.summary = "not_applicable", "No processors are declared and none were detected."
         return
-    _from_findings(a, c.open("D003") + c.open("D007", field_name="contract"), f"All {len(c.manifest.processors)} processor(s) used in code are declared with a contract reference.")
+    _from_findings(
+        a,
+        c.open("D003") + c.open("D007", field_name="contract") + c.open("D009"),
+        f"All {len(c.manifest.processors)} processor(s) used in code are declared with a contract reference, and receive only the data recorded for them.",
+    )
 
 
 def _obl09(a: Assessment, c: Context) -> None:

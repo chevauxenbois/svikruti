@@ -94,6 +94,8 @@ class ScanResult:
     breach_readiness: Dict[str, Any] = field(default_factory=dict)
     assurance_profile: Dict[str, Any] = field(default_factory=dict)
     scan_quality: Dict[str, Any] = field(default_factory=dict)
+    # Result of reconciling privacy.yaml against this scan (empty when the repo has no manifest).
+    privacy_as_code: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def empty(cls, repo_path: Optional[str], url: Optional[str]) -> "ScanResult":
@@ -136,4 +138,5 @@ class ScanResult:
             "breach_readiness": self.breach_readiness,
             "assurance_profile": self.assurance_profile,
             "scan_quality": self.scan_quality,
+            "privacy_as_code": self.privacy_as_code,
         }

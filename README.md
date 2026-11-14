@@ -21,13 +21,14 @@ Production runs code. Svikruti closes the gap in three commands.
 ```bash
 svikruti init --repo .     # write privacy.yaml from what the code does today
 svikruti check --repo .    # reconcile code against the manifest; exit 3 on drift
+svikruti sync --repo .     # show the manifest changes the code now needs
 svikruti init-github-action --mode check   # gate every pull request
 ```
 
 ```text
 $ svikruti check --repo . --privacy-file privacy-notice.md
   HIGH  D002  Activity 'repayments' processes Location data in code, but the record does not declare it.  [services/payments/refund.js:7]
-  HIGH  D003  Activity 'repayments' sends data to Mixpanel, which is not a declared processor.            [services/payments/refund.js]
+  HIGH  D003  Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor.  [services/payments/refund.js:9]
   HIGH  P001  Contact data is written to logs in activity 'repayments' (1 location(s)).                   [services/payments/refund.js:8]
   DPDPA      14/23 verified, 4 attested, 5 failing, 0 not verified
   GDPR       14/23 verified, 4 attested, 5 failing, 0 not verified
@@ -37,13 +38,17 @@ Privacy gate failed: 3 finding(s) at HIGH or above
 
 - **Drift detection.** Undeclared data categories, undeclared processors,
   code outside any declared activity, stale declarations, incomplete records.
+- **Processor data flows.** Not just "this code uses Mixpanel" but which data
+  categories are passed to it, checked against the processor's record.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations
-  mapped to DPDPA (Act and Rules 2025), GDPR and ISO/IEC 27701:2025. A new
-  framework is one YAML file.
+  mapped to DPDPA (Act and Rules 2025), GDPR, ISO/IEC 27701:2025 (controller
+  and processor), LGPD and CCPA/CPRA. A new framework is one YAML file.
 - **Honest states.** Verified, failing, attested, not verified, not
   applicable. An attestation expires, and never overrides failing code.
+- **Self-maintaining.** `svikruti sync` turns drift into a reviewable patch
+  to `privacy.yaml`; what needs a person stays a TODO.
 - **Adoptable.** Baselines and line-independent fingerprints mean only what a
   pull request introduces can block it.
 

@@ -45,8 +45,14 @@ For your own repository:
 svikruti init --repo .                       # writes privacy.yaml with TODOs
 $EDITOR privacy.yaml                         # fill in purpose, lawful basis, retention, contracts
 svikruti check --repo .                      # reconcile; writes svikruti-check/
+svikruti sync --repo .                       # later: show the manifest changes the code now needs
 svikruti init-github-action --mode check     # CI gate for every pull request
 ```
+
+`svikruti scan` picks up `privacy.yaml` automatically: the evidence report gets
+a Privacy as Code tab, the JSON a `privacy_as_code` block, the evidence pack a
+`privacy-check/` folder, and `svikruti dashboard` a matching tab. Use
+`--no-manifest` to skip it.
 
 ## The manifest
 
@@ -87,6 +93,7 @@ processors:
   - id: razorpay
     name: Razorpay
     purpose: Payment processing
+    data_categories: [contact]        # what the code is allowed to pass to this processor
     country: IN
     contract: DPA-2025-011
     transfer_mechanism: ""            # e.g. Standard Contractual Clauses
@@ -128,6 +135,7 @@ organisation has decided.
 | D006 | MEDIUM | Activity lacks purpose, lawful basis, retention, owner or data subjects, or the basis is not valid for a selected framework |
 | D007 | MEDIUM / HIGH | Processor lacks country, purpose or contract (HIGH when the contract is missing) |
 | D008 | MEDIUM | An activity's paths match no code with personal-data evidence |
+| D009 | HIGH / CRITICAL | Code passes a data category to a declared processor whose record does not list it |
 | P001 | HIGH / CRITICAL | Personal data is passed to a logging call |
 | P002 | CRITICAL | A category under `forbidden_categories` is present |
 | P003 | HIGH | High-risk data with no `dpia` reference |
@@ -136,6 +144,44 @@ organisation has decided.
 
 CRITICAL applies where the category is high-risk (health, children,
 government ID, biometric).
+
+## Processor data flows
+
+A third-party SDK in a file shows a processor exists. Svikruti also follows the
+SDK from its import to the calls made on it and reports which personal-data
+categories are in those calls:
+
+```js
+const mixpanel = require("mixpanel").init(token);
+mixpanel.track("refund_requested", { email, pincode });   // Contact, Location -> Mixpanel
+```
+
+These flows appear as `processor_data_flow` evidence, in the evidence graph
+(`data category -> sent to -> third party`), in `svikruti diff` ("Location
+data is now sent to Mixpanel") and in the reconciled record. Rule D009 fires
+when a declared processor receives a category its record does not list.
+
+Limits: the analysis is per file. It follows imports, constructed clients,
+endpoint URL constants and one variable assignment. It does not follow the
+vendor's response object, and it does not see data that reaches a vendor
+through a wrapper defined in another file.
+
+## Keeping the manifest current: `svikruti sync`
+
+```bash
+svikruti sync --repo .            # print a unified diff of privacy.yaml
+svikruti sync --repo . --write    # apply it
+svikruti sync --repo . --prune    # also remove categories and processors no longer in code
+```
+
+Sync fixes drift that has one mechanical answer: it adds a newly handled
+category to its activity, creates a processor stub for a new SDK and links it,
+records what each processor receives, and adds an activity stub for unmapped
+paths. Purpose, lawful basis, retention and contracts are written as TODO, so
+`check` keeps failing until a person fills them in. Policy findings (logs,
+forbidden data, missing DPIA) are never auto-resolved. The file is edited as
+text, so comments and layout survive, and the result is re-parsed and compared
+with the intended state before it is offered.
 
 ## Obligations and frameworks
 
@@ -152,8 +198,21 @@ each obligation supports:
 | OBL-09 Cross-border transfers documented | Sec. 16, Rule 15 | Arts. 44, 46 | A.1.5.2 to A.1.5.4 |
 | ... 24 in total | | | |
 
-`svikruti frameworks` lists the built-in packs. The ISO pack carries the 2019
-edition's control numbers as `legacy` references.
+`svikruti frameworks` lists the built-in packs:
+
+| Id | Framework |
+|---|---|
+| `dpdpa` | India DPDP Act 2023 and DPDP Rules 2025 |
+| `gdpr` | EU GDPR |
+| `iso27701` | ISO/IEC 27701:2025, PII controllers (2019 control numbers kept as `legacy`) |
+| `iso27701_processor` | ISO/IEC 27701:2025, PII processors (Tables A.2 and A.3) |
+| `lgpd` | Brazil LGPD |
+| `ccpa` | California CCPA as amended by the CPRA |
+
+A pack only maps obligations its framework actually has. The CCPA has no
+lawful-basis requirement, so `OBL-03` carries no CCPA clause instead of a
+borrowed one. Lawful bases are validated per framework: `contract` is valid
+under GDPR and LGPD, and rejected under DPDPA.
 
 Each obligation ends in one of five states:
 

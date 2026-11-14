@@ -12,7 +12,7 @@
 - `svikruti init`: generates the manifest from a scan, in sync with the code
   by construction, with TODO placeholders for what code cannot know.
 - `svikruti check`: reconciles the manifest against scanner evidence.
-  Drift rules D001-D008 (shadow processing, undeclared category, undeclared
+  Drift rules D001-D009 (shadow processing, undeclared category, undeclared
   processor, stale declarations, incomplete records) and policy rules
   P001-P005 (personal data in logs, forbidden categories, missing DPIA,
   undocumented transfers, expired exceptions). Exit code 3 on findings at or
@@ -31,6 +31,25 @@
 - Baselines: `svikruti scan --baseline --fail-on-new`, `svikruti check
   --baseline`, and `svikruti diff base.json head.json` with a semantic summary
   (new data categories, new third parties, new logging flows).
+- Processor data flows (`processor_data_flow` evidence): follows a third-party
+  SDK from import to call and reports which data categories are passed to it
+  (direct arguments, constructed clients, endpoint URL constants, one
+  assignment hop; per file). Feeds the evidence graph, RoPA starter, `diff`
+  and the reconciled record. New rule D009: a declared processor receives a
+  category its record does not list. D003 now names the data sent.
+- `svikruti sync [--write] [--prune]`: updates `privacy.yaml` from drift as a
+  reviewable diff (categories, processor stubs and links, processor data,
+  activity stubs for unmapped paths). Text-level edits keep comments; the
+  result is re-parsed and verified before it is offered. YAML flow and block
+  lists and `privacy.json` are supported.
+- `svikruti scan` reconciles `privacy.yaml` automatically (`--manifest`,
+  `--no-manifest`): `privacy_as_code` block in the JSON, a Privacy as Code tab
+  in the HTML report and the dashboard, and `privacy-check/` in the evidence
+  pack. A broken manifest never fails a scan.
+- Framework packs: `iso27701_processor` (Tables A.2/A.3), `lgpd`, `ccpa`.
+  Packs map only obligations the framework has.
+- `release.yml`: tag-driven build, wheel test, build provenance and PyPI
+  trusted publishing (`docs/RELEASING.md`).
 - `svikruti init-github-action --mode check`: pull-request gate that builds
   its baseline from the base branch, posts a PR comment and uploads SARIF.
 - Worked example `examples/privacy-as-code` (passes), drift scenario

@@ -1,0 +1,63 @@
+id: ccpa
+name: California Consumer Privacy Act as amended by the CPRA
+short_name: CCPA/CPRA
+version: "Cal. Civ. Code §§ 1798.100-1798.199.100"
+verified: "2026-11-13"
+source: https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?division=3.&part=4.&lawCode=CIV&title=1.81.5
+terms: {controller: business, processor: service provider or contractor, subject: consumer, record: inventory of personal information}
+legal_bases: []
+notes: >
+  The CCPA has no lawful-basis requirement, no general record-of-processing duty and no
+  transfer restriction, so OBL-01, OBL-03, OBL-09 and OBL-22 are not mapped. Breach
+  notification sits in Cal. Civ. Code § 1798.82, outside the CCPA title.
+controls:
+  OBL-02:
+    - {ref: "§ 1798.100(a)(1)", title: "Notice at collection: categories of personal information and purposes"}
+    - {ref: "§ 1798.100(c)", title: "Collection and use limited to disclosed, compatible purposes"}
+  OBL-04:
+    - {ref: "§ 1798.100(a)(3)", title: "Retention period disclosed; no retention longer than reasonably necessary"}
+  OBL-05:
+    - {ref: "§ 1798.100(c)", title: "Reasonably necessary and proportionate collection, use, retention and sharing"}
+  OBL-06:
+    - {ref: "§ 1798.100(c)", title: "Reasonably necessary and proportionate use"}
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-07:
+    - {ref: "§ 1798.100(a)", title: "Notice at or before the point of collection"}
+    - {ref: "§ 1798.130(a)(5)", title: "Privacy policy contents, updated every 12 months"}
+  OBL-08:
+    - {ref: "§ 1798.100(d)", title: "Agreements with third parties, service providers and contractors"}
+    - {ref: "§ 1798.140(ag)", title: "Service provider: written contract restricting use of personal information"}
+  OBL-10:
+    - {ref: "§ 1798.185(a)(15)", title: "Regulations requiring risk assessments and cybersecurity audits"}
+  OBL-11:
+    - {ref: "§ 1798.120(c)", title: "Opt-in consent to sell or share personal information of consumers under 16"}
+  OBL-12:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+    - {ref: "§ 1798.150(a)", title: "Liability for breaches of nonencrypted and nonredacted personal information"}
+  OBL-13:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+    - {ref: "§ 1798.150(a)", title: "Liability for breaches of nonencrypted and nonredacted personal information"}
+  OBL-14:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-15:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-16:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-17:
+    - {ref: "Cal. Civ. Code § 1798.82", title: "Disclosure of a breach of the security of the system"}
+  OBL-18:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-19:
+    - {ref: "§ 1798.100(e)", title: "Reasonable security procedures and practices"}
+  OBL-20:
+    - {ref: "§ 1798.120", title: "Right to opt out of sale or sharing of personal information"}
+    - {ref: "§ 1798.135", title: "Methods of limiting sale, sharing and use, including opt-out preference signals"}
+  OBL-21:
+    - {ref: "§ 1798.105", title: "Right to delete"}
+    - {ref: "§ 1798.106", title: "Right to correct"}
+    - {ref: "§ 1798.110", title: "Right to know what personal information is collected"}
+    - {ref: "§ 1798.130(a)(2)", title: "Respond to verifiable consumer requests within 45 days"}
+  OBL-23:
+    - {ref: "§ 1798.130(a)(1)", title: "Designated methods for submitting consumer requests"}
+  OBL-24:
+    - {ref: "Cal. Civ. Code § 1798.82", title: "Disclosure of a breach of the security of the system"}

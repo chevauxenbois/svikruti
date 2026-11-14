@@ -461,6 +461,68 @@ def _breach_readiness_panel(result: ScanResult) -> str:
     )
 
 
+def _privacy_as_code_panel(result: ScanResult) -> str:
+    data = result.privacy_as_code
+    if not data:
+        return (
+            '<div class="box"><h3>No privacy manifest in this repository</h3>'
+            '<p>Run <code>svikruti init</code> to generate <code>privacy.yaml</code> from this scan, fill in purpose, lawful basis and retention, '
+            'then run <code>svikruti check</code> in CI. From then on this tab shows where the code and the declared record disagree, '
+            'mapped to DPDPA, GDPR and ISO/IEC 27701.</p></div>'
+        )
+    if data.get("error"):
+        return f'<div class="box"><h3>Manifest could not be reconciled</h3><p>{escape(str(data["error"]))}</p></div>'
+    summary = data.get("summary", {})
+    findings = [item for item in data.get("findings", []) if item.get("status") == "open"]
+    framework_rows = "".join(
+        f'<tr><td><strong>{escape(str(item.get("short_name", "")))}</strong><br><span class="small">{escape(str(item.get("version", "")))}</span></td>'
+        f'<td>{item["counts"]["pass"]}</td><td>{item["counts"]["attested"]}</td><td>{item["counts"]["fail"]}</td>'
+        f'<td>{item["counts"]["manual"]}</td><td>{item.get("code_verified_percent", 0)}% of {item.get("applicable", 0)}</td></tr>'
+        for item in data.get("frameworks", [])
+    )
+    finding_rows = "".join(
+        f'<tr><td>{_badge(str(item.get("severity", "")))}</td><td><strong>{escape(str(item.get("rule", "")))}</strong><br>{escape(str(item.get("title", "")))}</td>'
+        f'<td>{escape(str(item.get("detail", "")))}</td>'
+        f'<td>{escape(", ".join(str(ref) for ref in (item.get("refs") or [])[:3]) or "privacy.yaml")}</td>'
+        f'<td>{escape(str(item.get("fix", "")))}</td></tr>'
+        for item in findings[:100]
+    ) or '<tr><td colspan="5">None. The manifest and the code agree.</td></tr>'
+    activity_rows = "".join(
+        f'<tr><td><strong>{escape(str(item.get("name", "")))}</strong><br><span class="small">{escape(", ".join(item.get("paths", [])))}</span></td>'
+        f'<td>{escape(", ".join(item.get("declared_categories", [])))}</td>'
+        f'<td>{escape(", ".join(item.get("detected_categories", [])))}</td>'
+        f'<td>{escape("; ".join(flow["processor"] + ": " + ", ".join(flow["categories"]) for flow in item.get("detected_flows", [])) or ", ".join(item.get("detected_processors", [])))}</td>'
+        f'<td>{"In sync" if item.get("in_sync") else "<strong>Drifted</strong>"}</td></tr>'
+        for item in data.get("activities", [])
+    )
+    obligation_rows = "".join(
+        f'<tr><td>{escape({"pass": "Verified", "fail": "Failing", "attested": "Attested", "manual": "Not verified", "not_applicable": "Not applicable"}.get(str(item.get("status")), str(item.get("status"))))}</td>'
+        f'<td><strong>{escape(str(item.get("id", "")))}</strong> {escape(str(item.get("title", "")))}</td><td>{escape(str(item.get("summary", "")))}</td></tr>'
+        for item in data.get("obligations", [])
+    )
+    by_severity = summary.get("open_by_severity", {})
+    return (
+        '<section class="grid">'
+        f'<div class="metric"><div class="label">Open findings</div><div class="value">{summary.get("open_findings", 0)}</div></div>'
+        f'<div class="metric"><div class="label">Critical / high</div><div class="value">{by_severity.get("CRITICAL", 0)} / {by_severity.get("HIGH", 0)}</div></div>'
+        f'<div class="metric"><div class="label">Declared activities</div><div class="value">{summary.get("activities", 0)}</div></div>'
+        f'<div class="metric"><div class="label">Declared processors</div><div class="value">{summary.get("processors", 0)}</div></div>'
+        '</section>'
+        '<h3>Frameworks</h3>'
+        '<table><thead><tr><th>Framework</th><th>Verified</th><th>Attested</th><th>Failing</th><th>Not verified</th><th>Verified share</th></tr></thead>'
+        f'<tbody>{framework_rows}</tbody></table>'
+        '<h3>Drift and policy findings</h3>'
+        '<table><thead><tr><th>Severity</th><th>Rule</th><th>What drifted</th><th>Where</th><th>Fix</th></tr></thead>'
+        f'<tbody>{finding_rows}</tbody></table>'
+        '<h3>Processing record, reconciled with code</h3>'
+        '<table><thead><tr><th>Activity</th><th>Declared data</th><th>Detected in code</th><th>Data sent to processors</th><th>State</th></tr></thead>'
+        f'<tbody>{activity_rows}</tbody></table>'
+        '<h3>Obligations</h3>'
+        '<table><thead><tr><th>Result</th><th>Obligation</th><th>Evidence</th></tr></thead>'
+        f'<tbody>{obligation_rows}</tbody></table>'
+    )
+
+
 def _fix_pack(result: ScanResult) -> str:
     items = []
     for index, action in enumerate(result.evidence_graph.proof_pack[:10], start=1):
@@ -1621,6 +1683,7 @@ def render_html(result: ScanResult) -> str:
   </header>
   <nav class="topbar" aria-label="Report views">
     <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+    <button type="button" class="tab-btn" data-tab="pac">Privacy as Code</button>
     <button type="button" class="tab-btn" data-tab="quality">Scan Quality</button>
     <button type="button" class="tab-btn" data-tab="technical">Technical Controls</button>
     <button type="button" class="tab-btn" data-tab="breach">Breach Readiness</button>
@@ -1683,6 +1746,12 @@ def render_html(result: ScanResult) -> str:
       <h2>Breach Readiness</h2>
       <p class="small">A technical-readiness register built from code/config evidence and imported scanner results.</p>
       {_breach_readiness_panel(result)}
+    </section>
+
+    <section class="workspace-section" data-section="pac">
+      <h2>Privacy as Code</h2>
+      <p class="small">The declared record (privacy.yaml) reconciled against this scan. Where they disagree, the code is right and the record is out of date.</p>
+      {_privacy_as_code_panel(result)}
     </section>
 
     <section class="workspace-section" data-section="controls">

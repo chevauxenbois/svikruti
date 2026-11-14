@@ -94,6 +94,7 @@ def main() -> None:
     tabs = st.tabs(
         [
             "Command Center",
+            "Privacy as Code",
             "Assurance",
             "Scan Quality",
             "Control Plane",
@@ -107,21 +108,108 @@ def main() -> None:
     with tabs[0]:
         _command_center(st, report, go)
     with tabs[1]:
-        _assurance(st, report, pd, go)
+        _privacy_as_code(st, report)
     with tabs[2]:
-        _scan_quality(st, report, pd)
+        _assurance(st, report, pd, go)
     with tabs[3]:
-        _control_plane(st, report, pd, go)
+        _scan_quality(st, report, pd)
     with tabs[4]:
-        _evidence_flow(st, report, pd, go)
+        _control_plane(st, report, pd, go)
     with tabs[5]:
-        _breach_readiness(st, report, pd, go)
+        _evidence_flow(st, report, pd, go)
     with tabs[6]:
-        _evidence_explorer(st, report, pd)
+        _breach_readiness(st, report, pd, go)
     with tabs[7]:
-        _ai_workbench(st, report)
+        _evidence_explorer(st, report, pd)
     with tabs[8]:
+        _ai_workbench(st, report)
+    with tabs[9]:
         _exports(st, report)
+
+
+def _privacy_as_code(st: Any, report: Dict[str, Any]) -> None:
+    data = report.get("privacy_as_code") or {}
+    st.subheader("Privacy as Code")
+    if not data:
+        st.info(
+            "This scan has no privacy manifest. Run `svikruti init` in the repository to generate privacy.yaml, "
+            "then `svikruti scan --save-history` again to see where the code and the declared record disagree."
+        )
+        return
+    if data.get("error"):
+        st.error(str(data["error"]))
+        return
+    summary = data.get("summary", {})
+    by_severity = summary.get("open_by_severity", {})
+    columns = st.columns(4)
+    columns[0].metric("Open findings", summary.get("open_findings", 0))
+    columns[1].metric("Critical / high", f"{by_severity.get('CRITICAL', 0)} / {by_severity.get('HIGH', 0)}")
+    columns[2].metric("Declared activities", summary.get("activities", 0))
+    columns[3].metric("Declared processors", summary.get("processors", 0))
+
+    st.markdown("#### Frameworks")
+    _render_simple_table(
+        st,
+        [
+            {
+                "Framework": item.get("short_name"),
+                "Verified": item["counts"]["pass"],
+                "Attested": item["counts"]["attested"],
+                "Failing": item["counts"]["fail"],
+                "Not verified": item["counts"]["manual"],
+                "Verified share": f"{item.get('code_verified_percent', 0)}% of {item.get('applicable', 0)}",
+            }
+            for item in data.get("frameworks", [])
+        ],
+        ["Framework", "Verified", "Attested", "Failing", "Not verified", "Verified share"],
+    )
+
+    st.markdown("#### Drift and policy findings")
+    findings = [item for item in data.get("findings", []) if item.get("status") == "open"]
+    if findings:
+        _render_simple_table(
+            st,
+            [
+                {
+                    "Severity": item.get("severity"),
+                    "Rule": item.get("rule"),
+                    "What drifted": item.get("detail"),
+                    "Where": ", ".join((item.get("refs") or [])[:3]) or "privacy.yaml",
+                    "Fix": item.get("fix"),
+                }
+                for item in findings
+            ],
+            ["Severity", "Rule", "What drifted", "Where", "Fix"],
+        )
+    else:
+        st.success("The manifest and the code agree.")
+
+    st.markdown("#### Processing record, reconciled with code")
+    _render_simple_table(
+        st,
+        [
+            {
+                "Activity": item.get("name"),
+                "Declared data": ", ".join(item.get("declared_categories", [])),
+                "Detected in code": ", ".join(item.get("detected_categories", [])),
+                "Data sent to processors": "; ".join(f"{flow['processor']}: {', '.join(flow['categories'])}" for flow in item.get("detected_flows", [])),
+                "State": "In sync" if item.get("in_sync") else "Drifted",
+            }
+            for item in data.get("activities", [])
+        ],
+        ["Activity", "Declared data", "Detected in code", "Data sent to processors", "State"],
+    )
+
+    st.markdown("#### Obligations")
+    labels = {"pass": "Verified", "fail": "Failing", "attested": "Attested", "manual": "Not verified", "not_applicable": "Not applicable"}
+    _render_simple_table(
+        st,
+        [
+            {"Result": labels.get(str(item.get("status")), item.get("status")), "Obligation": f"{item.get('id')} {item.get('title')}", "Evidence": item.get("summary")}
+            for item in data.get("obligations", [])
+        ],
+        ["Result", "Obligation", "Evidence"],
+    )
 
 
 def _load_initial_report(report_path: str | None, db_path: str) -> Dict[str, Any] | None:

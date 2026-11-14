@@ -13,6 +13,7 @@ from svikruti.pac.fingerprint import assign_fingerprints
 from svikruti.scanner.assurance import build_assurance_profile
 from svikruti.scanner.browser import scan_consent_journey
 from svikruti.scanner.code import MAX_FILE_BYTES, scan_repo
+from svikruti.scanner.flows import scan_processor_flows
 from svikruti.scanner.dpdpa import build_evidence_graph, build_ropa_starter, notice_gap_check, summarize
 from svikruti.scanner.semantic import scan_semantic_evidence
 from svikruti.scanner.technical import (
@@ -63,6 +64,8 @@ def run_scan(
                 f"{code_result.skipped_vendored_files} vendored/minified third-party file(s) (node_modules, vendor/, *.min.js, ...) were skipped; first-party code only."
             )
         result.evidence.extend(scan_technical_evidence(repo))
+        # Which personal data is handed to which third-party SDK.
+        result.evidence.extend(scan_processor_flows(repo))
     else:
         result.scan_quality = {
             "schema_version": "svikruti-scan-quality-v1",

@@ -353,6 +353,10 @@ def build_evidence_graph(result: ScanResult, privacy_notice_text: str) -> Eviden
         third_party = item.metadata.get("third_party") or item.metadata.get("domain")
         if third_party:
             third_node = add_node(f"third_party:{third_party}", str(third_party), "third_party")
+            if data_category and item.kind == "processor_data_flow":
+                # A proven hand-off: this category is an argument of a call to this vendor.
+                add_edge(f"data:{data_category}", third_node, "sent to", index)
+                data_flows[str(data_category)]["third_parties"].add(str(third_party))
             add_edge(source_node, third_node, "references", index)
             add_edge(app_node, third_node, "shares or may share data", index)
             if not _notice_mentions_third_party(str(third_party), notice_lower):

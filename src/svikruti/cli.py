@@ -104,6 +104,11 @@ def build_parser() -> argparse.ArgumentParser:
             "the CRITICAL band requires sustained critical evidence)."
         ),
     )
+    scan.add_argument(
+        "--manifest",
+        help="privacy.yaml to reconcile against this scan (default: auto-detected in --repo). The result is added to the report, JSON and evidence pack.",
+    )
+    scan.add_argument("--no-manifest", action="store_true", help="Do not reconcile a privacy.yaml even if the repository has one.")
     scan.add_argument("--baseline", help="Previous Svikruti JSON report. Findings already in it are treated as existing backlog.")
     scan.add_argument(
         "--fail-on-new",
@@ -137,6 +142,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     check.add_argument("--out-dir", default="svikruti-check", help="Directory for the report pack (default: svikruti-check).")
     check.add_argument("--scan-json-out", help="Also write the underlying scan report JSON (usable as a scan --baseline).")
+
+    sync = subparsers.add_parser("sync", help="Update privacy.yaml from the code: prints a diff, or writes it with --write.")
+    sync.add_argument("--repo", default=".", help="Repository to scan (default: current directory).")
+    sync.add_argument("--manifest", help="Manifest path (default: privacy.yaml in the repo).")
+    sync.add_argument("--write", action="store_true", help="Apply the changes to the manifest instead of printing a diff.")
+    sync.add_argument("--prune", action="store_true", help="Also remove declared categories and processors no longer found in code.")
 
     diff = subparsers.add_parser("diff", help="Compare two Svikruti JSON scan reports.")
     diff.add_argument("base", help="Baseline report JSON (for example from the main branch).")
@@ -188,6 +199,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_check(args)
     if args.command == "diff":
         return _cmd_diff(args)
+    if args.command == "sync":
+        return _cmd_sync(args)
     if args.command == "frameworks":
         return _cmd_frameworks()
 
@@ -215,6 +228,22 @@ def main(argv: list[str] | None = None) -> int:
             ai_provider=args.ai_provider,
             ai_model=args.ai_model,
         )
+        check_result = None
+        manifest_path = None
+        if not args.no_manifest:
+            from svikruti.pac.manifest import find_manifest
+
+            manifest_path = Path(args.manifest) if args.manifest else find_manifest(args.repo)
+            if args.manifest and not manifest_path.is_file():
+                raise ValueError(f"manifest not found: {args.manifest}")
+        if manifest_path is not None:
+            from svikruti.pac.engine import attach_check
+
+            check_result = attach_check(result, str(manifest_path))
+            if check_result is not None and args.evidence_pack:
+                from svikruti.pac.report import write_check_pack
+
+                write_check_pack(check_result, str(Path(args.evidence_pack) / "privacy-check"), "high")
         output_path = Path(args.out)
         write_html(result, str(output_path))
         if args.json_out:
@@ -252,6 +281,14 @@ def main(argv: list[str] | None = None) -> int:
         f"Risk: {result.summary.risk_level} ({result.summary.risk_score}/100), "
         f"evidence items: {len(result.evidence)}, files scanned: {result.summary.files_scanned}"
     )
+    if result.privacy_as_code.get("error"):
+        print(f"warning: privacy manifest not reconciled: {result.privacy_as_code['error']}", file=sys.stderr)
+    elif check_result is not None:
+        open_count = len(check_result.open_findings())
+        print(
+            f"Privacy manifest {manifest_path}: {open_count} open drift/policy finding(s). "
+            "`svikruti check` gates on them; `svikruti sync` updates the manifest."
+        )
     exit_code = EXIT_OK
     if args.baseline:
         from svikruti.pac.fingerprint import diff_markdown, diff_reports, load_report, new_at_or_above
@@ -384,6 +421,45 @@ def _cmd_check(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _cmd_sync(args: argparse.Namespace) -> int:
+    from svikruti.pac.engine import run_check
+    from svikruti.pac.manifest import ManifestError, find_manifest, load_manifest
+    from svikruti.pac.sync import SyncError, sync_manifest, unified_diff
+
+    manifest_path = Path(args.manifest) if args.manifest else find_manifest(args.repo)
+    if manifest_path is None:
+        print(f"svikruti sync: no privacy.yaml found in {args.repo}. Run `svikruti init` first.", file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        manifest = load_manifest(manifest_path)
+    except ManifestError as exc:
+        print(f"svikruti sync: invalid manifest {manifest_path}: " + "; ".join(exc.errors), file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        result = run_check(run_scan(args.repo, None), manifest)
+        plan, original, updated = sync_manifest(result, prune=args.prune)
+    except SyncError as exc:
+        print(f"svikruti sync: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    except Exception as exc:
+        print(f"svikruti sync failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    if plan.empty():
+        print("privacy.yaml already matches the code. Nothing to sync.")
+    elif args.write:
+        manifest_path.write_text(updated, encoding="utf-8")
+        print(f"Updated {manifest_path}:")
+        for line in plan.summary():
+            print(f"  {line}")
+        print("Review the change, fill in any TODO, and commit it with the code.")
+    else:
+        print(unified_diff(original, updated, manifest_path.name), end="")
+        print(f"\n# {len(plan.summary())} change(s). Re-run with --write to apply.")
+    for note in plan.notes:
+        print(f"note: {note}")
+    return EXIT_OK
+
+
 def _cmd_diff(args: argparse.Namespace) -> int:
     import json
 
@@ -412,7 +488,7 @@ def _cmd_frameworks() -> int:
     for pack_id in builtin_pack_ids():
         pack = load_pack(pack_id)
         clauses = sum(len(refs) for refs in pack.controls.values())
-        print(f"{pack.id:10} {pack.name}  [{pack.version}; {len(pack.controls)} obligations -> {clauses} clause references; verified {pack.verified}]")
+        print(f"{pack.id:19} {pack.name}  [{pack.version}; {len(pack.controls)} obligations -> {clauses} clause references; verified {pack.verified}]")
     print("Custom packs: pass a YAML/JSON path to --framework or list it under `frameworks:` in privacy.yaml.")
     return EXIT_OK
 

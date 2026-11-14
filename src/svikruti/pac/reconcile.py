@@ -38,6 +38,7 @@ RULES: Dict[str, Dict[str, str]] = {
     "D005": {"title": "Declared processor no longer found in code", "fix": "Confirm the integration is gone, then remove the processor and close out the contract and data return."},
     "D006": {"title": "Processing record is incomplete", "fix": "Fill in the missing fields; code cannot tell you purpose, lawful basis or retention."},
     "D007": {"title": "Processor record is incomplete", "fix": "Record the processor's country, purpose and contract / DPA reference."},
+    "D009": {"title": "Processor receives data that is not declared for it", "fix": "Add the category to the processor's data_categories (and check the contract covers it), or stop sending it."},
     "D008": {"title": "Declared activity matches no code", "fix": "Fix the path globs after the refactor, or delete the activity if the processing was removed."},
     "P001": {"title": "Personal data written to logs", "fix": "Remove or mask the field before logging, or record a time-boxed exception with a reason."},
     "P002": {"title": "Forbidden data category present", "fix": "Remove the data: organisational policy says this category must not be processed here."},
@@ -97,6 +98,7 @@ class FileFacts:
     categories: Dict[str, List[str]] = field(default_factory=dict)       # slug -> refs
     log_categories: Dict[str, List[str]] = field(default_factory=dict)   # slug -> refs
     processors: Dict[str, Tuple[str, List[str]]] = field(default_factory=dict)  # slug -> (name, refs)
+    flows: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)  # processor slug -> category slug -> refs
 
 
 @dataclass
@@ -109,6 +111,14 @@ class CodeModel:
 
     def categories(self) -> Set[str]:
         return {slug for facts in self.files.values() for slug in facts.categories}
+
+    def flows(self) -> Dict[str, Set[str]]:
+        """processor slug -> category slugs seen as arguments of calls to it."""
+        out: Dict[str, Set[str]] = {}
+        for facts in self.files.values():
+            for processor, categories in facts.flows.items():
+                out.setdefault(processor, set()).update(categories)
+        return out
 
     def processors(self) -> Dict[str, str]:
         found = {slug: name for facts in self.files.values() for slug, (name, _) in facts.processors.items()}
@@ -132,7 +142,7 @@ def build_code_model(evidence: Iterable[Evidence], min_confidence: str = "medium
             name = str(metadata["third_party"])
             model.website_processors.setdefault(slugify(name), (name, []))[1].append(_ref(item))
             continue
-        if not item.file or item.source not in {"code", "semantic-parser"}:
+        if not item.file or item.source not in {"code", "semantic-parser", "data-flow"}:
             continue
         rel = item.file.replace("\\", "/")
         if ignore_paths and match_any(rel, ignore_paths):
@@ -152,6 +162,10 @@ def build_code_model(evidence: Iterable[Evidence], min_confidence: str = "medium
             continue
         facts = model.files.setdefault(rel, FileFacts())
         facts.categories.setdefault(category, []).append(_ref(item))
+        if item.kind == "processor_data_flow" and metadata.get("third_party"):
+            name = str(metadata["third_party"])
+            facts.processors.setdefault(slugify(name), (name, []))
+            facts.flows.setdefault(slugify(name), {}).setdefault(category, []).append(_ref(item))
         if "log" in item.kind:
             facts.log_categories.setdefault(category, []).append(_ref(item))
     return model
@@ -259,7 +273,10 @@ def reconcile(
         for slug, (name, refs) in sorted(detected_processors.items()):
             processor = processors.get(slug)
             if processor is None:
-                findings.append(Finding(rule="D003", severity="HIGH", detail=f"Activity '{activity.id}' sends data to {name}, which is not a declared processor.", activity=activity.id, processor=slug, refs=_first_refs(refs)))
+                sent = sorted({cat for rel in files for cat in model.files[rel].flows.get(slug, {})})
+                what = f"{_labels(sent)} data" if sent else "data"
+                flow_refs = [ref for rel in files for cat_refs in model.files[rel].flows.get(slug, {}).values() for ref in cat_refs]
+                findings.append(Finding(rule="D003", severity="HIGH", detail=f"Activity '{activity.id}' sends {what} to {name}, which is not a declared processor.", activity=activity.id, processor=slug, refs=_first_refs(flow_refs or refs)))
                 continue
             seen_processor_ids.add(processor.id)
             if processor.id not in activity.processors:
@@ -329,6 +346,33 @@ def reconcile(
                     refs=_first_refs(refs),
                 )
             )
+
+    # --- What each declared processor actually receives ------------------
+    flow_groups: Dict[Tuple[str, str], Tuple[Set[str], List[str]]] = {}
+    for rel, facts in model.files.items():
+        for slug, categories in facts.flows.items():
+            processor = processors.get(slug)
+            if processor is None:
+                continue  # undeclared processors are D003; the categories are named there
+            for category, refs in categories.items():
+                if category in processor.data_categories:
+                    continue
+                activities, all_refs = flow_groups.setdefault((processor.id, category), (set(), []))
+                activities.add(assignment.get(rel) or "")
+                all_refs.extend(refs)
+    for (processor_id, category), (activities, refs) in sorted(flow_groups.items()):
+        name = next(p.name for p in manifest.processors if p.id == processor_id)
+        findings.append(
+            Finding(
+                rule="D009",
+                severity=category_severity(category),
+                detail=f"Code sends {category_label(category)} data to {name}, but the processor record does not list that category.",
+                activity=next(iter(activities)) if len(activities) == 1 else "",
+                category=category,
+                processor=processor_id,
+                refs=_first_refs(refs),
+            )
+        )
 
     # --- Forbidden categories -------------------------------------------
     for slug in sorted(forbidden & model.categories()):

@@ -9,7 +9,10 @@ review-ready artifacts over generic compliance checklists.
 
 - Privacy as code: `privacy.yaml` manifest, `svikruti init` / `check` / `diff`,
   drift and policy rules, framework packs (DPDPA, GDPR, ISO/IEC 27701:2025),
-  baselines with stable fingerprints, and a pull-request gate.
+  baselines with stable fingerprints, a pull-request gate, `svikruti sync`,
+  and processor data flows (which data reaches which third party).
+- Six framework packs: DPDPA, GDPR, ISO/IEC 27701 controller and processor,
+  LGPD, CCPA/CPRA.
 - Argument-level log-sink detection.
 
 - Local CLI scanner for repository, website, privacy notice, browser-consent,
@@ -31,13 +34,10 @@ review-ready artifacts over generic compliance checklists.
 
 ## Near Term
 
-- Privacy as code: surface the check result in the HTML evidence report and
-  the Streamlit dashboard; `svikruti check --fix` to add newly detected
-  categories and processors to the manifest as a reviewable patch.
-- More framework packs: CCPA/CPRA, LGPD, ISO/IEC 27701 Table A.2 (processors),
-  SOC 2 Privacy criteria, RBI/SEBI sector overlays.
-- Inter-procedural data-flow (source to sink across functions and files) so
-  processor findings say which data categories reach which third party.
+- More framework packs: SOC 2 Privacy criteria, RBI/SEBI sector overlays,
+  Singapore PDPA, UK GDPR deltas.
+- Cross-file data flow: follow personal data through wrappers and service
+  layers to the processor call (today's flow analysis is per file).
 - Data-model sources: SQL migrations, ORM models and OpenAPI schemas as
   first-class inputs to the manifest (field-level inventory).
 
@@ -51,7 +51,7 @@ review-ready artifacts over generic compliance checklists.
   (partially done: imported secret-scanner runs are redacted and imported
   messages truncated before report generation).
 - Improve report screenshots and launch demo artifacts.
-- Add signed release artifacts and PyPI publishing.
+- First PyPI release (the tag-driven workflow with build provenance is in place).
 - Add more realistic examples for fintech, healthcare, ecommerce, SaaS, BFSI,
   and edtech.
 

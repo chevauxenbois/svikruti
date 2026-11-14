@@ -57,6 +57,15 @@ def _findings_table(findings: List[Finding], result: CheckResult, limit: int) ->
     return lines
 
 
+def _flows_text(activity: Dict[str, Any]) -> str:
+    """'Razorpay (receives Contact)' for declared processors, plus undeclared ones seen in code."""
+    received = {flow["processor"]: flow["categories"] for flow in activity["detected_flows"]}
+    declared = [p["name"] for p in activity["declared_processors"]]
+    parts = [f"{name} (receives {', '.join(received[name])})" if received.get(name) else name for name in declared]
+    parts += [f"{name} (undeclared)" for name in activity["detected_processors"] if name not in declared]
+    return "; ".join(parts)
+
+
 def check_markdown(result: CheckResult, threshold: str = "high") -> str:
     data = result.to_dict()
     summary = data["summary"]
@@ -97,7 +106,7 @@ def check_markdown(result: CheckResult, threshold: str = "high") -> str:
         basis_text = ", ".join(f"{key}: {value}" for key, value in basis.items()) if isinstance(basis, dict) else basis
         lines.append(
             f"| {_cell(activity['name'])} | {_cell(', '.join(activity['declared_categories']))} | {_cell(', '.join(activity['detected_categories']))} | "
-            f"{_cell(', '.join(p['name'] for p in activity['declared_processors']))} | {_cell(basis_text)} | {_cell(activity['retention'])} | {'yes' if activity['in_sync'] else '**no**'} |"
+            f"{_cell(_flows_text(activity))} | {_cell(basis_text)} | {_cell(activity['retention'])} | {'yes' if activity['in_sync'] else '**no**'} |"
         )
     lines += ["", "## Obligation crosswalk", ""]
     header = "| | Obligation | " + " | ".join(pack.short_name for pack in result.packs) + " | Result |"
@@ -154,6 +163,7 @@ def write_record_csv(result: CheckResult, path: str) -> None:
                 _join(activity["data_subjects"]), _join(activity["declared_categories"]), _join(activity["detected_categories"]),
                 _join(p["name"] for p in processors), _join(sorted({p["country"] for p in processors if p["country"]})),
                 _join(sorted({p["transfer_mechanism"] for p in processors if p["transfer_mechanism"]})),
+                "; ".join(f"{flow['processor']}: {', '.join(flow['categories'])}" for flow in activity["detected_flows"]),
                 activity["retention"], activity["dpia"], _join(activity["logged_categories"]), _join(activity["paths"]),
                 len(activity["files"]), "yes" if activity["in_sync"] else "no", _join(activity["open_rules"]), result.generated_at,
             ]
@@ -163,7 +173,7 @@ def write_record_csv(result: CheckResult, path: str) -> None:
         [
             "Activity ID", "Processing Activity", "Owner", "Purposes", "Lawful Basis", "Data Subjects",
             "Declared Data Categories", "Categories Detected In Code", "Processors / Recipients", "Processor Countries",
-            "Transfer Mechanisms", "Retention", "DPIA Reference", "Categories Reaching Logs", "Code Paths",
+            "Transfer Mechanisms", "Data Sent To Processors (Detected)", "Retention", "DPIA Reference", "Categories Reaching Logs", "Code Paths",
             "Files With Evidence", "In Sync With Code", "Open Rules", "Verified At",
         ],
         rows,
@@ -289,7 +299,19 @@ def render_check_html(result: CheckResult, threshold: str = "high") -> str:
         chips += "".join(f'<span class="chip stale" title="declared, not found in code">{_e(name)}</span>' for name in sorted(declared - detected))
         basis = activity["legal_basis"]
         basis_text = ", ".join(f"{k}: {v}" for k, v in basis.items()) if isinstance(basis, dict) else basis
-        processors = "".join(f'<span class="chip">{_e(p["name"])}{" · " + _e(p["country"]) if p["country"] else ""}</span>' for p in activity["declared_processors"])
+        received = {flow["processor"]: flow["categories"] for flow in activity["detected_flows"]}
+        declared_names = [p["name"] for p in activity["declared_processors"]]
+        processors = "".join(
+            f'<span class="chip">{_e(p["name"])}{" · " + _e(p["country"]) if p["country"] else ""}</span>'
+            + (f'<div class="mute">receives {_e(", ".join(received[p["name"]]))}</div>' if received.get(p["name"]) else "")
+            for p in activity["declared_processors"]
+        )
+        processors += "".join(
+            f'<span class="chip miss" title="in code, not declared">+ {_e(name)}</span>'
+            + (f'<div class="mute">receives {_e(", ".join(received[name]))}</div>' if received.get(name) else "")
+            for name in activity["detected_processors"]
+            if name not in declared_names
+        )
         activity_rows.append(
             f"<tr><td><b>{_e(activity['name'])}</b><br><span class='mute'>{_e(', '.join(activity['paths']))}</span></td><td>{chips}</td><td>{processors}</td>"
             f"<td>{_e(', '.join(activity['purposes']))}</td><td>{_e(basis_text)}</td><td>{_e(activity['retention'])}</td>"

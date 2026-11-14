@@ -117,10 +117,12 @@ def generate_manifest(scan: ScanResult, frameworks: Optional[List[str]] = None, 
         lines.append("")
     if processors:
         lines.append("processors:")
+        flows = model.flows()
         for slug, name in sorted(processors.items()):
             lines += [
                 f"  - id: {slug}",
                 f"    name: {_q(name)}",
+                f"    data_categories: {_inline(sorted(flows.get(slug, [])))}   # what the code passes to this processor",
                 "    purpose: TODO",
                 "    country: TODO             # ISO country code where the processor handles the data",
                 "    contract: TODO            # DPA / contract reference",

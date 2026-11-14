@@ -16,8 +16,8 @@ Manifest `privacy.yaml` reconciled against 7 file(s) with personal-data evidence
 
 | Severity | Rule | What drifted | Where | Fix |
 |---|---|---|---|---|
-| HIGH | D002 | Activity 'repayments' processes Location data in code, but the record does not declare it. | `services/payments/refund.js:7`, `services/payments/refund.js:10` | Declare the category on the activity (and update the notice and legal basis), or remove the data from the code. |
-| HIGH | D003 | Activity 'repayments' sends data to Mixpanel, which is not a declared processor. | `services/payments/refund.js` | Add the processor with country and contract reference, link it to the activity, or remove the integration. |
+| HIGH | D002 | Activity 'repayments' processes Location data in code, but the record does not declare it. | `services/payments/refund.js:7`, `services/payments/refund.js:9`, `services/payments/refund.js:10` | Declare the category on the activity (and update the notice and legal basis), or remove the data from the code. |
+| HIGH | D003 | Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor. | `services/payments/refund.js:9` | Add the processor with country and contract reference, link it to the activity, or remove the integration. |
 | HIGH | P001 | Contact data is written to logs in activity 'repayments' (1 location(s)). | `services/payments/refund.js:8` | Remove or mask the field before logging, or record a time-boxed exception with a reason. |
 
 ## Processing record, reconciled with code
@@ -25,8 +25,8 @@ Manifest `privacy.yaml` reconciled against 7 file(s) with personal-data evidence
 | Activity | Declared data | Detected in code | Processors | Lawful basis | Retention | In sync |
 |---|---|---|---|---|---|---|
 | Loan applicant onboarding and KYC | Identity, Contact, Government ID | Contact, Government ID, Identity |  | dpdpa: consent, gdpr: legal_obligation | 8 years after loan closure (PML Rules), then erased | yes |
-| EMI repayment collection | Contact, Financial | Contact, Financial, Location | Razorpay | dpdpa: legitimate_use, gdpr: contract | 8 years after loan closure (tax and PML records) | **no** |
-| Repayment reminders | Contact | Contact | MSG91 | dpdpa: consent, gdpr: legitimate_interests | Message logs kept 90 days | yes |
+| EMI repayment collection | Contact, Financial | Contact, Financial, Location | Razorpay (receives Contact); Mixpanel (undeclared) | dpdpa: legitimate_use, gdpr: contract | 8 years after loan closure (tax and PML records) | **no** |
+| Repayment reminders | Contact | Contact | MSG91 (receives Contact) | dpdpa: consent, gdpr: legitimate_interests | Message logs kept 90 days | yes |
 
 ## Obligation crosswalk
 

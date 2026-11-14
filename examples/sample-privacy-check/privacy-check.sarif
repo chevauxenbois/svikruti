@@ -80,6 +80,16 @@
               }
             },
             {
+              "id": "svikruti.pac.D009",
+              "name": "svikruti_pac_D009",
+              "shortDescription": {
+                "text": "Processor receives data that is not declared for it"
+              },
+              "help": {
+                "text": "Add the category to the processor's data_categories (and check the contract covers it), or stop sending it."
+              }
+            },
+            {
               "id": "svikruti.pac.D008",
               "name": "svikruti_pac_D008",
               "shortDescription": {
@@ -166,6 +176,16 @@
                   "uri": "services/payments/refund.js"
                 },
                 "region": {
+                  "startLine": 9
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "services/payments/refund.js"
+                },
+                "region": {
                   "startLine": 10
                 }
               }
@@ -184,7 +204,7 @@
           "ruleId": "svikruti.pac.D003",
           "level": "error",
           "message": {
-            "text": "Activity 'repayments' sends data to Mixpanel, which is not a declared processor. Fix: Add the processor with country and contract reference, link it to the activity, or remove the integration."
+            "text": "Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor. Fix: Add the processor with country and contract reference, link it to the activity, or remove the integration."
           },
           "locations": [
             {
@@ -193,7 +213,7 @@
                   "uri": "services/payments/refund.js"
                 },
                 "region": {
-                  "startLine": 1
+                  "startLine": 9
                 }
               }
             }

@@ -1,0 +1,63 @@
+id: iso27701_processor
+name: "ISO/IEC 27701:2025 Privacy information management systems (PII processors)"
+short_name: ISO 27701 (processor)
+version: "ISO/IEC 27701:2025 (Annex A, Tables A.2 and A.3)"
+verified: "2026-11-13"
+source: https://www.iso.org/standard/27701
+terms: {controller: customer (PII controller), processor: PII processor, subject: PII principal, record: records related to processing PII}
+legal_bases: []
+notes: >
+  For organisations that process PII on behalf of customers. Use alongside or instead of
+  `iso27701` (Table A.1, controllers). Obligations that belong to the controller (notice,
+  impact assessment, children's consent, published contact) are not mapped. Titles are
+  paraphrased; consult the licensed standard for normative text.
+controls:
+  OBL-01:
+    - {ref: "A.2.2.7", title: "Records related to processing PII"}
+  OBL-02:
+    - {ref: "A.2.2.2", title: "Customer agreement"}
+    - {ref: "A.2.2.3", title: "Organization's purposes"}
+  OBL-03:
+    - {ref: "A.2.2.2", title: "Customer agreement"}
+    - {ref: "A.2.2.5", title: "Infringing instruction"}
+  OBL-04:
+    - {ref: "A.2.4.3", title: "Return, transfer or disposal of PII"}
+    - {ref: "A.2.4.2", title: "Temporary files"}
+  OBL-05:
+    - {ref: "A.2.2.3", title: "Organization's purposes"}
+  OBL-06:
+    - {ref: "A.3.25", title: "Logging"}
+  OBL-08:
+    - {ref: "A.2.5.7", title: "Disclosure of subcontractors used to process PII"}
+    - {ref: "A.2.5.8", title: "Engagement of a subcontractor to process PII"}
+    - {ref: "A.2.5.9", title: "Change of subcontractor to process PII"}
+  OBL-09:
+    - {ref: "A.2.5.2", title: "Basis for PII transfer between jurisdictions"}
+    - {ref: "A.2.5.3", title: "Countries and international organizations to which PII can be transferred"}
+  OBL-12:
+    - {ref: "A.2.4.4", title: "PII transmission controls"}
+    - {ref: "A.3.26", title: "Use of cryptography"}
+  OBL-13:
+    - {ref: "A.3.26", title: "Use of cryptography"}
+  OBL-14:
+    - {ref: "A.3.23", title: "Secure authentication"}
+    - {ref: "A.3.27", title: "Secure development life cycle"}
+  OBL-15:
+    - {ref: "A.3.27", title: "Secure development life cycle"}
+    - {ref: "A.3.28", title: "Application security requirements"}
+  OBL-16:
+    - {ref: "A.3.25", title: "Logging"}
+    - {ref: "A.3.11", title: "Information security incident management planning and preparation"}
+  OBL-17:
+    - {ref: "A.3.11", title: "Information security incident management planning and preparation"}
+    - {ref: "A.3.12", title: "Response to information security incidents"}
+  OBL-18:
+    - {ref: "A.3.24", title: "Information backup"}
+  OBL-19:
+    - {ref: "A.3.29", title: "Secure system architecture and engineering principles"}
+  OBL-20:
+    - {ref: "A.2.2.4", title: "Marketing and advertising use"}
+  OBL-21:
+    - {ref: "A.2.3.2", title: "Comply with obligations to PII principals"}
+  OBL-24:
+    - {ref: "A.3.12", title: "Response to information security incidents"}

@@ -96,6 +96,7 @@ class CheckResult:
                 "new_findings": None if self.baseline_fingerprints is None else len([f for f in open_findings if self.is_new(f)]),
                 "detected_categories": sorted(self.model.categories()),
                 "detected_processors": sorted(self.model.processors().values()),
+                "detected_flows": {slug: sorted(categories) for slug, categories in sorted(self.model.flows().items())},
             },
             "frameworks": [self.framework_summary(pack) for pack in self.packs],
             "findings": [dict(finding.to_dict(), new=self.is_new(finding)) for finding in self.findings],
@@ -142,6 +143,30 @@ def run_check(
     )
 
 
+def attach_check(scan: ScanResult, manifest_path: str, frameworks: Optional[List[str]] = None) -> Optional[CheckResult]:
+    """Reconcile ``manifest_path`` against ``scan`` and store the result on the scan.
+
+    Used by `svikruti scan` so the evidence report, the JSON and the dashboard
+    carry the privacy-as-code verdict. A broken manifest never fails a scan:
+    the problem is recorded and shown instead.
+    """
+    from svikruti.pac.frameworks import PackError
+    from svikruti.pac.manifest import ManifestError, load_manifest
+
+    try:
+        result = run_check(scan, load_manifest(manifest_path), frameworks=frameworks)
+    except ManifestError as exc:
+        scan.privacy_as_code = {"schema_version": SCHEMA_VERSION, "manifest": str(manifest_path), "error": "Invalid manifest: " + "; ".join(exc.errors)}
+        return None
+    except PackError as exc:
+        scan.privacy_as_code = {"schema_version": SCHEMA_VERSION, "manifest": str(manifest_path), "error": str(exc)}
+        return None
+    data = result.to_dict()
+    data.pop("scan_summary", None)
+    scan.privacy_as_code = data
+    return result
+
+
 def _activities_view(manifest: Manifest, model: CodeModel, findings: List[Finding]) -> List[Dict[str, Any]]:
     """The reconciled record: declared fields side by side with code evidence."""
     assignment = assign_files(model.files, manifest.activities)
@@ -152,6 +177,10 @@ def _activities_view(manifest: Manifest, model: CodeModel, findings: List[Findin
         detected = sorted({slug for rel in files for slug in model.files[rel].categories})
         logged = sorted({slug for rel in files for slug in model.files[rel].log_categories})
         detected_processors = sorted({name for rel in files for name, _ in model.files[rel].processors.values()})
+        flows: Dict[str, set] = {}
+        for rel in files:
+            for slug, categories in model.files[rel].flows.items():
+                flows.setdefault(model.files[rel].processors[slug][0], set()).update(categories)
         open_rules = sorted({f.rule for f in findings if f.activity == activity.id and f.status == "open"})
         view.append(
             {
@@ -167,11 +196,18 @@ def _activities_view(manifest: Manifest, model: CodeModel, findings: List[Findin
                 "detected_categories": [category_label(slug) for slug in detected],
                 "logged_categories": [category_label(slug) for slug in logged],
                 "declared_processors": [
-                    {"name": processors[pid].name, "country": processors[pid].country, "contract": processors[pid].contract, "transfer_mechanism": processors[pid].transfer_mechanism}
+                    {
+                        "name": processors[pid].name,
+                        "country": processors[pid].country,
+                        "contract": processors[pid].contract,
+                        "transfer_mechanism": processors[pid].transfer_mechanism,
+                        "data_categories": [category_label(slug) for slug in processors[pid].data_categories],
+                    }
                     for pid in activity.processors
                     if pid in processors
                 ],
                 "detected_processors": detected_processors,
+                "detected_flows": [{"processor": name, "categories": [category_label(slug) for slug in sorted(cats)]} for name, cats in sorted(flows.items())],
                 "paths": activity.paths,
                 "files": files,
                 "in_sync": not any(rule.startswith("D") and rule not in {"D004", "D005"} for rule in open_rules),

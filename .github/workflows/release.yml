@@ -1,0 +1,59 @@
+name: Release
+
+# Tag vX.Y.Z to build, attest and publish to PyPI.
+# One-time setup: add this repository and workflow as a Trusted Publisher for the
+# `svikruti` project on PyPI (no API token is stored in GitHub). See docs/RELEASING.md.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tag must match the package version
+        run: |
+          VERSION=$(python -c "import re,pathlib;print(re.search(r'__version__ = \"(.+?)\"', pathlib.Path('src/svikruti/__init__.py').read_text()).group(1))")
+          test "v$VERSION" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != package version $VERSION"; exit 1; }
+      - run: python -m pip install build twine pytest
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Test the built wheel, not the source tree
+        run: |
+          python -m pip install dist/*.whl
+          python -m pytest -q tests
+          svikruti check --repo examples/privacy-as-code --privacy-file examples/privacy-as-code/privacy-notice.md --out-dir /tmp/svikruti-check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write       # PyPI trusted publishing and build provenance
+      attestations: write
+      contents: write       # create the GitHub release
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*"
+      - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes
