@@ -8,7 +8,7 @@
   <meta property="og:description" content="Open-source DPDPA evidence workbench for code, cloud, websites, privacy notices, consent journeys, RoPA starters, vendor registers, and remediation tickets.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#17324d">
-  <title>Svikruti.ai - India-first PrivacyOps evidence scanner</title>
+  <title>Svikruti - open-source privacy as code</title>
   <style>
     :root {
       color-scheme: light;
@@ -690,6 +690,7 @@
       <span>Svikruti.ai</span>
     </a>
     <nav class="nav" aria-label="Primary navigation">
+      <a href="#privacy-as-code">Privacy as code</a>
       <a href="#evidence">Evidence</a>
       <a href="#artifacts">Artifacts</a>
       <a href="#workflow">Workflow</a>
@@ -702,9 +703,9 @@
   <main id="top">
     <section class="hero">
       <div>
-        <div class="eyebrow">Open source now · India-first · DPDPA-focused</div>
-        <h1>Privacy evidence for DPDPA, from code to launch.</h1>
-        <p class="lead">Svikruti scans repositories, cloud-facing product surfaces, websites, privacy notices, and consent journeys, then turns engineering evidence into RoPA starters, vendor registers, fix tickets, SARIF, and an offline evidence workbench.</p>
+        <div class="eyebrow">Open source · Privacy as code · DPDPA, GDPR, ISO/IEC 27701, LGPD, CCPA</div>
+        <h1>Your code is the record of processing.</h1>
+        <p class="lead">Privacy programmes run on documents. Production runs code. Svikruti reads what your repository does with personal data, reconciles it against a reviewed <code>privacy.yaml</code>, and fails the pull request when the two drift apart.</p>
         <div class="hero-actions">
           <a class="button" href="https://github.com/chevauxenbois/svikruti">View on GitHub</a>
           <a class="button secondary" href="#demo">See what it generates</a>
@@ -715,20 +716,15 @@
             <span>Run locally</span>
             <span>No account required</span>
           </div>
-<pre>git clone https://github.com/chevauxenbois/svikruti.git
-cd svikruti
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[parsers]'
-svikruti scan \
-  --repo . \
-  --url https://example.com \
-  --privacy-url https://example.com/privacy \
-  --out svikruti-report.html \
-  --sarif-out svikruti.sarif \
-  --ropa-out ropa.csv \
-  --actions-out actions.csv \
-  --vendors-out vendors.csv</pre>
+<pre>pip install "svikruti[parsers] @ git+https://github.com/chevauxenbois/svikruti"
+
+cd your-repo
+svikruti init      # write privacy.yaml from the code
+svikruti check     # reconcile; exit 3 on drift
+svikruti sync      # show the manifest patch the code needs
+
+# full evidence pack: report, SARIF, RoPA, vendors, fix tickets
+svikruti scan --repo . --evidence-pack svikruti-pack</pre>
         </div>
       </div>
 
@@ -772,6 +768,43 @@ svikruti scan \
       </div>
     </section>
 
+    <section id="privacy-as-code">
+      <div class="section-head">
+        <span>Privacy as code</span>
+        <h2>The record cannot be merged out of date.</h2>
+        <p>A developer adds a refund handler that logs an email, collects an address and calls a new analytics SDK. Nobody files a ticket with the privacy team. The pull request is blocked anyway.</p>
+      </div>
+      <pre style="background:#0f1b2a;color:#d7e3f0;padding:18px 20px;border-radius:12px;overflow-x:auto;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 26px">$ svikruti check --repo .
+  HIGH  D002  Activity 'repayments' processes Location data in code, but the record does not declare it.
+  HIGH  D003  Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor.
+  HIGH  P001  Contact data is written to logs in activity 'repayments'.
+  DPDPA      14/23 verified, 4 attested, 5 failing
+  GDPR       14/23 verified, 4 attested, 5 failing
+  ISO 27701  14/23 verified, 4 attested, 5 failing
+Privacy gate failed: 3 finding(s) at HIGH or above</pre>
+      <div class="cards">
+        <article class="card">
+          <span class="icon">1</span>
+          <h3>Generate, then review</h3>
+          <p><code>svikruti init</code> writes <code>privacy.yaml</code> from what the code does today. People add what code cannot know: purpose, lawful basis, retention, contracts.</p>
+        </article>
+        <article class="card">
+          <span class="icon">2</span>
+          <h3>Gate on drift</h3>
+          <p><code>svikruti check</code> runs in CI: undeclared data, undeclared processors, what each processor actually receives, personal data in logs, missing DPIAs. Only what a pull request introduces can block it.</p>
+        </article>
+        <article class="card">
+          <span class="icon">3</span>
+          <h3>One evidence base, many frameworks</h3>
+          <p>24 obligations mapped to DPDPA, GDPR, ISO/IEC 27701, LGPD and CCPA. Verified, failing, attested or not verified, and an attestation never overrides failing code.</p>
+        </article>
+      </div>
+      <div class="hero-actions" style="margin-top:22px">
+        <a class="button" href="privacy-check-demo.html">Open a sample privacy check</a>
+        <a class="button secondary" href="https://github.com/chevauxenbois/svikruti/blob/main/docs/PRIVACY_AS_CODE.md">Read the guide</a>
+      </div>
+    </section>
+
     <section id="evidence">
       <div class="section-head">
         <span>Evidence-first PrivacyOps</span>
@@ -786,8 +819,8 @@ svikruti scan \
         </article>
         <article class="card">
           <span class="icon">02</span>
-          <h3>DPDPA-oriented control mapping</h3>
-          <p>Connect findings to notice coverage, consent and withdrawal, data minimization, vendor governance, RoPA readiness, and children-data review.</p>
+          <h3>Processor data flows</h3>
+          <p>Not just "this code uses Stripe" but which data categories are passed to it, followed through wrapper functions across files and checked against the processor record.</p>
         </article>
         <article class="card">
           <span class="icon">03</span>
@@ -853,9 +886,9 @@ svikruti scan \
       <div class="workflow">
         <div class="workflow-card"><span>1</span><strong>Scan</strong><p>Repository, website URL, privacy notice, and optional browser consent journey.</p></div>
         <div class="workflow-card"><span>2</span><strong>Classify</strong><p>Personal-data categories, vendors, logging, storage, forms, cookies, and notices.</p></div>
-        <div class="workflow-card"><span>3</span><strong>Map</strong><p>Evidence to DPDPA control areas and launch-readiness concerns.</p></div>
+        <div class="workflow-card"><span>3</span><strong>Reconcile</strong><p>Code against privacy.yaml, mapped to DPDPA, GDPR, ISO/IEC 27701, LGPD and CCPA.</p></div>
         <div class="workflow-card"><span>4</span><strong>Export</strong><p>RoPA, action tracker, vendor register, notice patch, SARIF, JSON, and fix pack.</p></div>
-        <div class="workflow-card"><span>5</span><strong>Gate</strong><p>Use GitHub Actions to block risky privacy changes before release.</p></div>
+        <div class="workflow-card"><span>5</span><strong>Gate</strong><p>Fail the pull request on new drift. <code>svikruti sync</code> proposes the manifest patch.</p></div>
       </div>
     </section>
 
