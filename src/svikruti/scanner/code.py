@@ -239,6 +239,71 @@ def _logged_terms(line: str, matched_terms: List[str]) -> List[str]:
     return _matched_terms(normalize_text(_drop_record_identifiers(_code_outside_strings(line))), matched_terms)
 
 
+_CODE_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".java", ".kt", ".rb", ".php", ".cs", ".scala", ".swift", ".dart"}
+_MULTILINE_STRING_RE = re.compile(r'("""|\'\'\'|`)(?:\\.|(?!\1)[\s\S])*?\1')
+_URLISH_LITERAL_RE = re.compile(r"""["'`]([^"'`\s]*[./@][^"'`\s]*)["'`]""")
+
+
+_VENDOR_MANIFEST_JSON = {"package.json", "composer.json", "firebase.json", "app.json", "manifest.json", "vercel.json", "netlify.json", "angular.json"}
+_WORD_NEEDLE_CACHE: Dict[str, "re.Pattern[str]"] = {}
+
+
+def _vendor_match(needle: str, text: str, lowered: str) -> bool:
+    """Substring for URLs and package names; whole word (camelCase aware) for bare names.
+
+    "cohere" must not match "coherence", "stripe" not "striped", but "ChatOpenAI"
+    and "langchain_openai" still contain OpenAI.
+    """
+    needle_lower = needle.lower()
+    if needle_lower not in lowered:
+        return False
+    if not needle_lower.isalnum():
+        return True
+    pattern = _WORD_NEEDLE_CACHE.get(needle_lower)
+    if pattern is None:
+        pattern = re.compile(rf"(?:(?<![a-z])|(?<=[a-z])(?=[A-Z]))(?i:{re.escape(needle_lower)})(?![a-z])")
+        _WORD_NEEDLE_CACHE[needle_lower] = pattern
+    return bool(pattern.search(text))
+
+
+def _vendor_searchable(rel: str, text: str, lowered_text: str) -> str:
+    """Text a vendor reference can legitimately come from.
+
+    In source code that is identifiers, imports, and URL- or package-like
+    string literals. Prose inside strings and comments is dropped: an LLM
+    system prompt that says "questions about OpenAI, Anthropic, Groq" is not
+    an integration with any of them. Markup and config files keep all text
+    (script tags and config keys are the integration there).
+    """
+    suffix = Path(rel).suffix.lower()
+    if suffix == ".json" and Path(rel).name.lower() not in _VENDOR_MANIFEST_JSON and not rel.lower().endswith(".config.json"):
+        return ""  # data files (catalogues, fixtures, translations) are not integrations
+    if suffix not in _CODE_SUFFIXES:
+        return text
+
+    def keep_urlish(match: "re.Match[str]") -> str:
+        body = match.group(0)
+        if "${" in body or "\n" in body:
+            return " ".join(re.findall(r"\$\{([^}]*)\}", body))
+        return body if (" " not in body.strip("\"'`")) else " "
+
+    stripped = _MULTILINE_STRING_RE.sub(keep_urlish, text)
+    parts: List[str] = []
+    for line in stripped.splitlines():
+        bare = line.strip()
+        if bare.startswith(("#", "//", "*", "/*", "<!--")):
+            continue
+        if _IMPORT_LIKE_RE.search(line):
+            parts.append(line)
+            continue
+        parts.append(_code_outside_strings(line))
+        parts.extend(_URLISH_LITERAL_RE.findall(line))
+    return "\n".join(parts)
+
+
+_IMPORT_LIKE_RE = re.compile(r"^\s*(?:import\b|from\s+\S+\s+import\b|use\s|require_once|#include|using\s)|\brequire\s*\(|\bimport\s*\(")
+
+
 def _inside_open_log_call(lines: List[str], index: int, lookback: int = 6) -> bool:
     """True when line ``index`` is an argument of a logging call opened above it."""
     for start in range(index - 1, max(index - lookback, 0) - 1, -1):
@@ -583,10 +648,12 @@ def scan_repo(repo_path: str) -> CodeScanResult:
         # scanning below (keyword/third-party detectors stay excluded).
         is_prose = rel.lower().endswith((".md", ".txt"))
 
+        vendor_text = _vendor_searchable(rel, text, lowered_text)
+        vendor_lower = vendor_text.lower()
         for name, needles in THIRD_PARTY_PATTERNS.items():
             if file_context == "reference":
                 continue
-            if any(needle.lower() in lowered_text for needle in needles):
+            if any(_vendor_match(needle, vendor_text, vendor_lower) for needle in needles):
                 key = f"third_party:{rel}:{name}"
                 if key not in seen:
                     seen.add(key)

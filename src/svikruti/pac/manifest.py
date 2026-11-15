@@ -20,7 +20,8 @@ from svikruti.pac.taxonomy import is_placeholder, slugify
 MANIFEST_VERSION = 1
 DEFAULT_MANIFEST_NAMES = ("privacy.yaml", "privacy.yml", ".svikruti/privacy.yaml", "privacy.json")
 
-_TOP_KEYS = {"version", "organization", "frameworks", "processing_activities", "processors", "policies", "exceptions", "attestations"}
+_TOP_KEYS = {"version", "organization", "frameworks", "processing_activities", "processors", "policies", "erasure", "exceptions", "attestations"}
+_ERASURE_KEYS = {"handlers", "retained"}
 _ACTIVITY_KEYS = {
     "id", "name", "owner", "paths", "data_categories", "data_subjects", "purposes",
     "legal_basis", "retention", "processors", "dpia", "logging", "notes",
@@ -29,6 +30,7 @@ _PROCESSOR_KEYS = {"id", "name", "aliases", "purpose", "country", "contract", "t
 _POLICY_KEYS = {
     "personal_data_in_logs", "forbidden_categories", "allowed_transfer_countries",
     "require_dpia_for", "ignore_paths", "attestation_max_age_days", "min_confidence",
+    "ai_allowed_categories", "require_field_protection_for",
 }
 _EXCEPTION_KEYS = {"rule", "activity", "category", "processor", "path", "reason", "approved_by", "expires"}
 _ATTESTATION_KEYS = {"obligation", "statement", "evidence", "owner", "reviewed"}
@@ -94,6 +96,19 @@ class Policies:
     ignore_paths: List[str] = field(default_factory=list)
     attestation_max_age_days: int = 365
     min_confidence: str = "medium"
+    # None: not enforced. []: no personal data may be sent to AI model providers.
+    ai_allowed_categories: Optional[List[str]] = None
+    # Categories whose stored fields must be encrypted, tokenised, hashed or masked
+    # (for example government_id, for the UIDAI Aadhaar Data Vault requirement).
+    require_field_protection_for: List[str] = field(default_factory=list)
+
+
+@dataclass
+class Erasure:
+    """How the code deletes personal data, and which stores are kept on purpose."""
+
+    handlers: List[str] = field(default_factory=list)       # extra function names that erase data
+    retained: Dict[str, str] = field(default_factory=dict)  # store (table / model) -> legal reason it is kept
 
 
 @dataclass
@@ -130,6 +145,7 @@ class Manifest:
     policies: Policies = field(default_factory=Policies)
     exceptions: List[ExceptionRule] = field(default_factory=list)
     attestations: List[Attestation] = field(default_factory=list)
+    erasure: Erasure = field(default_factory=Erasure)
     warnings: List[str] = field(default_factory=list)
     path: Optional[str] = None
 
@@ -301,7 +317,31 @@ def parse_manifest(data: Any, source: Optional[str] = None) -> Manifest:
         ignore_paths=_str_list(policies_raw.get("ignore_paths"), "policies.ignore_paths", errors),
         attestation_max_age_days=max_age,
         min_confidence=min_confidence,
+        ai_allowed_categories=(
+            None
+            if policies_raw.get("ai_allowed_categories") is None
+            else [slugify(item) for item in _str_list(policies_raw.get("ai_allowed_categories"), "policies.ai_allowed_categories", errors)]
+        ),
+        require_field_protection_for=[
+            slugify(item) for item in _str_list(policies_raw.get("require_field_protection_for"), "policies.require_field_protection_for", errors)
+        ],
     )
+
+    erasure_raw = data.get("erasure") or {}
+    if not isinstance(erasure_raw, dict):
+        errors.append("erasure: must be a mapping with `handlers` and/or `retained`")
+        erasure_raw = {}
+    _unknown(erasure_raw, _ERASURE_KEYS, "erasure", warnings)
+    retained_raw = erasure_raw.get("retained") or {}
+    retained: Dict[str, str] = {}
+    if isinstance(retained_raw, dict):
+        for store, reason in retained_raw.items():
+            if len(_text(reason)) < 10:
+                errors.append(f"erasure.retained.{store}: say why this store is kept (at least 10 characters, e.g. the law and period)")
+            retained[str(store).strip()] = _text(reason)
+    else:
+        errors.append("erasure.retained: must be a mapping of store name to the reason it is kept")
+    erasure = Erasure(handlers=_str_list(erasure_raw.get("handlers"), "erasure.handlers", errors), retained=retained)
 
     exceptions: List[ExceptionRule] = []
     for index, raw in enumerate(_dict_list(data.get("exceptions"), "exceptions", errors)):
@@ -359,6 +399,7 @@ def parse_manifest(data: Any, source: Optional[str] = None) -> Manifest:
         policies=policies,
         exceptions=exceptions,
         attestations=attestations,
+        erasure=erasure,
         warnings=warnings,
     )
 

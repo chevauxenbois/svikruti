@@ -33,7 +33,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
 from svikruti.scanner.code import _code_outside_strings, _drop_record_identifiers, _file_context, _is_fixture_file, _language_for, iter_source_files
-from svikruti.scanner.patterns import CATEGORY_SEVERITY, THIRD_PARTY_PATTERNS, normalize_text
+from svikruti.scanner.patterns import AI_PROVIDERS, CATEGORY_SEVERITY, THIRD_PARTY_PATTERNS, normalize_text
 from svikruti.scanner.semantic import _categories_for_text
 
 _FLOW_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".rb", ".go", ".java", ".kt", ".php", ".html", ".htm"}
@@ -167,8 +167,13 @@ def _handles_for(lines: List[str], needles: List[str]) -> Set[str]:
         # VENDOR_URL = "https://api.vendor.com/..." : a constant holding the endpoint.
         for literal in _STRING_RE.findall(line):
             lowered_literal = literal.lower()
-            if any(needle in lowered_literal for needle in lowered_needles) and ("/" in literal or "." in literal):
-                handles.update(_bound_names(line.split(literal)[0]))
+            if not any(needle in lowered_literal for needle in lowered_needles):
+                continue
+            before_literal = line.split(literal)[0]
+            # A constant holding the endpoint, or a client built for the service by name:
+            # bedrock = boto3.client("bedrock-runtime")
+            if "/" in literal or "." in literal or ("=" in before_literal and "(" in before_literal.split("=", 1)[1]):
+                handles.update(_bound_names(before_literal))
     handles |= _typed_as(lines, handles | _needle_handles(needles))
     seeds = handles | _needle_handles(needles)
     # Construction: client = razorpay.Client(...), const rzp = new Razorpay({...}), mp = Mixpanel(token)
@@ -182,6 +187,9 @@ def _handles_for(lines: List[str], needles: List[str]) -> Set[str]:
                 continue
             left, right = line.split("=", 1)
             if pattern.search(right) and not re.search(r"\.\s*[a-z_]\w*\s*\.\s*[a-z_]\w*\s*\(", right):
+                handles.update(_bound_names(left + "="))
+            # LangChain-style composition: chain = prompt | llm | parser
+            elif "|" in right and "||" not in right and seeds & set(re.findall(_IDENT, right.split("#")[0])):
                 handles.update(_bound_names(left + "="))
         seeds = handles | _needle_handles(needles)
         if len(handles) == before:
@@ -640,10 +648,13 @@ def _site_evidence(
             "third_party": name,
             "flow": flow,
             "semantic_role": "processor_sink",
+            "ai_provider": name in AI_PROVIDERS,
         }
         if via is not None:
             metadata["via"] = f"{via.rel}:{via.start + 1}:{via.name}"
             metadata["wrapper_depth"] = via.depth
+        if name in AI_PROVIDERS:
+            detail = detail.replace(f"a {name} call", f"a {name} model call (prompt or request payload)")
         out.append(
             Evidence(
                 kind="processor_data_flow",

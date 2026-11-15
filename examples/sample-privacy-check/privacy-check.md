@@ -2,7 +2,7 @@
 
 ❌ **Blocked**: 3 finding(s) at HIGH or above.
 
-Manifest `privacy.yaml` reconciled against 7 file(s) with personal-data evidence: 3 activit(ies), 2 processor(s), **3 open finding(s)** (0 under exception).
+Manifest `privacy.yaml` reconciled against 8 file(s) with personal-data evidence: 3 activit(ies), 2 processor(s), **3 open finding(s)** (0 under exception).
 
 ## Frameworks
 
@@ -35,7 +35,7 @@ Manifest `privacy.yaml` reconciled against 7 file(s) with personal-data evidence
 | ❌ | **OBL-01** The processing record matches the code | Sec. 8(1), Sec. 10(2)(c) | Art. 30(1), Art. 5(2) | A.1.2.9 | Failing: 2 open finding(s): Undeclared personal data category; Undeclared processor / third party |
 | ✅ | **OBL-02** Every activity has a specified purpose | Sec. 4(1), Sec. 5(1)(i) | Art. 5(1)(b), Art. 30(1)(b) | A.1.2.2 | Verified: Every activity states its purposes. |
 | ✅ | **OBL-03** Every activity has a lawful basis | Sec. 4(1), Sec. 6, Sec. 7 | Art. 6(1), Art. 9(2) | A.1.2.3 | Verified: Every activity records a lawful basis valid under the selected frameworks. |
-| ✅ | **OBL-04** Retention is defined | Sec. 8(7), Rule 8 | Art. 5(1)(e), Art. 30(1)(f) | A.1.4.8, A.1.4.6 | Verified: Every activity defines retention. |
+| ✅ | **OBL-04** Retention is defined | Sec. 8(7), Rule 8 | Art. 5(1)(e), Art. 30(1)(f) | A.1.4.8, A.1.4.6 | Verified: Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason. |
 | ❌ | **OBL-05** Only declared data is collected | Sec. 6(1) | Art. 5(1)(c), Art. 25(2) | A.1.4.2, A.1.4.5 | Failing: 1 open finding(s): Undeclared personal data category |
 | ❌ | **OBL-06** No personal data in logs | Sec. 8(5), Rule 6 | Art. 5(1)(c), Art. 5(1)(f), Art. 32(1) | A.1.4.3, A.1.4.5, A.3.25 | Failing: 1 open finding(s): Personal data written to logs |
 | ❌ | **OBL-07** The privacy notice matches actual processing | Sec. 5, Rule 3 | Art. 13, Art. 14, Art. 5(1)(a) | A.1.3.3, A.1.3.4 | Failing: The notice omits 1 item(s) the code processes. |

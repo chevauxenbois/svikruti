@@ -140,6 +140,36 @@
               }
             },
             {
+              "id": "svikruti.pac.P006",
+              "name": "svikruti_pac_P006",
+              "shortDescription": {
+                "text": "Personal data sent to an AI model provider beyond the allowlist"
+              },
+              "help": {
+                "text": "Remove or redact the field before it reaches the prompt, or add the category to policies.ai_allowed_categories after review."
+              }
+            },
+            {
+              "id": "svikruti.pac.P007",
+              "name": "svikruti_pac_P007",
+              "shortDescription": {
+                "text": "High-risk field stored without field-level protection"
+              },
+              "help": {
+                "text": "Encrypt, tokenise (vault), hash or mask the field before it is stored, or record a time-boxed exception."
+              }
+            },
+            {
+              "id": "svikruti.pac.D010",
+              "name": "svikruti_pac_D010",
+              "shortDescription": {
+                "text": "Stored personal data no erasure path reaches"
+              },
+              "help": {
+                "text": "Delete or anonymise this store from your erasure / retention code, list the function under erasure.handlers, or record the legal reason under erasure.retained."
+              }
+            },
+            {
               "id": "svikruti.pac.P005",
               "name": "svikruti_pac_P005",
               "shortDescription": {

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from svikruti.models import ScanResult
 from svikruti.pac.manifest import Attestation, Manifest
@@ -147,6 +147,13 @@ def _field(field_name: str, ok: str) -> Callable[[Assessment, Context], None]:
     return evaluate
 
 
+def _obl04(a: Assessment, c: Context) -> None:
+    if not c.manifest.activities:
+        a.status, a.summary = ("fail", "Code handles personal data but no processing activities are declared.") if c.model.files else ("not_applicable", "No personal-data processing is declared or detected.")
+        return
+    _from_findings(a, c.open("D006", field_name="retention") + c.open("D010"), "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason.")
+
+
 def _obl05(a: Assessment, c: Context) -> None:
     _from_findings(a, c.open("D002") + c.open("P002"), "Every personal data category found in code is declared, and none is forbidden.")
 
@@ -176,7 +183,7 @@ def _obl08(a: Assessment, c: Context) -> None:
         return
     _from_findings(
         a,
-        c.open("D003") + c.open("D007", field_name="contract") + c.open("D009"),
+        c.open("D003") + c.open("D007", field_name="contract") + c.open("D009") + c.open("P006"),
         f"All {len(c.manifest.processors)} processor(s) used in code are declared with a contract reference, and receive only the data recorded for them.",
     )
 
@@ -201,8 +208,12 @@ def _obl10(a: Assessment, c: Context) -> None:
     _from_findings(a, c.open("P003"), "Every activity handling high-risk data references an impact assessment.")
 
 
-def _tech(control_id: str) -> Callable[[Assessment, Context], None]:
+def _tech(control_id: str, rules: Tuple[str, ...] = ()) -> Callable[[Assessment, Context], None]:
     def evaluate(a: Assessment, c: Context) -> None:
+        extra = [finding for rule in rules for finding in c.open(rule)]
+        if extra:
+            _from_findings(a, extra, "")
+            return
         control = c.control(control_id)
         status = control.get("status")
         a.evidence = list(control.get("evidence_refs") or [])[:10]
@@ -256,7 +267,7 @@ _EVALUATORS: Dict[str, Callable[[Assessment, Context], None]] = {
     "OBL-01": _obl01,
     "OBL-02": _field("purposes", "Every activity states its purposes."),
     "OBL-03": _field("legal_basis", "Every activity records a lawful basis valid under the selected frameworks."),
-    "OBL-04": _field("retention", "Every activity defines retention."),
+    "OBL-04": _obl04,
     "OBL-05": _obl05,
     "OBL-06": _obl06,
     "OBL-07": _obl07,
@@ -271,6 +282,8 @@ _EVALUATORS: Dict[str, Callable[[Assessment, Context], None]] = {
     "OBL-24": _attest_only,
 }
 _EVALUATORS.update({obligation_id: _tech(control_id) for obligation_id, control_id in _TECH_CONTROLS.items()})
+_EVALUATORS["OBL-13"] = _tech("DPDPA-TECH-002", ("P007",))
+_EVALUATORS["OBL-21"] = lambda a, c: _from_findings(a, c.open("D010"), "") if c.open("D010") else _attest_only(a, c)
 
 # Obligations where a human attestation may stand in for missing repo evidence.
 # OBL-11 is special: children's data in code plus an attestation is "attested",

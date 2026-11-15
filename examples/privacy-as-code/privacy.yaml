@@ -14,6 +14,8 @@ policies:
   personal_data_in_logs: deny
   forbidden_categories: [health, children, biometric]
   allowed_transfer_countries: [IN]
+  require_field_protection_for: [government_id]   # Aadhaar / PAN: UIDAI Aadhaar Data Vault, DPDP Rule 6
+  ai_allowed_categories: []                       # no personal data in prompts to AI model providers
 
 processing_activities:
   - id: applicant_onboarding
@@ -63,6 +65,10 @@ processors:
     data_categories: [contact]
     country: IN
     contract: DPA-2025-019
+
+erasure:
+  retained:
+    Repayment: "Repayment records kept 8 years after loan closure under the PML Rules and tax law"
 
 exceptions: []
 

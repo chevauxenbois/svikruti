@@ -6,8 +6,8 @@ dpdpa,Sec. 5(1)(i),,Notice states the personal data and the purpose of processin
 dpdpa,Sec. 4(1),,Processing only with consent or for certain legitimate uses,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
 dpdpa,Sec. 6,,Consent,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
 dpdpa,Sec. 7,,Certain legitimate uses,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
-dpdpa,Sec. 8(7),,Erasure when the specified purpose is no longer served or consent is withdrawn,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
-dpdpa,Rule 8,,Time period for the specified purpose to be deemed no longer served,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+dpdpa,Sec. 8(7),,Erasure when the specified purpose is no longer served or consent is withdrawn,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
+dpdpa,Rule 8,,Time period for the specified purpose to be deemed no longer served,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
 dpdpa,Sec. 6(1),,Consent limited to personal data necessary for the specified purpose,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
 dpdpa,Sec. 8(5),,Reasonable security safeguards to prevent personal data breach,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
 dpdpa,Rule 6,,"Security safeguards: encryption, obfuscation, masking or virtual tokens",OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
@@ -53,8 +53,8 @@ gdpr,Art. 5(1)(b),,Purpose limitation,OBL-02,Every activity has a specified purp
 gdpr,Art. 30(1)(b),,Purposes of the processing recorded,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
 gdpr,Art. 6(1),,Lawfulness of processing,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
 gdpr,Art. 9(2),,"Condition for special categories, where they are processed",OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
-gdpr,Art. 5(1)(e),,Storage limitation,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
-gdpr,Art. 30(1)(f),,Envisaged time limits for erasure,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+gdpr,Art. 5(1)(e),,Storage limitation,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
+gdpr,Art. 30(1)(f),,Envisaged time limits for erasure,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
 gdpr,Art. 5(1)(c),,Data minimisation,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
 gdpr,Art. 25(2),,Data protection by default,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
 gdpr,Art. 5(1)(c),,Data minimisation,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs
@@ -98,8 +98,8 @@ gdpr,Art. 33(5),,Documenting personal data breaches,OBL-24,Breach notification p
 iso27701,A.1.2.9,A.7.2.8,Records related to processing PII,OBL-01,The processing record matches the code,Failing,code,2 open finding(s): Undeclared personal data category; Undeclared processor / third party
 iso27701,A.1.2.2,A.7.2.1,Identify and document purpose,OBL-02,Every activity has a specified purpose,Verified,manifest,Every activity states its purposes.
 iso27701,A.1.2.3,A.7.2.2,Identify lawful basis,OBL-03,Every activity has a lawful basis,Verified,manifest,Every activity records a lawful basis valid under the selected frameworks.
-iso27701,A.1.4.8,A.7.4.7,Retention,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
-iso27701,A.1.4.6,A.7.4.5,PII de-identification and deletion at the end of processing,OBL-04,Retention is defined,Verified,manifest,Every activity defines retention.
+iso27701,A.1.4.8,A.7.4.7,Retention,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
+iso27701,A.1.4.6,A.7.4.5,PII de-identification and deletion at the end of processing,OBL-04,Retention is defined,Verified,manifest,"Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
 iso27701,A.1.4.2,A.7.4.1,Limit collection,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
 iso27701,A.1.4.5,A.7.4.4,PII minimization objectives,OBL-05,Only declared data is collected,Failing,code,1 open finding(s): Undeclared personal data category
 iso27701,A.1.4.3,A.7.4.2,Limit processing,OBL-06,No personal data in logs,Failing,code,1 open finding(s): Personal data written to logs

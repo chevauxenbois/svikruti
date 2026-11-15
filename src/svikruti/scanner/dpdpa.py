@@ -108,6 +108,8 @@ def _is_risk_evidence(item: Evidence) -> bool:
         return False
     if item.metadata.get("positive_evidence"):
         return False
+    if item.metadata.get("suppressed"):
+        return False
     return True
 
 

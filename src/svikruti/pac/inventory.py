@@ -13,19 +13,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from svikruti.models import ScanResult
+from svikruti.pac.datastore import _CONTAINER_RES, cascades, erasure_coverage, erasure_paths, field_protection, protection_index
 from svikruti.pac.globs import match_any
 from svikruti.pac.taxonomy import HIGH_RISK_CATEGORIES, category_slug
 from svikruti.reports.exports import _write_rows
 
-_CONTAINER_RES = (
-    re.compile(r"^\s*create\s+table\s+(?:if\s+not\s+exists\s+)?[`\"\[]?([\w.]+)", re.IGNORECASE),   # SQL
-    re.compile(r"^\s*(?:model|type|enum)\s+(\w+)\s*\{"),                                              # Prisma / GraphQL
-    re.compile(r"^\s*(?:export\s+)?(?:abstract\s+)?(?:public\s+|final\s+|data\s+)*class\s+(\w+)"),   # Python / Java / Kotlin / TS / PHP / Ruby
-    re.compile(r"^\s*type\s+(\w+)\s+struct\b"),                                                       # Go
-    re.compile(r"^\s*(?:export\s+)?interface\s+(\w+)"),                                               # TS
-    re.compile(r"\b(?:define|model)\(\s*[\"'](\w+)[\"']"),                                            # Sequelize / Mongoose
-    re.compile(r"\bcreate_table\s+[:\"'](\w+)"),                                                      # Rails migration
-)
 
 
 def _container(lines: Optional[List[str]], line: Optional[int]) -> str:
@@ -38,6 +30,27 @@ def _container(lines: Optional[List[str]], line: Optional[int]) -> str:
             if match:
                 return match.group(1)
     return ""
+
+
+def production_files(root: Optional[Path]) -> List[str]:
+    """Source files outside tests and docs: where protection and erasure code lives."""
+    if root is None:
+        return []
+    from svikruti.scanner.code import _file_context, _is_fixture_file, iter_source_files
+
+    files = []
+    for path in iter_source_files(root):
+        rel = str(path.relative_to(root)).replace("\\", "/")
+        if path.suffix.lower() in {".md", ".txt", ".csv", ".json", ".lock", ".svg", ".html", ".htm"} or _is_fixture_file(root, rel):
+            continue
+        try:
+            head = path.read_text(encoding="utf-8", errors="ignore")[:20000]
+        except OSError:
+            continue
+        if _file_context(rel, head) in {"test", "reference"}:
+            continue
+        files.append(rel)
+    return files
 
 
 def build_inventory(scan: ScanResult, check: Any = None) -> List[Dict[str, Any]]:
@@ -97,7 +110,38 @@ def build_inventory(scan: ScanResult, check: Any = None) -> List[Dict[str, Any]]
             }
         )
     rows.sort(key=lambda row: (row["file"], row["store"], row["line"] or 0))
+    _annotate(rows, root, lines_for, check)
     return rows
+
+
+def _annotate(rows: List[Dict[str, Any]], root: Optional[Path], lines_for: Any, check: Any) -> None:
+    """Add protection and erasure coverage to each inventory row."""
+    if not rows:
+        return
+    files = production_files(root)
+    index = protection_index(root, files)
+    for row in rows:
+        lines = lines_for(row["file"]) or []
+        declaration = lines[row["line"] - 1] if row["line"] and row["line"] <= len(lines) else ""
+        protection = field_protection(row["field"], declaration, f"{row['file']}:{row['line']}", index)
+        row["protection"] = protection.kind
+        row["protection_evidence"] = protection.evidence
+    from svikruti.pac.datastore import is_persistent_store, store_header
+
+    for row in rows:
+        lines = lines_for(row["file"]) or []
+        row["persistent"] = bool(row["store"]) and is_persistent_store(row["file"], store_header(lines, row["line"] or 1))
+    erasure = check.manifest.erasure if check is not None else None
+    paths = erasure_paths(root, files, erasure.handlers if erasure else ())
+    stores: Dict[str, Any] = {}
+    for row in rows:
+        if row["store"] and row["persistent"]:
+            stores.setdefault(row["store"], (row["file"], row["line"] or 1))
+    coverage = erasure_coverage(stores, paths, erasure.retained if erasure else {}, cascades(root, stores))
+    for row in rows:
+        row["erasure"] = coverage.get(row["store"], "") if row["persistent"] else "n/a (not a stored table or model)"
+    if rows:
+        rows[0].setdefault("_erasure_paths", [f"{path.name}:{path.file}:{path.line}" for path in paths])
 
 
 def write_inventory_csv(rows: List[Dict[str, Any]], path: str) -> None:
@@ -106,11 +150,17 @@ def write_inventory_csv(rows: List[Dict[str, Any]], path: str) -> None:
 
     _write_rows(
         path,
-        ["Store (table / model)", "Field", "Data Category", "High Risk", "File", "Line", "Processing Activity", "Category Declared", "Category Reaches Logs (activity)", "Category Sent To (activity)", "Retention", "Parser", "Confidence"],
+        [
+            "Store (table / model)", "Field", "Data Category", "High Risk", "File", "Line", "Processing Activity", "Category Declared",
+            "Category Reaches Logs (activity)", "Category Sent To (activity)", "Persistent Store", "Field Protection", "Protection Evidence", "Erasure Path",
+            "Retention", "Parser", "Confidence",
+        ],
         [
             [
                 row["store"], row["field"], row["data_category"], "yes" if row["high_risk"] else "no", row["file"], row["line"] or "",
-                row["activity"], declared(row["declared"]), "yes" if row["reaches_logs"] else "no", "; ".join(row["sent_to"]), row["retention"], row["parser"], row["confidence"],
+                row["activity"], declared(row["declared"]), "yes" if row["reaches_logs"] else "no", "; ".join(row["sent_to"]),
+                "yes" if row.get("persistent") else "no", row.get("protection", ""), row.get("protection_evidence", ""), row.get("erasure", "") or "not found",
+                row["retention"], row["parser"], row["confidence"],
             ]
             for row in rows
         ],

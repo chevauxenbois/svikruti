@@ -124,29 +124,92 @@ def run_check(
     today = today or date.today()
     base_dir = str(Path(manifest.path).parent) if manifest.path else None
     packs = load_packs(frameworks or manifest.frameworks, base_dir)
+    from svikruti.pac.inventory import build_inventory
+    from svikruti.pac.reconcile import finalize_findings
+
     model = build_code_model(scan.evidence, manifest.policies.min_confidence, manifest.policies.ignore_paths)
     legal_bases = {pack.id: pack.legal_bases for pack in packs if pack.legal_bases}
-    findings = reconcile(model, manifest, legal_bases=legal_bases, today=today)
-    context = Context(result=scan, manifest=manifest, model=model, findings=findings, today=today)
-    assessments = evaluate_obligations(context)
-    baseline_fingerprints = None
-    if baseline is not None:
-        baseline_fingerprints = {item.get("fingerprint") for item in baseline.get("findings", []) if item.get("status", "open") == "open"}
-    from svikruti.pac.inventory import build_inventory
-
+    root = str(Path(scan.repo_path).resolve()) if scan.repo_path else None
+    findings = reconcile(model, manifest, legal_bases=legal_bases, today=today, finalize=False)
     result = CheckResult(
         manifest=manifest,
         packs=packs,
         model=model,
         findings=findings,
-        assessments=assessments,
+        assessments=[],
         scan=scan,
         generated_at=scan.generated_at,
-        baseline_fingerprints=baseline_fingerprints,
         activities_view=_activities_view(manifest, model, findings),
     )
+    # The inventory needs the activity view; storage findings need the inventory.
     result.inventory = build_inventory(scan, result)
+    findings.extend(_storage_findings(result.inventory, manifest))
+    result.findings = finalize_findings(findings, manifest, today, root)
+    result.activities_view = _activities_view(manifest, model, result.findings)
+    context = Context(result=scan, manifest=manifest, model=model, findings=result.findings, today=today)
+    result.assessments = evaluate_obligations(context)
+    if baseline is not None:
+        result.baseline_fingerprints = {item.get("fingerprint") for item in baseline.get("findings", []) if item.get("status", "open") == "open"}
     return result
+
+
+def _storage_findings(inventory: List[Dict[str, Any]], manifest: Manifest) -> List[Finding]:
+    """P007 (unprotected high-risk fields) and D010 (stores no erasure path reaches)."""
+    from svikruti.pac.datastore import PROTECTED_KINDS
+    from svikruti.pac.taxonomy import HIGH_RISK_CATEGORIES, category_severity, category_slug
+
+    findings: List[Finding] = []
+    stored = [row for row in inventory if row.get("persistent")]
+    protect = set(manifest.policies.require_field_protection_for)
+    for row in stored:
+        slug = category_slug(row["data_category"])
+        if slug in protect and row.get("protection") not in PROTECTED_KINDS:
+            how = " (a binary column, but no encryption, tokenisation or hashing was found where it is written)" if row.get("protection") == "binary" else ""
+            findings.append(
+                Finding(
+                    rule="P007",
+                    severity=category_severity(slug),
+                    detail=f"`{row['store']}.{row['field']}` stores {row['data_category']} data with no field-level protection{how}.",
+                    activity=row.get("activity", ""),
+                    category=slug,
+                    fields=[f"{row['store']}.{row['field']}"],
+                    refs=[f"{row['file']}:{row['line']}"],
+                )
+            )
+    stores: Dict[str, List[Dict[str, Any]]] = {}
+    for row in stored:
+        stores.setdefault(row["store"], []).append(row)
+    if not stores:
+        return findings
+    paths = (inventory[0].get("_erasure_paths") if inventory else None) or []
+    uncovered = {store: rows for store, rows in stores.items() if not rows[0].get("erasure")}
+    if not paths and uncovered:
+        categories = sorted({category_slug(row["data_category"]) for rows in uncovered.values() for row in rows})
+        findings.append(
+            Finding(
+                rule="D010",
+                severity="HIGH" if set(categories) & HIGH_RISK_CATEGORIES else "MEDIUM",
+                detail=f"No erasure or retention code was found, and {len(uncovered)} store(s) hold personal data ({', '.join(sorted(uncovered))}).",
+                category=",".join(categories),
+                fields=["*"],
+                refs=[f"{rows[0]['file']}:{rows[0]['line']}" for rows in list(uncovered.values())[:8]],
+            )
+        )
+        return findings
+    for store, rows in sorted(uncovered.items()):
+        categories = sorted({category_slug(row["data_category"]) for row in rows})
+        findings.append(
+            Finding(
+                rule="D010",
+                severity="HIGH" if set(categories) & HIGH_RISK_CATEGORIES else "MEDIUM",
+                detail=f"`{store}` holds {', '.join(sorted({row['data_category'] for row in rows}))} data, but no erasure or retention path deletes or anonymises it.",
+                activity=rows[0].get("activity", ""),
+                category=",".join(categories),
+                fields=[store],
+                refs=[f"{rows[0]['file']}:{rows[0]['line']}"],
+            )
+        )
+    return findings
 
 
 def attach_check(scan: ScanResult, manifest_path: str, frameworks: Optional[List[str]] = None) -> Optional[CheckResult]:

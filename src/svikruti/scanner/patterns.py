@@ -174,7 +174,23 @@ THIRD_PARTY_PATTERNS: Dict[str, List[str]] = {
     "MoEngage": ["moengage"],
     "CleverTap": ["clevertap"],
     "WebEngage": ["webengage"],
+    # AI model providers. Frameworks (LangChain, LlamaIndex) are not listed
+    # separately: their provider classes (ChatOpenAI, ChatAnthropic, ...) carry
+    # the provider name, so a LangChain call is attributed to the real vendor.
+    # Azure OpenAI is reported as OpenAI.
+    "OpenAI": ["openai"],
+    "Anthropic": ["anthropic"],
+    "Google Gemini": ["google.generativeai", "google.genai", "from google import genai", "@google/genai", "@google/generative-ai", "generativelanguage.googleapis.com", "vertexai", "chatgooglegenerativeai", "chatvertexai"],
+    "AWS Bedrock": ["bedrock-runtime", "bedrock_runtime", "bedrockruntime", "@aws-sdk/client-bedrock", "chatbedrock"],
+    "Cohere": ["cohere"],
+    "Mistral AI": ["mistralai", "api.mistral.ai", "chatmistralai"],
+    "Groq": ["groq-sdk", "from groq import", "import groq", "api.groq.com", "chatgroq"],
 }
+
+# Third parties that are AI model providers. Personal data in a prompt is
+# personal data sent to a processor, and policies.ai_allowed_categories in
+# privacy.yaml limits which categories may be sent.
+AI_PROVIDERS = {"OpenAI", "Anthropic", "Google Gemini", "AWS Bedrock", "Cohere", "Mistral AI", "Groq"}
 
 # --- Verhoeff checksum (Aadhaar validation) ---------------------------------
 # Aadhaar numbers carry a Verhoeff check digit. The algorithm works over the

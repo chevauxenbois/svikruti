@@ -1,12 +1,12 @@
 {
   "schema_version": "svikruti-privacy-check-v1",
-  "generated_at": "2026-11-13T08:53:49.629005+00:00",
+  "generated_at": "2026-11-15T04:01:34.785848+00:00",
   "manifest": "privacy.yaml",
   "repo": ".",
   "summary": {
     "activities": 3,
     "processors": 2,
-    "files_with_personal_data": 7,
+    "files_with_personal_data": 8,
     "open_findings": 3,
     "open_by_severity": {
       "CRITICAL": 0,
@@ -205,7 +205,7 @@
       "question": "Does each processing activity state how long data is kept or what triggers erasure?",
       "proof": "manifest",
       "status": "pass",
-      "summary": "Every activity defines retention.",
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason.",
       "findings": [],
       "evidence": [],
       "attestation": null
@@ -582,7 +582,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "dpdpa",
@@ -593,7 +593,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "dpdpa",
@@ -1099,7 +1099,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "gdpr",
@@ -1110,7 +1110,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "gdpr",
@@ -1594,7 +1594,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "iso27701",
@@ -1605,7 +1605,7 @@
       "obligation_title": "Retention is defined",
       "status": "pass",
       "proof": "manifest",
-      "summary": "Every activity defines retention."
+      "summary": "Every activity defines retention, and every stored table or model is reached by erasure or retention code, or is retained for a recorded reason."
     },
     {
       "framework": "iso27701",
@@ -2074,6 +2074,7 @@
         "web/**"
       ],
       "files": [
+        "services/onboarding/erasure.py",
         "services/onboarding/kyc.py",
         "services/onboarding/models.py",
         "web/signup.tsx"
@@ -2223,7 +2224,14 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "_erasure_paths": [
+        "handle_erasure_request:services/onboarding/erasure.py:10"
+      ]
     },
     {
       "store": "Applicant",
@@ -2238,7 +2246,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2253,7 +2265,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2268,7 +2284,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2283,7 +2303,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "encrypted",
+      "protection_evidence": "services/onboarding/kyc.py:19",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2298,7 +2322,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (PML Rules), then erased",
       "parser": "python.ast",
-      "confidence": "high"
+      "confidence": "high",
+      "protection": "encrypted",
+      "protection_evidence": "services/onboarding/kyc.py:20",
+      "persistent": true,
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Repayment",
@@ -2316,7 +2344,11 @@
       ],
       "retention": "8 years after loan closure (tax and PML records)",
       "parser": "js_ts.endpoint_heuristic",
-      "confidence": "medium"
+      "confidence": "medium",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
     },
     {
       "store": "Repayment",
@@ -2334,7 +2366,11 @@
       ],
       "retention": "8 years after loan closure (tax and PML records)",
       "parser": "js_ts.endpoint_heuristic",
-      "confidence": "medium"
+      "confidence": "medium",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
     },
     {
       "store": "Repayment",
@@ -2349,7 +2385,11 @@
       "sent_to": [],
       "retention": "8 years after loan closure (tax and PML records)",
       "parser": "js_ts.endpoint_heuristic",
-      "confidence": "medium"
+      "confidence": "medium",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
     },
     {
       "store": "Repayment",
@@ -2364,12 +2404,16 @@
       "sent_to": [],
       "retention": "8 years after loan closure (tax and PML records)",
       "parser": "js_ts.endpoint_heuristic",
-      "confidence": "medium"
+      "confidence": "medium",
+      "protection": "none",
+      "protection_evidence": "",
+      "persistent": true,
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
     }
   ],
   "manifest_warnings": [],
   "scan_summary": {
-    "files_scanned": 12,
+    "files_scanned": 13,
     "website_pages_scanned": 0,
     "personal_data_categories": [
       "Contact",

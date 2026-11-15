@@ -44,6 +44,9 @@ RULES: Dict[str, Dict[str, str]] = {
     "P002": {"title": "Forbidden data category present", "fix": "Remove the data: organisational policy says this category must not be processed here."},
     "P003": {"title": "High-risk processing without an impact assessment", "fix": "Complete a DPIA and reference it in the activity's `dpia` field."},
     "P004": {"title": "Cross-border transfer without a recorded mechanism", "fix": "Record the transfer mechanism on the processor, or add the country to allowed_transfer_countries after review."},
+    "P006": {"title": "Personal data sent to an AI model provider beyond the allowlist", "fix": "Remove or redact the field before it reaches the prompt, or add the category to policies.ai_allowed_categories after review."},
+    "P007": {"title": "High-risk field stored without field-level protection", "fix": "Encrypt, tokenise (vault), hash or mask the field before it is stored, or record a time-boxed exception."},
+    "D010": {"title": "Stored personal data no erasure path reaches", "fix": "Delete or anonymise this store from your erasure / retention code, list the function under erasure.handlers, or record the legal reason under erasure.retained."},
     "P005": {"title": "Exception has expired", "fix": "Fix the underlying finding or renew the exception with a new review date."},
 }
 
@@ -108,6 +111,7 @@ class CodeModel:
     files: Dict[str, FileFacts] = field(default_factory=dict)
     website_processors: Dict[str, Tuple[str, List[str]]] = field(default_factory=dict)
     ignored_files: Set[str] = field(default_factory=set)
+    ai_processors: Set[str] = field(default_factory=set)  # slugs of AI model providers seen in flows
 
     def categories(self) -> Set[str]:
         return {slug for facts in self.files.values() for slug in facts.categories}
@@ -164,6 +168,8 @@ def build_code_model(evidence: Iterable[Evidence], min_confidence: str = "medium
         facts.categories.setdefault(category, []).append(_ref(item))
         if item.kind == "processor_data_flow" and metadata.get("third_party"):
             name = str(metadata["third_party"])
+            if metadata.get("ai_provider"):
+                model.ai_processors.add(slugify(name))
             facts.processors.setdefault(slugify(name), (name, []))
             facts.flows.setdefault(slugify(name), {}).setdefault(category, []).append(_ref(item))
         if "log" in item.kind:
@@ -191,6 +197,8 @@ def reconcile(
     manifest: Manifest,
     legal_bases: Optional[Dict[str, List[str]]] = None,
     today: Optional[date] = None,
+    finalize: bool = True,
+    root: Optional[str] = None,
 ) -> List[Finding]:
     findings: List[Finding] = []
     policies = manifest.policies
@@ -413,7 +421,49 @@ def reconcile(
                 )
             )
 
+    # --- Personal data in prompts to AI model providers --------------------
+    allowed_ai = policies.ai_allowed_categories
+    if allowed_ai is not None:
+        ai_groups: Dict[Tuple[str, str], Tuple[str, Set[str], List[str]]] = {}
+        for rel, facts in model.files.items():
+            for slug, categories in facts.flows.items():
+                if slug not in model.ai_processors:
+                    continue
+                name = facts.processors[slug][0]
+                for category, refs in categories.items():
+                    if category in allowed_ai:
+                        continue
+                    _, activities, all_refs = ai_groups.setdefault((slug, category), (name, set(), []))
+                    activities.add(assignment.get(rel) or "")
+                    all_refs.extend(refs)
+        for (slug, category), (name, activities, refs) in sorted(ai_groups.items()):
+            processor = processors.get(slug)
+            findings.append(
+                Finding(
+                    rule="P006",
+                    severity=category_severity(category),
+                    detail=f"{category_label(category)} data is sent to {name} (AI model provider) but is not in policies.ai_allowed_categories.",
+                    activity=next(iter(activities)) if len(activities) == 1 else "",
+                    category=category,
+                    processor=processor.id if processor else slug,
+                    refs=_first_refs(refs),
+                )
+            )
+
+    if finalize:
+        return finalize_findings(findings, manifest, today, root)
+    return findings
+
+
+def finalize_findings(findings: List[Finding], manifest: Manifest, today: Optional[date] = None, root: Optional[str] = None) -> List[Finding]:
+    """Apply manifest exceptions and inline suppressions, fingerprint, and sort."""
     _apply_exceptions(findings, manifest.exceptions, today or date.today())
+    if root:
+        from svikruti.pac.suppress import apply_inline_suppressions
+
+        for warning in apply_inline_suppressions(findings, root):
+            if warning not in manifest.warnings:
+                manifest.warnings.append(warning)
     for finding in findings:
         finding.fingerprint = _fingerprint(finding)
     findings.sort(key=lambda item: (item.status != "open", -SEVERITY_ORDER.get(item.severity, 0), item.rule, item.activity, item.category, item.processor))

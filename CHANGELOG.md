@@ -12,10 +12,11 @@
 - `svikruti init`: generates the manifest from a scan, in sync with the code
   by construction, with TODO placeholders for what code cannot know.
 - `svikruti check`: reconciles the manifest against scanner evidence.
-  Drift rules D001-D009 (shadow processing, undeclared category, undeclared
+  Drift rules D001-D010 (shadow processing, undeclared category, undeclared
   processor, stale declarations, incomplete records) and policy rules
-  P001-P005 (personal data in logs, forbidden categories, missing DPIA,
-  undocumented transfers, expired exceptions). Exit code 3 on findings at or
+  P001-P007 (personal data in logs, forbidden categories, missing DPIA,
+  undocumented transfers, expired exceptions, data in AI prompts,
+  unprotected high-risk fields). Exit code 3 on findings at or
   above `--fail-on` (default high).
 - Framework packs: 24 framework-neutral obligations mapped to DPDPA (Act and
   Rules 2025), GDPR and ISO/IEC 27701:2025 (with 2019 legacy numbers). Custom
@@ -68,6 +69,28 @@
 - Processor flows follow instance-held and injected clients
   (`self.client`, `this.stripe`, typed constructor and function parameters,
   Java fields, Go struct fields).
+- AI model providers as processors: OpenAI, Anthropic, Google Gemini, AWS
+  Bedrock, Cohere, Mistral and Groq SDKs, LangChain chat models and pipes,
+  and clients built by service name. `policies.ai_allowed_categories` and
+  rule P006 limit which personal data may reach a prompt; an undeclared AI
+  provider is D003.
+- Field protection: each stored field is classified as encrypted, tokenised,
+  hashed, masked, binary or none, from its declaration or the call that wraps
+  it where it is written. `policies.require_field_protection_for` and rule
+  P007 (for example `[government_id]` for the Aadhaar Data Vault).
+- Erasure coverage: erasure and retention paths (named functions and
+  classes, functions that delete the subject's own record, `erasure.handlers`,
+  one level of calls, SQL `DELETE`) and ON DELETE CASCADE relationships.
+  Rule D010 for stored data no path reaches; `erasure.retained` records
+  stores kept for a legal reason. D010 also fails OBL-04 and OBL-21.
+- Stores are classified as persistent (ORM models, SQL tables, Prisma) or
+  transient (DTOs, forms, API types, pydantic models); P007 and D010 apply to
+  persistent stores only.
+- Inline suppressions: `svikruti-ignore[RULE]: reason` on or above a line.
+  A reason is required. In `scan`, suppressed evidence leaves the risk score
+  and is marked as suppressed in SARIF.
+- `svikruti inventory`: list stored personal-data fields by category or
+  field name, with protection and erasure, as a table, CSV or JSON.
 - `svikruti init-github-action --mode check`: pull-request gate that builds
   its baseline from the base branch, posts a PR comment and uploads SARIF.
 - Worked example `examples/privacy-as-code` (passes), drift scenario

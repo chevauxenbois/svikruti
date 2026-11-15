@@ -41,6 +41,11 @@ Privacy gate failed: 3 finding(s) at HIGH or above
 - **Processor data flows.** Not just "this code uses Mixpanel" but which data
   categories are passed to it, followed through wrapper functions across
   files and checked against the processor's record.
+- **AI in the data map.** Personal data in prompts to OpenAI, Anthropic,
+  Gemini, Bedrock and others is a processor flow, held to an allowlist.
+- **Stored data you can defend.** Every table and model with personal data,
+  whether high-risk fields are encrypted or tokenised (Aadhaar Data Vault),
+  and whether any erasure or retention code reaches it.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations

@@ -157,6 +157,18 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("--json-out", help="Write the diff as JSON.")
     diff.add_argument("--fail-on-new", choices=["low", "medium", "high", "critical"], help="Exit with code 3 when a new finding reaches this severity.")
 
+    inventory = subparsers.add_parser(
+        "inventory",
+        help="Where is personal data stored? List tables/models and fields, with protection and erasure coverage (DSAR and breach scoping).",
+    )
+    inventory.add_argument("--repo", default=".", help="Repository to scan (default: current directory).")
+    inventory.add_argument("--category", action="append", default=[], help="Only these categories (e.g. contact, government_id). Repeatable.")
+    inventory.add_argument("--field", help="Only fields whose name contains this text (e.g. email, aadhaar).")
+    inventory.add_argument("--stored-only", action="store_true", help="Only persistent tables and models (skip DTOs, forms, API types).")
+    inventory.add_argument("--format", choices=["table", "csv", "json"], default="table")
+    inventory.add_argument("--out", help="Write to a file instead of stdout (csv/json).")
+    inventory.add_argument("--no-manifest", action="store_true", help="Ignore privacy.yaml even if present.")
+
     subparsers.add_parser("frameworks", help="List built-in framework packs.")
     schema = subparsers.add_parser("schema", help="Print the JSON Schema for privacy.yaml (editor completion and validation).")
     schema.add_argument("--out", help="Write the schema to a file instead of stdout.")
@@ -206,6 +218,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_sync(args)
     if args.command == "frameworks":
         return _cmd_frameworks()
+    if args.command == "inventory":
+        return _cmd_inventory(args)
     if args.command == "schema":
         import json
 
@@ -499,6 +513,67 @@ def _cmd_diff(args: argparse.Namespace) -> int:
     if args.fail_on_new and new_at_or_above(diff, args.fail_on_new):
         print(f"New-finding gate failed at {args.fail_on_new.upper()} or above", file=sys.stderr)
         return EXIT_GATE
+    return EXIT_OK
+
+
+def _cmd_inventory(args: argparse.Namespace) -> int:
+    import json
+
+    from svikruti.pac.inventory import build_inventory, write_inventory_csv
+    from svikruti.pac.taxonomy import category_slug
+
+    try:
+        scan = run_scan(args.repo, None)
+        rows = None
+        if not args.no_manifest:
+            from svikruti.pac.manifest import ManifestError, find_manifest, load_manifest
+
+            manifest_path = find_manifest(args.repo)
+            if manifest_path is not None:
+                from svikruti.pac.engine import run_check
+
+                try:
+                    rows = run_check(scan, load_manifest(manifest_path)).inventory
+                except ManifestError as exc:
+                    print(f"warning: privacy.yaml ignored ({'; '.join(exc.errors)[:200]})", file=sys.stderr)
+        if rows is None:
+            rows = build_inventory(scan)
+    except Exception as exc:
+        print(f"svikruti inventory failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    wanted = {category_slug(item) for item in args.category}
+    rows = [
+        row
+        for row in rows
+        if (not wanted or category_slug(row["data_category"]) in wanted)
+        and (not args.field or args.field.lower() in row["field"].lower())
+        and (not args.stored_only or row.get("persistent"))
+    ]
+    clean = [{key: value for key, value in row.items() if not key.startswith("_")} for row in rows]
+    if args.format == "json":
+        text = json.dumps(clean, indent=2)
+        if args.out:
+            Path(args.out).write_text(text + "\n", encoding="utf-8")
+        else:
+            print(text)
+    elif args.format == "csv":
+        target = args.out or "/dev/stdout"
+        write_inventory_csv(rows, target)
+    else:
+        if not rows:
+            print("No matching personal-data fields found.")
+            return EXIT_OK
+        width = max(len(f"{row['store'] or '-'}.{row['field']}") for row in rows)
+        for row in rows:
+            erasure = row.get("erasure") or ("no erasure path" if row.get("persistent") else "not stored")
+            print(
+                f"{(row['store'] or '-') + '.' + row['field']:<{width}}  {row['data_category']:<14} {row.get('protection', ''):<10} "
+                f"{row['file']}:{row['line']}  [{erasure if len(erasure) <= 90 else erasure[:87] + '...'}]"
+            )
+        stores = {(row["store"], row["file"]) for row in rows if row.get("persistent")}
+        print(f"\n{len(rows)} field(s) in {len(stores)} stored table(s)/model(s).")
+    if args.out and args.format != "table":
+        print(f"Inventory written: {Path(args.out).resolve()}", file=sys.stderr)
     return EXIT_OK
 
 

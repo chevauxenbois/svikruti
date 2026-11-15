@@ -62,6 +62,11 @@ def write_sarif(result: ScanResult, output_path: str) -> None:
                     if item.metadata.get("fingerprint")
                     else {}
                 ),
+                **(
+                    {"suppressions": [{"kind": "inSource", "justification": str(item.metadata["suppressed"])}]}
+                    if item.metadata.get("suppressed")
+                    else {}
+                ),
                 "properties": {
                     "severity": item.severity,
                     "source": item.source,

@@ -74,6 +74,13 @@ policies:
   ignore_paths: ["fixtures/**"]
   min_confidence: medium              # ignore low-confidence scanner signals when reconciling
   attestation_max_age_days: 365
+  ai_allowed_categories: []           # personal data allowed in prompts to AI providers; [] = none; omit = not enforced
+  require_field_protection_for: [government_id, health]   # stored fields must be encrypted / tokenised / hashed / masked
+
+erasure:
+  handlers: [close_account]           # extra functions that delete personal data, if not named delete_user / erase_* / ...
+  retained:                           # stores kept on purpose, with the legal reason
+    Repayment: "Kept 8 years after loan closure under the PML Rules and tax law"
 
 processing_activities:
   - id: repayments
@@ -141,6 +148,9 @@ organisation has decided.
 | P003 | HIGH | High-risk data with no `dpia` reference |
 | P004 | HIGH | Processor outside `allowed_transfer_countries` with no `transfer_mechanism` |
 | P005 | MEDIUM | An exception has expired; its finding is enforced again |
+| P006 | HIGH / CRITICAL | Personal data is sent to an AI model provider and its category is not in `ai_allowed_categories` |
+| P007 | HIGH / CRITICAL | A stored field in `require_field_protection_for` has no encryption, tokenisation, hashing or masking |
+| D010 | MEDIUM / HIGH | A stored table or model holds personal data and no erasure or retention code reaches it, and it is not under `erasure.retained` |
 
 CRITICAL applies where the category is high-risk (health, children,
 government ID, biometric).
@@ -193,6 +203,83 @@ starter 6. Reading them by hand, each passes a customer email, name, address
 or payment-method detail to Stripe. That is two repositories with one vendor,
 not a precision benchmark.
 
+## AI model providers
+
+OpenAI, Anthropic, Google Gemini, AWS Bedrock, Cohere, Mistral and Groq are
+processors like any other, so a prompt that carries a customer's email is a
+processor flow:
+
+```python
+prompt = f"Summarise the account of {customer.full_name} ({customer.email})"
+client.chat.completions.create(model="gpt-4o", messages=[{"role": "user", "content": prompt}])
+#  -> Identity, Contact sent to OpenAI
+```
+
+The same detector covers the provider SDKs, LangChain chat models and pipes
+(`chain = prompt | llm`), and clients built by service name
+(`boto3.client("bedrock-runtime")`). Calls through LangChain are attributed
+to the real provider; Azure OpenAI is reported as OpenAI.
+
+An AI provider the manifest does not declare is a D003 finding, which is how
+shadow AI shows up in a pull request. `policies.ai_allowed_categories` then
+limits what declared providers may receive: `[]` allows no personal data in
+prompts, `[device]` allows only device data, and leaving the key out disables
+the check. Anything else is P006.
+
+What it cannot see: free-text user input forwarded as-is (a chat box passed
+straight to the model) carries no field name, so its contents are unknown to a
+static scanner. A proxy or DLP layer at runtime is the control for that.
+
+## Stored data: protection and erasure
+
+For every stored table or model, the inventory answers two more questions.
+
+**Is it protected?** A field counts as protected when its declaration says so
+(`EncryptedCharField`, `@Convert`, `aadhaar_hash`, `pan_last4`, a vault
+reference) or when the value is wrapped where it is written
+(`aadhaar=encrypt_field(payload["aadhaar"])`, `tokenize(user.pan_number)`).
+Comments do not count. A binary column with no such write is reported as
+"binary, unverified". `policies.require_field_protection_for` turns this into
+rule P007. For Indian requesting entities, `[government_id]` is the code-level
+check behind UIDAI's Aadhaar Data Vault requirement (Aadhaar numbers stored
+encrypted, in a vault, behind reference keys).
+
+**Can it be erased?** An erasure path is a function or class named for it
+(`delete_user`, `handle_erasure_request`, `AccountDelete`,
+`purge_expired_records`, `apply_retention`), any function that deletes the
+data subject's own record (`user.delete()`), anything listed under
+`erasure.handlers`, and the functions those call. A store is reached when one
+of them deletes, updates or anonymises it (`Applicant.objects.filter(...).delete()`,
+`DELETE FROM customers`, `applicant.email = "erased"`), or when it cascades
+from a store that is (`ForeignKey(Customer, on_delete=CASCADE)`,
+`REFERENCES users ON DELETE CASCADE`). Seed, cleardb and populate scripts are
+not erasure paths. A store nothing reaches, and that is not listed under
+`erasure.retained` with a reason, is rule D010.
+
+"Reached" means code that deletes or overwrites the store exists; it does not
+prove that your rights-request process calls it, or that it runs. Only stored
+tables and models count: DTOs, forms, API types and pydantic models are
+inventoried but not held to D010 or P007.
+
+## Inline suppressions
+
+When a finding is accepted where it happens, say so next to the code:
+
+```python
+logger.info("chargeback for %s", customer.email)  # svikruti-ignore[P001]: chargeback evidence, masked from Q1
+```
+
+The comment goes on the flagged line or the line above. The rule list in
+brackets limits it to those rules; without one it covers every rule. A reason
+of at least 10 characters is required: a bare `svikruti-ignore` is reported
+as a manifest warning and suppresses nothing. Suppressed findings appear in
+the report under exception with the reason, so reviewers can challenge them.
+In `svikruti scan`, a suppression without a rule list (or with `scan`) takes
+that line's evidence out of the risk score and marks it suppressed in SARIF.
+
+Use manifest `exceptions` instead for anything time-boxed or approved by
+someone other than the author.
+
 ## Data inventory
 
 `svikruti check` also writes `data-inventory.csv`: one row per stored
@@ -210,6 +297,18 @@ the row says contact data from this activity reaches Razorpay, not that this
 exact column does. Use it to answer a rights request ("where do we hold
 email?"), scope a breach, or seed a DPIA. `svikruti scan --inventory-out`
 produces the same file without a manifest.
+
+From the command line:
+
+```bash
+svikruti inventory --repo . --field email               # every column that holds an email
+svikruti inventory --repo . --category government_id    # where Aadhaar / PAN live, and whether they are protected
+svikruti inventory --repo . --stored-only --format csv --out inventory.csv
+```
+
+Each row also carries `protection` (encrypted, tokenised, hashed, masked,
+binary, none) and `erasure` (which code reaches the store, a cascade, or the
+reason it is retained).
 
 ## Keeping the manifest current: `svikruti sync`
 

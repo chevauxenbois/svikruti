@@ -117,6 +117,10 @@ def run_scan(
 
     # Stable, line-number-independent identity for baselines and SARIF.
     assign_fingerprints(result.evidence, repo)
+    # `svikruti-ignore: reason` comments take evidence out of the score and SARIF (kept in the report).
+    from svikruti.pac.suppress import suppress_scan_evidence
+
+    suppress_scan_evidence(result.evidence, repo)
 
     result.summary = summarize(result.evidence, files_scanned, pages_scanned)
     result.ropa_starter = build_ropa_starter(result.evidence)

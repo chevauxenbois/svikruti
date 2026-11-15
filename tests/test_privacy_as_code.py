@@ -16,6 +16,7 @@ from svikruti.pac.obligations import OBLIGATIONS
 from svikruti.pac.report import check_markdown, render_check_html, write_check_pack
 from svikruti.pac.sync import apply_plan_yaml, build_plan, sync_manifest
 from svikruti.reports.html import render_html
+from svikruti.reports.sarif import write_sarif
 from svikruti.scanner.flows import scan_processor_flows
 from svikruti.scanner.runner import run_scan
 
@@ -798,6 +799,201 @@ class InventoryTests(unittest.TestCase):
                 ("seq.js", "Repayment", "phone_number", "Contact"),
             ],
         )
+
+
+class AiProviderTests(unittest.TestCase):
+    """Personal data in prompts is personal data sent to a processor."""
+
+    FILES = {
+        "summarise.py": 'from openai import OpenAI\n\nclient = OpenAI()\n\ndef summarise(customer):\n    prompt = f"Summarise the account of {customer.full_name} ({customer.email})"\n    return client.chat.completions.create(\n        model="gpt-4o",\n        messages=[{"role": "user", "content": prompt}],\n    )\n',
+        "draft.ts": 'import Anthropic from "@anthropic-ai/sdk";\nconst anthropic = new Anthropic();\nexport async function draft(user) {\n  return anthropic.messages.create({\n    model: "claude",\n    messages: [{ role: "user", content: `Write to ${user.email} about ${user.aadhaar}` }],\n  });\n}\n',
+        "chain.py": 'from langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\n\nllm = ChatOpenAI(model="gpt-4o-mini")\nprompt = ChatPromptTemplate.from_template("Advise {name} on {question}")\nchain = prompt | llm\n\ndef ask(user, question):\n    return chain.invoke({"name": user.full_name, "question": question})\n',
+        "gemini.py": 'from google import genai\nclient = genai.Client()\n\ndef go(p):\n    client.models.generate_content(model="gemini", contents=f"Patient {p.diagnosis}")\n',
+        "bedrock.py": 'import boto3\nbedrock = boto3.client("bedrock-runtime")\n\ndef go(u):\n    bedrock.converse(modelId="x", messages=[{"role": "user", "content": [{"text": u.email}]}])\n',
+        "embed.py": 'from openai import OpenAI\nclient = OpenAI()\n\ndef ok(doc):\n    client.embeddings.create(model="e", input=doc.text)\n',
+    }
+
+    def test_flows_to_ai_providers(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, text in self.FILES.items():
+                (Path(tmp) / name).write_text(text, encoding="utf-8")
+            flows = sorted((e.file, e.metadata["data_category"], e.metadata["third_party"], e.metadata["ai_provider"]) for e in scan_processor_flows(tmp))
+        self.assertEqual(
+            flows,
+            [
+                ("bedrock.py", "Contact", "AWS Bedrock", True),
+                ("chain.py", "Identity", "OpenAI", True),
+                ("draft.ts", "Contact", "Anthropic", True),
+                ("draft.ts", "Government ID", "Anthropic", True),
+                ("gemini.py", "Health", "Google Gemini", True),
+                ("summarise.py", "Contact", "OpenAI", True),
+                ("summarise.py", "Identity", "OpenAI", True),
+            ],
+        )
+
+    def test_ai_allowlist_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            (repo / "services/notifications/assist.py").write_text(self.FILES["summarise.py"], encoding="utf-8")
+            _edit_manifest(repo, "    processors: [msg91]\n", "    processors: [msg91, openai]\n")
+            _edit_manifest(repo, "data_categories: [contact]\n    data_subjects: [borrowers]\n    purposes: [repayment reminders]", "data_categories: [contact, identity]\n    data_subjects: [borrowers]\n    purposes: [repayment reminders]")
+            _edit_manifest(
+                repo,
+                "processors:\n  - id: razorpay",
+                "processors:\n  - id: openai\n    name: OpenAI\n    purpose: Drafting reminders\n    country: US\n    contract: DPA-2026-002\n    transfer_mechanism: SCC\n    data_categories: [contact, identity]\n  - id: razorpay",
+            )
+            result = _check(repo)
+            p006 = sorted((f.category, f.severity) for f in result.open_findings() if f.rule == "P006")
+            self.assertEqual(p006, [("contact", "HIGH"), ("identity", "HIGH")])
+            self.assertEqual(next(a for a in result.assessments if a.id == "OBL-08").status, "fail")
+            _edit_manifest(repo, "  ai_allowed_categories: []", "  ai_allowed_categories: [identity]")
+            self.assertEqual([f.category for f in _check(repo).open_findings() if f.rule == "P006"], ["contact"])
+            _edit_manifest(repo, "  ai_allowed_categories: [identity]", "  ai_allowed_categories: [identity, contact]")
+            self.assertEqual(_rules(_check(repo)), [])
+
+
+    def test_vendor_names_in_prose_are_not_integrations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "prompts.py").write_text(
+                'SYSTEM = """You answer questions about LLM providers such as OpenAI, Anthropic, Groq and Cohere."""\n'
+                "# TODO: compare with Mistral\n"
+                "def check_coherence(x):\n    return x.striped\n",
+                encoding="utf-8",
+            )
+            (Path(tmp) / "catalog.json").write_text('{"integrations": ["Stripe", "Cohere"]}', encoding="utf-8")
+            (Path(tmp) / "real.py").write_text("from langchain_openai import ChatOpenAI\nllm = ChatOpenAI()\n", encoding="utf-8")
+            (Path(tmp) / "package.json").write_text('{"dependencies": {"stripe": "^14.0.0"}}', encoding="utf-8")
+            vendors = sorted(run_scan(tmp, None).summary.third_parties)
+        self.assertEqual(vendors, ["OpenAI", "Stripe"])
+
+
+class StoredDataTests(unittest.TestCase):
+    """Field protection (P007) and erasure coverage (D010)."""
+
+    def test_example_fields_are_protected_and_erasable(self):
+        result = _check(EXAMPLE)
+        rows = {(row["store"], row["field"]): row for row in result.inventory}
+        self.assertEqual(rows[("Applicant", "aadhaar")]["protection"], "encrypted")
+        self.assertEqual(rows[("Applicant", "aadhaar")]["protection_evidence"], "services/onboarding/kyc.py:19")
+        self.assertTrue(rows[("Applicant", "email")]["erasure"].startswith("reached by handle_erasure_request()"))
+        self.assertTrue(rows[("Repayment", "email")]["erasure"].startswith("retained: Repayment records kept 8 years"))
+        self.assertEqual(_rules(result), [])
+
+    def test_unprotected_aadhaar_and_unerased_store(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            kyc = repo / "services/onboarding/kyc.py"
+            kyc.write_text(kyc.read_text(encoding="utf-8").replace('encrypt_field(payload["aadhaar"])', 'payload["aadhaar"].encode()'), encoding="utf-8")
+            (repo / "services/onboarding/erasure.py").unlink()
+            _edit_manifest(repo, '    Repayment: "Repayment records kept 8 years after loan closure under the PML Rules and tax law"\n', "")
+            _edit_manifest(repo, "erasure:\n  retained:\n", "erasure:\n  retained: {}\n")
+            findings = {(f.rule, tuple(f.fields)): f for f in _check(repo).open_findings()}
+            p007 = findings[("P007", ("Applicant.aadhaar",))]
+            self.assertEqual((p007.severity, p007.refs), ("CRITICAL", ["services/onboarding/models.py:12"]))
+            self.assertIn("binary column", p007.detail)
+            self.assertNotIn(("P007", ("Applicant.pan_number",)), findings)   # still encrypted where it is written
+            d010 = findings[("D010", ("*",))]
+            self.assertIn("No erasure or retention code was found", d010.detail)
+            self.assertEqual(d010.severity, "HIGH")
+
+    def test_erasure_paths_cascades_and_dev_tools(self):
+        from svikruti.pac.datastore import cascades, erasure_coverage, erasure_paths, is_erasure_name
+
+        for name, expected in {
+            "deleteUser": True, "handle_erasure_request": True, "purgeExpiredUsers": True, "process_dsar": True,
+            "AccountDelete": True, "delete_item": False, "deleteFile": False, "get_users_to_remove": False,
+        }.items():
+            self.assertEqual(is_erasure_name(name), expected, name)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "models.py").write_text(
+                "class Customer(models.Model):\n    email = models.EmailField()\n\nclass Address(models.Model):\n    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)\n    pincode = models.CharField()\n\n"
+                "class Invoice(models.Model):\n    customer = models.ForeignKey(\"Customer\", on_delete=models.PROTECT)\n    pan_number = models.CharField()\n\n"
+                "class Subscription(models.Model):\n    user = models.OneToOneField(User, models.CASCADE)\n    invoice_email = models.EmailField()\n",
+                encoding="utf-8",
+            )
+            (root / "gdpr.py").write_text("def delete_customer(customer_id):\n    Customer.objects.filter(id=customer_id).delete()\n\ndef delete_user_stats():\n    Invoice.objects.filter(x=1).count()\n", encoding="utf-8")
+            (root / "views.py").write_text("def close(request):\n    user = request.user\n    user.delete()\n", encoding="utf-8")
+            (root / "cleardb.py").write_text("def handle():\n    Invoice.objects.all().delete()\n", encoding="utf-8")
+            files = ["models.py", "gdpr.py", "views.py", "cleardb.py"]
+            paths = erasure_paths(root, files)
+            self.assertEqual(sorted(path.name for path in paths), ["close", "delete_customer", "delete_user_stats"])
+            stores = {"Customer": ("models.py", 2), "Address": ("models.py", 6), "Invoice": ("models.py", 10), "Subscription": ("models.py", 14)}
+            coverage = erasure_coverage(stores, paths, {}, cascades(root, stores))
+            self.assertTrue(coverage["Customer"].startswith("reached by delete_customer()"))
+            self.assertEqual(coverage["Address"], "cascade from Customer")
+            self.assertEqual(coverage["Invoice"], "")   # PROTECT, a count() is not a delete, and cleardb is a dev tool
+            self.assertTrue(coverage["Subscription"].startswith("cascade from User (close()"))
+
+    def test_persistent_vs_transient_classes(self):
+        from svikruti.pac.datastore import is_persistent_store
+
+        self.assertTrue(is_persistent_store("app/models.py", "class Customer(models.Model):"))
+        self.assertTrue(is_persistent_store("db/schema.sql", "CREATE TABLE users ("))
+        self.assertTrue(is_persistent_store("src/user.entity.ts", "@Entity()"))
+        self.assertFalse(is_persistent_store("hc/api/models.py", "class ZulipConf(BaseModel):"))
+        self.assertFalse(is_persistent_store("saleor/graphql/account/types.py", "class User(ModelObjectType):"))
+        self.assertFalse(is_persistent_store("api/SpringCustomerController.java", "public class CustomerPayload {"))
+
+
+class InlineSuppressionTests(unittest.TestCase):
+    def test_inline_suppression_with_reason(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            drift = DRIFT_FILE.read_text(encoding="utf-8").replace(
+                '  console.log("refund requested for", email, phone_number);',
+                '  // svikruti-ignore[P001]: chargeback evidence, masking ships in Q1\n  console.log("refund requested for", email, phone_number);',
+            )
+            (repo / "services/payments/refund.js").write_text(drift, encoding="utf-8")
+            result = _check(repo)
+            self.assertNotIn("P001", _rules(result))
+            excepted = next(f for f in result.findings if f.rule == "P001")
+            self.assertEqual(excepted.status, "excepted")
+            self.assertIn("inline: chargeback evidence", excepted.exception_reason)
+            self.assertIn("D002", _rules(result))   # the rule list limits the suppression
+
+    def test_suppression_without_reason_is_a_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            drift = DRIFT_FILE.read_text(encoding="utf-8").replace('console.log("refund requested for", email, phone_number);', 'console.log("refund requested for", email, phone_number); // svikruti-ignore')
+            (repo / "services/payments/refund.js").write_text(drift, encoding="utf-8")
+            result = _check(repo)
+            self.assertIn("P001", _rules(result))
+            self.assertTrue(any("without a reason" in warning for warning in result.manifest.warnings))
+
+    def test_scan_suppression_leaves_score_and_marks_sarif(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "a.py").write_text("def f(user):\n    logger.info('x %s', user.email)  # svikruti-ignore: masked by the log formatter\n", encoding="utf-8")
+            (Path(tmp) / "b.py").write_text("def f(user):\n    logger.info('x %s', user.email)\n", encoding="utf-8")
+            scan = run_scan(tmp, None)
+            logged = {item.file: item.metadata.get("suppressed") for item in scan.evidence if "log" in item.kind}
+            self.assertEqual(logged["a.py"], "masked by the log formatter")
+            self.assertIsNone(logged["b.py"])
+            out = Path(tmp) / "r.sarif"
+            write_sarif(scan, str(out))
+            results = json.loads(out.read_text(encoding="utf-8"))["runs"][0]["results"]
+            suppressed = [r for r in results if r.get("suppressions")]
+            self.assertTrue(suppressed and all(r["locations"][0]["physicalLocation"]["artifactLocation"]["uri"] == "a.py" for r in suppressed))
+
+
+class InventoryCliTests(unittest.TestCase):
+    def test_inventory_command(self):
+        import contextlib
+        import io
+
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            self.assertEqual(main(["inventory", "--repo", str(EXAMPLE), "--category", "government_id"]), 0)
+        text = buffer.getvalue()
+        self.assertIn("Applicant.aadhaar", text)
+        self.assertIn("encrypted", text)
+        self.assertNotIn("Applicant.email", text)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "inv.json"
+            self.assertEqual(main(["inventory", "--repo", "examples/realistic", "--stored-only", "--format", "json", "--out", str(out)]), 0)
+            rows = json.loads(out.read_text(encoding="utf-8"))
+            self.assertTrue(rows and all(row["persistent"] for row in rows))
+            self.assertNotIn("CustomerPayload", {row["store"] for row in rows})
 
 
 class SchemaAndToolingTests(unittest.TestCase):

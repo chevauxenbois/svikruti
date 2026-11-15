@@ -40,6 +40,9 @@ review-ready artifacts over generic compliance checklists.
 
 - More framework packs: SOC 2 Privacy criteria, RBI/SEBI sector overlays,
   Singapore PDPA, UK GDPR deltas.
+- Runtime companion: a lightweight log and prompt redaction library whose
+  presence the scanner recognises as protection.
+- IDE extension (VS Code / JetBrains) that runs `svikruti check` on save.
 - Deeper data flow: dependency injection, queues and event buses between the
   caller and the processor (wrapper functions are already followed across
   files).

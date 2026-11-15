@@ -328,6 +328,77 @@
             "medium"
           ],
           "default": "medium"
+        },
+        "ai_allowed_categories": {
+          "type": "array",
+          "description": "Categories that may appear in prompts or payloads sent to AI model providers (rule P006). [] allows none; omit to not enforce.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "require_field_protection_for": {
+          "type": "array",
+          "description": "Categories whose stored fields must be encrypted, tokenised, hashed or masked (rule P007), e.g. government_id for the Aadhaar Data Vault.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "erasure": {
+      "type": "object",
+      "description": "How the code erases personal data, and which stores are kept on purpose.",
+      "properties": {
+        "handlers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Extra function or class names that erase personal data, beyond those named for it (delete_user, handle_erasure_request, ...)."
+        },
+        "retained": {
+          "type": "object",
+          "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rule D010.",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 10
+          }
         }
       },
       "required": [],
@@ -350,11 +421,14 @@
               "D007",
               "D008",
               "D009",
+              "D010",
               "P001",
               "P002",
               "P003",
               "P004",
-              "P005"
+              "P005",
+              "P006",
+              "P007"
             ],
             "description": "Rule this exception suppresses."
           },

@@ -263,6 +263,28 @@ def _pill(value: str, label: str = "") -> str:
     return f'<span class="pill {_e(value)}">{_e(label or value)}</span>'
 
 
+def _protection_cell(row: Dict[str, Any]) -> str:
+    kind = row.get("protection") or "none"
+    if not row.get("persistent"):
+        return '<span class="mute">-</span>'
+    if kind in {"encrypted", "tokenised", "hashed", "masked"}:
+        return _pill("pass", kind) + (f'<div class="mute">{_e(row.get("protection_evidence", ""))}</div>' if row.get("protection_evidence") else "")
+    if kind == "binary":
+        return _pill("MEDIUM", "binary, unverified")
+    return _pill("HIGH", "none") if row.get("high_risk") else '<span class="mute">none</span>'
+
+
+def _erasure_cell(row: Dict[str, Any]) -> str:
+    value = row.get("erasure") or ""
+    if not row.get("persistent"):
+        return '<span class="mute">not stored</span>'
+    if value.startswith("retained"):
+        return _pill("attested", "retained") + f'<div class="mute">{_e(value[len("retained: "):])}</div>'
+    if value:
+        return _pill("pass", "reached") + f'<div class="mute">{_e(value.replace("reached by ", ""))}</div>'
+    return _pill("HIGH", "no erasure path")
+
+
 def render_check_html(result: CheckResult, threshold: str = "high") -> str:
     data = result.to_dict()
     summary = data["summary"]
@@ -318,17 +340,34 @@ def render_check_html(result: CheckResult, threshold: str = "high") -> str:
             f"<td>{_e(', '.join(activity['purposes']))}</td><td>{_e(basis_text)}</td><td>{_e(activity['retention'])}</td>"
             f"<td>{_pill('pass', 'in sync') if activity['in_sync'] else _pill('fail', 'drifted')}</td></tr>"
         )
+    groups: Dict[tuple, List[Dict[str, Any]]] = {}
+    for row in result.inventory:
+        groups.setdefault((row["store"] or "-", row["file"]), []).append(row)
     inventory_rows = []
-    for row in result.inventory[:300]:
-        state = '<span class="mute">-</span>' if row["declared"] is None else (_pill("pass", "declared") if row["declared"] else _pill("fail", "undeclared"))
-        flags = (_pill("fail", "in logs") if row["reaches_logs"] else "") + "".join(f'<span class="chip">{_e(name)}</span>' for name in row["sent_to"])
-        inventory_rows.append(
-            f"<tr><td><b>{_e(row['store'] or '-')}</b></td><td><code>{_e(row['field'])}</code></td>"
-            f"<td>{_e(row['data_category'])}{' ' + _pill('HIGH', 'high risk') if row['high_risk'] else ''}</td>"
-            f"<td><code>{_e(row['file'])}:{_e(row['line'])}</code></td><td>{_e(row['activity'] or '-')}</td><td>{state}</td><td>{flags or '<span class=mute>-</span>'}</td></tr>"
+    for (store, rel), rows in list(groups.items())[:200]:
+        first = rows[0]
+        fields = "".join(
+            f'<span class="chip{" miss" if row["declared"] is False else ""}" title="{_e(row["data_category"])}{" · undeclared" if row["declared"] is False else ""}">'
+            f'<code>{_e(row["field"])}</code> {_e(row["data_category"])}{" · " + _e(row["protection"]) if row.get("protection") not in (None, "none", "") else ""}</span>'
+            for row in rows
         )
-    more_inventory = f'<p class="legend">Showing 300 of {len(result.inventory)} fields. The full list is in data-inventory.csv.</p>' if len(result.inventory) > 300 else ""
-    no_inventory = '<tr><td colspan="7">No model or schema fields with personal data were found.</td></tr>'
+        unprotected = [row for row in rows if row["high_risk"] and row.get("persistent") and row.get("protection") not in {"encrypted", "tokenised", "hashed", "masked"}]
+        flags = ""
+        if any(row["reaches_logs"] for row in rows):
+            flags += _pill("fail", "category in logs") + " "
+        sent = sorted({name for row in rows for name in row["sent_to"]})
+        flags += "".join(f'<span class="chip">{_e(name)}</span>' for name in sent)
+        protection = (
+            _pill("HIGH", f"{len(unprotected)} high-risk unprotected")
+            if unprotected
+            else (_pill("pass", "high-risk protected") if any(row["high_risk"] for row in rows) and first.get("persistent") else '<span class="mute">-</span>')
+        )
+        inventory_rows.append(
+            f"<tr><td><b>{_e(store)}</b><br><code>{_e(rel)}:{_e(first['line'])}</code></td><td>{_e(first['activity'] or '-')}</td>"
+            f"<td>{fields}</td><td>{flags or '<span class=mute>-</span>'}</td><td>{protection}</td><td>{_erasure_cell(first)}</td></tr>"
+        )
+    more_inventory = f'<p class="legend">Showing 200 of {len(groups)} stores. The full field list is in data-inventory.csv.</p>' if len(groups) > 200 else ""
+    no_inventory = '<tr><td colspan="6">No model or schema fields with personal data were found.</td></tr>'
     pack_heads = "".join(f"<th>{_e(pack.short_name)}</th>" for pack in result.packs)
     obligation_rows = []
     for assessment in result.assessments:
@@ -350,8 +389,8 @@ def render_check_html(result: CheckResult, threshold: str = "high") -> str:
 <h2>Processing record, reconciled with code</h2>
 <div class="wrap"><table><thead><tr><th>Activity</th><th>Data categories</th><th>Processors</th><th>Purposes</th><th>Lawful basis</th><th>Retention</th><th>State</th></tr></thead><tbody>{"".join(activity_rows)}</tbody></table></div>
 <p class="legend"><span class="chip">declared and found</span><span class="chip miss">+ in code, not declared</span><span class="chip stale">declared, not in code</span></p>
-<h2>Data inventory ({len(result.inventory)} stored fields)</h2>
-<div class="wrap"><table><thead><tr><th>Table / model</th><th>Field</th><th>Category</th><th>Where</th><th>Activity</th><th>Record</th><th>Category also goes to</th></tr></thead><tbody>{"".join(inventory_rows) or no_inventory}</tbody></table></div>
+<h2>Data inventory ({len(groups)} tables and models, {len(result.inventory)} fields)</h2>
+<div class="wrap"><table><thead><tr><th>Table / model</th><th>Activity</th><th>Personal-data fields</th><th>Category also goes to</th><th>Protection</th><th>Erasure</th></tr></thead><tbody>{"".join(inventory_rows) or no_inventory}</tbody></table></div>
 {more_inventory}
 <h2>Obligation crosswalk</h2>
 <div class="wrap"><table><thead><tr><th>Result</th><th>Obligation</th>{pack_heads}<th>Evidence</th></tr></thead><tbody>{"".join(obligation_rows)}</tbody></table></div>

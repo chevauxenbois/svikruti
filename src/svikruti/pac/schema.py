@@ -89,6 +89,8 @@ def manifest_schema() -> Dict[str, Any]:
             "ignore_paths": {**_STR_LIST, "description": "Globs excluded from reconciliation."},
             "attestation_max_age_days": {"type": "integer", "minimum": 1, "default": 365},
             "min_confidence": {"enum": sorted(m._CONFIDENCE), "default": "medium"},
+            "ai_allowed_categories": _categories("Categories that may appear in prompts or payloads sent to AI model providers (rule P006). [] allows none; omit to not enforce."),
+            "require_field_protection_for": _categories("Categories whose stored fields must be encrypted, tokenised, hashed or masked (rule P007), e.g. government_id for the Aadhaar Data Vault."),
         },
         m._POLICY_KEYS,
         [],
@@ -140,6 +142,19 @@ def manifest_schema() -> Dict[str, Any]:
             "processing_activities": {"type": "array", "items": activity},
             "processors": {"type": "array", "items": processor},
             "policies": policies,
+            "erasure": _object(
+                {
+                    "handlers": {**_STR_LIST, "description": "Extra function or class names that erase personal data, beyond those named for it (delete_user, handle_erasure_request, ...)."},
+                    "retained": {
+                        "type": "object",
+                        "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rule D010.",
+                        "additionalProperties": {"type": "string", "minLength": 10},
+                    },
+                },
+                m._ERASURE_KEYS,
+                [],
+                "How the code erases personal data, and which stores are kept on purpose.",
+            ),
             "exceptions": {"type": "array", "items": exception},
             "attestations": {"type": "array", "items": attestation},
         },
