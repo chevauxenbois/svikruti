@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.9.1
+
+### Fixed
+
+- `svikruti init-github-action` (scan mode) generated a workflow that ran
+  `pip install -e '.[parsers]'`, which only works inside the Svikruti
+  repository itself. Both generated workflows now install `svikruti[parsers]`
+  from PyPI.
+- Erasure-path detection read no files when the repository path went through a
+  symlink (macOS `/var` -> `/private/var`).
+
+### Changed
+
+- README, guide and site install from PyPI.
+
 ## 0.9.0 - Privacy as Code
 
 ### Added

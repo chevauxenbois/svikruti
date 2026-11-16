@@ -475,7 +475,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Svikruti
-        run: python -m pip install -e '.[parsers]'
+        run: python -m pip install "svikruti[parsers]"
 
       - name: Scan repository
         run: |
@@ -562,7 +562,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Svikruti
-        run: python -m pip install "svikruti[parsers] @ git+https://github.com/chevauxenbois/svikruti"
+        run: python -m pip install "svikruti[parsers]"
 
       - name: Baseline from the base branch
         if: github.event_name == 'pull_request'

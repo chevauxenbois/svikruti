@@ -1027,6 +1027,15 @@ class SchemaAndToolingTests(unittest.TestCase):
 
         text = generate_manifest(run_scan(str(EXAMPLE), None))
         self.assertTrue(text.startswith("# yaml-language-server: $schema=https://"))
+        from svikruti.reports.exports import PRIVACY_CHECK_WORKFLOW
+
+        with tempfile.TemporaryDirectory() as tmp:
+            scan_wf = Path(tmp) / "scan.yml"
+            self.assertEqual(main(["init-github-action", "--out", str(scan_wf)]), 0)
+            for workflow in (scan_wf.read_text(encoding="utf-8"), PRIVACY_CHECK_WORKFLOW):
+                self.assertIn('pip install "svikruti[parsers]"', workflow)   # from PyPI, not the user's checkout
+                self.assertNotIn("pip install -e", workflow)
+                yaml.safe_load(workflow)
         hooks = yaml.safe_load(Path(".pre-commit-hooks.yaml").read_text(encoding="utf-8"))
         self.assertEqual([hook["id"] for hook in hooks], ["svikruti-check", "svikruti-sync"])
         with tempfile.TemporaryDirectory() as tmp:

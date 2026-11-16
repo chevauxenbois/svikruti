@@ -21,9 +21,10 @@ audit. It becomes a file that cannot be merged out of date.
 ## Five-minute walkthrough
 
 ```bash
-pip install -e '.[parsers]'
+pip install "svikruti[parsers]"
+git clone https://github.com/chevauxenbois/svikruti.git   # for the worked example
 
-cd examples/privacy-as-code            # a small lending app with a finished manifest
+cd svikruti/examples/privacy-as-code           # a small lending app with a finished manifest
 svikruti check --repo . --privacy-file privacy-notice.md
 # Privacy check: 0 open findings, exit code 0
 

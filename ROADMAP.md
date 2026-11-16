@@ -59,7 +59,7 @@ review-ready artifacts over generic compliance checklists.
   (partially done: imported secret-scanner runs are redacted and imported
   messages truncated before report generation).
 - Improve report screenshots and launch demo artifacts.
-- First PyPI release (the tag-driven workflow with build provenance is in place).
+- Published on PyPI (`pip install svikruti`) with build provenance.
 - Add more realistic examples for fintech, healthcare, ecommerce, SaaS, BFSI,
   and edtech.
 

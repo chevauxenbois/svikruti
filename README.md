@@ -5,6 +5,7 @@ reads what your code does with personal data, reconciles it against a
 reviewed `privacy.yaml`, and fails the pull request when the two drift apart.
 One scan maps to DPDPA, GDPR and ISO/IEC 27701.
 
+[![PyPI](https://img.shields.io/pypi/v/svikruti)](https://pypi.org/project/svikruti/)
 [![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
 [![Frameworks](https://img.shields.io/badge/Frameworks-DPDPA_·_GDPR_·_ISO_27701-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
@@ -117,15 +118,18 @@ visible in engineering systems, not just in policy documents.
 
 ## Try It In 3 Minutes
 
-Use the source install while the project is moving quickly:
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install "svikruti[parsers]"
+```
+
+The examples used below live in the repository, so clone it to follow along:
 
 ```bash
-git clone https://github.com/chevauxenbois/svikruti.git
-cd svikruti
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[parsers]'
+git clone https://github.com/chevauxenbois/svikruti.git && cd svikruti
 ```
+
+Working on Svikruti itself? Install from the clone instead: `pip install -e '.[parsers]'`.
 
 Generate a full evidence pack with one flag:
 
@@ -185,7 +189,7 @@ Ruby, and PHP (the language pack may download grammars on first use, so
 pre-provision the environment for offline or air-gapped CI runs):
 
 ```bash
-python -m pip install -e '.[parsers]'
+pip install "svikruti[parsers]"
 ```
 
 ```bash

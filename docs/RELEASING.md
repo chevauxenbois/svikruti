@@ -25,6 +25,5 @@ The workflow refuses to publish if the tag does not match the package
 version, runs the test suite against the built wheel, attaches build
 provenance, publishes to PyPI and creates the GitHub release.
 
-After the first PyPI release, change the install line in
-`svikruti init-github-action --mode check` (see `PRIVACY_CHECK_WORKFLOW` in
-`src/svikruti/reports/exports.py`) from the Git URL to `svikruti[parsers]`.
+A version number can be published to PyPI only once. If a release fails after
+the upload step, fix forward with the next patch version.
