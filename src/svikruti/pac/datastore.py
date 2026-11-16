@@ -149,7 +149,7 @@ def _kind(text: str) -> str:
 
 class _Repo:
     def __init__(self, root: Optional[Path], files: Iterable[str]):
-        self.root = root
+        self.root = root.resolve() if root else None
         self._lines: Dict[str, Optional[List[str]]] = {}
         self.files = sorted(set(files))
 
