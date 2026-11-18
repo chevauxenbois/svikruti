@@ -1,0 +1,34 @@
+[
+ [
+  "Aadhaar 2345 6789 0124 and order 234567890123",
+  "Aadhaar [AADHAAR] and order 234567890123"
+ ],
+ [
+  "PAN ABCPE1234F, IFSC HDFC0001234, upi ravi.k@okhdfcbank",
+  "PAN [PAN], IFSC [IFSC], upi [UPI]"
+ ],
+ [
+  "mail ravi.kumar@example.co.in phone +91 98765 43210 or 9876543210 or 09876543210",
+  "mail [EMAIL] phone [PHONE] or [PHONE] or [PHONE]"
+ ],
+ [
+  "card 4111 1111 1111 1111 vs 4111 1111 1111 1112",
+  "card [CARD] vs 4111 1111 1111 1112"
+ ],
+ [
+  "iban GB82 WEST 1234 5698 7654 32, ip 203.0.113.9, ssn 123-45-6789",
+  "iban [IBAN], ip [IP], ssn [SSN]"
+ ],
+ [
+  "version 1.2.3.4 build 2024-11-18 id 550e8400 count 1234567890",
+  "version 1.2.3.4 build 2024-11-18 id 550e8400 count 1234567890"
+ ],
+ [
+  "+1 415 555 2671 and +44 20 7946 0958",
+  "[PHONE] and [PHONE]"
+ ],
+ [
+  "loan LN-2024-000123 for Ravi, amount 250000",
+  "loan LN-2024-000123 for Ravi, amount 250000"
+ ]
+]

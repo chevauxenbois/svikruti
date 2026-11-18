@@ -247,9 +247,45 @@ def _drop_record_identifiers(text: str) -> str:
     return _ID_SUFFIX_RE.sub(keep_listed, text)
 
 
+PROTECTING_CALL_NAME_RE = re.compile(
+    r"^(?:redact\w*|mask\w*|\w*_mask(?:ed)?|scrub\w*|anonymi[sz]e\w*|pseudonymi[sz]e\w*|hash\w*|sha\d+\w*|md5|hmac\w*|encrypt\w*|tokeni[sz]e\w*|obfuscate\w*|last_?four|last4|truncate_pii|strip_pii|remove_pii)$",
+    re.IGNORECASE,
+)
+_CALL_START_RE = re.compile(r"([A-Za-z_$][\w$]*)\s*\(")
+
+
+def _drop_protected_calls(text: str) -> str:
+    """Remove calls that protect their argument: redact(user.email), maskPhone(p), sha256(pan).
+
+    What is logged or sent is the protected result, not the personal data
+    passed in, so the argument must not count as a leak.
+    """
+    out, cursor = [], 0
+    for match in _CALL_START_RE.finditer(text):
+        if match.start() < cursor or not PROTECTING_CALL_NAME_RE.match(match.group(1)):
+            continue
+        depth, end = 0, None
+        for position in range(match.end() - 1, len(text)):
+            char = text[position]
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    end = position + 1
+                    break
+        if end is None:
+            continue
+        out.append(text[cursor : match.start()])
+        out.append(" ")
+        cursor = end
+    out.append(text[cursor:])
+    return "".join(out)
+
+
 def _logged_terms(line: str, matched_terms: List[str]) -> List[str]:
-    """Matched personal-data terms that are identifiers on the line, not message prose or record ids."""
-    return _matched_terms(normalize_text(_drop_record_identifiers(_code_outside_strings(line))), matched_terms)
+    """Matched personal-data terms that are identifiers on the line, not message prose, record ids or protected values."""
+    return _matched_terms(normalize_text(_drop_record_identifiers(_code_outside_strings(_drop_protected_calls(line)))), matched_terms)
 
 
 _CODE_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".java", ".kt", ".rb", ".php", ".cs", ".scala", ".swift", ".dart"}

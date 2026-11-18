@@ -1,0 +1,52 @@
+id: sebi_cscrf
+name: "SEBI overlay: Cybersecurity and Cyber Resilience Framework (CSCRF) for SEBI Regulated Entities"
+short_name: SEBI CSCRF
+version: "SEBI/HO/ITD-1/ITD_CSC_EXT/P/CIR/2024/113, 20 Aug 2024, with later clarifications"
+verified: "2026-11-18"
+source: https://www.sebi.gov.in/sebi_data/attachdocs/aug-2024/1724326790365.pdf
+terms: {controller: Regulated Entity, processor: third-party service provider, subject: investor, record: processing record}
+legal_bases: []
+notes: >
+  An overlay for stock brokers, depositories, AMCs, RTAs and other SEBI
+  regulated entities: CSCRF is a cybersecurity framework, so use it with
+  dpdpa, which covers lawful basis, notice, rights and consent (those
+  obligations are not mapped here). Refs are CSCRF function categories
+  (GV, ID, PR, DE, RS, RC); a numbered standard is cited only where its number
+  was confirmed against the circular. Which standards apply depends on the
+  entity's category (MII, Qualified, Mid-size, Small-size, Self-certification).
+  Regulatory Data must stay within India: enforce with
+  policies.allowed_transfer_countries: [IN].
+controls:
+  OBL-04:
+    - {ref: "Part I, Definition 16", title: "Regulatory Data kept accessible, legible and usable for the period laws require"}
+  OBL-06:
+    - {ref: "PR.DS", title: "Data security: protection of data at rest, in transit and in use"}
+  OBL-08:
+    - {ref: "GV.SC", title: "Cybersecurity supply chain risk management"}
+    - {ref: "GV.SC.S4", title: "Review of RE systems managed by third-party service providers"}
+  OBL-09:
+    - {ref: "Part I, Definition 16(e)", title: "Regulatory Data stored within the legal boundaries of India"}
+  OBL-10:
+    - {ref: "ID.RA", title: "Risk assessment, including threat-based risk assessment (ID.RA.S2)"}
+  OBL-12:
+    - {ref: "PR.DS", title: "Data security, including data in transit"}
+  OBL-13:
+    - {ref: "PR.DS", title: "Data security, including data at rest: full-disk encryption layered with file-based encryption"}
+  OBL-14:
+    - {ref: "PR.AA", title: "Identity management, authentication and access control"}
+    - {ref: "PR.AA.S5", title: "Review of user access rights, delegated access and unused tokens"}
+  OBL-15:
+    - {ref: "DE.CM.S5", title: "VAPT scope, periodicity and compliance"}
+  OBL-16:
+    - {ref: "DE.CM", title: "Security continuous monitoring"}
+  OBL-17:
+    - {ref: "RS.MA", title: "Incident management"}
+    - {ref: "RS.AN", title: "Incident analysis"}
+  OBL-18:
+    - {ref: "RC.RP", title: "Incident recovery plan execution"}
+    - {ref: "RC.RP.S3", title: "Scenario-based drills testing the recovery plan"}
+  OBL-19:
+    - {ref: "PR.IP", title: "Information protection processes and procedures"}
+    - {ref: "PR.AA.S11", title: "Review of privileged users' activities"}
+  OBL-24:
+    - {ref: "RS.CO", title: "Incident response reporting and communication; incidents reported through the SEBI incident reporting portal"}

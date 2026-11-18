@@ -56,11 +56,18 @@ Privacy gate failed: 3 finding(s) at HIGH or above
   reaches that code.
 - **Consent checked in code.** For processing that relies on consent, every
   hand-off to a processor must sit behind a consent check.
+- **Runtime redaction.** `svikruti.redact` (Python) and `svikruti-redact`
+  (Node) strip emails, phones, Aadhaar, PAN, cards, IFSC, UPI IDs and more
+  from logs and AI prompts, with validated detectors; the check recognises
+  them as protection.
+- **In the editor.** A VS Code extension runs the check on save and puts
+  findings on the line that causes them.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations
   mapped to DPDPA (Act and Rules 2025), GDPR, ISO/IEC 27701:2025 (controller
-  and processor), LGPD and CCPA/CPRA. A new framework is one YAML file.
+  and processor), LGPD, CCPA/CPRA and SOC 2, with RBI and SEBI CSCRF
+  overlays for Indian financial services. A new framework is one YAML file.
 - **Honest states.** Verified, failing, attested, not verified, not
   applicable. An attestation expires, and never overrides failing code.
 - **Self-maintaining.** `svikruti sync` turns drift into a reviewable patch

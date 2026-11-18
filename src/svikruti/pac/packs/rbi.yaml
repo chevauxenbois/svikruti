@@ -1,0 +1,72 @@
+id: rbi
+name: "RBI overlay: Digital Lending Directions 2025, IT Governance Directions 2023, Storage of Payment System Data 2018"
+short_name: RBI
+version: "DL: RBI/2025-26/36 (8 May 2025); ITG: RBI/2023-24/107 (7 Nov 2023, effective 1 Apr 2024); PSD: RBI/2017-18/153 (6 Apr 2018)"
+verified: "2026-11-18"
+source: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848
+terms: {controller: Regulated Entity, processor: Lending Service Provider or service provider, subject: borrower, record: processing record}
+legal_bases: []
+notes: >
+  An overlay for banks, NBFCs and payment system operators: use it together
+  with dpdpa, which supplies lawful bases and data principal rights. Refs are
+  prefixed DL (Digital Lending Directions 2025), ITG (Master Direction on IT
+  Governance, Risk, Controls and Assurance Practices 2023) and PSD (Storage of
+  Payment System Data, 2018). Enforce the overlay in privacy.yaml with
+  policies.allowed_transfer_countries: [IN] (DL 13(iv), PSD 2(i)) and
+  policies.forbidden_categories: [biometric] for digital lending apps
+  (DL 13(iii), unless statute permits). ITG does not set log retention
+  periods or incident reporting timelines; those come from CERT-In directions.
+controls:
+  OBL-01:
+    - {ref: "DL 12(i)", title: "Data collection need-based, with prior and explicit consent and an audit trail"}
+  OBL-02:
+    - {ref: "DL 12(i)", title: "Need-based collection for a disclosed purpose"}
+  OBL-03:
+    - {ref: "DL 12(i)", title: "Prior and explicit consent of the borrower"}
+  OBL-04:
+    - {ref: "DL 13(ii)", title: "Policy on storage period, destruction protocol and breach handling"}
+    - {ref: "DL 13(i)", title: "LSPs keep no borrower personal data beyond basic minimal details"}
+  OBL-05:
+    - {ref: "DL 12(i)", title: "No access to files, media, contacts, call logs or telephony; one-time camera, microphone, location for onboarding/KYC"}
+    - {ref: "DL 13(iii)", title: "No collection or storage of biometric data unless statute permits"}
+  OBL-07:
+    - {ref: "DL 14(i)-(ii)", title: "Comprehensive privacy policy published on the RE and LSP websites, naming third parties allowed to collect data"}
+  OBL-08:
+    - {ref: "DL 13(i)", title: "RE responsible for data held by LSPs; LSP storage limited"}
+    - {ref: "ITG 10", title: "Vendor and third-party IT risk assessed, including supply chain risk"}
+  OBL-09:
+    - {ref: "DL 13(iv)", title: "All data stored only in servers in India; data processed abroad deleted there and brought back within 24 hours"}
+    - {ref: "PSD 2(i)", title: "Entire payment system data stored in a system only in India"}
+  OBL-10:
+    - {ref: "ITG 9(c)", title: "Information assets classified by criticality before controls are set"}
+  OBL-12:
+    - {ref: "ITG 16", title: "Cryptographic controls: strong, non-deprecated algorithms and key lengths for transmission"}
+    - {ref: "ITG 23(d)", title: "Secure storage, transmission and processing of data"}
+  OBL-13:
+    - {ref: "ITG 16", title: "Cryptographic controls with internationally accepted standards"}
+    - {ref: "DL 15(i)", title: "REs and LSPs follow RBI and other agencies' technology and cybersecurity standards"}
+  OBL-14:
+    - {ref: "ITG 16", title: "Cryptographic key management"}
+    - {ref: "ITG 19(a)-(c)", title: "Need-based access; privileged users supervised and logged; MFA for privileged users"}
+  OBL-15:
+    - {ref: "ITG 26(a)-(f)", title: "VA every six months and PT every 12 months for critical and internet-facing systems; time-bound fixes"}
+  OBL-16:
+    - {ref: "ITG 15(a)-(c)", title: "Audit and logging for applications handling sensitive data; logs monitored"}
+  OBL-17:
+    - {ref: "ITG 27(a)-(e)", title: "Incident classification, response procedures and communication"}
+  OBL-18:
+    - {ref: "ITG 28", title: "DR drills for critical systems at least half-yearly"}
+    - {ref: "ITG 29(a)-(j)", title: "Backup and restore testing, RTO and RPO"}
+  OBL-19:
+    - {ref: "ITG 13(a)-(d)", title: "Patch and change management with impact assessment and rollback"}
+    - {ref: "ITG 19(a)-(c)", title: "Access control and privileged access management"}
+  OBL-21:
+    - {ref: "DL 12(ii)", title: "Borrower can deny or revoke consent and have data deleted"}
+  OBL-22:
+    - {ref: "DL 12(i)", title: "Explicit consent with an audit trail"}
+    - {ref: "DL 12(ii)", title: "Consent can be revoked"}
+  OBL-23:
+    - {ref: "DL 11(i)-(ii)", title: "Nodal grievance redressal officers; contact details on website, app and KFS"}
+  OBL-24:
+    - {ref: "ITG 27", title: "Incidents notified to CERT-In and RBI as required"}
+    - {ref: "DL 13(ii)", title: "Breach-handling standards in the privacy policy"}

@@ -42,6 +42,7 @@ class CheckResult:
     activities_view: List[Dict[str, Any]] = field(default_factory=list)
     inventory: List[Dict[str, Any]] = field(default_factory=list)
     consent: Dict[str, Any] = field(default_factory=dict)
+    runtime_redaction: Dict[str, str] = field(default_factory=dict)
 
     # -- findings ---------------------------------------------------------
     def open_findings(self) -> List[Finding]:
@@ -134,6 +135,7 @@ class CheckResult:
             "inventory": [{key: value for key, value in row.items() if not key.startswith("_")} for row in self.inventory],
             "rights_request_entrypoints": (self.inventory[0].get("_rights_entries") if self.inventory else None) or [],
             "consent_check": self.consent,
+            "runtime_redaction": self.runtime_redaction,
             "manifest_warnings": self.manifest.warnings,
             "scan_summary": self.scan.summary.to_dict(),
             "disclaimers": [
@@ -176,8 +178,12 @@ def run_check(
     from svikruti.pac.consent import consent_findings
     from svikruti.pac.inventory import production_files
 
-    consent = consent_findings(scan, model, manifest, root, production_files(Path(root)) if root else [])
+    source_files = production_files(Path(root)) if root else []
+    consent = consent_findings(scan, model, manifest, root, source_files)
     findings.extend(consent.findings)
+    from svikruti.pac.runtime import apply_runtime_redaction
+
+    result.runtime_redaction = apply_runtime_redaction(findings, root, source_files)
     result.consent = {"activities": consent.activities, "flows_checked": consent.checked_flows, "flows_guarded": consent.guarded_flows}
     result.findings = finalize_findings(findings, manifest, today, root)
     result.activities_view = _activities_view(manifest, model, result.findings)

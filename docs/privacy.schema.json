@@ -36,7 +36,10 @@
               "gdpr",
               "iso27701",
               "iso27701_processor",
-              "lgpd"
+              "lgpd",
+              "rbi",
+              "sebi_cscrf",
+              "soc2"
             ]
           },
           {

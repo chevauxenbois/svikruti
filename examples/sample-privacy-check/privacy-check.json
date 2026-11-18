@@ -1,6 +1,6 @@
 {
   "schema_version": "svikruti-privacy-check-v1",
-  "generated_at": "2026-11-16T16:14:05.037796+00:00",
+  "generated_at": "2026-11-18T13:05:44.458490+00:00",
   "manifest": "privacy.yaml",
   "repo": ".",
   "organization": {
@@ -2460,6 +2460,7 @@
     "flows_checked": 2,
     "flows_guarded": 2
   },
+  "runtime_redaction": {},
   "manifest_warnings": [],
   "scan_summary": {
     "files_scanned": 13,

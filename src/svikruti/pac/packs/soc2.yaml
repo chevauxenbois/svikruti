@@ -1,0 +1,82 @@
+id: soc2
+name: SOC 2 Trust Services Criteria (Security, Availability, Confidentiality, Privacy)
+short_name: SOC 2
+version: "AICPA TSP section 100, 2017 Trust Services Criteria (revised points of focus, 2022)"
+verified: "2026-11-18"
+source: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022
+terms: {controller: entity, processor: vendor or business partner, subject: data subject, record: personal information inventory}
+legal_bases: []
+notes: >
+  SOC 2 is an attestation framework, not a law: the criteria describe what an
+  entity's controls must achieve, and a service auditor tests them. Privacy
+  criteria (P1-P8) apply only when Privacy is in scope of the report; the
+  Security common criteria (CC) always apply. There is no lawful-basis list,
+  so OBL-03 maps to choice and consent. Children's data (OBL-11) has no
+  specific criterion. Criterion titles here are short descriptions; read the
+  AICPA text and its points of focus for the full statement.
+controls:
+  OBL-01:
+    - {ref: "P3.1", title: "Personal information is collected consistent with the entity's objectives related to privacy"}
+    - {ref: "P4.1", title: "Personal information is used only for the purposes identified in the notice"}
+  OBL-02:
+    - {ref: "P1.1", title: "Notice to data subjects about privacy practices, including purposes"}
+    - {ref: "P4.1", title: "Use limited to the purposes identified in the notice"}
+  OBL-03:
+    - {ref: "P2.1", title: "Choices about collection, use, retention, disclosure and disposal are communicated; consent obtained where required"}
+    - {ref: "P3.2", title: "Explicit consent obtained for sensitive personal information"}
+  OBL-04:
+    - {ref: "P4.2", title: "Personal information is retained consistent with the entity's objectives"}
+    - {ref: "P4.3", title: "Personal information is securely disposed of"}
+    - {ref: "C1.2", title: "Confidential information is disposed of to meet confidentiality objectives"}
+  OBL-05:
+    - {ref: "P3.1", title: "Collection limited to what is consistent with privacy objectives"}
+    - {ref: "P4.1", title: "Use limited to identified purposes"}
+  OBL-06:
+    - {ref: "P4.1", title: "Use limited to identified purposes"}
+    - {ref: "CC6.1", title: "Logical access security over protected information assets"}
+  OBL-07:
+    - {ref: "P1.1", title: "Notice to data subjects about privacy practices"}
+  OBL-08:
+    - {ref: "P6.1", title: "Disclosure to third parties only for identified purposes, with consent where required"}
+    - {ref: "P6.4", title: "Privacy commitments obtained from vendors and other third parties"}
+    - {ref: "CC9.2", title: "Risks from vendors and business partners are assessed and managed"}
+  OBL-09:
+    - {ref: "P6.1", title: "Disclosure to third parties only for identified purposes"}
+    - {ref: "P6.2", title: "Records of authorized disclosures are created and retained"}
+  OBL-10:
+    - {ref: "CC3.2", title: "Risks to the achievement of objectives are identified and analysed"}
+  OBL-12:
+    - {ref: "CC6.7", title: "Transmission and movement of information is restricted and protected"}
+  OBL-13:
+    - {ref: "CC6.1", title: "Logical access security, including protection of data at rest"}
+  OBL-14:
+    - {ref: "CC6.1", title: "Logical access security, including credential and key management"}
+  OBL-15:
+    - {ref: "CC7.1", title: "Detection and monitoring of vulnerabilities and configuration changes"}
+  OBL-16:
+    - {ref: "CC7.2", title: "Monitoring of system components for anomalies indicating malicious acts or errors"}
+  OBL-17:
+    - {ref: "CC7.3", title: "Security events are evaluated to determine whether they are incidents"}
+    - {ref: "CC7.4", title: "Security incidents are responded to with a defined incident response program"}
+    - {ref: "CC7.5", title: "Recovery from identified security incidents"}
+  OBL-18:
+    - {ref: "A1.2", title: "Environmental protections, software, data backup and recovery infrastructure"}
+    - {ref: "A1.3", title: "Recovery plan procedures are tested"}
+  OBL-19:
+    - {ref: "CC6.6", title: "Logical access security measures against threats from outside system boundaries"}
+    - {ref: "CC8.1", title: "Changes to infrastructure, data, software and procedures are authorised and controlled"}
+  OBL-20:
+    - {ref: "P2.1", title: "Choice and consent before collection where required"}
+  OBL-21:
+    - {ref: "P5.1", title: "Data subjects can access their personal information"}
+    - {ref: "P5.2", title: "Data subjects can correct their personal information"}
+    - {ref: "P4.3", title: "Personal information is securely disposed of"}
+  OBL-22:
+    - {ref: "P2.1", title: "Consent obtained and its consequences communicated"}
+    - {ref: "P3.2", title: "Explicit consent for sensitive personal information, documented"}
+  OBL-23:
+    - {ref: "P8.1", title: "Inquiries, complaints and disputes are received, addressed and monitored"}
+  OBL-24:
+    - {ref: "P6.3", title: "Records of unauthorized disclosures (including breaches) are created and retained"}
+    - {ref: "P6.5", title: "Vendors notify the entity of unauthorized disclosures"}
+    - {ref: "P6.6", title: "Affected data subjects are notified of breaches and incidents"}

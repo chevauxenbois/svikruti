@@ -1,0 +1,568 @@
+{
+  "type": "object",
+  "description": "Svikruti privacy-as-code manifest.",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "organization": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "controller",
+            "processor",
+            "both"
+          ]
+        },
+        "privacy_contact": {
+          "type": "string",
+          "description": "Published DPO / grievance contact (obligation OBL-23)."
+        }
+      }
+    },
+    "frameworks": {
+      "type": "array",
+      "description": "Built-in pack ids or paths to custom pack files.",
+      "items": {
+        "anyOf": [
+          {
+            "enum": [
+              "ccpa",
+              "dpdpa",
+              "gdpr",
+              "iso27701",
+              "iso27701_processor",
+              "lgpd",
+              "rbi",
+              "sebi_cscrf",
+              "soc2"
+            ]
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "processing_activities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "One processing activity: a record of processing bound to code paths.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier, used by exceptions and reports."
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Team accountable for this processing."
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Globs binding this record to the code that implements it (* within a segment, ** across segments)."
+          },
+          "data_categories": {
+            "type": "array",
+            "description": "Personal data categories this activity is declared to process.",
+            "items": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "biometric",
+                    "children",
+                    "contact",
+                    "device",
+                    "financial",
+                    "free_text",
+                    "government_id",
+                    "health",
+                    "identity",
+                    "location"
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "data_subjects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "legal_basis": {
+            "description": "One lawful basis, or one per framework: {gdpr: contract, dpdpa: legitimate_use}.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "retention": {
+            "type": "string",
+            "description": "How long data is kept, or what triggers erasure."
+          },
+          "processors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ids of processors (declared under top-level `processors`) this activity sends data to."
+          },
+          "dpia": {
+            "type": "string",
+            "description": "Reference to the impact assessment. Required when high-risk categories are involved."
+          },
+          "logging": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "description": "Categories allowed to appear in logs for this activity.",
+                "items": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "biometric",
+                        "children",
+                        "contact",
+                        "device",
+                        "financial",
+                        "free_text",
+                        "government_id",
+                        "health",
+                        "identity",
+                        "location"
+                      ]
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "paths"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "processors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "A third party that receives personal data.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Vendor name as the scanner reports it (for example Razorpay, Mixpanel)."
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO country code where the processor handles the data."
+          },
+          "contract": {
+            "type": "string",
+            "description": "Contract / DPA reference."
+          },
+          "transfer_mechanism": {
+            "type": "string",
+            "description": "For example Standard Contractual Clauses. Needed outside allowed_transfer_countries."
+          },
+          "data_categories": {
+            "type": "array",
+            "description": "What the code is allowed to pass to this processor (rule D009).",
+            "items": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "biometric",
+                    "children",
+                    "contact",
+                    "device",
+                    "financial",
+                    "free_text",
+                    "government_id",
+                    "health",
+                    "identity",
+                    "location"
+                  ]
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    "policies": {
+      "type": "object",
+      "description": "Organisation-wide rules enforced on every check.",
+      "properties": {
+        "personal_data_in_logs": {
+          "enum": [
+            "allow",
+            "deny",
+            "warn"
+          ],
+          "default": "deny"
+        },
+        "forbidden_categories": {
+          "type": "array",
+          "description": "Categories this codebase must never process (rule P002).",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "free_text",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "allowed_transfer_countries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Processors elsewhere need a transfer_mechanism (rule P004)."
+        },
+        "require_dpia_for": {
+          "type": "array",
+          "description": "Categories that require a `dpia` reference (rule P003). Defaults to the high-risk set.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "free_text",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "ignore_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Globs excluded from reconciliation."
+        },
+        "attestation_max_age_days": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 365
+        },
+        "min_confidence": {
+          "enum": [
+            "high",
+            "low",
+            "medium"
+          ],
+          "default": "medium"
+        },
+        "ai_allowed_categories": {
+          "type": "array",
+          "description": "Categories that may appear in prompts or payloads sent to AI model providers (rule P006). [] allows none; omit to not enforce.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "free_text",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "require_field_protection_for": {
+          "type": "array",
+          "description": "Categories whose stored fields must be encrypted, tokenised, hashed or masked (rule P007), e.g. government_id for the Aadhaar Data Vault.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "biometric",
+                  "children",
+                  "contact",
+                  "device",
+                  "financial",
+                  "free_text",
+                  "government_id",
+                  "health",
+                  "identity",
+                  "location"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "erasure": {
+      "type": "object",
+      "description": "How the code erases personal data, and which stores are kept on purpose.",
+      "properties": {
+        "handlers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Extra function or class names that erase personal data, beyond those named for it (delete_user, handle_erasure_request, ...)."
+        },
+        "retained": {
+          "type": "object",
+          "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rules D010 and D011.",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 10
+          }
+        },
+        "entrypoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Functions or classes a data subject's erasure request enters through (route handlers, mutations, the job your privacy team runs), beyond those found automatically. Rule D011 checks they reach every store."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "consent": {
+      "type": "object",
+      "description": "How the code checks consent before consent-based processing.",
+      "properties": {
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of your own consent guards (has_marketing_consent, ConsentService.isGranted). A call to one before a processor flow counts as a consent check for rule P008."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "A time-boxed, reasoned exception.",
+        "properties": {
+          "rule": {
+            "enum": [
+              "D001",
+              "D002",
+              "D003",
+              "D004",
+              "D005",
+              "D006",
+              "D007",
+              "D008",
+              "D009",
+              "D010",
+              "D011",
+              "P001",
+              "P002",
+              "P003",
+              "P004",
+              "P005",
+              "P006",
+              "P007",
+              "P008"
+            ],
+            "description": "Rule this exception suppresses."
+          },
+          "activity": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "processor": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "description": "Glob; the exception applies to findings with evidence under it."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date",
+            "description": "After this date the finding is enforced again."
+          }
+        },
+        "required": [
+          "rule",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "attestations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "What a repository cannot prove, attested by an owner on a date.",
+        "properties": {
+          "obligation": {
+            "enum": [
+              "OBL-01",
+              "OBL-02",
+              "OBL-03",
+              "OBL-04",
+              "OBL-05",
+              "OBL-06",
+              "OBL-07",
+              "OBL-08",
+              "OBL-09",
+              "OBL-10",
+              "OBL-11",
+              "OBL-12",
+              "OBL-13",
+              "OBL-14",
+              "OBL-15",
+              "OBL-16",
+              "OBL-17",
+              "OBL-18",
+              "OBL-19",
+              "OBL-20",
+              "OBL-21",
+              "OBL-22",
+              "OBL-23",
+              "OBL-24"
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "description": "What is in place."
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Link or path to the proof."
+          },
+          "owner": {
+            "type": "string"
+          },
+          "reviewed": {
+            "type": "string",
+            "format": "date",
+            "description": "Stops counting after policies.attestation_max_age_days."
+          }
+        },
+        "required": [
+          "obligation",
+          "statement"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/chevauxenbois/svikruti/main/docs/privacy.schema.json",
+  "title": "Svikruti privacy.yaml"
+}

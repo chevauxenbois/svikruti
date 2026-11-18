@@ -453,6 +453,28 @@ each obligation supports:
 | `iso27701_processor` | ISO/IEC 27701:2025, PII processors (Tables A.2 and A.3) |
 | `lgpd` | Brazil LGPD |
 | `ccpa` | California CCPA as amended by the CPRA |
+| `soc2` | SOC 2 Trust Services Criteria (2017, revised points of focus 2022): Privacy P1-P8 plus the Security, Availability and Confidentiality criteria the obligations touch |
+| `rbi` | RBI overlay: Digital Lending Directions 2025, IT Governance Master Direction 2023, Storage of Payment System Data 2018 |
+| `sebi_cscrf` | SEBI overlay: Cybersecurity and Cyber Resilience Framework for regulated entities (2024) |
+
+The RBI and SEBI packs are overlays: they add sector clauses to the same
+evidence and are meant to run next to `dpdpa`, which supplies lawful bases,
+notice and rights. Pair them with the policies they imply:
+
+```yaml
+frameworks: [dpdpa, rbi]                 # or [dpdpa, sebi_cscrf], [gdpr, soc2]
+policies:
+  allowed_transfer_countries: [IN]       # RBI DL 13(iv), payment data, SEBI Regulatory Data
+  forbidden_categories: [biometric]      # digital lending apps: RBI DL 13(iii)
+  require_field_protection_for: [government_id, financial]
+```
+
+SOC 2 refs are criterion ids (`P4.3`, `CC6.7`); a service auditor tests the
+controls behind them. RBI refs carry the instrument (`DL 13(iv)`,
+`ITG 26(a)-(f)`, `PSD 2(i)`). SEBI refs are CSCRF function categories
+(`PR.DS`, `DE.CM`, `GV.SC`), with a numbered standard only where the number
+was confirmed against the circular (`DE.CM.S5` for VAPT, `GV.SC.S4` for
+third-party systems).
 
 A pack only maps obligations its framework actually has. The CCPA has no
 lawful-basis requirement, so `OBL-03` carries no CCPA clause instead of a
@@ -494,7 +516,53 @@ svikruti check --framework gdpr --framework packs/acme-privacy-standard.yaml
 
 A new law or an internal standard is a data file. No scanner change is needed.
 
+## Runtime redaction
+
+Static analysis finds where personal data can leak; `svikruti.redact` (Python,
+in the same package) and `svikruti-redact` (Node, zero dependencies) remove it
+at runtime, and the check recognises both:
+
+```python
+from svikruti.redact import install_logging_redaction, redact, redact_messages
+
+install_logging_redaction()                          # every stdlib logging record in the process
+logger.info("refund for %s", customer.email)        # -> refund for [EMAIL]
+client.chat.completions.create(model="gpt-4o", messages=redact_messages(messages))
+```
+
+```js
+const { installConsoleRedaction, redactMessages, pinoLogMethod } = require("svikruti-redact");
+installConsoleRedaction();
+```
+
+Detectors are validated: Aadhaar numbers must pass the Verhoeff checksum, card
+numbers Luhn, IBANs mod 97, PANs the holder-type letter, so order ids and
+amounts survive. Also email, Indian and international phone numbers, IFSC,
+UPI IDs, US SSNs and IPv4. Styles: `label` (`[EMAIL]`), `partial`
+(`[PHONE ...3210]`) and `hash` (keyed SHA-256 prefix via
+`SVIKRUTI_REDACT_KEY`, so the same value still correlates). The Python and
+JavaScript versions share a test file and produce identical output.
+
+What the check does with it:
+
+- A value passed through a protecting call is not a leak:
+  `logger.info("%s", redact(user.email))`, `mask_phone(p)`, `sha256(pan)`.
+- `redact_messages()` / `redactMessages()` before an AI call clears the
+  free-text finding.
+- `install_logging_redaction()` (or a `RedactingFilter` on a handler) marks
+  Python stdlib logging findings as redacted at runtime;
+  `installConsoleRedaction()` does the same for `console.*` and
+  `pinoLogMethod()` for pino. The P001 finding stays in the report under
+  exception, naming the line that installs it. Loggers it does not cover
+  (loguru, structlog, winston) stay open.
+
 ## Editor and local tooling
+
+The VS Code extension (`editors/vscode`) runs `svikruti check` on save and
+puts each finding on the line that causes it, record-level findings on the
+matching `privacy.yaml` entry, with a quick fix that inserts an inline
+`svikruti-ignore` comment and a status bar count that opens the report. It
+bundles the manifest schema for completion and validation.
 
 `svikruti init` starts the manifest with a `yaml-language-server` schema
 comment, so editors with YAML support complete keys, category names, rule ids
@@ -507,7 +575,7 @@ Pre-commit users can run the gate before a push:
 ```yaml
 repos:
   - repo: https://github.com/chevauxenbois/svikruti
-    rev: v0.9.0
+    rev: v0.12.0
     hooks:
       - id: svikruti-check
 ```

@@ -1,0 +1,43 @@
+{
+  "name": "svikruti",
+  "displayName": "Svikruti: Privacy as Code",
+  "description": "Privacy drift in the editor: personal data in logs, undeclared processors, data sent to AI, unprotected Aadhaar fields, erasure and consent gaps, checked against privacy.yaml on save.",
+  "version": "0.12.0",
+  "publisher": "chevauxenbois",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Linters", "Other"],
+  "keywords": ["privacy", "dpdpa", "gdpr", "iso 27701", "pii", "compliance", "privacy as code"],
+  "repository": { "type": "git", "url": "https://github.com/chevauxenbois/svikruti.git", "directory": "editors/vscode" },
+  "main": "./extension.js",
+  "activationEvents": ["workspaceContains:**/privacy.yaml", "workspaceContains:**/privacy.yml", "workspaceContains:**/privacy.json"],
+  "contributes": {
+    "commands": [
+      { "command": "svikruti.check", "title": "Svikruti: Run privacy check" },
+      { "command": "svikruti.openReport", "title": "Svikruti: Open privacy check report" },
+      { "command": "svikruti.init", "title": "Svikruti: Generate privacy.yaml from code" },
+      { "command": "svikruti.clear", "title": "Svikruti: Clear findings" }
+    ],
+    "configuration": {
+      "title": "Svikruti",
+      "properties": {
+        "svikruti.command": { "type": "string", "default": "svikruti", "description": "Path to the svikruti CLI (pip install svikruti). Use a virtualenv path if it is not on PATH." },
+        "svikruti.runOnSave": { "type": "boolean", "default": true, "description": "Run the privacy check when a file is saved." },
+        "svikruti.frameworks": { "type": "array", "items": { "type": "string" }, "default": [], "description": "Framework packs to report (dpdpa, gdpr, iso27701, soc2, rbi, sebi_cscrf, ...). Empty uses privacy.yaml's list." },
+        "svikruti.minimumSeverity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"], "default": "LOW", "description": "Hide findings below this severity." },
+        "svikruti.showExcepted": { "type": "boolean", "default": false, "description": "Show findings under an exception or suppression as hints." }
+      }
+    },
+    "yamlValidation": [
+      { "fileMatch": ["privacy.yaml", "privacy.yml"], "url": "./privacy.schema.json" }
+    ],
+    "jsonValidation": [
+      { "fileMatch": "privacy.json", "url": "./privacy.schema.json" }
+    ]
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepackage": "node -e \"require('fs').copyFileSync('../../docs/privacy.schema.json','privacy.schema.json')\"",
+    "package": "npx @vscode/vsce package --no-dependencies"
+  }
+}
