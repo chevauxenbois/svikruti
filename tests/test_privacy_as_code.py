@@ -851,7 +851,8 @@ class AiProviderTests(unittest.TestCase):
             _edit_manifest(repo, "  ai_allowed_categories: []", "  ai_allowed_categories: [identity]")
             self.assertEqual([f.category for f in _check(repo).open_findings() if f.rule == "P006"], ["contact"])
             _edit_manifest(repo, "  ai_allowed_categories: [identity]", "  ai_allowed_categories: [identity, contact]")
-            self.assertEqual(_rules(_check(repo)), [])
+            # Allowed for AI, but reminders rely on consent and this call never checks it.
+            self.assertEqual(_rules(_check(repo)), ["P008"])
 
 
     def test_vendor_names_in_prose_are_not_integrations(self):
@@ -1018,6 +1019,10 @@ class RecallBenchmarkTests(unittest.TestCase):
 
     def test_tuning_set(self):
         results = self._run("benchmarks/recall/cases.yaml")
+        self.assertEqual([r["case"] + ":" + r["type"] for r in results if not r["passed"]], [])
+
+    def test_channels_set(self):
+        results = self._run("benchmarks/recall/channels.yaml")
         self.assertEqual([r["case"] + ":" + r["type"] for r in results if not r["passed"]], [])
 
     def test_held_out_set(self):
@@ -1332,6 +1337,143 @@ class OrgAggregationTests(unittest.TestCase):
             empty = Path(tmp) / "empty"
             empty.mkdir()
             self.assertEqual(main(["org", str(empty)]), 2)
+
+
+def _write(root: Path, files: dict) -> None:
+    for rel, text in files.items():
+        path = root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+
+def _flows(root: Path):
+    return {(e.file, e.metadata["third_party"], e.metadata["data_category"], e.metadata["flow"]) for e in scan_processor_flows(str(root))}
+
+
+class QueueAndInjectionFlowTests(unittest.TestCase):
+    def test_celery_task_and_bull_queue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "tasks.py": "import mailchimp_marketing as MailchimpMarketing\nfrom celery import shared_task\nclient = MailchimpMarketing.Client()\n\n@shared_task\ndef subscribe(address):\n    client.lists.add_list_member('l', {'email_address': address})\n",
+                "views.py": "from .tasks import subscribe\n\ndef signup(user):\n    subscribe.delay(user.email)\n",
+                "worker.js": "const twilio = require('twilio')(a, b);\nnew Worker('sms', async (job) => {\n  await twilio.messages.create({ to: job.data.to });\n});\n",
+                "enqueue.js": "const sms = new Queue('sms');\nasync function remind(c) {\n  await sms.add('due', { to: c.phone });\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("views.py", "Mailchimp", "Contact", "queue"), flows)
+            self.assertIn(("enqueue.js", "Twilio", "Contact", "queue"), flows)
+            detail = next(e.detail for e in scan_processor_flows(str(root)) if e.file == "views.py")
+            self.assertIn("task `subscribe`", detail)
+
+    def test_spring_event_with_constant_topic_and_unrelated_event_stays_quiet(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "Topics.java": "package a;\npublic final class Topics {\n    public static final String KYC = \"kyc-events\";\n}\n",
+                "Listener.java": "package a;\nimport com.sendgrid.SendGrid;\npublic class Listener {\n    private final SendGrid sendgrid = new SendGrid(\"k\");\n    @KafkaListener(topics = \"kyc-events\")\n    public void onKyc(String payload) {\n        sendgrid.api(payload);\n    }\n}\n",
+                "Signup.java": "package a;\npublic class Signup {\n    void register(User user) {\n        kafkaTemplate.send(Topics.KYC, user.getPanNumber());\n        kafkaTemplate.send(\"audit\", user.getEmail());\n    }\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("Signup.java", "SendGrid", "Government ID", "queue"), flows)
+            self.assertNotIn(("Signup.java", "SendGrid", "Contact", "queue"), flows)
+
+    def test_interface_injection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "di/Notifier.java": "package di;\npublic interface Notifier {\n    void notifyUser(String phone, String text);\n}\n",
+                "di/impl/SmsNotifier.java": "package di.impl;\nimport com.twilio.Twilio;\npublic class SmsNotifier implements Notifier {\n    public void notifyUser(String phone, String text) {\n        Twilio.messages.create(phone, text);\n    }\n}\n",
+                "app/LoanService.java": "package app;\nimport di.Notifier;\npublic class LoanService {\n    private Notifier notifier;\n    void approve(Applicant a) {\n        notifier.notifyUser(a.getMobileNumber(), \"ok\");\n    }\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("app/LoanService.java", "Twilio", "Contact", "wrapper"), flows)
+            self.assertFalse(any(f[0] == "di/Notifier.java" for f in flows))
+
+
+class FreeTextToAiTests(unittest.TestCase):
+    APP = (
+        "from flask import request\nfrom openai import OpenAI\nclient = OpenAI()\n\n"
+        "@app.post('/ask')\ndef ask():\n    q = request.json['question']\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': q}])\n\n"
+        "@app.post('/safe')\ndef safe():\n    q = redact(request.json['question'])\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': q}])\n\n"
+        "def digest(stats):\n    text = f'approved {stats.approved}'\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': text}])\n"
+    )
+
+    def test_request_text_flagged_redacted_and_server_text_not(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {"app.py": self.APP})
+            hits = [e for e in scan_processor_flows(str(root)) if e.metadata["data_category"] == "Free text"]
+            self.assertEqual([e.line for e in hits], [8])
+            self.assertEqual(hits[0].severity, "HIGH")
+            self.assertIn("request.json", hits[0].metadata["free_text_source"])
+
+    def test_free_text_is_held_to_the_ai_allowlist(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            _write(repo, {"services/payments/assist.py": self.APP})
+            _edit_manifest(repo, "processors:\n  - id: razorpay", "processors:\n  - id: openai\n    name: OpenAI\n    purpose: Support answers\n    country: US\n    contract: DPA-9\n    transfer_mechanism: SCC\n    data_categories: [free_text]\n  - id: razorpay")
+            _edit_manifest(repo, "    processors: [razorpay]", "    processors: [razorpay, openai]")
+            _edit_manifest(repo, "data_categories: [contact, financial]", "data_categories: [contact, financial, free_text]")
+            p006 = [f for f in _check(repo).open_findings() if f.rule == "P006"]
+            self.assertEqual([f.category for f in p006], ["free_text"])
+            _edit_manifest(repo, "  ai_allowed_categories: []", "  ai_allowed_categories: [free_text]")
+            self.assertEqual([f for f in _check(repo).open_findings() if f.rule == "P006"], [])
+
+
+class RightsRequestTests(unittest.TestCase):
+    def test_entry_point_reaches_store_or_d011(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            result = _check(repo)
+            self.assertEqual(result.to_dict()["rights_request_entrypoints"], ["handle_erasure_request (services/onboarding/erasure.py:10)"])
+            applicant = next(r for r in result.inventory if r["store"] == "Applicant")
+            self.assertTrue(applicant["rights_request"].startswith("reached from handle_erasure_request()"))
+            # Rename the handler: the deletion still exists, but nothing a person can trigger reaches it.
+            path = repo / "services/onboarding/erasure.py"
+            path.write_text(path.read_text(encoding="utf-8").replace("handle_erasure_request", "delete_applicant_records"), encoding="utf-8")
+            d011 = [f for f in _check(repo).open_findings() if f.rule == "D011"]
+            self.assertEqual(len(d011), 1)
+            self.assertIn("no rights-request entry point was found", d011[0].detail)
+            self.assertEqual(d011[0].severity, "HIGH")  # Applicant holds government IDs
+            _edit_manifest(repo, "erasure:\n", "erasure:\n  entrypoints: [delete_applicant_records]\n")
+            self.assertEqual([f for f in _check(repo).open_findings() if f.rule == "D011"], [])
+
+    def test_routes_and_retention_jobs(self):
+        from svikruti.pac.datastore import rights_request_entrypoints
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "accounts/urls.py": "urlpatterns = [\n    path('accounts/close/', views.close),\n    path('accounts/two_factor/totp/remove/', views.remove_totp),\n]\n",
+                "accounts/views.py": "def close(request):\n    purge_profile(request.user)\n\ndef remove_totp(request):\n    pass\n\ndef purge_profile(user):\n    Profile.objects.filter(user=user).delete()\n",
+                "api/routes.js": "router.delete('/me', async (req, res) => {\n  await Customer.destroy({ where: { id: req.user.id } });\n});\nrouter.post('/items/remove', removeItem);\n",
+            })
+            entries = rights_request_entrypoints(root, ["accounts/urls.py", "accounts/views.py", "api/routes.js"])
+            names = sorted(entry.name for entry in entries)
+            self.assertEqual(names, ["DELETE /me", "close"])
+            close = next(entry for entry in entries if entry.name == "close")
+            self.assertIn("Profile.objects.filter", close.text)  # reached through purge_profile()
+
+
+class ConsentGateTests(unittest.TestCase):
+    def test_guard_in_caller_custom_guard_and_missing_guard(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            result = _check(repo)
+            self.assertEqual(result.consent["flows_guarded"], result.consent["flows_checked"])
+            self.assertNotIn("P008", _rules(result))
+            sms = repo / "services/notifications/sms.py"
+            text = sms.read_text(encoding="utf-8")
+            sms.write_text(text.replace("        if not borrower.reminder_consent:\n            continue\n", ""), encoding="utf-8")
+            result = _check(repo)
+            p008 = [f for f in result.open_findings() if f.rule == "P008"]
+            self.assertEqual((len(p008), p008[0].activity, p008[0].processor), (1, "reminders", "msg91"))
+            self.assertEqual(next(a for a in result.assessments if a.id == "OBL-22").status, "fail")
+            sms.write_text(sms.read_text(encoding="utf-8").replace("    for borrower in borrowers:\n", "    for borrower in borrowers:\n        if not may_contact(borrower):\n            continue\n"), encoding="utf-8")
+            self.assertIn("P008", _rules(_check(repo)))
+            (repo / "privacy.yaml").write_text((repo / "privacy.yaml").read_text(encoding="utf-8") + "\nconsent:\n  checks: [may_contact]\n", encoding="utf-8")
+            self.assertNotIn("P008", _rules(_check(repo)))
 
 
 if __name__ == "__main__":

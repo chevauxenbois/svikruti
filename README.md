@@ -42,12 +42,20 @@ Privacy gate failed: 3 finding(s) at HIGH or above
   code outside any declared activity, stale declarations, incomplete records.
 - **Processor data flows.** Not just "this code uses Mixpanel" but which data
   categories are passed to it, followed through wrapper functions across
-  files and checked against the processor's record.
+  files, dependency injection, and queues, task runners and event buses
+  (Celery, Kafka, RabbitMQ, SQS, BullMQ, NestJS, Spring, Sidekiq, Laravel),
+  and checked against the processor's record.
 - **AI in the data map.** Personal data in prompts to OpenAI, Anthropic,
-  Gemini, Bedrock and others is a processor flow, held to an allowlist.
+  Gemini, Bedrock and others is a processor flow, held to an allowlist. A
+  chat box passed straight to the model is tracked as free text unless it is
+  redacted first.
 - **Stored data you can defend.** Every table and model with personal data,
   whether high-risk fields are encrypted or tokenised (Aadhaar Data Vault),
-  and whether any erasure or retention code reaches it.
+  whether any erasure or retention code reaches it, and whether a person's
+  erasure request (the route, mutation or job it enters through) actually
+  reaches that code.
+- **Consent checked in code.** For processing that relies on consent, every
+  hand-off to a processor must sit behind a consent check.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations
@@ -371,7 +379,9 @@ erasure. The baseline set caught 33/53 (62%) before tuning. A held-out set
 written afterwards caught 18/21 (86%) on its first run, with 2 of 4 traps
 quiet. After fixes, all 74 planted leaks are found inside healthchecks,
 saleor and a Next.js/Stripe starter, and the CRITICAL/HIGH defect counts
-above are unchanged.
+above are unchanged. A third set for queues, dependency injection and free
+text sent to AI caught 9/14 on its first run; see the results for what it
+missed.
 
 How to read this:
 

@@ -47,6 +47,8 @@ RULES: Dict[str, Dict[str, str]] = {
     "P006": {"title": "Personal data sent to an AI model provider beyond the allowlist", "fix": "Remove or redact the field before it reaches the prompt, or add the category to policies.ai_allowed_categories after review."},
     "P007": {"title": "High-risk field stored without field-level protection", "fix": "Encrypt, tokenise (vault), hash or mask the field before it is stored, or record a time-boxed exception."},
     "D010": {"title": "Stored personal data no erasure path reaches", "fix": "Delete or anonymise this store from your erasure / retention code, list the function under erasure.handlers, or record the legal reason under erasure.retained."},
+    "D011": {"title": "Erasure code a rights request does not reach", "fix": "Call this deletion from the code a data subject's erasure request goes through (route, mutation or job), or list that entry point under erasure.entrypoints if it was not found."},
+    "P008": {"title": "Consent-based processing without a consent check in code", "fix": "Check the person's consent before this call (and stop when it is withdrawn), name your own guard under consent.checks, or record a time-boxed exception if consent is enforced elsewhere."},
     "P005": {"title": "Exception has expired", "fix": "Fix the underlying finding or renew the exception with a new review date."},
 }
 

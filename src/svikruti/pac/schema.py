@@ -147,13 +147,28 @@ def manifest_schema() -> Dict[str, Any]:
                     "handlers": {**_STR_LIST, "description": "Extra function or class names that erase personal data, beyond those named for it (delete_user, handle_erasure_request, ...)."},
                     "retained": {
                         "type": "object",
-                        "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rule D010.",
+                        "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rules D010 and D011.",
                         "additionalProperties": {"type": "string", "minLength": 10},
+                    },
+                    "entrypoints": {
+                        **_STR_LIST,
+                        "description": "Functions or classes a data subject's erasure request enters through (route handlers, mutations, the job your privacy team runs), beyond those found automatically. Rule D011 checks they reach every store.",
                     },
                 },
                 m._ERASURE_KEYS,
                 [],
                 "How the code erases personal data, and which stores are kept on purpose.",
+            ),
+            "consent": _object(
+                {
+                    "checks": {
+                        **_STR_LIST,
+                        "description": "Names of your own consent guards (has_marketing_consent, ConsentService.isGranted). A call to one before a processor flow counts as a consent check for rule P008.",
+                    },
+                },
+                m._CONSENT_KEYS,
+                [],
+                "How the code checks consent before consent-based processing.",
             ),
             "exceptions": {"type": "array", "items": exception},
             "attestations": {"type": "array", "items": attestation},

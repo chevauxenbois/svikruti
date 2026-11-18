@@ -5,7 +5,17 @@ reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 277
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.10.0
+## Current Release: 0.11.0
+
+- Data followed through queues, task runners and event buses (Celery,
+  Dramatiq, RQ, Kafka, RabbitMQ, SQS, NATS, BullMQ, NestJS, Spring, Sidekiq,
+  Laravel) and through dependency injection.
+- Free text from a request sent to an AI model is tracked as its own
+  category; redaction clears it.
+- Rights-request entry points found and followed to each store (D011).
+- Consent checked in code for consent-based processing (P008).
+
+## 0.10.0
 
 - `svikruti org`: one processing record, processor register, data map and
   framework posture across many repositories, flagging vendors recorded
@@ -53,9 +63,8 @@ review-ready artifacts over generic compliance checklists.
 - Runtime companion: a lightweight log and prompt redaction library whose
   presence the scanner recognises as protection.
 - IDE extension (VS Code / JetBrains) that runs `svikruti check` on save.
-- Deeper data flow: dependency injection, queues and event buses between the
-  caller and the processor (wrapper functions are already followed across
-  files).
+- Join producers and consumers that live in different repositories
+  (`svikruti org` already sees both ends).
 - Grow the recall benchmark: more languages and frameworks, and a third set
   written by someone other than the maintainer.
 - `svikruti org` straight from a GitHub organisation (download the latest

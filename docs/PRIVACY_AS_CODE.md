@@ -82,6 +82,10 @@ erasure:
   handlers: [close_account]           # extra functions that delete personal data, if not named delete_user / erase_* / ...
   retained:                           # stores kept on purpose, with the legal reason
     Repayment: "Kept 8 years after loan closure under the PML Rules and tax law"
+  entrypoints: [ErasureJob]           # where a rights request enters, if not an erasure route / mutation / DSAR handler
+
+consent:
+  checks: [may_contact]               # your own consent guards, if not named has_consent / is_opted_in / ...
 
 processing_activities:
   - id: repayments
@@ -152,6 +156,8 @@ organisation has decided.
 | P006 | HIGH / CRITICAL | Personal data is sent to an AI model provider and its category is not in `ai_allowed_categories` |
 | P007 | HIGH / CRITICAL | A stored field in `require_field_protection_for` has no encryption, tokenisation, hashing or masking |
 | D010 | MEDIUM / HIGH | A stored table or model holds personal data and no erasure or retention code reaches it, and it is not under `erasure.retained` |
+| D011 | MEDIUM / HIGH | Erasure code deletes a store, but no rights-request entry point (route, mutation, DSAR handler, `erasure.entrypoints`) reaches that code |
+| P008 | HIGH | An activity whose lawful basis is consent sends data to a processor with no consent check in the calling code |
 
 CRITICAL applies where the category is high-risk (health, children,
 government ID, biometric).
@@ -197,8 +203,40 @@ What counts, and what does not:
   (`StripeObject`) is a response, not a client.
 - Test suites are skipped.
 
-Limits: dynamic dispatch, service locators, queues and event buses between
-the caller and the vendor are not followed. On saleor (4,600 files) the
+**Dependency injection.** A caller that holds an interface is linked to the
+implementation that wraps the vendor: `notifier.notifyUser(applicant.mobile)`
+on a `Notifier` field reaches `SmsNotifier implements Notifier` and its
+Twilio call (Java, Kotlin, C#, TypeScript, Python base classes).
+
+**Queues, task runners and event buses.** The producer and the consumer are
+joined on the channel name, and the producer's payload is attributed to every
+vendor the consumer's code reaches:
+
+```python
+# views.py                                   # tasks.py
+add_to_newsletter.delay(user.email)          @shared_task
+#  -> Contact sent to Mailchimp,             def add_to_newsletter(address):
+#     through task `add_to_newsletter`           client.lists.add_list_member(...)
+```
+
+| Ecosystem | Producer | Consumer |
+|---|---|---|
+| Celery, Dramatiq, Huey | `task.delay()`, `.apply_async()`, `.send()`, `send_task("x")` | `@shared_task`, `@app.task`, `@dramatiq.actor` |
+| RQ, arq | `q.enqueue(func, ...)` | the function itself |
+| Kafka, RabbitMQ, SQS, NATS, Redis | `send` / `produce` / `publish` / `basic_publish` / `sendToQueue` / `sendMessage` with a topic, queue, subject or URL | `@KafkaListener`, `@RabbitListener`, `@SqsListener`, `@JmsListener`, FastStream / Faust subscribers, `basic_consume`, kafkajs `consumer.run`, `.subscribe("x", fn)`, `.consume("x", fn)` |
+| Node events, BullMQ, NestJS | `emit("x", ...)`, `queue.add(...)` on `new Queue("x")` | `.on("x", fn)`, `new Worker("x", fn)`, `@OnEvent`, `@EventPattern`, `@MessagePattern`, `@Processor` |
+| Spring, Laravel events | `publishEvent(new UserRegistered(...))`, `event(new X(...))` | `@EventListener void on(UserRegistered e)`, `handle(UserRegistered $e)` |
+| Sidekiq, ActiveJob, Laravel jobs | `Job.perform_async` / `perform_later`, `Job::dispatch` | `include Sidekiq::Job`, `< ApplicationJob`, `implements ShouldQueue` |
+| Django signals | `signal.send(sender=...)` | `@receiver(signal)` |
+
+String constants are resolved (`KafkaListener(topics = Topics.KYC)` and
+`kafkaTemplate.send(Topics.KYC, ...)` meet at `"kyc-events"`). A channel with
+no consumer that calls a vendor produces nothing.
+
+Limits: dynamic dispatch through reflection or service locators, channel
+names built at runtime, and vendors called from a different repository (a
+separate worker service) are not followed. `svikruti org` shows the second
+repository's flows but does not join them. On saleor (4,600 files) the
 detector reports 13 Stripe flows in under a second, on a Next.js subscription
 starter 6. Reading them by hand, each passes a customer email, name, address
 or payment-method detail to Stripe. That is two repositories with one vendor,
@@ -227,9 +265,21 @@ limits what declared providers may receive: `[]` allows no personal data in
 prompts, `[device]` allows only device data, and leaving the key out disables
 the check. Anything else is P006.
 
-What it cannot see: free-text user input forwarded as-is (a chat box passed
-straight to the model) carries no field name, so its contents are unknown to a
-static scanner. A proxy or DLP layer at runtime is the control for that.
+**Free text.** A chat box passed straight to the model has no field name, so
+no category can be read from it. Svikruti tracks it as its own category,
+`free_text`, when text from the request reaches an AI call:
+`req.body.message`, `const { messages } = await req.json()`,
+`request.json["prompt"]`, `request.POST["question"]`, a FastAPI or Spring
+request body field, `st.chat_input(...)`. It is reported HIGH because it can
+carry anything, and it follows the same rules as any category: undeclared on
+the activity is D002, not on the processor's record is D009, and outside
+`ai_allowed_categories` is P006.
+
+Redaction before the call clears it: Presidio (`AnalyzerEngine`,
+`AnonymizerEngine`), scrubadub, llm-guard `Anonymize`, AWS Comprehend
+`detect_pii_entities`, Google DLP `deidentify_content`, or any `redact*`,
+`scrub*`, `anonymize*`, `mask_pii` call in the same function. Text the server
+builds itself (a report summary, a template) is not free text.
 
 ## Stored data: protection and erasure
 
@@ -257,10 +307,60 @@ from a store that is (`ForeignKey(Customer, on_delete=CASCADE)`,
 not erasure paths. A store nothing reaches, and that is not listed under
 `erasure.retained` with a reason, is rule D010.
 
-"Reached" means code that deletes or overwrites the store exists; it does not
-prove that your rights-request process calls it, or that it runs. Only stored
-tables and models count: DTOs, forms, API types and pydantic models are
-inventoried but not held to D010 or P007.
+**Does a rights request reach it?** Code that deletes a table proves the table
+*can* be deleted, not that a person's erasure request deletes it. Svikruti
+finds where requests enter and follows them:
+
+- routes: `path("accounts/close/", views.close)`, `@router.delete("/me")`,
+  `router.delete("/account", handler)`, `@DeleteMapping("/users/{id}")`,
+  `DELETE /api/v1/customers/:id`, `/dsar`, `/privacy/erasure`, `/gdpr/...`;
+- GraphQL mutations and jobs named for erasure (`AccountDelete`,
+  `CustomerErasureJob`), management commands (`manage.py delete_user`),
+  functions named for the request (`handle_erasure_request`, `process_dsar`);
+- anything under `erasure.entrypoints`.
+
+From each entry it follows the functions it calls, the tasks it queues and the
+classes it constructs, four levels deep, plus cascades, including cascades
+through tables that hold no personal data (`Channel -> Project -> User`). The
+inventory's "Reached By Rights Request" column shows the result. A store that
+erasure code deletes but no entry reaches is rule D011. When the only deletion
+is a retention job, the finding says so: "`Order` is deleted only by a
+retention job, delete_expired_orders_task(). An erasure request
+(AccountDelete ...) leaves it in place until then." Record it under
+`erasure.retained` if that is the intent.
+
+Only stored tables and models count: DTOs, forms, API types and pydantic
+models are inventoried but not held to D010, D011 or P007. Reaching code is
+not proof that it runs.
+
+## Consent checked in code
+
+When an activity's lawful basis is consent, every hand-off of its data to a
+processor should run only for people who agreed, and stop when they withdraw.
+For each processor flow in a consent-based activity, Svikruti looks for a
+consent guard in the calling function, its decorators, and its callers two
+levels up:
+
+```python
+def send_due_reminders(borrowers):
+    for borrower in borrowers:
+        if not borrower.reminder_consent:      # guard
+            continue
+        send_reminder(borrower.phone_number, "emi_due")   # -> MSG91
+```
+
+A guard is a consent signal in a guard position: a condition, a query filter
+(`User.objects.filter(marketing_opt_in=True)`), an assertion, an early return
+or a decorator (`@requires_consent("marketing")`). Signals are identifiers
+about consent, opt-in, subscription, tracking permission and do-not-track,
+consent-management platforms (OneTrust, Didomi, Cookiebot, the IAB TCF API,
+Usercentrics and others), and your own guards listed under `consent.checks`.
+A flow with none is rule P008, and obligation OBL-22 fails.
+
+What it does not show: that consent was recorded with its notice version,
+that withdrawal is as easy as giving it, or that a middleware or gateway
+enforces it outside the repository. The first two stay attestations; for the
+third, name the guard in `consent.checks` or record an exception.
 
 ## Inline suppressions
 
@@ -538,8 +638,10 @@ the boundary:
   or that a rights request was answered on time. Those are recorded as
   attestations with an owner and a review date, and reported separately from
   code-verified items.
-- Detection is heuristic outside Python (regex and tree-sitter based). Dynamic
-  dispatch, generated code and data that only exists at runtime can be missed.
+- Detection is heuristic outside Python (regex and tree-sitter based).
+  Reflection, service locators, channel names built at runtime, generated code
+  and data that only exists at runtime can be missed. A vendor called from a
+  different repository than the producer is not joined to it.
   The scan-quality section of the scan report states parser coverage.
 
 A passing check is engineering evidence that supports a clause. It is not

@@ -184,20 +184,20 @@ class OrgResult:
         for repo in self.repos:
             for activity in repo.data.get("activities", []):
                 for label in set(activity.get("declared_categories", [])) | set(activity.get("detected_categories", [])):
-                    entry = categories.setdefault(label, {"category": label, "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "in_logs": set()})
+                    entry = categories.setdefault(label, {"category": label, "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "not_reached_by_request": set(), "in_logs": set()})
                     entry["repos"].add(repo.name)
                     entry["activities"].add(f"{repo.name}:{activity['id']}")
                     if label in activity.get("logged_categories", []):
                         entry["in_logs"].add(repo.name)
                 for flow in activity.get("detected_flows", []):
                     for label in flow["categories"]:
-                        entry = categories.setdefault(label, {"category": label, "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "in_logs": set()})
+                        entry = categories.setdefault(label, {"category": label, "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "not_reached_by_request": set(), "in_logs": set()})
                         entry["processors"].add(flow["processor"])
             ai_names = {processor.get("name") for processor in repo.data.get("processors", []) if processor.get("ai_provider")}
             for row in repo.data.get("inventory", []):
                 if not row.get("persistent"):
                     continue
-                entry = categories.setdefault(row["data_category"], {"category": row["data_category"], "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "in_logs": set()})
+                entry = categories.setdefault(row["data_category"], {"category": row["data_category"], "repos": set(), "activities": set(), "stores": set(), "processors": set(), "ai_providers": set(), "unprotected_high_risk": set(), "no_erasure": set(), "not_reached_by_request": set(), "in_logs": set()})
                 store = f"{repo.name}:{row['store']}"
                 entry["repos"].add(repo.name)
                 entry["stores"].add(store)
@@ -205,6 +205,8 @@ class OrgResult:
                     entry["unprotected_high_risk"].add(f"{store}.{row['field']}")
                 if not row.get("erasure"):
                     entry["no_erasure"].add(store)
+                elif row.get("erasure", "").startswith(("reached", "cascade")) and "rights_request" in row and not row.get("rights_request"):
+                    entry["not_reached_by_request"].add(store)
             for entry in categories.values():
                 entry["ai_providers"].update(name for name in entry["processors"] if name in ai_names)
         out = [{key: (sorted(value) if isinstance(value, set) else value) for key, value in entry.items()} for entry in categories.values()]
@@ -430,7 +432,7 @@ def render_org_html(org: OrgResult, threshold: str = "high") -> str:
     for item in data["data_map"]:
         map_rows.append(
             f"<tr><td><b>{_e(item['category'])}</b></td><td>{_chips(item['repos'])}</td><td>{_chips(item['stores'])}</td><td>{_chips(item['processors'])}</td>"
-            f"<td>{_chips(item['unprotected_high_risk'], 'miss')}</td><td>{_chips(item['no_erasure'], 'miss')}</td><td>{_chips(item['in_logs'], 'miss')}</td></tr>"
+            f"<td>{_chips(item['unprotected_high_risk'], 'miss')}</td><td>{_chips(item['no_erasure'], 'miss')}{_chips(item.get('not_reached_by_request', []), 'stale')}</td><td>{_chips(item['in_logs'], 'miss')}</td></tr>"
         )
     finding_rows = []
     for item in data["findings"][:300]:
@@ -464,7 +466,7 @@ def render_org_html(org: OrgResult, threshold: str = "high") -> str:
 <h2>Processor register</h2><p class="mute">One row per vendor across the estate. Conflicting country, contract or transfer records, and services that use a vendor without recording it, are flagged.</p>
 {table(['Processor', 'Declared in', 'Used without record in', 'Countries', 'Data sent (from code)', 'Issues'], proc_rows, 'No processors declared or detected.')}
 <h2>Data map</h2><p class="mute">Per data category: which services hold it, where it is stored, who receives it, and the gaps a DSAR or breach would hit.</p>
-{table(['Category', 'Repositories', 'Stored in', 'Sent to', 'Unprotected high-risk fields', 'No erasure path', 'Reaches logs'], map_rows, 'No personal data found.')}
+{table(['Category', 'Repositories', 'Stored in', 'Sent to', 'Unprotected high-risk fields', 'No erasure path (dashed: no rights request reaches it)', 'Reaches logs'], map_rows, 'No personal data found.')}
 <h2>Clauses failing or not verified somewhere</h2>{table(['Framework', 'Clause', 'Status', 'Repositories'], failing_rows, 'Every applicable clause is verified or attested in every repository.')}
 <h2>Open findings</h2>{table(['Severity', 'Repository', 'Finding', 'Where'], finding_rows, 'No open findings.')}
 {f'<h2>Skipped</h2><ul>{skipped}</ul>' if skipped else ''}
@@ -516,10 +518,10 @@ def write_org_pack(org: OrgResult, directory: str, threshold: str = "high") -> D
     )
     _write_rows(
         files["inventory"],
-        ["repository", "store", "field", "data_category", "high_risk", "persistent", "protection", "erasure", "reaches_logs", "sent_to", "activity", "retention", "file", "line"],
+        ["repository", "store", "field", "data_category", "high_risk", "persistent", "protection", "erasure", "rights_request", "reaches_logs", "sent_to", "activity", "retention", "file", "line"],
         [
             [row["repo"], row.get("store", ""), row.get("field", ""), row.get("data_category", ""), "yes" if row.get("high_risk") else "", "yes" if row.get("persistent") else "",
-             row.get("protection", ""), row.get("erasure", ""), "yes" if row.get("reaches_logs") else "", _join(row.get("sent_to")), row.get("activity", ""), row.get("retention", ""), row.get("file", ""), row.get("line", "")]
+             row.get("protection", ""), row.get("erasure", ""), row.get("rights_request", ""), "yes" if row.get("reaches_logs") else "", _join(row.get("sent_to")), row.get("activity", ""), row.get("retention", ""), row.get("file", ""), row.get("line", "")]
             for row in org.inventory()
         ],
     )

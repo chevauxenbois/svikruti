@@ -20,8 +20,9 @@ from svikruti.pac.taxonomy import is_placeholder, slugify
 MANIFEST_VERSION = 1
 DEFAULT_MANIFEST_NAMES = ("privacy.yaml", "privacy.yml", ".svikruti/privacy.yaml", "privacy.json")
 
-_TOP_KEYS = {"version", "organization", "frameworks", "processing_activities", "processors", "policies", "erasure", "exceptions", "attestations"}
-_ERASURE_KEYS = {"handlers", "retained"}
+_TOP_KEYS = {"version", "organization", "frameworks", "processing_activities", "processors", "policies", "erasure", "consent", "exceptions", "attestations"}
+_ERASURE_KEYS = {"handlers", "retained", "entrypoints"}
+_CONSENT_KEYS = {"checks"}
 _ACTIVITY_KEYS = {
     "id", "name", "owner", "paths", "data_categories", "data_subjects", "purposes",
     "legal_basis", "retention", "processors", "dpia", "logging", "notes",
@@ -109,6 +110,14 @@ class Erasure:
 
     handlers: List[str] = field(default_factory=list)       # extra function names that erase data
     retained: Dict[str, str] = field(default_factory=dict)  # store (table / model) -> legal reason it is kept
+    entrypoints: List[str] = field(default_factory=list)    # functions / classes a rights request enters through
+
+
+@dataclass
+class Consent:
+    """How the code checks consent before consent-based processing."""
+
+    checks: List[str] = field(default_factory=list)  # names of your own consent helpers / guards (has_marketing_consent)
 
 
 @dataclass
@@ -146,6 +155,7 @@ class Manifest:
     exceptions: List[ExceptionRule] = field(default_factory=list)
     attestations: List[Attestation] = field(default_factory=list)
     erasure: Erasure = field(default_factory=Erasure)
+    consent: Consent = field(default_factory=Consent)
     warnings: List[str] = field(default_factory=list)
     path: Optional[str] = None
 
@@ -341,7 +351,17 @@ def parse_manifest(data: Any, source: Optional[str] = None) -> Manifest:
             retained[str(store).strip()] = _text(reason)
     else:
         errors.append("erasure.retained: must be a mapping of store name to the reason it is kept")
-    erasure = Erasure(handlers=_str_list(erasure_raw.get("handlers"), "erasure.handlers", errors), retained=retained)
+    erasure = Erasure(
+        handlers=_str_list(erasure_raw.get("handlers"), "erasure.handlers", errors),
+        retained=retained,
+        entrypoints=_str_list(erasure_raw.get("entrypoints"), "erasure.entrypoints", errors),
+    )
+    consent_raw = data.get("consent") or {}
+    if not isinstance(consent_raw, dict):
+        errors.append("consent: must be a mapping with `checks`")
+        consent_raw = {}
+    _unknown(consent_raw, _CONSENT_KEYS, "consent", warnings)
+    consent = Consent(checks=_str_list(consent_raw.get("checks"), "consent.checks", errors))
 
     exceptions: List[ExceptionRule] = []
     for index, raw in enumerate(_dict_list(data.get("exceptions"), "exceptions", errors)):
@@ -400,6 +420,7 @@ def parse_manifest(data: Any, source: Optional[str] = None) -> Manifest:
         exceptions=exceptions,
         attestations=attestations,
         erasure=erasure,
+        consent=consent,
         warnings=warnings,
     )
 

@@ -281,7 +281,13 @@ def _erasure_cell(row: Dict[str, Any]) -> str:
     if value.startswith("retained"):
         return _pill("attested", "retained") + f'<div class="mute">{_e(value[len("retained: "):])}</div>'
     if value:
-        return _pill("pass", "reached") + f'<div class="mute">{_e(value.replace("reached by ", ""))}</div>'
+        request = row.get("rights_request")
+        note = (
+            '<div class="mute">rights request: reaches it</div>'
+            if request
+            else ('<div class="mute">' + _pill("MEDIUM", "no rights request reaches it") + "</div>" if "rights_request" in row else "")
+        )
+        return _pill("pass", "reached") + f'<div class="mute">{_e(value.replace("reached by ", ""))}</div>' + note
     return _pill("HIGH", "no erasure path")
 
 

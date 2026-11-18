@@ -210,8 +210,8 @@ def _privacy_as_code(st: Any, report: Dict[str, Any]) -> None:
         gaps[2].metric("Stores no erasure reaches", len({row["Store"] for row in rows if row["Erasure"] == "No erasure path"}))
         only_gaps = st.checkbox("Only gaps (unprotected high-risk fields, no erasure path, reaches logs)", value=False, key="pac_inventory_gaps")
         if only_gaps:
-            rows = [row for row in rows if row["Protection"] == "NONE" or row["Erasure"] == "No erasure path" or row["Logs"]]
-        _render_simple_table(st, rows, ["Store", "Field", "Category", "Protection", "Erasure", "Sent to", "Logs", "Where"])
+            rows = [row for row in rows if row["Protection"] == "NONE" or row["Erasure"] == "No erasure path" or row["Logs"] or row["Rights request"] == "NOT REACHED"]
+        _render_simple_table(st, rows, ["Store", "Field", "Category", "Protection", "Erasure", "Rights request", "Sent to", "Logs", "Where"])
     else:
         st.caption("No persistent tables or models with personal data were found.")
 
@@ -274,6 +274,7 @@ def inventory_rows(stored: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "Category": f"{row.get('data_category')}{' (high risk)' if row.get('high_risk') else ''}",
                 "Protection": protection,
                 "Erasure": erasure,
+                "Rights request": "reaches it" if row.get("rights_request") else ("n/a" if erasure.startswith(("Retained", "No erasure")) else "NOT REACHED"),
                 "Sent to": ", ".join(row.get("sent_to") or []),
                 "Logs": "yes" if row.get("reaches_logs") else "",
                 "Where": f"{row.get('file')}:{row.get('line')}",

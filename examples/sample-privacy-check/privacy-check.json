@@ -1,6 +1,6 @@
 {
   "schema_version": "svikruti-privacy-check-v1",
-  "generated_at": "2026-11-16T15:43:13.458917+00:00",
+  "generated_at": "2026-11-16T16:14:05.037796+00:00",
   "manifest": "privacy.yaml",
   "repo": ".",
   "organization": {
@@ -2259,7 +2259,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2278,7 +2279,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2297,7 +2299,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2316,7 +2319,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2335,7 +2339,8 @@
       "protection": "encrypted",
       "protection_evidence": "services/onboarding/kyc.py:19",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",
@@ -2354,7 +2359,8 @@
       "protection": "encrypted",
       "protection_evidence": "services/onboarding/kyc.py:20",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
+      "rights_request": "reached from handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Repayment",
@@ -2376,7 +2382,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law",
+      "rights_request": "retained"
     },
     {
       "store": "Repayment",
@@ -2398,7 +2405,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law",
+      "rights_request": "retained"
     },
     {
       "store": "Repayment",
@@ -2417,7 +2425,8 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law",
+      "rights_request": "retained"
     },
     {
       "store": "Repayment",
@@ -2436,9 +2445,21 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law"
+      "erasure": "retained: Repayment records kept 8 years after loan closure under the PML Rules and tax law",
+      "rights_request": "retained"
     }
   ],
+  "rights_request_entrypoints": [
+    "handle_erasure_request (services/onboarding/erasure.py:10)"
+  ],
+  "consent_check": {
+    "activities": [
+      "applicant_onboarding",
+      "reminders"
+    ],
+    "flows_checked": 2,
+    "flows_guarded": 2
+  },
   "manifest_warnings": [],
   "scan_summary": {
     "files_scanned": 13,

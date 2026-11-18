@@ -82,6 +82,7 @@
                     "contact",
                     "device",
                     "financial",
+                    "free_text",
                     "government_id",
                     "health",
                     "identity",
@@ -150,6 +151,7 @@
                         "contact",
                         "device",
                         "financial",
+                        "free_text",
                         "government_id",
                         "health",
                         "identity",
@@ -222,6 +224,7 @@
                     "contact",
                     "device",
                     "financial",
+                    "free_text",
                     "government_id",
                     "health",
                     "identity",
@@ -266,6 +269,7 @@
                   "contact",
                   "device",
                   "financial",
+                  "free_text",
                   "government_id",
                   "health",
                   "identity",
@@ -297,6 +301,7 @@
                   "contact",
                   "device",
                   "financial",
+                  "free_text",
                   "government_id",
                   "health",
                   "identity",
@@ -341,6 +346,7 @@
                   "contact",
                   "device",
                   "financial",
+                  "free_text",
                   "government_id",
                   "health",
                   "identity",
@@ -365,6 +371,7 @@
                   "contact",
                   "device",
                   "financial",
+                  "free_text",
                   "government_id",
                   "health",
                   "identity",
@@ -394,11 +401,33 @@
         },
         "retained": {
           "type": "object",
-          "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rule D010.",
+          "description": "Store (table / model) -> the legal reason it is kept and for how long. Retained stores are exempt from rules D010 and D011.",
           "additionalProperties": {
             "type": "string",
             "minLength": 10
           }
+        },
+        "entrypoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Functions or classes a data subject's erasure request enters through (route handlers, mutations, the job your privacy team runs), beyond those found automatically. Rule D011 checks they reach every store."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "consent": {
+      "type": "object",
+      "description": "How the code checks consent before consent-based processing.",
+      "properties": {
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of your own consent guards (has_marketing_consent, ConsentService.isGranted). A call to one before a processor flow counts as a consent check for rule P008."
         }
       },
       "required": [],
@@ -422,13 +451,15 @@
               "D008",
               "D009",
               "D010",
+              "D011",
               "P001",
               "P002",
               "P003",
               "P004",
               "P005",
               "P006",
-              "P007"
+              "P007",
+              "P008"
             ],
             "description": "Rule this exception suppresses."
           },

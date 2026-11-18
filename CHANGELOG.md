@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.11.0 - Queues, free text, rights requests, consent
+
+### Added
+
+- Processor flows follow queues, task runners and event buses: Celery,
+  Dramatiq, Huey and RQ tasks; Kafka, RabbitMQ, SQS, NATS and Redis
+  producers and listeners; Node `EventEmitter`, BullMQ and kafkajs; NestJS
+  `@OnEvent` / `@EventPattern` / `@Processor`; Spring `@KafkaListener`,
+  `@RabbitListener` and `@EventListener`; Sidekiq and ActiveJob; Laravel jobs
+  and event listeners; Django signals. Producer and consumer meet on the
+  channel name, with string constants resolved; findings name the channel and
+  the consumer.
+- Dependency injection: a caller holding an interface or base class reaches
+  the implementation that wraps the vendor (Java, Kotlin, C#, TypeScript,
+  Python).
+- Free text sent to AI: text from the request (`req.body.message`,
+  destructured `messages` from `req.json()`, `request.POST["question"]`,
+  request-body DTO fields, `st.chat_input`) reaching an AI provider call is a
+  new category, `free_text`, held to D002, D009 and P006. Redaction in the
+  same function (Presidio, scrubadub, llm-guard, Comprehend, Google DLP,
+  `redact*`) clears it.
+- Rights requests: erasure routes, account-deletion endpoints, erasure
+  mutations, DSAR handlers, management commands and `erasure.entrypoints` are
+  followed four levels deep (calls, queued tasks, constructed classes) and
+  through cascades. New inventory column "Reached By Rights Request" and rule
+  D011 for stores that only unconnected code (often a retention job) deletes.
+- Cascades resolve through tables that hold no personal data
+  (`Channel -> Project -> User`).
+- Consent in code: rule P008 for processor flows in consent-based activities
+  with no consent guard in the function, its decorators or its callers;
+  `consent.checks` names your own guards. OBL-22 fails on P008. OBL-21 fails
+  on D011.
+- `privacy-check.json` adds `rights_request_entrypoints` and `consent_check`.
+- C# files are read by the flow detector. Mailgun added; Twilio's C#
+  `MessageResource` and namespaced constructions (`new \Vendor\Client()`)
+  are recognised.
+- Field names read out of a request or mapping (`$request->input('email')`,
+  `data["phone"]`) count as the data they name.
+- Recall set `benchmarks/recall/channels.yaml`: 9/14 on its first run, 14/14
+  after fixes, also inside three real repositories.
+
 ## 0.10.0 - Organisation view and measured recall
 
 ### Added

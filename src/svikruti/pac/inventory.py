@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from svikruti.models import ScanResult
-from svikruti.pac.datastore import _CONTAINER_RES, cascades, erasure_coverage, erasure_paths, field_protection, protection_index
+from svikruti.pac.datastore import _CONTAINER_RES, cascades, entry_label, model_cascades, erasure_coverage, erasure_paths, field_protection, protection_index, rights_request_entrypoints
 from svikruti.pac.globs import match_any
 from svikruti.pac.taxonomy import HIGH_RISK_CATEGORIES, category_slug
 from svikruti.reports.exports import _write_rows
@@ -143,11 +143,23 @@ def _annotate(rows: List[Dict[str, Any]], root: Optional[Path], lines_for: Any, 
     for row in rows:
         if row["store"] and row["persistent"]:
             stores.setdefault(row["store"], (row["file"], row["line"] or 1))
-    coverage = erasure_coverage(stores, paths, erasure.retained if erasure else {}, cascades(root, stores))
+    cascade_map = cascades(root, stores)
+    model_parents = model_cascades(root, files)
+    coverage = erasure_coverage(stores, paths, erasure.retained if erasure else {}, cascade_map, model_parents)
+    # Which of those deletions a data subject's request actually reaches.
+    entries = rights_request_entrypoints(root, files, erasure.entrypoints if erasure else ())
+    from_request = erasure_coverage(stores, entries, {}, cascade_map, model_parents) if entries else {}
     for row in rows:
         row["erasure"] = coverage.get(row["store"], "") if row["persistent"] else "n/a (not a stored table or model)"
+        if not row["persistent"]:
+            row["rights_request"] = "n/a"
+        elif row["erasure"].startswith("retained"):
+            row["rights_request"] = "retained"
+        else:
+            row["rights_request"] = from_request.get(row["store"], "").replace("reached by ", "reached from ")
     if rows:
         rows[0].setdefault("_erasure_paths", [f"{path.name}:{path.file}:{path.line}" for path in paths])
+        rows[0].setdefault("_rights_entries", [entry_label(entry) for entry in entries])
 
 
 def write_inventory_csv(rows: List[Dict[str, Any]], path: str) -> None:
@@ -159,14 +171,14 @@ def write_inventory_csv(rows: List[Dict[str, Any]], path: str) -> None:
         [
             "Store (table / model)", "Field", "Data Category", "High Risk", "File", "Line", "Processing Activity", "Category Declared",
             "Category Reaches Logs (activity)", "Category Sent To (activity)", "Persistent Store", "Field Protection", "Protection Evidence", "Erasure Path",
-            "Retention", "Parser", "Confidence",
+            "Reached By Rights Request", "Retention", "Parser", "Confidence",
         ],
         [
             [
                 row["store"], row["field"], row["data_category"], "yes" if row["high_risk"] else "no", row["file"], row["line"] or "",
                 row["activity"], declared(row["declared"]), "yes" if row["reaches_logs"] else "no", "; ".join(row["sent_to"]),
                 "yes" if row.get("persistent") else "no", row.get("protection", ""), row.get("protection_evidence", ""), row.get("erasure", "") or "not found",
-                row["retention"], row["parser"], row["confidence"],
+                row.get("rights_request", "") or ("no" if row.get("persistent") else "n/a"), row["retention"], row["parser"], row["confidence"],
             ]
             for row in rows
         ],

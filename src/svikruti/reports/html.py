@@ -519,7 +519,10 @@ def _privacy_as_code_panel(result: ScanResult) -> str:
         value = str(row.get("erasure") or "")
         if value.startswith("retained"):
             return "Retained: " + escape(value[len("retained: "):])
-        return escape(value.replace("reached by ", "Reached by ")) if value else "<strong>No erasure path</strong>"
+        if not value:
+            return "<strong>No erasure path</strong>"
+        request = "" if row.get("rights_request") else "<br><strong>No rights request reaches it</strong>"
+        return escape(value.replace("reached by ", "Reached by ")) + request
 
     ordered = sorted(stored, key=lambda row: (not (row.get("high_risk") and row.get("protection") not in protected_kinds), bool(row.get("erasure")), str(row.get("store")), str(row.get("field"))))
     inventory_rows = "".join(

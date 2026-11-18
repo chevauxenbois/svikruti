@@ -1,7 +1,7 @@
 {
   "schema_version": "svikruti-org-v1",
-  "generated_at": "2026-11-16T15:43:01.979051+00:00",
-  "svikruti_version": "0.10.0",
+  "generated_at": "2026-11-16T16:14:05.968999+00:00",
+  "svikruti_version": "0.11.0",
   "repositories": [
     {
       "name": "lending",
@@ -11,7 +11,7 @@
         "role": "controller",
         "privacy_contact": "privacy@lendflow.example"
       },
-      "generated_at": "2026-11-16T15:43:01.736579+00:00",
+      "generated_at": "2026-11-16T16:14:05.697567+00:00",
       "activities": 3,
       "processors": 2,
       "open_findings": 0,
@@ -47,7 +47,7 @@
         "role": "controller",
         "privacy_contact": "privacy@lendflow.example"
       },
-      "generated_at": "2026-11-16T15:43:01.485010+00:00",
+      "generated_at": "2026-11-16T16:14:05.402656+00:00",
       "activities": 3,
       "processors": 2,
       "open_findings": 4,
@@ -1826,6 +1826,7 @@
       "ai_providers": [],
       "unprotected_high_risk": [],
       "no_erasure": [],
+      "not_reached_by_request": [],
       "in_logs": [
         "payments"
       ]
@@ -1848,6 +1849,7 @@
       "ai_providers": [],
       "unprotected_high_risk": [],
       "no_erasure": [],
+      "not_reached_by_request": [],
       "in_logs": []
     },
     {
@@ -1868,6 +1870,7 @@
       "ai_providers": [],
       "unprotected_high_risk": [],
       "no_erasure": [],
+      "not_reached_by_request": [],
       "in_logs": []
     },
     {
@@ -1888,6 +1891,7 @@
       "ai_providers": [],
       "unprotected_high_risk": [],
       "no_erasure": [],
+      "not_reached_by_request": [],
       "in_logs": []
     },
     {
@@ -1905,6 +1909,7 @@
       "ai_providers": [],
       "unprotected_high_risk": [],
       "no_erasure": [],
+      "not_reached_by_request": [],
       "in_logs": []
     }
   ],

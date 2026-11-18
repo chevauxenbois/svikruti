@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "Svikruti privacy-as-code",
-          "version": "0.10.0",
+          "version": "0.11.0",
           "informationUri": "https://github.com/chevauxenbois/svikruti",
           "rules": [
             {
@@ -167,6 +167,26 @@
               },
               "help": {
                 "text": "Delete or anonymise this store from your erasure / retention code, list the function under erasure.handlers, or record the legal reason under erasure.retained."
+              }
+            },
+            {
+              "id": "svikruti.pac.D011",
+              "name": "svikruti_pac_D011",
+              "shortDescription": {
+                "text": "Erasure code a rights request does not reach"
+              },
+              "help": {
+                "text": "Call this deletion from the code a data subject's erasure request goes through (route, mutation or job), or list that entry point under erasure.entrypoints if it was not found."
+              }
+            },
+            {
+              "id": "svikruti.pac.P008",
+              "name": "svikruti_pac_P008",
+              "shortDescription": {
+                "text": "Consent-based processing without a consent check in code"
+              },
+              "help": {
+                "text": "Check the person's consent before this call (and stop when it is withdrawn), name your own guard under consent.checks, or record a time-boxed exception if consent is enforced elsewhere."
               }
             },
             {

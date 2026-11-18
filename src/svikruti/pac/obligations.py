@@ -283,7 +283,24 @@ _EVALUATORS: Dict[str, Callable[[Assessment, Context], None]] = {
 }
 _EVALUATORS.update({obligation_id: _tech(control_id) for obligation_id, control_id in _TECH_CONTROLS.items()})
 _EVALUATORS["OBL-13"] = _tech("DPDPA-TECH-002", ("P007",))
-_EVALUATORS["OBL-21"] = lambda a, c: _from_findings(a, c.open("D010"), "") if c.open("D010") else _attest_only(a, c)
+_EVALUATORS["OBL-21"] = lambda a, c: _from_findings(a, c.open("D010") + c.open("D011"), "") if (c.open("D010") or c.open("D011")) else _attest_only(a, c)
+
+
+def _obl22(a: Assessment, c: Context) -> None:
+    from svikruti.pac.consent import consent_based
+
+    if c.open("P008"):
+        _from_findings(a, c.open("P008"), "")
+        return
+    _attest_only(a, c)
+    if any(consent_based(activity) for activity in c.manifest.activities):
+        a.summary = (
+            "Code checks consent before every consent-based hand-off to a processor. "
+            "That consent is stored as a provable record and can be withdrawn needs an attestation."
+        )
+
+
+_EVALUATORS["OBL-22"] = _obl22
 
 # Obligations where a human attestation may stand in for missing repo evidence.
 # OBL-11 is special: children's data in code plus an attestation is "attested",

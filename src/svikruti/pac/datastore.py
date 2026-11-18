@@ -271,6 +271,25 @@ def cascades(root: Optional[Path], store_files: Dict[str, Tuple[str, int]]) -> D
     return out
 
 
+_MODEL_DECL_RE = re.compile(r"^\s*(?:export\s+)?(?:(?:public|final|abstract)\s+)*(?:class|model)\s+(\w+)\b|\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[`\"\[]?(\w+)", re.IGNORECASE)
+
+
+def model_cascades(root: Optional[Path], files: Iterable[str]) -> Dict[str, Set[str]]:
+    """Cascade parents for every model / table in the repository, personal data or not.
+
+    Lets a chain resolve through tables that hold no personal data:
+    Channel -> Project -> User, where only Channel and User are in the inventory.
+    """
+    repo = _Repo(root, [rel for rel in files if _PERSISTENT_PATH_RE.search(rel) or rel.endswith((".prisma", ".sql", "models.py"))])
+    declared: Dict[str, Tuple[str, int]] = {}
+    for rel in repo.files:
+        for number, line in enumerate(repo.lines(rel) or [], start=1):
+            match = _MODEL_DECL_RE.search(line)
+            if match:
+                declared.setdefault(match.group(1) or match.group(2), (rel, number))
+    return cascades(root, declared)
+
+
 def _is_container_header(text: str) -> bool:
     return any(pattern.search(text) for pattern in _CONTAINER_RES)
 
@@ -329,6 +348,7 @@ def erasure_coverage(
     paths: List[ErasurePath],
     retained: Dict[str, str],
     cascade_map: Dict[str, Set[str]],
+    model_parents: Optional[Dict[str, Set[str]]] = None,
 ) -> Dict[str, str]:
     """store -> 'erased by name (file:line)' | 'cascade from X' | 'retained: reason' | ''."""
     retained_lower = {key.lower(): value for key, value in retained.items()}
@@ -354,10 +374,21 @@ def erasure_coverage(
                     changed = True
                     break
                 if parent_store is None:
-                    # The parent holds no detected personal data (e.g. Django's User), but deleting it still cascades.
-                    hit = next((path for path in paths if _erases(path.text, store_variants(parent))), None)
+                    # The parent holds no detected personal data (e.g. Django's User, a Project), but deleting it,
+                    # or anything it cascades from, still deletes this store.
+                    chain, frontier = [parent], [parent]
+                    hit = None
+                    for _ in range(3):
+                        hit = next((path for path in paths for name in frontier if _erases(path.text, store_variants(name))), None)
+                        if hit or not model_parents:
+                            break
+                        frontier = [grand for name in frontier for grand in model_parents.get(name, set()) if grand not in chain]
+                        chain.extend(frontier)
+                        if not frontier:
+                            break
                     if hit:
-                        coverage[store] = f"cascade from {parent} ({path_label(hit)})"
+                        via = " -> ".join(chain) if len(chain) > 1 else parent
+                        coverage[store] = f"cascade from {via} ({path_label(hit)})"
                         changed = True
                         break
         if not changed:
@@ -367,3 +398,156 @@ def erasure_coverage(
 
 def path_label(path: ErasurePath) -> str:
     return f"{path.name}() ({path.file}:{path.line})" if not path.name.startswith("sql:") else f"DELETE in {path.file}:{path.line}"
+
+
+# ----------------------------------------------------------- rights requests
+# Erasure code proves a table *can* be deleted. A data subject's request only
+# deletes it if the code their request enters (a route, a GraphQL mutation, a
+# job the privacy team runs) reaches that deletion. These are those entries.
+_ERASURE_ROUTE_RE = re.compile(
+    r"(?:delete|erase|erasure|forget|close|deactivate|remove|purge|anonymi[sz]e|destroy)[-_/]?(?:my[-_]?)?(?:accounts?|me|users?|profiles?|data|customers?|members?|personal[-_]?data)\b"
+    r"|\b(?:accounts?|me|users?|profiles?|customers?|members?)(?:/(?:me|[{<:][^/]*|\$\{[^}]*\}|\(\?P<[^>]+>[^)]*\)|\d+|\[[^\]]+\]))?[-_/](?:delete|erase|erasure|close|forget|deactivate|remove|destroy|anonymi[sz]e)(?![a-z])"
+    r"|\bdsar\b|\bdsr\b|data[-_]subject|privacy[-_/](?:request|requests|delete|erasure)|\bgdpr\b|right[-_]to[-_](?:erasure|be[-_]forgotten)|forget[-_]me",
+    re.IGNORECASE,
+)
+_SUBJECT_PATH_RE = re.compile(r"^/?(?:api/)?(?:v\d+/)?(?:me|account|accounts|profile|users?|customers?|members?)(?:/(?:me|[{:<][^/]*|\$\{[^}]*\}))?/?$", re.IGNORECASE)
+_DECORATOR_ROUTE_RE = re.compile(
+    r"^\s*@(?:[\w.]+\.)?(?:route|delete|post|put|patch|api_route|Delete|Post|Put|Patch|DeleteMapping|PostMapping|PutMapping|RequestMapping|DELETE|POST)\s*\(\s*(?:value\s*=\s*|path\s*=\s*)?[\"']([^\"']*)[\"'](.*)$"
+)
+_CALL_ROUTE_RE = re.compile(
+    r"(?<![\w$])(?:\w+)\s*\.\s*(delete|del|post|put|patch|all|route|Delete|DELETE|Post|POST|HandleFunc|Handle|map_delete|MapDelete|MapPost)\s*\(\s*[\"'`]([^\"'`]*)[\"'`]\s*,\s*(.*)$"
+)
+_DJANGO_ROUTE_RE = re.compile(r"\b(?:re_)?path\s*\(\s*r?[\"']([^\"']*)[\"']\s*,\s*([\w.]+)")
+_RAILS_ROUTE_RE = re.compile(r"^\s*(delete|post|put|patch|match)\s+[\"']([^\"']+)[\"'].*\bto:\s*[\"'](\w+)#(\w+)[\"']")
+_DSAR_NAME_RE = re.compile(r"(?:^|_)(?:dsar|dsr|data_?subject(?:_?request)?|rights?_?request|erasure_?request|deletion_?request|right_?to_?(?:erasure|be_?forgotten)|forget_?me|gdpr_?(?:delete|erase|request))(?:_|$)")
+_QUEUED_CALL_RE = re.compile(r"(?<![\w$.])([A-Za-z_$][\w$]*)\s*(?:\.|::)\s*(?:delay|apply_async|perform_later|perform_async|dispatch|dispatch_sync|send|enqueue)\s*\(")
+_MAX_REACH_DEPTH = 4
+_MAX_REACH_BODIES = 80
+
+
+def _is_erasure_route(path: str, method: str, rest: str = "") -> bool:
+    if _ERASURE_ROUTE_RE.search(path):
+        return True
+    deleting = method.lower() in {"delete", "del", "deletemapping", "map_delete", "mapdelete"} or re.search(r"\bmethods?\s*=\s*\[?[^\]\n]*[\"']DELETE[\"']|RequestMethod\.DELETE", rest)
+    return bool(deleting and _SUBJECT_PATH_RE.match(path.strip()))
+
+
+def rights_request_entrypoints(root: Optional[Path], files: Iterable[str], declared: Iterable[str] = ()) -> List[ErasurePath]:
+    """Entries a data subject's erasure request goes through, each with the text of everything it calls."""
+    from svikruti.scanner.flows import _functions
+
+    repo = _Repo(root, files)
+    wanted = {name.split(".")[-1].split(":")[-1].lower() for name in declared if name}
+    bodies: Dict[str, List[Tuple[str, int, str]]] = {}
+    entries: List[ErasurePath] = []
+    pending: List[Tuple[str, str, int, str]] = []  # (handler name or "", file, line, inline body)
+
+    def add_entry(name: str, rel: str, line: int, body: str) -> None:
+        if not any(entry.file == rel and entry.line == line for entry in entries):
+            entries.append(ErasurePath(name, rel, line, body))
+
+    for rel in repo.files:
+        if _DEV_TOOL_PATH_RE.search(rel):
+            continue
+        lines = repo.lines(rel) or []
+        suffix = Path(rel).suffix.lower()
+        functions = _functions(lines, suffix) if suffix not in {".sql", ".yaml", ".yml", ".json"} else []
+        for function in functions:
+            bodies.setdefault(function.name.lower(), []).append((rel, function.start + 1, "\n".join(lines[function.start : function.end + 1])))
+        for number, line in enumerate(lines):
+            match = re.match(r"^(\s*)(?:export\s+)?(?:default\s+)?(?:(?:public|final|abstract)\s+)*class\s+(\w+)", line)
+            if match:
+                indent, end = len(match.group(1)), len(lines)
+                for offset in range(number + 1, len(lines)):
+                    text = lines[offset]
+                    if text.strip() and len(text) - len(text.lstrip()) <= indent and not text.lstrip().startswith(("}", ")", "@")):
+                        end = offset
+                        break
+                body = "\n".join(lines[number:end])
+                bodies.setdefault(match.group(2).lower(), []).append((rel, number + 1, body))
+                if (is_erasure_name(match.group(2)) and re.search(r"(?:mutation|graphql|api|views?|controllers?|resolvers?|jobs?|handlers?|commands?)", rel, re.IGNORECASE)) or match.group(2).lower() in wanted:
+                    add_entry(match.group(2), rel, number + 1, body)
+        # Management commands and scripts named for erasure: python manage.py delete_user <id>
+        if re.search(r"(?:management/commands|scripts?|bin|jobs?|tasks?)/[^/]*$", rel) and is_erasure_name(Path(rel).stem):
+            add_entry(Path(rel).stem, rel, 1, "\n".join(lines))
+        for number, line in enumerate(lines):
+            decorated = _DECORATOR_ROUTE_RE.match(line)
+            if decorated:
+                method = re.match(r"^\s*@(?:[\w.]+\.)?(\w+)", line).group(1)
+                if _is_erasure_route(decorated.group(1), method, decorated.group(2) + " " + " ".join(lines[number + 1 : number + 2])):
+                    following = next((f for f in functions if number < f.start <= number + 6), None)
+                    if following is not None:
+                        add_entry(following.name, rel, following.start + 1, "\n".join(lines[following.start : following.end + 1]))
+                continue
+            called = _CALL_ROUTE_RE.search(line)
+            if called and _is_erasure_route(called.group(2), called.group(1), called.group(3)):
+                rest = called.group(3)
+                handler = [name for name in re.findall(r"(?<![\w$.'\"])(?:[\w$]+\.)*([A-Za-z_$][\w$]*)\s*[,)]", rest) if name not in {"async", "function", "req", "res", "next", "ctx", "w", "r"}]
+                inline = re.search(r"=>|\bfunction\b|\bfunc\s*\(", rest)
+                if inline:
+                    depth, end = 0, number
+                    for offset in range(number, min(number + 200, len(lines))):
+                        depth += lines[offset].count("{") - lines[offset].count("}")
+                        end = offset
+                        if offset > number and depth <= 0:
+                            break
+                    add_entry(f"{called.group(1).upper()} {called.group(2)}", rel, number + 1, "\n".join(lines[number : end + 1]))
+                if handler:
+                    pending.append((handler[-1], rel, number + 1, ""))
+                continue
+            django = _DJANGO_ROUTE_RE.search(line)
+            if django and _is_erasure_route(django.group(1), "", ""):
+                pending.append((django.group(2).split(".")[-1], rel, number + 1, django.group(2).rsplit(".", 1)[0] if "." in django.group(2) else ""))
+                continue
+            rails = _RAILS_ROUTE_RE.match(line)
+            if rails and _is_erasure_route(rails.group(2), rails.group(1), ""):
+                pending.append((rails.group(4), rel, number + 1, ""))
+        for function in functions:
+            if _DSAR_NAME_RE.search(_snake(function.name)) or function.name.lower() in wanted:
+                add_entry(function.name, rel, function.start + 1, "\n".join(lines[function.start : function.end + 1]))
+    for name, rel, line, qualifier in pending:
+        candidates = bodies.get(name.lower(), [])
+        # `views.close` in hc/accounts/urls.py is hc/accounts/views.py's close(), not hc/lib/statsd.py's.
+        near = [c for c in candidates if qualifier and Path(c[0]).stem == qualifier.split(".")[-1] and Path(c[0]).parent == Path(rel).parent]
+        near = near or [c for c in candidates if qualifier and Path(c[0]).stem == qualifier.split(".")[-1]]
+        near = near or [c for c in candidates if Path(c[0]).parent == Path(rel).parent] or candidates
+        for file, start, body in near[:3]:
+            add_entry(name, file, start, body)
+    # Everything each entry reaches: callees by name, queued tasks, and classes it constructs, a few levels deep.
+    for entry in entries:
+        seen = {entry.name.lower()}
+        frontier, collected = [entry.text], [entry.text]
+        for _ in range(_MAX_REACH_DEPTH):
+            names: Set[str] = set()
+            for text in frontier:
+                names.update(re.findall(r"(?<![\w$.])([A-Za-z_$][\w$]*)\s*\(", text))
+                names.update(re.findall(r"\.([A-Za-z_$][\w$]*)\s*\(", text))
+                names.update(_QUEUED_CALL_RE.findall(text))
+                names.update(re.findall(r"\bnew\s+([A-Za-z_$][\w$]*)", text))
+            frontier = []
+            for name in names:
+                key = name.lower()
+                if key in seen or key in _NOT_CALLEES or len(key) < 3:
+                    continue
+                seen.add(key)
+                definitions = bodies.get(key, [])
+                if len(definitions) > 3:
+                    continue  # a common method name (clean, run, handle): following it would pull in unrelated code
+                for _, _, body in definitions:
+                    frontier.append(body)
+                    collected.append(body)
+            if not frontier or len(collected) > _MAX_REACH_BODIES:
+                break
+        entry.text = "\n".join(collected[:_MAX_REACH_BODIES])
+    return entries
+
+
+_NOT_CALLEES = {
+    "if", "for", "while", "switch", "return", "print", "len", "str", "int", "list", "dict", "set", "get", "filter", "map", "update",
+    "delete", "save", "all", "first", "json", "format", "append", "extend", "join", "split", "super", "isinstance", "range", "sorted",
+    "send", "log", "info", "debug", "warning", "error", "then", "catch", "push", "find", "findone", "query", "execute", "commit",
+}
+
+
+def entry_label(path: ErasurePath) -> str:
+    return f"{path.name} ({path.file}:{path.line})"

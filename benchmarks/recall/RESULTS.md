@@ -80,15 +80,42 @@ Two false flows that appeared while fixing recall were found this way and
 removed before release: `sentry_sdk.init(...)` configuration in saleor, and
 a TypeScript type annotation (`payment_method: Stripe.PaymentMethod`).
 
+## Queues, dependency injection and free text (0.11.0)
+
+`channels.yaml` (18 cases: 14 checks and 4 traps) covers what 0.10.0 listed as
+not followed: Dramatiq, RQ, NestJS events, kafkajs, amqplib, Spring
+`@RabbitListener` with a constant queue name, Sidekiq, Laravel events, NATS in
+Go, interface injection in TypeScript and C#, and request text sent to OpenAI,
+Anthropic and Gemini. It was written after those detectors were built, using
+idioms the development fixtures did not use, and run once before any change.
+
+| Run | Recall | Traps quiet |
+|---|---|---|
+| **First run** | **9/14 (64%)** | **4/4** |
+| After fixes | 14/14 | 4/4 |
+| Planted in healthchecks, saleor and the Next.js starter | 14/14 each | 4/4 each |
+
+What the first run missed: an RQ job (`q.enqueue(func, ...)` runs a plain,
+undecorated function), Dramatiq's `actor.send(...)`, Mailgun (not in the
+vendor catalogue), a PHP client built as `new \MailchimpMarketing\ApiClient()`,
+and C# (`.cs` files were not read by the flow detector at all). The traps (a
+redacted prompt, server-built text sent to a model, an event with no vendor
+behind it, an interface declaration) stayed quiet on the first run.
+
+Precision after these changes, same repositories and method as above:
+CRITICAL/HIGH defects 1 / 8 / 2 / 0 and processor flows 0 / 0 / 13 / 6,
+unchanged. Free text was checked on chatbot-ui (an open-source multi-provider
+chat app): 14 sites reported, each read by hand; every one sends chat messages
+or embedding input taken from the request to OpenAI, Anthropic or Gemini.
+
 ## Limits
 
 - The seeds were written by the author of the tool. They follow the idioms
   he expects, and the held-out set is small (25 checks).
 - The real repositories contain few genuine privacy leaks, so they test
   precision far better than recall.
-- Not measured: data passed through queues, event buses or dependency
-  injection, free text sent to AI models, and languages other than those
-  listed.
+- Not measured: Kotlin, Swift and Scala; channel names built at runtime;
+  producers and consumers in different repositories.
 
 Treat the held-out first run (86% recall, 2 of 4 traps quiet) as the
 estimate, and expect real code to be harder.
