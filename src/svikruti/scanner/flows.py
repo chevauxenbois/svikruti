@@ -19,9 +19,12 @@ import/require, by construction from such an identifier, or a constant holding
 the vendor's URL. Arguments are followed one assignment back (``payload =
 {...}`` then ``sdk.send(payload)``). A wrapper is a function that passes one of
 its own parameters to a vendor call; a call to it counts only where the caller
-imports the wrapper's module (or shares its package). Dependency injection,
-dynamic dispatch, queues and event buses between caller and vendor are not
-followed.
+imports the wrapper's module (or shares its package), or names the interface
+or base class the wrapper's class implements (dependency injection: the caller
+holds a `NotificationService`, the container supplies `SmsNotificationService`).
+
+Queues, task runners and event buses are followed too (see ``channels``): data
+a producer publishes is attributed to every vendor its consumer reaches.
 """
 
 from __future__ import annotations
@@ -36,7 +39,7 @@ from svikruti.scanner.code import _code_outside_strings, _drop_record_identifier
 from svikruti.scanner.patterns import AI_PROVIDERS, CATEGORY_SEVERITY, THIRD_PARTY_PATTERNS, normalize_text
 from svikruti.scanner.semantic import _categories_for_text
 
-_FLOW_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".rb", ".go", ".java", ".kt", ".php", ".html", ".htm"}
+_FLOW_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".rb", ".go", ".java", ".kt", ".cs", ".php", ".html", ".htm"}
 _MAX_STATEMENT_LINES = 25
 _ASSIGN_LOOKBACK = 40
 
@@ -55,9 +58,14 @@ _BINDING_RES = (
     re.compile(r"^\s*use\s+[\w\\]+\\(\w+)\s*;"),                                                # use Vendor\Api\Client; (PHP)
     re.compile(rf"^\s*import\s+({_IDENT})\s+\""),                                                # import alias "pkg" (Go)
 )
+_ACCESSED_KEY_RE = re.compile(
+    r"""(?:(?<=[\w\])])\[\s*["']([A-Za-z_][\w-]*)["']\s*\]|(?:->|\.)\s*(?:input|get|getParameter|getString|param|params|query|post|json|value|getHeader|getAttribute|getValue)\s*\(\s*["']([A-Za-z_][\w-]*)["'])"""
+)
 _KEY_RE = re.compile(r"""["']([A-Za-z_][\w-]*)["']\s*(?::|=>)""")
 _IMPORT_LINE_RE = re.compile(r"^\s*(?:import\b|from\s+\S+\s+import\b|use\s|require_once|require\s*\(|#include)|\brequire\s*\(", re.IGNORECASE)
 _ASSIGN_RE = re.compile(rf"^\s*(?:const|let|var|val|final)?\s*(?:self\.|this\.|\$)?({_IDENT})\s*(?::[^=]+)?(?::=|=)(?!=)\s*(.+)$")
+_SDK_SETUP_RE = re.compile(r"^[.:>-]*\s*(?:init|initialize|configure|config|setup|set_up|setOptions|set_options|load|use)\s*\(", re.IGNORECASE)
+_ASSIGNMENT_RE = re.compile(r"^\s*(?:const|let|var|val|final)?\s*[\w$.\[\]\"']+\s*(?::[^=]+)?(?::=|=)(?!=)")
 _SKIP_HANDLES = {"const", "let", "var", "import", "from", "require", "new", "await", "return", "this", "self", "default", "as", "type"}
 
 
@@ -120,7 +128,12 @@ def _argument_text(statement: str) -> str:
     statement = _CONSTANT_PAIR_RE.sub(" ", statement)
     # Passing `customer_id` or `intent.id` hands over a record reference, not the record's data.
     statement = _drop_record_identifiers(statement)
-    return _code_outside_strings(statement) + " " + " ".join(_KEY_RE.findall(statement))
+    # String values sent to a vendor API are options ("expand": ["default_payment_method"]),
+    # not field names; keys are kept separately below.
+    # Field names read out of a request or a mapping are the data itself:
+    # $request->input('email'), request.POST["phone"], data.get("pan"), params.require(:user)
+    accessed = " ".join(part for pair in _ACCESSED_KEY_RE.findall(statement) for part in pair if part)
+    return _code_outside_strings(statement, keep_identifier_literals=False) + " " + " ".join(_KEY_RE.findall(statement)) + " " + accessed
 
 
 def _carries_its_inputs(value: str) -> bool:
@@ -174,6 +187,10 @@ def _handles_for(lines: List[str], needles: List[str]) -> Set[str]:
             # bedrock = boto3.client("bedrock-runtime")
             if "/" in literal or "." in literal or ("=" in before_literal and "(" in before_literal.split("=", 1)[1]):
                 handles.update(_bound_names(before_literal))
+        # $mc = new \MailchimpMarketing\ApiClient();  var client = new Twilio.Clients.TwilioRestClient(sid, token);
+        namespaced = re.match(r"^\s*(?:(?:var|val|const|let|final|auto)\s+|[\w<>\[\]]+\s+)?(\$?[A-Za-z_]\w*)\s*=\s*new\s+\\?([\w\\.]+)\s*\(", line)
+        if namespaced and any(needle in namespaced.group(2).lower() for needle in lowered_needles):
+            handles.add(namespaced.group(1).lstrip("$"))
     handles |= _typed_as(lines, handles | _needle_handles(needles))
     seeds = handles | _needle_handles(needles)
     # Construction: client = razorpay.Client(...), const rzp = new Razorpay({...}), mp = Mixpanel(token)
@@ -347,7 +364,7 @@ def _param_names(signature: str, suffix: str) -> List[str]:
         if part.startswith(("{", "[")):  # JS destructuring: ({ email, phone })
             names.extend(re.findall(r"[A-Za-z_$][\w$]*", part.split(":")[0] if "}" not in part else part[: part.index("}")]))
             continue
-        if suffix in {".java"}:
+        if suffix in {".java", ".cs"}:
             idents = re.findall(r"[A-Za-z_]\w*", part)
             names.extend(idents[-1:])
         else:  # Python, JS/TS, Kotlin (name: Type), Go (name Type)
@@ -476,6 +493,8 @@ def scan_processor_flows(repo_path: str) -> List[Evidence]:
     wrappers: List[_Wrapper] = []
     reported: Set[Tuple[str, int, str, str]] = set()
 
+    sinks: Dict[str, List[Tuple[int, str]]] = {}  # file -> (line index, processor) of every vendor or wrapper call
+
     # Pass 1: direct calls on a vendor SDK, and the functions that wrap them.
     for source in files:
         present = {name: needles for name, needles in THIRD_PARTY_PATTERNS.items() if any(needle.lower() in source.lowered for needle in needles)}
@@ -483,26 +502,74 @@ def scan_processor_flows(repo_path: str) -> List[Evidence]:
             handles = _handles_for(source.lines, needles)
             call_targets = handles | _needle_handles(needles)
             for index in _call_sites(source, handles, call_targets):
+                sinks.setdefault(source.rel, []).append((index, name))
                 evidence.extend(_site_evidence(source, index, name, call_targets, reported))
                 _note_wrapper(source, index, name, 1, wrappers)
 
     # Pass 2: calls to those wrappers, anywhere in the repository.
-    current = wrappers[:_MAX_WRAPPERS]
-    for _ in range(_WRAPPER_ROUNDS):
+    _follow_wrappers(files, wrappers, wrappers[:_MAX_WRAPPERS], evidence, reported, sinks)
+
+    # Pass 3: queues, task runners and event buses. A producer's payload reaches
+    # every vendor its consumer's code calls.
+    if sinks:
+        from svikruti.scanner.channels import constants_of, find_consumers, find_producers
+
+        constants = constants_of(files)
+        reach: Dict[str, List[Tuple[object, str]]] = {}
+        consumers = find_consumers(files, constants)
+        # A task queue can run any plain function handed to it: q.enqueue(text_borrower, phone) (RQ, Huey, arq).
+        from svikruti.scanner.channels import Consumer
+
+        for source in files:
+            for function in source.functions:
+                if any(function.start <= index <= function.end for index, _ in sinks.get(source.rel, [])):
+                    consumers.append(Consumer(f"callable:{function.name.lower()}", source.rel, function.name, function.start, function.end))
+        for consumer in consumers:
+            for index, processor in sinks.get(consumer.rel, []):
+                if consumer.start <= index <= consumer.end and not any(p == processor and c.rel == consumer.rel and c.start == consumer.start for c, p in reach.get(consumer.channel, [])):
+                    reach.setdefault(consumer.channel, []).append((consumer, processor))
+        produced: List[_Wrapper] = []
+        if reach:
+            for source in files:
+                for producer in find_producers(source, constants):
+                    for consumer, processor in reach.get(producer.channel, []):
+                        if consumer.rel == source.rel and consumer.start <= producer.index <= consumer.end:
+                            continue  # the consumer re-publishing to its own channel
+                        hop = _Wrapper(consumer.name, consumer.rel, processor, consumer.start, consumer.end, 1)
+                        evidence.extend(_site_evidence(source, producer.index, processor, set(), reported, via=hop, channel=producer.channel))
+                        sinks.setdefault(source.rel, []).append((producer.index, processor))
+                        _note_wrapper(source, producer.index, processor, 2, produced)
+        known = {(w.rel, w.name, w.processor) for w in wrappers}
+        fresh = [w for w in produced if (w.rel, w.name, w.processor) not in known][:_MAX_WRAPPERS]
+        wrappers.extend(fresh)
+        _follow_wrappers(files, wrappers, fresh, evidence, reported, sinks, rounds=1)
+    return evidence
+
+
+def _follow_wrappers(
+    files: List[_SourceFile],
+    wrappers: List[_Wrapper],
+    current: List[_Wrapper],
+    evidence: List[Evidence],
+    reported: Set[Tuple[str, int, str, str]],
+    sinks: Dict[str, List[Tuple[int, str]]],
+    rounds: int = _WRAPPER_ROUNDS,
+) -> None:
+    for _ in range(rounds):
         if not current:
             break
         discovered: List[_Wrapper] = []
         for source in files:
             for wrapper in current:
-                if wrapper.name.lower() not in source.lowered or not _linked(source, wrapper):
+                if wrapper.name.lower() not in source.lowered or not _linked(source, wrapper, files):
                     continue
                 for index in _wrapper_call_sites(source, wrapper):
+                    sinks.setdefault(source.rel, []).append((index, wrapper.processor))
                     evidence.extend(_site_evidence(source, index, wrapper.processor, {wrapper.name}, reported, via=wrapper))
                     _note_wrapper(source, index, wrapper.processor, wrapper.depth + 1, discovered)
         known = {(w.rel, w.name, w.processor) for w in wrappers}
         current = [w for w in discovered if (w.rel, w.name, w.processor) not in known][:_MAX_WRAPPERS]
         wrappers.extend(current)
-    return evidence
 
 
 def _note_wrapper(source: _SourceFile, index: int, processor: str, depth: int, into: List[_Wrapper]) -> None:
@@ -521,7 +588,7 @@ def _note_wrapper(source: _SourceFile, index: int, processor: str, depth: int, i
         into.append(_Wrapper(function.name, source.rel, processor, function.start, function.end, depth))
 
 
-def _linked(source: _SourceFile, wrapper: _Wrapper) -> bool:
+def _linked(source: _SourceFile, wrapper: _Wrapper, files: Optional[List[_SourceFile]] = None) -> bool:
     """Does this file plausibly call *that* function, not another one with the same name?"""
     if source.rel == wrapper.rel:
         return True
@@ -531,11 +598,44 @@ def _linked(source: _SourceFile, wrapper: _Wrapper) -> bool:
             lowered = line.lower()
             if re.search(rf"(?<![\w$]){re.escape(name)}(?![\w$])", lowered) or (len(stem) > 2 and re.search(rf"(?<![\w$]){re.escape(stem)}(?![\w$])", lowered)):
                 return True
+    # Dependency injection: the caller holds the interface or base class, the container
+    # supplies the implementation that wraps the vendor.
+    owner = next((item for item in files or [] if item.rel == wrapper.rel), None)
+    if owner is not None:
+        for contract in _contracts(owner, wrapper.start):
+            if re.search(rf"(?<![\w$]){re.escape(contract)}(?![\w$])", source.lowered):
+                return True
     # Languages where siblings share a package without importing each other.
     suffix = source.path.suffix.lower()
     if suffix in _IMPLICIT_PACKAGE_SUFFIXES and suffix == Path(wrapper.rel).suffix.lower():
         return str(Path(source.rel).parent) == str(Path(wrapper.rel).parent)
     return False
+
+
+_CLASS_DECL_RE = re.compile(r"^(\s*)(?:export\s+)?(?:default\s+)?(?:(?:public|private|internal|final|abstract|sealed|open|data|partial|static)\s+)*class\s+([A-Za-z_]\w*)(.*)$")
+_GENERIC_CONTRACTS = {"object", "base", "model", "service", "basemodel", "exception", "abc", "generic", "component", "controller", "interface", "protocol", "handler", "client", "provider", "module"}
+
+
+def _contracts(source: _SourceFile, line: int) -> List[str]:
+    """Interfaces and base classes of the class that encloses ``line`` (lowercased), for DI linking."""
+    for index in range(min(line, len(source.lines) - 1), -1, -1):
+        match = _CLASS_DECL_RE.match(source.lines[index])
+        if not match:
+            continue
+        if len(match.group(1)) > len(source.lines[line]) - len(source.lines[line].lstrip()):
+            continue
+        header = " ".join(source.lines[index : index + 3])
+        header = header.split("{", 1)[0]
+        names: List[str] = []
+        py = re.search(r"class\s+\w+\s*\(([^)]*)\)", header)
+        if py and source.path.suffix.lower() == ".py":
+            names = re.findall(r"([A-Za-z_]\w*)\s*(?:,|$)", py.group(1))
+        else:
+            tail = re.search(r"(?:\bextends|\bimplements|:)\s+(.+)$", header.split("class", 1)[-1])
+            if tail:
+                names = re.findall(r"([A-Z]\w+)", re.sub(r"<[^>]*>", "", tail.group(1)))
+        return [name.lower() for name in names if len(name) >= 6 and name.lower() not in _GENERIC_CONTRACTS]
+    return []
 
 
 def _wrapper_call_sites(source: _SourceFile, wrapper: _Wrapper) -> List[int]:
@@ -551,6 +651,8 @@ def _wrapper_call_sites(source: _SourceFile, wrapper: _Wrapper) -> List[int]:
             continue  # the wrapper's own signature or a recursive call
         if any(function.start == index and function.name == wrapper.name for function in source.functions):
             continue  # another definition with the same name (method on a class, overload)
+        if re.search(rf"(?:^|[{{;])\s*(?:(?:public|private|protected|internal|static|abstract|default|final|synchronized|override|virtual|async)\s+)*[\w<>\[\],.?]+\s+{re.escape(wrapper.name)}\s*\([^)]*\)\s*(?:throws\s+[\w., ]+)?\s*;", line) and not re.match(r"^\s*(?:return|await|yield|throw|new|else)\b", line):
+            continue  # an interface or abstract method declaration: `void notifyUser(String phone);`
         if index not in sites:
             sites.append(index)
     return sites
@@ -589,17 +691,93 @@ def _call_sites(source: _SourceFile, handles: Set[str], call_targets: Set[str]) 
     for line_index, line in enumerate(lines):
         if _IMPORT_LINE_RE.search(line) or line.lstrip().startswith(("//", "#", "*", "/*")):
             continue
-        if target_re.search(line):
+        target = target_re.search(line)
+        if target and _SDK_SETUP_RE.search(line[target.end() - 1 :]):
+            continue  # sentry_sdk.init(...), mixpanel.init(token): configuration, not data
+        if target and target.group(0).rstrip().endswith("(") and starts[line_index] != line_index and re.search(r"[:,(=]\s*$", line[: target.start()]):
+            # The vendor client is a value inside a larger call, as in the Vercel AI SDK:
+            # generateText({ model: openai("gpt-4o"), prompt: `... ${user.email}` })
+            index = starts[line_index]
+        elif target:
             index = line_index
         elif argument_re and argument_re.search(line) and starts[line_index] != line_index:
             index = starts[line_index]
-        elif argument_re and argument_re.search(line) and "(" in line.split("=", 1)[-1]:
+        elif argument_re and argument_re.search(line) and "(" in (line.split("=", 1)[-1] if _ASSIGNMENT_RE.match(line) else line):
+            # requests.post(VENDOR_URL, json={...}): only an assignment's left side is skipped,
+            # never a keyword argument's.
             index = line_index
         else:
             continue
+        if re.search(r"(?:\.|::|->)\s*(?:init|initialize|configure|setup|set_up|setOptions)\s*\(", lines[index], re.IGNORECASE):
+            continue  # the enclosing statement configures an SDK (sentry_sdk.init(integrations=[...]))
         if "(" in _statement(lines, index) and index not in sites:
             sites.append(index)
     return sites
+
+
+FREE_TEXT = "Free text"
+_REQUEST_SOURCE_RE = re.compile(
+    r"(?:\b(?:req|request|ctx\.request|event|evt)\s*\.\s*(?:body|json|data|form|POST|GET|args|values|query|query_params|params|get_json|input|stream|text)\b"
+    r"|\$request\s*->\s*(?:input|get|all|post|json|string)\b|\$_(?:POST|GET|REQUEST)\b|(?<![\w.])params\s*\[|\bparams\.(?:require|permit|fetch)\b"
+    r"|\bformData\.get\s*\(|\b(?:ShouldBindJSON|ShouldBind|BindJSON|BodyParser|PostForm)\s*\(|\bc\.(?:Bind|Query|Param)\s*\("
+    r"|\bupdate\.message\.text\b|\bevent\s*\[\s*[\"']body[\"']\s*\]|\bst\.(?:chat_input|text_input|text_area)\s*\(|\binput\s*\(\s*[\"'])"
+)
+_FREE_FIELD = r"(?:prompt|question|query|message|messages|content|text|input|user_input|userinput|user_message|usermessage|chat_input|comment|feedback|transcript|conversation|history|description|notes?|body|utterance|instruction|instructions)"
+_HOLDER_PARAMS = {"req", "request", "body", "payload", "dto", "form", "data", "params", "input", "chat", "command", "cmd", "args"}
+_FIELD_OF_HOLDER_RE = re.compile(rf"(?<![\w$])({'|'.join(sorted(_HOLDER_PARAMS))})\s*(?:\.\s*(?:get_?)?{_FREE_FIELD}\b|\[\s*[\"']{_FREE_FIELD}[\"']\s*\]|\.get\s*\(\s*[\"']{_FREE_FIELD}[\"'])", re.IGNORECASE)
+_ROUTE_SIGNATURE_RE = re.compile(r"@(?:RequestBody|RequestParam|PathVariable|Body|Query|Param)\b|\bBody\s*\(|\bForm\s*\(|@(?:app|router|api|bp|blueprint)\.(?:post|put|patch|route|get|websocket)\b|@(?:Post|Put|Patch|Get)Mapping\b|@(?:Post|Put|Get|Patch)\s*\(|\b(?:req|request)\s*[:,)]", re.IGNORECASE)
+_DESTRUCTURE_RE = re.compile(r"^\s*(?:const|let|var)\s*\{([^}]*)\}\s*=\s*(.+)$")
+_REDACTION_RE = re.compile(
+    r"\b(?:redact\w*|scrub\w*|anonymi[sz]e\w*|pseudonymi[sz]e\w*|deidentify\w*|de_identify\w*|mask_?pii\w*|maskPII|strip_?pii\w*|remove_?pii\w*|sanitize_?pii\w*|sanitizePII|filter_?pii\w*|filterPII|pii_?(?:filter|scrub|redact|mask)\w*)\s*\("
+    r"|\b(?:AnalyzerEngine|AnonymizerEngine|BatchAnonymizerEngine|DeidentifyContent|deidentify_content|detect_pii_entities|DetectPiiEntities|scrubadub|presidio_\w+)\b"
+    r"|\bAnonymize\s*\(|\bllm_guard\b|\bscan_prompt\s*\(",
+)
+
+
+def _free_text_source(source: _SourceFile, index: int, statement: str, tokens: Set[str]) -> Optional[str]:
+    """Where user-typed text in an AI call comes from, or None. Redacted text counts as None."""
+    function = source.enclosing(index)
+    start = function.start if function is not None else max(0, index - _ASSIGN_LOOKBACK)
+    region = source.lines[start : index + 1]
+    reached = [statement]
+    names = {token.lstrip("$") for token in tokens} | set(_KEY_RE.findall(statement))
+    for _ in range(3):
+        grew = False
+        for assigned_at, variable, value in source.assignments:
+            if start <= assigned_at < index and variable in names and value not in reached:
+                if not (_carries_its_inputs(value) or _REQUEST_SOURCE_RE.search(value) or _REDACTION_RE.search(value)):
+                    continue  # `response = await client.create(...)` is the vendor's answer, not the user's text
+                reached.append(value)
+                names.update(re.findall(_IDENT, _code_outside_strings(value)))
+                grew = True
+        for offset, line in enumerate(region):
+            match = _DESTRUCTURE_RE.match(line)
+            if match and {part.split(":")[0].strip() for part in match.group(1).split(",")} & names and match.group(2) not in reached:
+                reached.append(match.group(2))
+                names.update(re.findall(_IDENT, _code_outside_strings(match.group(2))))
+                grew = True
+        if not grew:
+            break
+    text = "\n".join(reached)
+    found = _REQUEST_SOURCE_RE.search(text)
+    label = None
+    if found:
+        label = f"`{found.group(0).strip()}`"
+    else:
+        field_of = _FIELD_OF_HOLDER_RE.search(text)
+        params = set(function.params) if function is not None else set()
+        signature = "\n".join(source.lines[max(0, start - 3) : start + 3])
+        if field_of and field_of.group(1) in params and _ROUTE_SIGNATURE_RE.search(signature):
+            label = f"`{field_of.group(0).strip()}`"
+        elif function is not None and _ROUTE_SIGNATURE_RE.search(signature):
+            typed = [param for param in function.params if re.fullmatch(_FREE_FIELD, param, re.IGNORECASE) and param in names]
+            if typed:
+                label = f"request parameter `{typed[0]}`"
+    if label is None:
+        return None
+    if _REDACTION_RE.search("\n".join(region)) or _REDACTION_RE.search(text):
+        return None
+    return label
 
 
 def _site_evidence(
@@ -609,6 +787,7 @@ def _site_evidence(
     call_targets: Iterable[str],
     reported: Set[Tuple[str, int, str, str]],
     via: Optional[_Wrapper] = None,
+    channel: Optional[str] = None,
 ) -> List[Evidence]:
     lines = source.lines
     statement = _statement(lines, index)
@@ -621,6 +800,9 @@ def _site_evidence(
     for assigned_at, variable, value in source.assignments:
         if variable in tokens and variable not in targets and 0 < index - assigned_at <= _ASSIGN_LOOKBACK and _carries_its_inputs(value):
             hop.update(_categories_for_text(_argument_text(value)))
+    free_text = _free_text_source(source, index, statement, tokens) if name in AI_PROVIDERS else None
+    if free_text:
+        direct.add(FREE_TEXT)
     out: List[Evidence] = []
     for category in sorted(direct | hop):
         key = (source.rel, index, category, name)
@@ -629,7 +811,13 @@ def _site_evidence(
         reported.add(key)
         via_variable = category not in direct
         detector_id = f"flow.processor.{normalize_text(name)}.{normalize_text(category)}"
-        if via is not None:
+        if channel is not None and via is not None:
+            from svikruti.scanner.channels import describe
+
+            handler = f"`{via.name}()`" if not via.name.startswith("<") else "a consumer"
+            detail = f"{category} data is published to {describe(channel)}; {handler} ({via.rel}:{via.start + 1}) consumes it and calls {name}."
+            flow = "queue"
+        elif via is not None:
             detail = f"{category} data is passed to `{via.name}()` ({via.rel}:{via.start + 1}), which sends its arguments to {name}."
             flow = "wrapper"
         elif via_variable:
@@ -653,18 +841,34 @@ def _site_evidence(
         if via is not None:
             metadata["via"] = f"{via.rel}:{via.start + 1}:{via.name}"
             metadata["wrapper_depth"] = via.depth
+        if channel is not None:
+            metadata["channel"] = channel
         if name in AI_PROVIDERS:
             detail = detail.replace(f"a {name} call", f"a {name} model call (prompt or request payload)")
+        severity = CATEGORY_SEVERITY.get(category, "MEDIUM")
+        if category == FREE_TEXT:
+            severity = "HIGH"
+            metadata["free_text_source"] = free_text
+            reach = f"`{via.name}()`, which calls {name}" if via is not None else name
+            detail = (
+                f"Text a user typed ({free_text}) is sent to {reach} without redaction. It can carry any personal data "
+                "(names, phone numbers, IDs, health details); static analysis cannot tell which."
+            )
         out.append(
             Evidence(
                 kind="processor_data_flow",
                 label=f"{category} data sent to {name}",
-                severity=CATEGORY_SEVERITY.get(category, "MEDIUM"),
+                severity=severity,
                 source="data-flow",
                 file=source.rel,
                 line=index + 1,
                 detail=detail,
-                recommendation=f"Confirm {name} needs {category} data for the stated purpose, record it on the processor, and cover it in the contract and the notice.",
+                recommendation=(
+                    f"Redact personal data before the call (Presidio, scrubadub, llm-guard Anonymize, or your own redact()), or record free_text "
+                    f"on the activity and the {name} processor and under policies.ai_allowed_categories after review."
+                    if category == FREE_TEXT
+                    else f"Confirm {name} needs {category} data for the stated purpose, record it on the processor, and cover it in the contract and the notice."
+                ),
                 category="Third-party processors",
                 metadata=metadata,
             )

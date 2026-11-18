@@ -1,0 +1,371 @@
+# Queues, task runners, event buses, dependency injection and free text to AI
+# (0.11.0). Written after those detectors were built, using idioms the
+# development fixtures did not use, then run once before any change. That
+# first run is recorded in RESULTS.md.
+
+cases:
+  - id: py-dramatiq-actor
+    path: c/py/signup_view.py
+    code: |
+      from app.py.c.py.workers import sync_crm
+
+      def register(form):
+          user = save(form)
+          sync_crm.send(user.email, user.mobile_number)
+    extra_files:
+      c/py/workers.py: |
+        import dramatiq
+        from hubspot import HubSpot
+
+        hs = HubSpot(access_token=TOKEN)
+
+        @dramatiq.actor
+        def sync_crm(email, phone):
+            hs.crm.contacts.basic_api.create({"properties": {"email": email, "phone": phone}})
+    expect:
+      - {type: flow, vendor: HubSpot, category: Contact, at: 'sync_crm.send('}
+
+  - id: py-rq-enqueue
+    path: c/py/loan_api.py
+    code: |
+      from redis import Redis
+      from rq import Queue
+      from app.py.c.py.notify import text_borrower
+
+      q = Queue(connection=Redis())
+
+      def approve(application):
+          q.enqueue(text_borrower, application.phone_number, "approved")
+    extra_files:
+      c/py/notify.py: |
+        from twilio.rest import Client
+
+        twilio = Client(SID, TOKEN)
+
+        def text_borrower(phone, body):
+            twilio.messages.create(to=phone, from_=SENDER, body=body)
+    expect:
+      - {type: flow, vendor: Twilio, category: Contact, at: 'q.enqueue('}
+
+  - id: ts-nest-onevent
+    path: c/ts/orders.service.ts
+    code: |
+      import { EventEmitter2 } from "@nestjs/event-emitter";
+
+      export class OrdersService {
+        constructor(private readonly events: EventEmitter2) {}
+
+        async place(order: Order) {
+          this.events.emit("order.created", { email: order.customerEmail, city: order.shippingCity });
+        }
+      }
+    extra_files:
+      c/ts/analytics.listener.ts: |
+        import { OnEvent } from "@nestjs/event-emitter";
+        import { PostHog } from "posthog-node";
+
+        const posthog = new PostHog(KEY);
+
+        export class AnalyticsListener {
+          @OnEvent("order.created")
+          handle(payload: any) {
+            posthog.capture({ distinctId: payload.email, event: "order", properties: payload });
+          }
+        }
+    expect:
+      - {type: flow, vendor: PostHog, category: Contact, at: 'this.events.emit('}
+
+  - id: js-kafkajs
+    path: c/js/kyc_producer.js
+    code: |
+      const { Kafka } = require("kafkajs");
+      const producer = new Kafka({ brokers }).producer();
+
+      async function submitKyc(applicant) {
+        await producer.send({ topic: "kyc-requests", messages: [{ value: JSON.stringify({ pan: applicant.panNumber }) }] });
+      }
+    extra_files:
+      c/js/kyc_consumer.js: |
+        const { Kafka } = require("kafkajs");
+        const sendgrid = require("@sendgrid/mail");
+        const consumer = new Kafka({ brokers }).consumer({ groupId: "kyc" });
+
+        async function start() {
+          await consumer.subscribe({ topic: "kyc-requests" });
+          await consumer.run({
+            eachMessage: async ({ message }) => {
+              await sendgrid.send({ to: OPS, text: message.value.toString() });
+            },
+          });
+        }
+    expect:
+      - {type: flow, vendor: SendGrid, category: Government ID, at: 'producer.send({ topic'}
+
+  - id: js-amqplib
+    path: c/js/publisher.js
+    code: |
+      const amqp = require("amqplib");
+
+      async function welcome(channel, user) {
+        channel.sendToQueue("welcome-mails", Buffer.from(JSON.stringify({ email: user.email })));
+      }
+    extra_files:
+      c/js/mailer.js: |
+        const postmark = require("postmark");
+        const client = new postmark.ServerClient(TOKEN);
+
+        function start(channel) {
+          channel.consume("welcome-mails", (msg) => {
+            client.sendEmail({ To: JSON.parse(msg.content).email, Subject: "Welcome" });
+          });
+        }
+    expect:
+      - {type: flow, vendor: Postmark, category: Contact, at: 'channel.sendToQueue('}
+
+  - id: java-rabbit-listener
+    path: c/java/ReminderScheduler.java
+    code: |
+      package app.reminders;
+
+      public class ReminderScheduler {
+          private final RabbitTemplate rabbit;
+
+          void remind(Borrower borrower) {
+              rabbit.convertAndSend(Queues.REMINDERS, borrower.getMobileNumber());
+          }
+      }
+    extra_files:
+      c/java/Queues.java: |
+        package app.reminders;
+
+        public final class Queues {
+            public static final String REMINDERS = "emi-reminders";
+        }
+      c/java/ReminderWorker.java: |
+        package app.reminders;
+
+        import com.twilio.Twilio;
+
+        public class ReminderWorker {
+            @RabbitListener(queues = "emi-reminders")
+            public void onReminder(String mobile) {
+                Twilio.messages.create(mobile, "EMI due");
+            }
+        }
+    expect:
+      - {type: flow, vendor: Twilio, category: Contact, at: 'rabbit.convertAndSend('}
+
+  - id: rb-sidekiq
+    path: c/rb/orders_controller.rb
+    code: |
+      class OrdersController < ApplicationController
+        def create
+          order = Order.create!(order_params)
+          ReceiptWorker.perform_async(order.customer_email)
+        end
+      end
+    extra_files:
+      c/rb/receipt_worker.rb: |
+        class ReceiptWorker
+          include Sidekiq::Job
+
+          def perform(email)
+            Mailgun::Client.new(KEY).send_message(DOMAIN, { to: email })
+          end
+        end
+    expect:
+      - {type: flow, vendor: Mailgun, category: Contact, at: 'ReceiptWorker.perform_async('}
+
+  - id: php-laravel-event
+    path: c/php/RegisterController.php
+    code: |
+      <?php
+      class RegisterController {
+          public function store($request) {
+              $user = User::create($request->all());
+              event(new UserRegistered($user->email, $user->phone));
+          }
+      }
+    extra_files:
+      c/php/SyncToMailchimp.php: |
+        <?php
+        class SyncToMailchimp {
+            public function handle(UserRegistered $event) {
+                $mc = new \MailchimpMarketing\ApiClient();
+                $mc->lists->addListMember(LIST_ID, ["email_address" => $event->email]);
+            }
+        }
+    expect:
+      - {type: flow, vendor: Mailchimp, category: Contact, at: 'event(new UserRegistered('}
+
+  - id: go-nats
+    path: c/go/publish.go
+    code: |
+      package billing
+
+      func notify(nc *nats.Conn, c Customer) {
+      	nc.Publish("invoice.ready", []byte(c.Email))
+      }
+    extra_files:
+      c/go/subscribe.go: |
+        package billing
+
+        import "github.com/sendgrid/sendgrid-go"
+
+        func listen(nc *nats.Conn) {
+        	nc.Subscribe("invoice.ready", func(m *nats.Msg) {
+        		client := sendgrid.NewSendClient(key)
+        		client.Send(mail(string(m.Data)))
+        	})
+        }
+    expect:
+      - {type: flow, vendor: SendGrid, category: Contact, at: 'nc.Publish('}
+
+  - id: ts-di-interface
+    path: c/ts/loan.service.ts
+    code: |
+      import { Notifier } from "./notifier";
+
+      export class LoanService {
+        constructor(private readonly notifier: Notifier) {}
+
+        approve(applicant: Applicant) {
+          this.notifier.notifyApplicant(applicant.mobileNumber, "approved");
+        }
+      }
+    extra_files:
+      c/ts/notifier.ts: |
+        export interface Notifier {
+          notifyApplicant(phone: string, text: string): void;
+        }
+      c/ts/sms.notifier.ts: |
+        import twilio from "twilio";
+        const client = twilio(SID, TOKEN);
+
+        export class SmsNotifier implements Notifier {
+          notifyApplicant(phone: string, text: string) {
+            client.messages.create({ to: phone, body: text });
+          }
+        }
+    expect:
+      - {type: flow, vendor: Twilio, category: Contact, at: 'this.notifier.notifyApplicant('}
+
+  - id: cs-di-interface
+    path: c/cs/ApprovalHandler.cs
+    code: |
+      public class ApprovalHandler {
+          private readonly IMessageSender _sender;
+          public ApprovalHandler(IMessageSender sender) { _sender = sender; }
+
+          public void Approve(Applicant applicant) {
+              _sender.SendText(applicant.PhoneNumber, "approved");
+          }
+      }
+    extra_files:
+      c/cs/TwilioSender.cs: |
+        using Twilio.Rest.Api.V2010.Account;
+
+        public class TwilioSender : IMessageSender {
+            public void SendText(string phone, string body) {
+                MessageResource.Create(to: phone, body: body);
+            }
+        }
+    expect:
+      - {type: flow, vendor: Twilio, category: Contact, at: '_sender.SendText('}
+
+  - id: js-express-free-text
+    path: c/js/support_bot.js
+    code: |
+      const OpenAI = require("openai");
+      const openai = new OpenAI();
+
+      app.post("/support", async (req, res) => {
+        const answer = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: req.body.message }],
+        });
+        res.json(answer);
+      });
+    expect:
+      - {type: flow, vendor: OpenAI, category: Free text, at: 'openai.chat.completions.create('}
+
+  - id: py-django-free-text
+    path: c/py/assistant_view.py
+    code: |
+      import anthropic
+
+      claude = anthropic.Anthropic()
+
+      def ask(request):
+          question = request.POST["question"]
+          reply = claude.messages.create(model="claude", max_tokens=400, messages=[{"role": "user", "content": question}])
+          return JsonResponse({"answer": reply.content[0].text})
+    expect:
+      - {type: flow, vendor: Anthropic, category: Free text, at: 'claude.messages.create('}
+
+  - id: py-gemini-streamlit-free-text
+    path: c/py/chat_app.py
+    code: |
+      import streamlit as st
+      import google.generativeai as genai
+
+      model = genai.GenerativeModel("gemini-1.5-flash")
+      prompt = st.chat_input("Ask about your loan")
+      if prompt:
+          st.write(model.generate_content(prompt).text)
+    expect:
+      - {type: flow, vendor: Google Gemini, category: Free text, at: 'model.generate_content('}
+
+  # ---------------------------------------------------------------- traps
+  - id: py-free-text-redacted-trap
+    path: c/py/safe_assistant.py
+    code: |
+      from openai import OpenAI
+      from presidio_anonymizer import AnonymizerEngine
+
+      client = OpenAI()
+
+      def ask(request):
+          text = anonymizer.anonymize(text=request.json["message"], analyzer_results=analyze(request.json["message"])).text
+          return client.responses.create(model="gpt-4o", input=text)
+    expect:
+      - {type: none-flow}
+
+  - id: py-server-text-to-ai-trap
+    path: c/py/digest.py
+    code: |
+      from openai import OpenAI
+
+      client = OpenAI()
+
+      def weekly_digest(stats):
+          summary = f"Loans approved: {stats.approved}, rejected: {stats.rejected}"
+          return client.chat.completions.create(model="gpt-4o", messages=[{"role": "user", "content": summary}])
+    expect:
+      - {type: none-flow}
+
+  - id: js-event-without-vendor-trap
+    path: c/js/ui_events.js
+    code: |
+      const bus = new EventEmitter();
+
+      function onSave(user) {
+        bus.emit("profile.saved", { email: user.email });
+      }
+
+      bus.on("profile.saved", (payload) => {
+        renderToast("Saved " + payload.email);
+      });
+    expect:
+      - {type: none-flow}
+
+  - id: java-interface-declaration-trap
+    path: c/java/PaymentGateway.java
+    code: |
+      package pay;
+
+      public interface PaymentGateway {
+          void charge(String customerEmail, long amount);
+      }
+    expect:
+      - {type: none-flow}

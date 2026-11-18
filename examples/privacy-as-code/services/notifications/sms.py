@@ -15,3 +15,11 @@ def send_reminder(phone_number: str, template_id: str) -> None:
         timeout=10,
     )
     response.raise_for_status()
+
+
+def send_due_reminders(borrowers) -> None:
+    """Reminders run on consent: a borrower who withdraws stops getting them."""
+    for borrower in borrowers:
+        if not borrower.reminder_consent:
+            continue
+        send_reminder(borrower.phone_number, "emi_due")

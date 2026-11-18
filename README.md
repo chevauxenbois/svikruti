@@ -24,6 +24,7 @@ svikruti init --repo .     # write privacy.yaml from what the code does today
 svikruti check --repo .    # reconcile code against the manifest; exit 3 on drift
 svikruti sync --repo .     # show the manifest changes the code now needs
 svikruti init-github-action --mode check   # gate every pull request
+svikruti org ../svc-a ../svc-b ../svc-c     # one record, processor register and data map across services
 ```
 
 ```text
@@ -41,12 +42,20 @@ Privacy gate failed: 3 finding(s) at HIGH or above
   code outside any declared activity, stale declarations, incomplete records.
 - **Processor data flows.** Not just "this code uses Mixpanel" but which data
   categories are passed to it, followed through wrapper functions across
-  files and checked against the processor's record.
+  files, dependency injection, and queues, task runners and event buses
+  (Celery, Kafka, RabbitMQ, SQS, BullMQ, NestJS, Spring, Sidekiq, Laravel),
+  and checked against the processor's record.
 - **AI in the data map.** Personal data in prompts to OpenAI, Anthropic,
-  Gemini, Bedrock and others is a processor flow, held to an allowlist.
+  Gemini, Bedrock and others is a processor flow, held to an allowlist. A
+  chat box passed straight to the model is tracked as free text unless it is
+  redacted first.
 - **Stored data you can defend.** Every table and model with personal data,
   whether high-risk fields are encrypted or tokenised (Aadhaar Data Vault),
-  and whether any erasure or retention code reaches it.
+  whether any erasure or retention code reaches it, and whether a person's
+  erasure request (the route, mutation or job it enters through) actually
+  reaches that code.
+- **Consent checked in code.** For processing that relies on consent, every
+  hand-off to a processor must sit behind a consent check.
 - **Policy as code.** No personal data in logs, forbidden categories, DPIA
   required for high-risk data, transfer allow-list, time-boxed exceptions.
 - **One evidence base, many frameworks.** 24 framework-neutral obligations
@@ -58,6 +67,12 @@ Privacy gate failed: 3 finding(s) at HIGH or above
   to `privacy.yaml`; what needs a person stays a TODO.
 - **Adoptable.** Baselines and line-independent fingerprints mean only what a
   pull request introduces can block it.
+- **Organisation-wide.** `svikruti org` merges every service into one
+  processing record, one processor register (flagging a vendor recorded with
+  different countries or contracts in different services) and one data map.
+- **Measured recall.** Planted leaks in seven languages, with a held-out set
+  written after tuning: 18/21 caught on its first run. See
+  [benchmarks/recall](benchmarks/recall/RESULTS.md).
 
 Worked example: [examples/privacy-as-code](examples/privacy-as-code) ·
 sample report: [examples/sample-privacy-check](examples/sample-privacy-check) ·
@@ -353,10 +368,20 @@ documentation emails, weak-hash names in comments). After fixing them:
 | saleor | 4,638 | 23 LOW | 29 | 2 | MD5 used for cache keys (2) |
 
 All 11 remaining findings match what the code does; whether SHA-1 or MD5 is
-acceptable in each place is a judgement call. Recall was not measured: a grep
-for logging calls that mention personal fields in saleor found none the
-scanner missed, which is weak evidence, not a recall figure. The risk score
-separates defects from data exposure and is not comparable with 0.8.x.
+acceptable in each place is a judgement call. The risk score separates
+defects from data exposure and is not comparable with 0.8.x.
+
+**Recall** (what the scanner misses) is measured separately in
+[benchmarks/recall](benchmarks/recall/RESULTS.md): known leaks planted in
+Python, TypeScript/JavaScript, Go, Java, Ruby, PHP and C#, covering logging,
+third-party and AI data flows, vendor detection, field protection and
+erasure. The baseline set caught 33/53 (62%) before tuning. A held-out set
+written afterwards caught 18/21 (86%) on its first run, with 2 of 4 traps
+quiet. After fixes, all 74 planted leaks are found inside healthchecks,
+saleor and a Next.js/Stripe starter, and the CRITICAL/HIGH defect counts
+above are unchanged. A third set for queues, dependency injection and free
+text sent to AI caught 9/14 on its first run; see the results for what it
+missed.
 
 How to read this:
 

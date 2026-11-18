@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -17,6 +19,16 @@ from svikruti.pac.taxonomy import at_least, category_label
 SCHEMA_VERSION = "svikruti-privacy-check-v1"
 
 
+def _ai_slugs() -> set:
+    from svikruti.pac.taxonomy import slugify
+    from svikruti.scanner.patterns import AI_PROVIDERS
+
+    return {slugify(name) for name in AI_PROVIDERS}
+
+
+_AI_PROVIDER_SLUGS = _ai_slugs()
+
+
 @dataclass
 class CheckResult:
     manifest: Manifest
@@ -29,6 +41,7 @@ class CheckResult:
     baseline_fingerprints: Optional[set] = None
     activities_view: List[Dict[str, Any]] = field(default_factory=list)
     inventory: List[Dict[str, Any]] = field(default_factory=list)
+    consent: Dict[str, Any] = field(default_factory=dict)
 
     # -- findings ---------------------------------------------------------
     def open_findings(self) -> List[Finding]:
@@ -87,6 +100,20 @@ class CheckResult:
             "generated_at": self.generated_at,
             "manifest": self.manifest.path,
             "repo": self.scan.repo_path,
+            "organization": self.manifest.organization,
+            "processors": [
+                {
+                    "id": processor.id,
+                    "name": processor.name,
+                    "purpose": processor.purpose,
+                    "country": processor.country,
+                    "contract": processor.contract,
+                    "transfer_mechanism": processor.transfer_mechanism,
+                    "data_categories": [category_label(slug) for slug in processor.data_categories],
+                    "ai_provider": processor.id in self.model.ai_processors or processor.id in _AI_PROVIDER_SLUGS,
+                }
+                for processor in self.manifest.processors
+            ],
             "summary": {
                 "activities": len(self.manifest.activities),
                 "processors": len(self.manifest.processors),
@@ -104,7 +131,9 @@ class CheckResult:
             "obligations": [assessment.to_dict() for assessment in self.assessments],
             "matrix": [row for pack in self.packs for row in self.framework_matrix(pack)],
             "activities": self.activities_view,
-            "inventory": self.inventory,
+            "inventory": [{key: value for key, value in row.items() if not key.startswith("_")} for row in self.inventory],
+            "rights_request_entrypoints": (self.inventory[0].get("_rights_entries") if self.inventory else None) or [],
+            "consent_check": self.consent,
             "manifest_warnings": self.manifest.warnings,
             "scan_summary": self.scan.summary.to_dict(),
             "disclaimers": [
@@ -144,6 +173,12 @@ def run_check(
     # The inventory needs the activity view; storage findings need the inventory.
     result.inventory = build_inventory(scan, result)
     findings.extend(_storage_findings(result.inventory, manifest))
+    from svikruti.pac.consent import consent_findings
+    from svikruti.pac.inventory import production_files
+
+    consent = consent_findings(scan, model, manifest, root, production_files(Path(root)) if root else [])
+    findings.extend(consent.findings)
+    result.consent = {"activities": consent.activities, "flows_checked": consent.checked_flows, "flows_guarded": consent.guarded_flows}
     result.findings = finalize_findings(findings, manifest, today, root)
     result.activities_view = _activities_view(manifest, model, result.findings)
     context = Context(result=scan, manifest=manifest, model=model, findings=result.findings, today=today)
@@ -151,6 +186,56 @@ def run_check(
     if baseline is not None:
         result.baseline_fingerprints = {item.get("fingerprint") for item in baseline.get("findings", []) if item.get("status", "open") == "open"}
     return result
+
+
+def _rights_request_findings(inventory: List[Dict[str, Any]], stores: Dict[str, List[Dict[str, Any]]]) -> List[Finding]:
+    """D011: stores that erasure code deletes, but no rights-request entry point reaches that code."""
+    from svikruti.pac.taxonomy import HIGH_RISK_CATEGORIES, category_slug
+
+    erased = {
+        store: rows
+        for store, rows in stores.items()
+        if rows[0].get("erasure", "").startswith(("reached", "cascade")) and not rows[0].get("rights_request")
+    }
+    if not erased:
+        return []
+    entries = (inventory[0].get("_rights_entries") if inventory else None) or []
+    categories = sorted({category_slug(row["data_category"]) for rows in erased.values() for row in rows})
+    severity = "HIGH" if set(categories) & HIGH_RISK_CATEGORIES else "MEDIUM"
+    if not entries:
+        return [
+            Finding(
+                rule="D011",
+                severity=severity,
+                detail=(
+                    f"Erasure code exists for {len(erased)} store(s) ({', '.join(sorted(erased))}), but no rights-request entry point was found: "
+                    "no erasure or account-deletion route, mutation, DSAR handler or command. Nothing shows that a person's request reaches this code."
+                ),
+                category=",".join(categories),
+                fields=["*"],
+                refs=[f"{rows[0]['file']}:{rows[0]['line']}" for rows in list(erased.values())[:8]],
+            )
+        ]
+    out = []
+    for store, rows in sorted(erased.items()):
+        how = rows[0]["erasure"].replace("reached by ", "")
+        entry_text = "; ".join(entries[:3]) + (f" and {len(entries) - 3} more" if len(entries) > 3 else "")
+        if re.search(r"expire|expiry|retention|retain|stale|old|ttl|cleanup|clean_up|prune|housekeep", how, re.IGNORECASE):
+            detail = f"`{store}` is deleted only by a retention job, {how}. An erasure request ({entry_text}) leaves it in place until then."
+        else:
+            detail = f"`{store}` is deleted by {how}, but no rights-request entry point ({entry_text}) reaches that code."
+        out.append(
+            Finding(
+                rule="D011",
+                severity="HIGH" if {category_slug(row["data_category"]) for row in rows} & HIGH_RISK_CATEGORIES else "MEDIUM",
+                detail=detail,
+                activity=rows[0].get("activity", ""),
+                category=",".join(sorted({category_slug(row["data_category"]) for row in rows})),
+                fields=[store],
+                refs=[f"{rows[0]['file']}:{rows[0]['line']}"],
+            )
+        )
+    return out
 
 
 def _storage_findings(inventory: List[Dict[str, Any]], manifest: Manifest) -> List[Finding]:
@@ -196,6 +281,7 @@ def _storage_findings(inventory: List[Dict[str, Any]], manifest: Manifest) -> Li
             )
         )
         return findings
+    findings.extend(_rights_request_findings(inventory, stores))
     for store, rows in sorted(uncovered.items()):
         categories = sorted({category_slug(row["data_category"]) for row in rows})
         findings.append(

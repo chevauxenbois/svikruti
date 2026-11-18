@@ -1,0 +1,321 @@
+# Held-out cases: written after the detectors were tuned on cases.yaml
+# (2026-11-16) and never used to tune them. Results on this file are the
+# honest estimate; cases.yaml results are not, because the misses it found
+# were fixed.
+
+cases:
+  - id: py-loguru
+    path: h/py/loguru_use.py
+    code: |
+      from loguru import logger
+
+      def deliver(order, customer):
+          logger.info("delivering {} to {}", order.id, customer.home_address)
+    expect:
+      - {type: log, category: Location, at: 'logger.info("delivering'}
+
+  - id: py-log-exception-context
+    path: h/py/payout.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def payout(merchant):
+          try:
+              transfer(merchant)
+          except Exception:
+              logger.exception("payout failed for account %s ifsc %s", merchant.bank_account, merchant.ifsc)
+    expect:
+      - {type: log, category: Financial, at: 'logger.exception("payout failed'}
+
+  - id: py-log-bool-flag-trap
+    path: h/py/flags.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def report(user):
+          logger.info("verified=%s", user.email_verified)
+          logger.info("phone validation failed")
+          logger.debug("password reset email sent")
+    expect:
+      - {type: none-log}
+
+  - id: py-razorpay-customer
+    path: h/py/rzp.py
+    code: |
+      import razorpay
+
+      rzp = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
+
+      def create_customer(borrower):
+          return rzp.customer.create({"name": borrower.full_name, "email": borrower.email, "contact": borrower.mobile_number})
+    expect:
+      - {type: flow, vendor: Razorpay, category: Contact, at: 'rzp.customer.create('}
+
+  - id: py-hubspot-contact
+    path: h/py/crm_sync.py
+    code: |
+      from hubspot import HubSpot
+
+      api = HubSpot(access_token=TOKEN)
+
+      def sync(lead):
+          properties = {"email": lead.email, "firstname": lead.first_name, "phone": lead.phone_number}
+          api.crm.contacts.basic_api.create(simple_public_object_input_for_create={"properties": properties})
+    expect:
+      - {type: flow, vendor: HubSpot, category: Contact, at: 'api.crm.contacts.basic_api.create('}
+
+  - id: py-gemini-chat
+    path: h/py/gemini_bot.py
+    code: |
+      import google.generativeai as genai
+
+      model = genai.GenerativeModel("gemini-1.5-flash")
+
+      def explain_bill(customer):
+          return model.generate_content(f"Explain the bill for {customer.full_name}, account {customer.account_number}")
+    expect:
+      - {type: flow, vendor: Google Gemini, category: Financial, at: 'model.generate_content('}
+
+  - id: py-vendor-comment-trap
+    path: h/py/comments.py
+    code: |
+      # We evaluated Stripe, Twilio and Mixpanel but chose in-house tools.
+      def stripe_whitespace(value):
+          return value.strip()
+    expect:
+      - {type: none-vendor}
+
+  - id: py-pydantic-dto-trap
+    path: h/py/schemas.py
+    code: |
+      from pydantic import BaseModel
+
+      class SignupRequest(BaseModel):
+          email: str
+          aadhaar: str
+    expect:
+      - {type: erasure, store: SignupRequest, covered: false}
+
+  - id: py-tokenised-field
+    path: h/py/vault/models.py
+    extra_files:
+      h/py/vault/service.py: |
+        from .models import Borrower
+        from .vault_client import tokenize
+
+        def save_borrower(form):
+            return Borrower.objects.create(full_name=form["name"], pan_number=tokenize(form["pan"]))
+    code: |
+      from django.db import models
+
+      class Borrower(models.Model):
+          full_name = models.CharField(max_length=120)
+          pan_number = models.CharField(max_length=64)
+    expect:
+      - {type: protection, field: pan_number, kinds: [tokenised]}
+      - {type: protection, field: full_name, kinds: [none]}
+
+  - id: py-retention-job
+    path: h/py/events/models.py
+    extra_files:
+      h/py/events/jobs.py: |
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import LoginEvent
+
+        def purge_old_login_events():
+            LoginEvent.objects.filter(created__lt=timezone.now() - timedelta(days=90)).delete()
+    code: |
+      from django.db import models
+
+      class LoginEvent(models.Model):
+          ip_address = models.GenericIPAddressField()
+          device_id = models.CharField(max_length=64)
+          created = models.DateTimeField(auto_now_add=True)
+    expect:
+      - {type: erasure, store: LoginEvent, covered: true}
+
+  - id: ts-console-warn-spread
+    path: h/ts/address.ts
+    code: |
+      export function validate(address: Address) {
+        if (!address.pincode) {
+          console.warn("invalid address", { ...address, pincode: address.pincode });
+        }
+      }
+    expect:
+      - {type: log, category: Location, at: 'console.warn("invalid address"'}
+
+  - id: ts-nest-logger
+    path: h/ts/users.service.ts
+    code: |
+      import { Injectable, Logger } from "@nestjs/common";
+
+      @Injectable()
+      export class UsersService {
+        private readonly logger = new Logger(UsersService.name);
+
+        async create(dto: CreateUserDto) {
+          this.logger.log(`Creating user ${dto.email}`);
+        }
+      }
+    expect:
+      - {type: log, category: Contact, at: 'this.logger.log(`Creating user'}
+
+  - id: ts-segment-node
+    path: h/ts/segment.ts
+    code: |
+      import { Analytics } from "@segment/analytics-node";
+
+      const analytics = new Analytics({ writeKey: process.env.SEGMENT_KEY! });
+
+      export function identify(user: User) {
+        analytics.identify({ userId: user.id, traits: { email: user.email, phone: user.phoneNumber } });
+      }
+    expect:
+      - {type: flow, vendor: Segment, category: Contact, at: 'analytics.identify({'}
+
+  - id: ts-twilio-wrapper
+    path: h/ts/otp.ts
+    extra_files:
+      h/ts/sms.ts: |
+        import twilio from "twilio";
+
+        const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+
+        export function sendSms(to: string, body: string) {
+          return client.messages.create({ to, from: process.env.TWILIO_FROM, body });
+        }
+    code: |
+      import { sendSms } from "./sms";
+
+      export async function sendOtp(user: User, code: string) {
+        await sendSms(user.phoneNumber, `Your code is ${code}`);
+      }
+    expect:
+      - {type: flow, vendor: Twilio, category: Contact, at: 'await sendSms(user.phoneNumber'}
+
+  - id: ts-anthropic-system-prompt
+    path: h/ts/support_bot.ts
+    code: |
+      import Anthropic from "@anthropic-ai/sdk";
+      const client = new Anthropic();
+
+      export async function answer(ticket: Ticket) {
+        const system = `You help ${ticket.customerName}. Their account email is ${ticket.customerEmail}.`;
+        return client.messages.create({ model: "claude", system, messages: [{ role: "user", content: ticket.body }] });
+      }
+    expect:
+      - {type: flow, vendor: Anthropic, category: Contact, at: 'return client.messages.create('}
+
+  - id: ts-ids-to-stripe-trap
+    path: h/ts/portal.ts
+    code: |
+      import Stripe from "stripe";
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+      export async function portal(customerId: string) {
+        return stripe.billingPortal.sessions.create({ customer: customerId, return_url: "https://acme.test/account" });
+      }
+    expect:
+      - {type: none-flow}
+
+  - id: ts-typeorm-entity
+    path: h/ts/customer.entity.ts
+    code: |
+      import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+
+      @Entity()
+      export class Customer {
+        @PrimaryGeneratedColumn()
+        id: number;
+
+        @Column()
+        email: string;
+
+        @Column({ transformer: encryptionTransformer })
+        aadhaar: string;
+      }
+    expect:
+      - {type: protection, field: aadhaar, kinds: [encrypted]}
+      - {type: protection, field: email, kinds: [none]}
+
+  - id: go-slog
+    path: h/go/slog.go
+    code: |
+      package app
+
+      import "log/slog"
+
+      func Login(u User) {
+      	slog.Info("login", "email", u.Email, "ip_address", u.IP)
+      }
+    expect:
+      - {type: log, category: Contact, at: 'slog.Info("login"'}
+
+  - id: go-fmt-println-trap
+    path: h/go/count.go
+    code: |
+      package app
+
+      import "fmt"
+
+      func Report(n int) {
+      	fmt.Println("emails sent:", n)
+      }
+    expect:
+      - {type: none-log}
+
+  - id: java-log4j-concat
+    path: h/java/KycController.java
+    code: |
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+
+      public class KycController {
+          private static final Logger logger = LogManager.getLogger(KycController.class);
+
+          public void verify(KycRequest req) {
+              logger.debug("Verifying aadhaar " + req.getAadhaarNumber());
+          }
+      }
+    expect:
+      - {type: log, category: Government ID, at: 'logger.debug("Verifying aadhaar'}
+
+  - id: rb-logger-tagged
+    path: h/rb/payments_job.rb
+    code: |
+      class PaymentsJob
+        def perform(payment)
+          Rails.logger.tagged("payments") { Rails.logger.warn("failed card #{payment.card_last4} for #{payment.email}") }
+        end
+      end
+    expect:
+      - {type: log, category: Contact, at: 'Rails.logger.tagged'}
+
+  - id: php-monolog
+    path: h/php/Signup.php
+    code: |
+      <?php
+      class Signup {
+          public function handle($user, $logger) {
+              $logger->info('signup', ['phone_number' => $user->phone_number]);
+          }
+      }
+    expect:
+      - {type: log, category: Contact, at: "$logger->info('signup'"}
+
+  - id: cs-serilog
+    path: h/cs/OrderService.cs
+    code: |
+      public class OrderService
+      {
+          public void Ship(Order order)
+          {
+              Log.Information("Shipping to {Address} for {Email}", order.ShippingAddress, order.CustomerEmail);
+          }
+      }
+    expect:
+      - {type: log, category: Contact, at: 'Log.Information("Shipping'}

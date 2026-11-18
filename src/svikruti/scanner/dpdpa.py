@@ -585,6 +585,7 @@ def _flow_label(kind: str) -> str:
 # Synonym sets used to check whether a privacy notice discloses a detected
 # data category. Matching is case-insensitive on normalized notice text.
 NOTICE_CATEGORY_SYNONYMS: Dict[str, List[str]] = {
+    "Free text": ["chat", "messages you", "conversation", "prompts", "content you", "what you type", "information you enter", "your inputs", "ai model", "artificial intelligence"],
     "Identity": ["identity", "name", "profile", "username", "date of birth"],
     "Contact": ["contact", "email", "e-mail", "phone", "mobile", "telephone", "phone number", "postal address"],
     "Government ID": [

@@ -1,0 +1,1999 @@
+{
+  "schema_version": "svikruti-org-v1",
+  "generated_at": "2026-11-16T16:14:05.968999+00:00",
+  "svikruti_version": "0.11.0",
+  "repositories": [
+    {
+      "name": "lending",
+      "source": "artifacts/lending/privacy-check.json",
+      "organization": {
+        "name": "LendFlow Financial Services",
+        "role": "controller",
+        "privacy_contact": "privacy@lendflow.example"
+      },
+      "generated_at": "2026-11-16T16:14:05.697567+00:00",
+      "activities": 3,
+      "processors": 2,
+      "open_findings": 0,
+      "open_by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "frameworks": {
+        "dpdpa": {
+          "verified": 19,
+          "applicable": 23,
+          "failing": 0
+        },
+        "gdpr": {
+          "verified": 19,
+          "applicable": 23,
+          "failing": 0
+        },
+        "iso27701": {
+          "verified": 19,
+          "applicable": 23,
+          "failing": 0
+        }
+      }
+    },
+    {
+      "name": "payments",
+      "source": "artifacts/payments/privacy-check.json",
+      "organization": {
+        "name": "LendFlow Financial Services",
+        "role": "controller",
+        "privacy_contact": "privacy@lendflow.example"
+      },
+      "generated_at": "2026-11-16T16:14:05.402656+00:00",
+      "activities": 3,
+      "processors": 2,
+      "open_findings": 4,
+      "open_by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 4,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "frameworks": {
+        "dpdpa": {
+          "verified": 13,
+          "applicable": 23,
+          "failing": 6
+        },
+        "gdpr": {
+          "verified": 13,
+          "applicable": 23,
+          "failing": 6
+        },
+        "iso27701": {
+          "verified": 13,
+          "applicable": 23,
+          "failing": 6
+        }
+      }
+    }
+  ],
+  "summary": {
+    "repositories": 2,
+    "activities": 6,
+    "open_findings": 4,
+    "open_by_severity": {
+      "CRITICAL": 0,
+      "HIGH": 4,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "stored_fields": 20
+  },
+  "frameworks": [
+    {
+      "id": "dpdpa",
+      "short_name": "DPDPA",
+      "clauses": 31,
+      "counts": {
+        "fail": 10,
+        "manual": 0,
+        "attested": 7,
+        "pass": 12,
+        "not_applicable": 2
+      },
+      "rows": [
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 15",
+          "control": "Transfer of personal data outside India",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 3",
+          "control": "Notice given by Data Fiduciary to Data Principal",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 6",
+          "control": "Security safeguards: encryption, obfuscation, masking or virtual tokens",
+          "obligations": [
+            "OBL-06",
+            "OBL-08",
+            "OBL-12",
+            "OBL-13",
+            "OBL-14",
+            "OBL-16",
+            "OBL-18"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 10(2)(c)",
+          "control": "Significant Data Fiduciary: DPIA and periodic audit rely on an accurate processing record",
+          "obligations": [
+            "OBL-01"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 16",
+          "control": "Processing of personal data outside India",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 5",
+          "control": "Notice",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 6(1)",
+          "control": "Consent limited to personal data necessary for the specified purpose",
+          "obligations": [
+            "OBL-05",
+            "OBL-20"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(1)",
+          "control": "Data Fiduciary responsible for compliance, including processing by its Data Processors",
+          "obligations": [
+            "OBL-01"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(2)",
+          "control": "Engaging a Data Processor only under a valid contract",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(5)",
+          "control": "Reasonable security safeguards to prevent personal data breach",
+          "obligations": [
+            "OBL-06",
+            "OBL-12",
+            "OBL-13",
+            "OBL-14",
+            "OBL-15",
+            "OBL-16",
+            "OBL-19"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 14",
+          "control": "Rights of Data Principals",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 7",
+          "control": "Intimation of personal data breach",
+          "obligations": [
+            "OBL-17",
+            "OBL-24"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 6(10)",
+          "control": "Data Fiduciary to prove that notice was given and consent obtained",
+          "obligations": [
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 6(4)",
+          "control": "Right to withdraw consent, with ease comparable to giving it",
+          "obligations": [
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(6)",
+          "control": "Intimation of personal data breach to the Board and affected Data Principals",
+          "obligations": [
+            "OBL-17",
+            "OBL-24"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 9(3)",
+          "control": "No tracking, behavioural monitoring or targeted advertising directed at children",
+          "obligations": [
+            "OBL-20"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Secs. 11-14",
+          "control": "Rights of Data Principal: access, correction and erasure, grievance redressal, nomination",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 13",
+          "control": "Additional obligations of Significant Data Fiduciary",
+          "obligations": [
+            "OBL-10"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 8",
+          "control": "Time period for the specified purpose to be deemed no longer served",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 9",
+          "control": "Contact information of person to answer questions about processing",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 10(2)(c)(i)",
+          "control": "Periodic Data Protection Impact Assessment (Significant Data Fiduciary)",
+          "obligations": [
+            "OBL-10"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 4(1)",
+          "control": "Processing only for a lawful purpose",
+          "obligations": [
+            "OBL-02",
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 5(1)(i)",
+          "control": "Notice states the personal data and the purpose of processing",
+          "obligations": [
+            "OBL-02"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 6",
+          "control": "Consent",
+          "obligations": [
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 7",
+          "control": "Certain legitimate uses",
+          "obligations": [
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(10)",
+          "control": "Effective mechanism to redress grievances",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(4)",
+          "control": "Appropriate technical and organisational measures",
+          "obligations": [
+            "OBL-15",
+            "OBL-19"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(7)",
+          "control": "Erasure when the specified purpose is no longer served or consent is withdrawn",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 8(9)",
+          "control": "Publish business contact information of the DPO or person answering on behalf of the Data Fiduciary",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Rule 10",
+          "control": "Verifiable consent for processing personal data of a child",
+          "obligations": [
+            "OBL-11"
+          ],
+          "status": "not_applicable",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "dpdpa",
+          "ref": "Sec. 9",
+          "control": "Processing of personal data of children",
+          "obligations": [
+            "OBL-11"
+          ],
+          "status": "not_applicable",
+          "failing": [],
+          "unverified": []
+        }
+      ]
+    },
+    {
+      "id": "gdpr",
+      "short_name": "GDPR",
+      "clauses": 42,
+      "counts": {
+        "fail": 15,
+        "manual": 0,
+        "attested": 9,
+        "pass": 17,
+        "not_applicable": 1
+      },
+      "rows": [
+        {
+          "framework": "gdpr",
+          "ref": "Art. 13",
+          "control": "Information to be provided where data are collected from the data subject",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 14",
+          "control": "Information where data have not been obtained from the data subject",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 25(2)",
+          "control": "Data protection by default",
+          "obligations": [
+            "OBL-05"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 28(1)",
+          "control": "Processors providing sufficient guarantees",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 28(3)",
+          "control": "Processing by a processor governed by a contract",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 30(1)",
+          "control": "Records of processing activities",
+          "obligations": [
+            "OBL-01"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 30(1)(d)",
+          "control": "Categories of recipients recorded",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 30(1)(e)",
+          "control": "Transfers to third countries recorded",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 32(1)",
+          "control": "Security of processing",
+          "obligations": [
+            "OBL-06"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 44",
+          "control": "General principle for transfers",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 46",
+          "control": "Transfers subject to appropriate safeguards",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(1)(a)",
+          "control": "Lawfulness, fairness and transparency",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(1)(c)",
+          "control": "Data minimisation",
+          "obligations": [
+            "OBL-05",
+            "OBL-06"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(1)(f)",
+          "control": "Integrity and confidentiality",
+          "obligations": [
+            "OBL-06",
+            "OBL-12"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(2)",
+          "control": "Accountability",
+          "obligations": [
+            "OBL-01"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 12(3)",
+          "control": "Responding to data subject requests within one month",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 33(1)",
+          "control": "Becoming aware of a personal data breach",
+          "obligations": [
+            "OBL-16",
+            "OBL-24"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 33(5)",
+          "control": "Documenting personal data breaches",
+          "obligations": [
+            "OBL-24"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 6(1)(a)",
+          "control": "Consent as lawful basis",
+          "obligations": [
+            "OBL-20"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 7",
+          "control": "Conditions for consent",
+          "obligations": [
+            "OBL-20"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 7(1)",
+          "control": "Demonstrating that consent was given",
+          "obligations": [
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 7(3)",
+          "control": "Withdrawal of consent as easy as giving it",
+          "obligations": [
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Arts. 15-22",
+          "control": "Rights of the data subject",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Directive 2002/58/EC Art. 5(3)",
+          "control": "Storing or accessing information on terminal equipment (ePrivacy)",
+          "obligations": [
+            "OBL-20"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 13(1)(a)-(b)",
+          "control": "Identity and contact details of the controller and DPO",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 25(1)",
+          "control": "Data protection by design",
+          "obligations": [
+            "OBL-19"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 30(1)(b)",
+          "control": "Purposes of the processing recorded",
+          "obligations": [
+            "OBL-02"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 30(1)(f)",
+          "control": "Envisaged time limits for erasure",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 32(1)(a)",
+          "control": "Pseudonymisation and encryption of personal data",
+          "obligations": [
+            "OBL-12",
+            "OBL-13"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 32(1)(b)",
+          "control": "Ongoing confidentiality of processing systems",
+          "obligations": [
+            "OBL-14",
+            "OBL-16",
+            "OBL-19"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 32(1)(c)",
+          "control": "Ability to restore availability and access in a timely manner",
+          "obligations": [
+            "OBL-18"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 32(1)(d)",
+          "control": "Regularly testing and evaluating security measures",
+          "obligations": [
+            "OBL-15"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 33",
+          "control": "Notification of a personal data breach to the supervisory authority",
+          "obligations": [
+            "OBL-17"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 34",
+          "control": "Communication of a breach to the data subject",
+          "obligations": [
+            "OBL-17"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 35(1)",
+          "control": "Data protection impact assessment",
+          "obligations": [
+            "OBL-10"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 35(3)(b)",
+          "control": "DPIA for large-scale special category processing",
+          "obligations": [
+            "OBL-10"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(1)(b)",
+          "control": "Purpose limitation",
+          "obligations": [
+            "OBL-02"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 5(1)(e)",
+          "control": "Storage limitation",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 6(1)",
+          "control": "Lawfulness of processing",
+          "obligations": [
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 9(2)",
+          "control": "Condition for special categories, where they are processed",
+          "obligations": [
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Arts. 37-39",
+          "control": "Data protection officer, where designation is required",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "gdpr",
+          "ref": "Art. 8",
+          "control": "Conditions applicable to child's consent",
+          "obligations": [
+            "OBL-11"
+          ],
+          "status": "not_applicable",
+          "failing": [],
+          "unverified": []
+        }
+      ]
+    },
+    {
+      "id": "iso27701",
+      "short_name": "ISO 27701",
+      "clauses": 34,
+      "counts": {
+        "fail": 13,
+        "manual": 0,
+        "attested": 7,
+        "pass": 14,
+        "not_applicable": 0
+      },
+      "rows": [
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.7",
+          "control": "Contracts with PII processors",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.9",
+          "control": "Records related to processing PII",
+          "obligations": [
+            "OBL-01"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.3",
+          "control": "Determining information for PII principals",
+          "obligations": [
+            "OBL-07"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.4",
+          "control": "Providing information to PII principals",
+          "obligations": [
+            "OBL-07",
+            "OBL-23"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.2",
+          "control": "Limit collection",
+          "obligations": [
+            "OBL-05"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.3",
+          "control": "Limit processing",
+          "obligations": [
+            "OBL-06"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.5",
+          "control": "PII minimization objectives",
+          "obligations": [
+            "OBL-05",
+            "OBL-06"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.5.2",
+          "control": "Identify basis for PII transfer between jurisdictions",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.5.3",
+          "control": "Countries and international organizations to which PII can be transferred",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.5.4",
+          "control": "Records of transfer of PII",
+          "obligations": [
+            "OBL-09"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.5.5",
+          "control": "Records of PII disclosures to third parties",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.10",
+          "control": "Addressing information security within supplier agreements",
+          "obligations": [
+            "OBL-08"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.25",
+          "control": "Logging",
+          "obligations": [
+            "OBL-06",
+            "OBL-16"
+          ],
+          "status": "fail",
+          "failing": [
+            "payments"
+          ],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.4",
+          "control": "Determine when and how consent is to be obtained",
+          "obligations": [
+            "OBL-11",
+            "OBL-20"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.5",
+          "control": "Obtain and record consent",
+          "obligations": [
+            "OBL-20",
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.10",
+          "control": "Handling requests",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.2",
+          "control": "Determining and fulfilling obligations to PII principals",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.5",
+          "control": "Providing mechanism to modify or withdraw consent",
+          "obligations": [
+            "OBL-22"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.3.7",
+          "control": "Access, correction or erasure",
+          "obligations": [
+            "OBL-21"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.12",
+          "control": "Response to information security incidents",
+          "obligations": [
+            "OBL-17",
+            "OBL-24"
+          ],
+          "status": "attested",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.2",
+          "control": "Identify and document purpose",
+          "obligations": [
+            "OBL-02"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.3",
+          "control": "Identify lawful basis",
+          "obligations": [
+            "OBL-03"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.2.6",
+          "control": "Privacy impact assessment",
+          "obligations": [
+            "OBL-10",
+            "OBL-11"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.10",
+          "control": "PII transmission controls",
+          "obligations": [
+            "OBL-12"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.6",
+          "control": "PII de-identification and deletion at the end of processing",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.1.4.8",
+          "control": "Retention",
+          "obligations": [
+            "OBL-04"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.11",
+          "control": "Information security incident management planning and preparation",
+          "obligations": [
+            "OBL-16",
+            "OBL-17"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.23",
+          "control": "Secure authentication",
+          "obligations": [
+            "OBL-14"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.24",
+          "control": "Information backup",
+          "obligations": [
+            "OBL-18"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.26",
+          "control": "Use of cryptography",
+          "obligations": [
+            "OBL-12",
+            "OBL-13"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.27",
+          "control": "Secure development life cycle",
+          "obligations": [
+            "OBL-14",
+            "OBL-15"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.28",
+          "control": "Application security requirements",
+          "obligations": [
+            "OBL-15"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.29",
+          "control": "Secure system architecture and engineering principles",
+          "obligations": [
+            "OBL-19"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        },
+        {
+          "framework": "iso27701",
+          "ref": "A.3.4",
+          "control": "Information security roles and responsibilities",
+          "obligations": [
+            "OBL-23"
+          ],
+          "status": "pass",
+          "failing": [],
+          "unverified": []
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "applicant_onboarding",
+      "name": "Loan applicant onboarding and KYC",
+      "owner": "lending-platform",
+      "purposes": [
+        "credit assessment",
+        "KYC under the PML Rules"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legal_obligation"
+      },
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "data_subjects": [
+        "loan applicants"
+      ],
+      "dpia": "DPIA-2026-003",
+      "declared_categories": [
+        "Identity",
+        "Contact",
+        "Government ID"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Government ID",
+        "Identity"
+      ],
+      "logged_categories": [],
+      "declared_processors": [],
+      "detected_processors": [],
+      "detected_flows": [],
+      "paths": [
+        "services/onboarding/**",
+        "web/**"
+      ],
+      "in_sync": true,
+      "open_rules": [],
+      "repo": "lending"
+    },
+    {
+      "id": "repayments",
+      "name": "EMI repayment collection",
+      "owner": "payments",
+      "purposes": [
+        "repayment collection"
+      ],
+      "legal_basis": {
+        "dpdpa": "legitimate_use",
+        "gdpr": "contract"
+      },
+      "retention": "8 years after loan closure (tax and PML records)",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact",
+        "Financial"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Financial"
+      ],
+      "logged_categories": [],
+      "declared_processors": [
+        {
+          "name": "Razorpay",
+          "country": "IN",
+          "contract": "DPA-2025-011",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "Razorpay"
+      ],
+      "detected_flows": [
+        {
+          "processor": "Razorpay",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/payments/**"
+      ],
+      "in_sync": true,
+      "open_rules": [],
+      "repo": "lending"
+    },
+    {
+      "id": "reminders",
+      "name": "Repayment reminders",
+      "owner": "growth",
+      "purposes": [
+        "repayment reminders"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legitimate_interests"
+      },
+      "retention": "Message logs kept 90 days",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact"
+      ],
+      "detected_categories": [
+        "Contact"
+      ],
+      "logged_categories": [],
+      "declared_processors": [
+        {
+          "name": "MSG91",
+          "country": "IN",
+          "contract": "DPA-2025-019",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "MSG91"
+      ],
+      "detected_flows": [
+        {
+          "processor": "MSG91",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/notifications/**"
+      ],
+      "in_sync": true,
+      "open_rules": [],
+      "repo": "lending"
+    },
+    {
+      "id": "applicant_onboarding",
+      "name": "Loan applicant onboarding and KYC",
+      "owner": "lending-platform",
+      "purposes": [
+        "credit assessment",
+        "KYC under the PML Rules"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legal_obligation"
+      },
+      "retention": "8 years after loan closure (PML Rules), then erased",
+      "data_subjects": [
+        "loan applicants"
+      ],
+      "dpia": "DPIA-2026-003",
+      "declared_categories": [
+        "Identity",
+        "Contact",
+        "Government ID"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Government ID",
+        "Identity"
+      ],
+      "logged_categories": [],
+      "declared_processors": [],
+      "detected_processors": [],
+      "detected_flows": [],
+      "paths": [
+        "services/onboarding/**",
+        "web/**"
+      ],
+      "in_sync": true,
+      "open_rules": [],
+      "repo": "payments"
+    },
+    {
+      "id": "repayments",
+      "name": "EMI repayment collection",
+      "owner": "payments",
+      "purposes": [
+        "repayment collection"
+      ],
+      "legal_basis": {
+        "dpdpa": "legitimate_use",
+        "gdpr": "contract"
+      },
+      "retention": "8 years after loan closure (tax and PML records)",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact",
+        "Financial"
+      ],
+      "detected_categories": [
+        "Contact",
+        "Financial",
+        "Location"
+      ],
+      "logged_categories": [
+        "Contact"
+      ],
+      "declared_processors": [
+        {
+          "name": "Razorpay",
+          "country": "SG",
+          "contract": "DPA-2025-099",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "Mixpanel",
+        "Razorpay"
+      ],
+      "detected_flows": [
+        {
+          "processor": "Mixpanel",
+          "categories": [
+            "Contact",
+            "Location"
+          ]
+        },
+        {
+          "processor": "Razorpay",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/payments/**"
+      ],
+      "in_sync": false,
+      "open_rules": [
+        "D002",
+        "D003",
+        "P001"
+      ],
+      "repo": "payments"
+    },
+    {
+      "id": "reminders",
+      "name": "Repayment reminders",
+      "owner": "growth",
+      "purposes": [
+        "repayment reminders"
+      ],
+      "legal_basis": {
+        "dpdpa": "consent",
+        "gdpr": "legitimate_interests"
+      },
+      "retention": "Message logs kept 90 days",
+      "data_subjects": [
+        "borrowers"
+      ],
+      "dpia": "",
+      "declared_categories": [
+        "Contact"
+      ],
+      "detected_categories": [
+        "Contact"
+      ],
+      "logged_categories": [],
+      "declared_processors": [
+        {
+          "name": "MSG91",
+          "country": "IN",
+          "contract": "DPA-2025-019",
+          "transfer_mechanism": "",
+          "data_categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "detected_processors": [
+        "MSG91"
+      ],
+      "detected_flows": [
+        {
+          "processor": "MSG91",
+          "categories": [
+            "Contact"
+          ]
+        }
+      ],
+      "paths": [
+        "services/notifications/**"
+      ],
+      "in_sync": true,
+      "open_rules": [],
+      "repo": "payments"
+    }
+  ],
+  "processors": [
+    {
+      "id": "mixpanel",
+      "name": "Mixpanel",
+      "ai_provider": false,
+      "declared_in": [],
+      "used_undeclared_in": [
+        "payments"
+      ],
+      "countries": [],
+      "contracts": [],
+      "categories_declared": [],
+      "categories_sent": [
+        "Contact",
+        "Location"
+      ],
+      "issues": [
+        "used without a record in payments; declared nowhere"
+      ]
+    },
+    {
+      "id": "razorpay",
+      "name": "Razorpay",
+      "ai_provider": false,
+      "declared_in": [
+        "lending",
+        "payments"
+      ],
+      "used_undeclared_in": [],
+      "countries": [
+        "IN",
+        "SG"
+      ],
+      "contracts": [
+        "DPA-2025-011",
+        "DPA-2025-099"
+      ],
+      "categories_declared": [
+        "Contact"
+      ],
+      "categories_sent": [
+        "Contact"
+      ],
+      "issues": [
+        "country differs across repositories: IN, SG",
+        "contract differs across repositories: DPA-2025-011, DPA-2025-099"
+      ]
+    },
+    {
+      "id": "msg91",
+      "name": "MSG91",
+      "ai_provider": false,
+      "declared_in": [
+        "lending",
+        "payments"
+      ],
+      "used_undeclared_in": [],
+      "countries": [
+        "IN"
+      ],
+      "contracts": [
+        "DPA-2025-019"
+      ],
+      "categories_declared": [
+        "Contact"
+      ],
+      "categories_sent": [
+        "Contact"
+      ],
+      "issues": []
+    }
+  ],
+  "data_map": [
+    {
+      "category": "Contact",
+      "repos": [
+        "lending",
+        "payments"
+      ],
+      "activities": [
+        "lending:applicant_onboarding",
+        "lending:reminders",
+        "lending:repayments",
+        "payments:applicant_onboarding",
+        "payments:reminders",
+        "payments:repayments"
+      ],
+      "stores": [
+        "lending:Applicant",
+        "lending:Repayment",
+        "payments:Applicant",
+        "payments:Repayment"
+      ],
+      "processors": [
+        "MSG91",
+        "Mixpanel",
+        "Razorpay"
+      ],
+      "ai_providers": [],
+      "unprotected_high_risk": [],
+      "no_erasure": [],
+      "not_reached_by_request": [],
+      "in_logs": [
+        "payments"
+      ]
+    },
+    {
+      "category": "Financial",
+      "repos": [
+        "lending",
+        "payments"
+      ],
+      "activities": [
+        "lending:repayments",
+        "payments:repayments"
+      ],
+      "stores": [
+        "lending:Repayment",
+        "payments:Repayment"
+      ],
+      "processors": [],
+      "ai_providers": [],
+      "unprotected_high_risk": [],
+      "no_erasure": [],
+      "not_reached_by_request": [],
+      "in_logs": []
+    },
+    {
+      "category": "Government ID",
+      "repos": [
+        "lending",
+        "payments"
+      ],
+      "activities": [
+        "lending:applicant_onboarding",
+        "payments:applicant_onboarding"
+      ],
+      "stores": [
+        "lending:Applicant",
+        "payments:Applicant"
+      ],
+      "processors": [],
+      "ai_providers": [],
+      "unprotected_high_risk": [],
+      "no_erasure": [],
+      "not_reached_by_request": [],
+      "in_logs": []
+    },
+    {
+      "category": "Identity",
+      "repos": [
+        "lending",
+        "payments"
+      ],
+      "activities": [
+        "lending:applicant_onboarding",
+        "payments:applicant_onboarding"
+      ],
+      "stores": [
+        "lending:Applicant",
+        "payments:Applicant"
+      ],
+      "processors": [],
+      "ai_providers": [],
+      "unprotected_high_risk": [],
+      "no_erasure": [],
+      "not_reached_by_request": [],
+      "in_logs": []
+    },
+    {
+      "category": "Location",
+      "repos": [
+        "payments"
+      ],
+      "activities": [
+        "payments:repayments"
+      ],
+      "stores": [],
+      "processors": [
+        "Mixpanel"
+      ],
+      "ai_providers": [],
+      "unprotected_high_risk": [],
+      "no_erasure": [],
+      "not_reached_by_request": [],
+      "in_logs": []
+    }
+  ],
+  "findings": [
+    {
+      "rule": "D002",
+      "kind": "drift",
+      "severity": "HIGH",
+      "title": "Undeclared personal data category",
+      "detail": "Activity 'repayments' processes Location data in code, but the record does not declare it.",
+      "fix": "Declare the category on the activity (and update the notice and legal basis), or remove the data from the code.",
+      "activity": "repayments",
+      "category": "location",
+      "processor": "",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:7",
+        "services/payments/refund.js:9",
+        "services/payments/refund.js:10"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:136e6153e490c2f21bcb",
+      "new": true,
+      "repo": "payments"
+    },
+    {
+      "rule": "D003",
+      "kind": "drift",
+      "severity": "HIGH",
+      "title": "Undeclared processor / third party",
+      "detail": "Activity 'repayments' sends Contact, Location data to Mixpanel, which is not a declared processor.",
+      "fix": "Add the processor with country and contract reference, link it to the activity, or remove the integration.",
+      "activity": "repayments",
+      "category": "",
+      "processor": "mixpanel",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:9"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:18eb6630a9e087cc8ac7",
+      "new": true,
+      "repo": "payments"
+    },
+    {
+      "rule": "P001",
+      "kind": "policy",
+      "severity": "HIGH",
+      "title": "Personal data written to logs",
+      "detail": "Contact data is written to logs in activity 'repayments' (1 location(s)).",
+      "fix": "Remove or mask the field before logging, or record a time-boxed exception with a reason.",
+      "activity": "repayments",
+      "category": "contact",
+      "processor": "",
+      "fields": [],
+      "refs": [
+        "services/payments/refund.js:8"
+      ],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:35069d7f9df3e044abd1",
+      "new": true,
+      "repo": "payments"
+    },
+    {
+      "rule": "P004",
+      "kind": "policy",
+      "severity": "HIGH",
+      "title": "Cross-border transfer without a recorded mechanism",
+      "detail": "Processor 'Razorpay' is in SG, outside allowed_transfer_countries, with no transfer_mechanism recorded.",
+      "fix": "Record the transfer mechanism on the processor, or add the country to allowed_transfer_countries after review.",
+      "activity": "",
+      "category": "",
+      "processor": "razorpay",
+      "fields": [],
+      "refs": [],
+      "status": "open",
+      "exception_reason": "",
+      "fingerprint": "svkd:6a3d034b86d02c4bac05",
+      "new": true,
+      "repo": "payments"
+    }
+  ],
+  "skipped": []
+}

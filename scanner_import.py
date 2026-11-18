@@ -438,19 +438,186 @@ def parse_privacy_manifest(file_bytes_or_text: Union[bytes, str, None]) -> Dict[
     }
 
 
+# ==================== privacy-check.json / org-summary.json ====================
+
+_CHECK_SCHEMAS = {"svikruti-privacy-check-v1", "svikruti-org-v1"}
+_VENDOR_RULES = {"D003", "D005", "D007", "D009", "P004", "P006"}
+_SECURITY_RULES = {"P001", "P002", "P007"}
+
+
+def looks_like_check(file_bytes_or_text: Union[bytes, str, None]) -> bool:
+    """True for `svikruti check` (privacy-check.json) or `svikruti org` (org-summary.json) output."""
+    head = _to_text(file_bytes_or_text)[:400]
+    return any(f'"{schema}"' in head for schema in _CHECK_SCHEMAS)
+
+
+def _basis_text(basis: Any) -> str:
+    if isinstance(basis, dict):
+        return "; ".join(f"{str(key).upper()}: {_label(value)}" for key, value in basis.items() if _todo(value))
+    return _label(_todo(basis))
+
+
+def _finding_category(rule: str) -> str:
+    if rule in _VENDOR_RULES:
+        return "Vendor Management"
+    if rule in _SECURITY_RULES:
+        return "Security safeguards"
+    if rule == "D010":
+        return "Data Subject Rights"
+    return "RoPA"
+
+
+def parse_privacy_check(file_bytes_or_text: Union[bytes, str, None]) -> Dict[str, Any]:
+    """
+    Turn the verdict of `svikruti check` (or `svikruti org`) into registry records.
+
+    A manifest import gives what was declared; this gives what was verified:
+    RoPA entries carry the data the code was found to process (declared plus
+    detected), vendors include processors found in code but not on record,
+    and every open drift or policy finding (unprotected Aadhaar, a store no
+    erasure path reaches, an undeclared AI provider) becomes a task with its
+    fix and code location. Org summaries add the repository to each record.
+    """
+    empty = {"ropa": [], "vendors": [], "actions": [], "note": ""}
+    try:
+        data = json.loads(_to_text(file_bytes_or_text))
+    except (json.JSONDecodeError, ValueError) as exc:
+        return dict(empty, note=f"Could not parse JSON: {exc}")
+    if not isinstance(data, dict) or data.get("schema_version") not in _CHECK_SCHEMAS:
+        return dict(empty, note="Not a Svikruti privacy-check.json or org-summary.json file.")
+    is_org = data["schema_version"] == "svikruti-org-v1"
+
+    transfer_gaps = {
+        (str(item.get("repo") or ""), str(item.get("processor") or "").lower())
+        for item in data.get("findings") or []
+        if isinstance(item, dict) and item.get("rule") == "P004" and item.get("status", "open") == "open"
+    }
+    ropa: List[Dict[str, Any]] = []
+    for raw in data.get("activities") or []:
+        if not isinstance(raw, dict) or not _clean(raw.get("name")):
+            continue
+        repo = _clean(raw.get("repo"))
+        categories = sorted(set(raw.get("declared_categories") or []) | set(raw.get("detected_categories") or []))
+        declared = [p for p in (raw.get("declared_processors") or []) if isinstance(p, dict)]
+        names = sorted({_clean(p.get("name")) for p in declared} | {str(name) for name in (raw.get("detected_processors") or [])} - {""})
+        countries = sorted({_todo(p.get("country")).upper() for p in declared if _todo(p.get("country"))})
+        open_rules = list(raw.get("open_rules") or [])
+        ropa.append({
+            "activity_name": f"{raw['name']} ({repo})" if is_org and repo else _clean(raw["name"]),
+            "data_categories": ", ".join(categories) or "Not specified",
+            "data_subjects": _todo(raw.get("data_subjects")) or "Not specified",
+            "purpose": _todo(raw.get("purposes")) or "Not specified",
+            "lawful_basis": _basis_text(raw.get("legal_basis")) or "To be confirmed",
+            "kwargs": _filter_ropa_kwargs({
+                "department": _todo(raw.get("owner")),
+                "retention_period": _todo(raw.get("retention")),
+                "data_processor": ", ".join(names),
+                "processing_location": ", ".join(countries),
+                "security_measures": f"DPIA: {_todo(raw.get('dpia'))}" if _todo(raw.get("dpia")) else "",
+                "cross_border": int(any(_todo(p.get("transfer_mechanism")) or (repo, _clean(p.get("name")).lower().replace(" ", "_")) in transfer_gaps for p in declared)),
+            }),
+            "_risk_tier": "High" if {"Government ID", "Health", "Biometric", "Children"} & set(categories) else "Medium",
+            "_evidence": "; ".join(filter(None, [", ".join(raw.get("paths") or []), "verified against code" if raw.get("in_sync") else f"drift: {', '.join(open_rules)}"])),
+        })
+
+    vendors: List[Dict[str, Any]] = []
+    actions: List[Dict[str, Any]] = []
+    for raw in data.get("processors") or []:
+        if not isinstance(raw, dict) or not _clean(raw.get("name")):
+            continue
+        name = _clean(raw["name"])
+        if is_org:
+            contract = ", ".join(raw.get("contracts") or [])
+            country = ", ".join(raw.get("countries") or [])
+            categories = sorted(set(raw.get("categories_declared") or []) | set(raw.get("categories_sent") or []))
+            declared_anywhere = bool(raw.get("declared_in"))
+            issues = list(raw.get("issues") or [])
+            extra = [f"Declared in: {', '.join(raw['declared_in'])}" if raw.get("declared_in") else "", f"Used without a record in: {', '.join(raw['used_undeclared_in'])}" if raw.get("used_undeclared_in") else ""]
+        else:
+            contract, country = _todo(raw.get("contract")), _todo(raw.get("country")).upper()
+            categories = list(raw.get("data_categories") or [])
+            declared_anywhere, issues = True, []
+            extra = [f"Transfer mechanism: {_todo(raw.get('transfer_mechanism'))}" if _todo(raw.get("transfer_mechanism")) else ""]
+        notes = [part for part in [f"Contract: {contract}" if contract else "", f"Country: {country}" if country else "", *extra, "AI model provider" if raw.get("ai_provider") else "", *(f"Issue: {issue}" for issue in issues), "Source: svikruti " + ("org" if is_org else "check")] if part]
+        vendors.append({
+            "vendor_name": name,
+            "service_type": _todo(raw.get("purpose")) or ("AI model provider" if raw.get("ai_provider") else "Not specified"),
+            "data_shared": ", ".join(categories) or "Not specified",
+            "kwargs": _filter_vendor_kwargs({
+                "dpa_status": "COMPLETED" if contract and declared_anywhere else "NOT_STARTED",
+                "risk_level": "HIGH" if issues or raw.get("ai_provider") or not declared_anywhere or {"Government ID", "Health", "Biometric"} & set(categories) else "MEDIUM",
+                "notes": " | ".join(notes),
+            }),
+            "_transfer_location": country,
+        })
+        if is_org and issues:
+            actions.append({
+                "title": f"Reconcile the {name} processor record across repositories"[:200],
+                "category": "Vendor Management",
+                "priority": "HIGH",
+                "description": "; ".join(issues),
+            })
+
+    if not is_org:
+        # Processors the code sends data to that privacy.yaml does not list.
+        known = {v["vendor_name"].lower() for v in vendors}
+        for finding in data.get("findings") or []:
+            if isinstance(finding, dict) and finding.get("rule") == "D003" and finding.get("status", "open") == "open":
+                flows = [flow for activity in data.get("activities") or [] for flow in activity.get("detected_flows") or []]
+                match = next((flow for flow in flows if flow.get("processor", "").lower().replace(" ", "_") == str(finding.get("processor", "")).lower()), None)
+                name = match["processor"] if match else _clean(finding.get("processor"))
+                if name and name.lower() not in known:
+                    known.add(name.lower())
+                    vendors.append({
+                        "vendor_name": name,
+                        "service_type": "Not specified",
+                        "data_shared": ", ".join(match["categories"]) if match else "Not specified",
+                        "kwargs": _filter_vendor_kwargs({"dpa_status": "NOT_STARTED", "risk_level": "HIGH", "notes": "Found in code, not in privacy.yaml | Source: svikruti check"}),
+                        "_transfer_location": "",
+                    })
+
+    for finding in data.get("findings") or []:
+        if not isinstance(finding, dict) or finding.get("status", "open") != "open":
+            continue
+        rule = _clean(finding.get("rule"))
+        repo = _clean(finding.get("repo"))
+        refs = ", ".join(str(ref) for ref in (finding.get("refs") or [])[:3])
+        prefix = f"[{repo}] " if repo else ""
+        actions.append({
+            "title": f"{prefix}{rule}: {_clean(finding.get('detail')) or _clean(finding.get('title'))}"[:200],
+            "category": _finding_category(rule),
+            "priority": _SEVERITY_PRIORITY_MAP.get(_clean(finding.get("severity")).upper(), "MEDIUM"),
+            "description": " ".join(part for part in [_clean(finding.get("fix")), f"Where: {refs}." if refs else ""] if part),
+        })
+
+    label = "org summary" if is_org else "privacy check"
+    repos = f" across {len(data.get('repositories') or [])} repositories" if is_org else ""
+    return {
+        "ropa": ropa,
+        "vendors": vendors,
+        "actions": actions,
+        "note": f"{label}{repos}: {len(ropa)} verified processing activit(ies), {len(vendors)} processor(s), {len(actions)} open finding task(s).",
+    }
+
+
 def parse_upload(filename: str, file_bytes_or_text: Union[bytes, str, None]) -> Dict[str, Any]:
     """
     Route one uploaded file to the right parser by name and content.
 
     Returns {'ropa': [...], 'vendors': [...], 'actions': [...], 'note': str}.
     Kept here (not in the Streamlit page) so the routing is unit-tested:
+    privacy-check.json / org-summary.json -> verified record and findings,
     privacy.yaml / privacy.json -> manifest, other .json -> scan report,
     *vendor*.csv -> vendors, *action*.csv -> tasks, any other .csv -> RoPA.
     """
     name = (filename or "").lower()
     out: Dict[str, Any] = {"ropa": [], "vendors": [], "actions": [], "note": ""}
     try:
-        if name.endswith((".yaml", ".yml")) or (name.endswith(".json") and looks_like_manifest(file_bytes_or_text)):
+        if name.endswith(".json") and looks_like_check(file_bytes_or_text):
+            parsed = parse_privacy_check(file_bytes_or_text)
+            out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
+            out["note"] = parsed.get("note", "")
+        elif name.endswith((".yaml", ".yml")) or (name.endswith(".json") and looks_like_manifest(file_bytes_or_text)):
             parsed = parse_privacy_manifest(file_bytes_or_text)
             out.update({key: parsed.get(key, []) for key in ("ropa", "vendors", "actions")})
             out["note"] = parsed.get("note", "")

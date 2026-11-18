@@ -18,6 +18,8 @@ CATEGORY_LABELS: Dict[str, str] = {
     "health": "Health",
     "device": "Device",
     "biometric": "Biometric",
+    # User-typed text sent to an AI model: it can hold any category, so it is tracked on its own.
+    "free_text": "Free text",
 }
 
 # Categories whose presence requires a recorded impact assessment before the

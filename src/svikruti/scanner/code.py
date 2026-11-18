@@ -176,6 +176,7 @@ def _is_logging_context(context: str) -> bool:
     return any(pattern.search(lowered) for pattern in LOGGING_HINT_PATTERNS)
 
 
+_IDENTIFIER_LITERAL_RE = re.compile(r"[A-Za-z_$][\w$]*_[\w$]+|[a-z]+[A-Z][A-Za-z0-9]*")
 _STRING_LITERAL_RE = re.compile(r"""([A-Za-z]{0,2})("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)""")
 _INTERPOLATION_RES = (
     re.compile(r"\$\{([^}]*)\}"),      # JS/TS/Kotlin/Groovy template: ${expr}
@@ -185,7 +186,7 @@ _INTERPOLATION_RES = (
 _FSTRING_INTERPOLATION_RE = re.compile(r"\{([^{}]*)\}")
 
 
-def _code_outside_strings(line: str) -> str:
+def _code_outside_strings(line: str, keep_identifier_literals: bool = True) -> str:
     """Drop the prose inside string literals but keep interpolated expressions.
 
     `logger.exception("Exception while parsing email")` logs the *word* email,
@@ -195,6 +196,12 @@ def _code_outside_strings(line: str) -> str:
     def replace(match: "re.Match[str]") -> str:
         prefix, literal = match.group(1), match.group(2)
         body = literal[1:-1]
+        first_argument = line[: match.start()].rstrip().endswith("(")
+        if keep_identifier_literals and _IDENTIFIER_LITERAL_RE.fullmatch(body) and not first_argument:
+            # "guardian_phone" in attributes.slice("full_name", "guardian_phone") or a
+            # dict key names a field; prose ("could not send email") has spaces. The
+            # first argument of a call is a message or event name ("email_sent"), not data.
+            return " " + body + " "
         kept: List[str] = []
         for pattern in _INTERPOLATION_RES:
             kept.extend(pattern.findall(body))
@@ -206,7 +213,13 @@ def _code_outside_strings(line: str) -> str:
 
 
 _ALL_TERM_TOKENS = {normalize_text(term) for pattern in PERSONAL_DATA_PATTERNS for term in pattern.terms}
-_ID_SUFFIX_RE = re.compile(r"(?<![\w$])[A-Za-z_$][\w$]*?(?:_id|Id|ID|_pk|_uuid|Uuid|_ref|_reference|_key|_slug)(?![\w$])")
+_ID_SUFFIX_RE = re.compile(
+    r"(?<![\w$])[A-Za-z_$][\w$]*?(?:_id|Id|ID|_pk|_uuid|Uuid|_ref|_reference|_key|_slug"
+    # Flags, counts and timestamps about a field are not the field: email_verified, phone_count, email_sent_at
+    r"|_verified|Verified|_confirmed|Confirmed|_enabled|Enabled|_disabled|_count|Count|_status|Status|_type|Type"
+    r"|_sent|_sent_at|SentAt|_at|At|_on|_valid|Valid|_exists|_changed|_updated|_required|Required|_opt_in|OptIn)(?![\w$])"
+    r"|(?<![\w$])(?:is|has|should|can)_?[A-Za-z_$][\w$]*(?![\w$])"
+)
 _ID_ATTRIBUTE_RE = re.compile(r"(?<![\w$])[A-Za-z_$][\w$]*(?:\(\))?(?:\??\.|->)(?:id|pk|uuid|ID|Id|getId\(\)|psp_reference|token)(?![\w$(])")
 _ID_PAIR_RE = re.compile(r"""["']?[A-Za-z_$][\w$-]*["']?\s*(?::|=>|=)\s*(?=(?:[A-Za-z_$][\w$]*(?:\??\.|->))*(?:id|pk|uuid|ID|Id|[A-Za-z_$][\w$]*?(?:_id|Id|_pk))(?![\w$(]))""")
 

@@ -1,0 +1,108 @@
+framework,clause,control,status,failing_in,not_verified_in,obligations
+DPDPA,Rule 15,Transfer of personal data outside India,fail,payments,,OBL-09
+DPDPA,Rule 3,Notice given by Data Fiduciary to Data Principal,fail,payments,,OBL-07
+DPDPA,Rule 6,"Security safeguards: encryption, obfuscation, masking or virtual tokens",fail,payments,,OBL-06; OBL-08; OBL-12; OBL-13; OBL-14; OBL-16; OBL-18
+DPDPA,Sec. 10(2)(c),Significant Data Fiduciary: DPIA and periodic audit rely on an accurate processing record,fail,payments,,OBL-01
+DPDPA,Sec. 16,Processing of personal data outside India,fail,payments,,OBL-09
+DPDPA,Sec. 5,Notice,fail,payments,,OBL-07
+DPDPA,Sec. 6(1),Consent limited to personal data necessary for the specified purpose,fail,payments,,OBL-05; OBL-20
+DPDPA,Sec. 8(1),"Data Fiduciary responsible for compliance, including processing by its Data Processors",fail,payments,,OBL-01
+DPDPA,Sec. 8(2),Engaging a Data Processor only under a valid contract,fail,payments,,OBL-08
+DPDPA,Sec. 8(5),Reasonable security safeguards to prevent personal data breach,fail,payments,,OBL-06; OBL-12; OBL-13; OBL-14; OBL-15; OBL-16; OBL-19
+DPDPA,Rule 14,Rights of Data Principals,attested,,,OBL-21
+DPDPA,Rule 7,Intimation of personal data breach,attested,,,OBL-17; OBL-24
+DPDPA,Sec. 6(10),Data Fiduciary to prove that notice was given and consent obtained,attested,,,OBL-22
+DPDPA,Sec. 6(4),"Right to withdraw consent, with ease comparable to giving it",attested,,,OBL-22
+DPDPA,Sec. 8(6),Intimation of personal data breach to the Board and affected Data Principals,attested,,,OBL-17; OBL-24
+DPDPA,Sec. 9(3),"No tracking, behavioural monitoring or targeted advertising directed at children",attested,,,OBL-20
+DPDPA,Secs. 11-14,"Rights of Data Principal: access, correction and erasure, grievance redressal, nomination",attested,,,OBL-21
+DPDPA,Rule 13,Additional obligations of Significant Data Fiduciary,pass,,,OBL-10
+DPDPA,Rule 8,Time period for the specified purpose to be deemed no longer served,pass,,,OBL-04
+DPDPA,Rule 9,Contact information of person to answer questions about processing,pass,,,OBL-23
+DPDPA,Sec. 10(2)(c)(i),Periodic Data Protection Impact Assessment (Significant Data Fiduciary),pass,,,OBL-10
+DPDPA,Sec. 4(1),Processing only for a lawful purpose,pass,,,OBL-02; OBL-03
+DPDPA,Sec. 5(1)(i),Notice states the personal data and the purpose of processing,pass,,,OBL-02
+DPDPA,Sec. 6,Consent,pass,,,OBL-03
+DPDPA,Sec. 7,Certain legitimate uses,pass,,,OBL-03
+DPDPA,Sec. 8(10),Effective mechanism to redress grievances,pass,,,OBL-23
+DPDPA,Sec. 8(4),Appropriate technical and organisational measures,pass,,,OBL-15; OBL-19
+DPDPA,Sec. 8(7),Erasure when the specified purpose is no longer served or consent is withdrawn,pass,,,OBL-04
+DPDPA,Sec. 8(9),Publish business contact information of the DPO or person answering on behalf of the Data Fiduciary,pass,,,OBL-23
+DPDPA,Rule 10,Verifiable consent for processing personal data of a child,not_applicable,,,OBL-11
+DPDPA,Sec. 9,Processing of personal data of children,not_applicable,,,OBL-11
+GDPR,Art. 13,Information to be provided where data are collected from the data subject,fail,payments,,OBL-07
+GDPR,Art. 14,Information where data have not been obtained from the data subject,fail,payments,,OBL-07
+GDPR,Art. 25(2),Data protection by default,fail,payments,,OBL-05
+GDPR,Art. 28(1),Processors providing sufficient guarantees,fail,payments,,OBL-08
+GDPR,Art. 28(3),Processing by a processor governed by a contract,fail,payments,,OBL-08
+GDPR,Art. 30(1),Records of processing activities,fail,payments,,OBL-01
+GDPR,Art. 30(1)(d),Categories of recipients recorded,fail,payments,,OBL-08
+GDPR,Art. 30(1)(e),Transfers to third countries recorded,fail,payments,,OBL-09
+GDPR,Art. 32(1),Security of processing,fail,payments,,OBL-06
+GDPR,Art. 44,General principle for transfers,fail,payments,,OBL-09
+GDPR,Art. 46,Transfers subject to appropriate safeguards,fail,payments,,OBL-09
+GDPR,Art. 5(1)(a),"Lawfulness, fairness and transparency",fail,payments,,OBL-07
+GDPR,Art. 5(1)(c),Data minimisation,fail,payments,,OBL-05; OBL-06
+GDPR,Art. 5(1)(f),Integrity and confidentiality,fail,payments,,OBL-06; OBL-12
+GDPR,Art. 5(2),Accountability,fail,payments,,OBL-01
+GDPR,Art. 12(3),Responding to data subject requests within one month,attested,,,OBL-21
+GDPR,Art. 33(1),Becoming aware of a personal data breach,attested,,,OBL-16; OBL-24
+GDPR,Art. 33(5),Documenting personal data breaches,attested,,,OBL-24
+GDPR,Art. 6(1)(a),Consent as lawful basis,attested,,,OBL-20
+GDPR,Art. 7,Conditions for consent,attested,,,OBL-20
+GDPR,Art. 7(1),Demonstrating that consent was given,attested,,,OBL-22
+GDPR,Art. 7(3),Withdrawal of consent as easy as giving it,attested,,,OBL-22
+GDPR,Arts. 15-22,Rights of the data subject,attested,,,OBL-21
+GDPR,Directive 2002/58/EC Art. 5(3),Storing or accessing information on terminal equipment (ePrivacy),attested,,,OBL-20
+GDPR,Art. 13(1)(a)-(b),Identity and contact details of the controller and DPO,pass,,,OBL-23
+GDPR,Art. 25(1),Data protection by design,pass,,,OBL-19
+GDPR,Art. 30(1)(b),Purposes of the processing recorded,pass,,,OBL-02
+GDPR,Art. 30(1)(f),Envisaged time limits for erasure,pass,,,OBL-04
+GDPR,Art. 32(1)(a),Pseudonymisation and encryption of personal data,pass,,,OBL-12; OBL-13
+GDPR,Art. 32(1)(b),Ongoing confidentiality of processing systems,pass,,,OBL-14; OBL-16; OBL-19
+GDPR,Art. 32(1)(c),Ability to restore availability and access in a timely manner,pass,,,OBL-18
+GDPR,Art. 32(1)(d),Regularly testing and evaluating security measures,pass,,,OBL-15
+GDPR,Art. 33,Notification of a personal data breach to the supervisory authority,pass,,,OBL-17
+GDPR,Art. 34,Communication of a breach to the data subject,pass,,,OBL-17
+GDPR,Art. 35(1),Data protection impact assessment,pass,,,OBL-10
+GDPR,Art. 35(3)(b),DPIA for large-scale special category processing,pass,,,OBL-10
+GDPR,Art. 5(1)(b),Purpose limitation,pass,,,OBL-02
+GDPR,Art. 5(1)(e),Storage limitation,pass,,,OBL-04
+GDPR,Art. 6(1),Lawfulness of processing,pass,,,OBL-03
+GDPR,Art. 9(2),"Condition for special categories, where they are processed",pass,,,OBL-03
+GDPR,Arts. 37-39,"Data protection officer, where designation is required",pass,,,OBL-23
+GDPR,Art. 8,Conditions applicable to child's consent,not_applicable,,,OBL-11
+ISO 27701,A.1.2.7,Contracts with PII processors,fail,payments,,OBL-08
+ISO 27701,A.1.2.9,Records related to processing PII,fail,payments,,OBL-01
+ISO 27701,A.1.3.3,Determining information for PII principals,fail,payments,,OBL-07
+ISO 27701,A.1.3.4,Providing information to PII principals,fail,payments,,OBL-07; OBL-23
+ISO 27701,A.1.4.2,Limit collection,fail,payments,,OBL-05
+ISO 27701,A.1.4.3,Limit processing,fail,payments,,OBL-06
+ISO 27701,A.1.4.5,PII minimization objectives,fail,payments,,OBL-05; OBL-06
+ISO 27701,A.1.5.2,Identify basis for PII transfer between jurisdictions,fail,payments,,OBL-09
+ISO 27701,A.1.5.3,Countries and international organizations to which PII can be transferred,fail,payments,,OBL-09
+ISO 27701,A.1.5.4,Records of transfer of PII,fail,payments,,OBL-09
+ISO 27701,A.1.5.5,Records of PII disclosures to third parties,fail,payments,,OBL-08
+ISO 27701,A.3.10,Addressing information security within supplier agreements,fail,payments,,OBL-08
+ISO 27701,A.3.25,Logging,fail,payments,,OBL-06; OBL-16
+ISO 27701,A.1.2.4,Determine when and how consent is to be obtained,attested,,,OBL-11; OBL-20
+ISO 27701,A.1.2.5,Obtain and record consent,attested,,,OBL-20; OBL-22
+ISO 27701,A.1.3.10,Handling requests,attested,,,OBL-21
+ISO 27701,A.1.3.2,Determining and fulfilling obligations to PII principals,attested,,,OBL-21
+ISO 27701,A.1.3.5,Providing mechanism to modify or withdraw consent,attested,,,OBL-22
+ISO 27701,A.1.3.7,"Access, correction or erasure",attested,,,OBL-21
+ISO 27701,A.3.12,Response to information security incidents,attested,,,OBL-17; OBL-24
+ISO 27701,A.1.2.2,Identify and document purpose,pass,,,OBL-02
+ISO 27701,A.1.2.3,Identify lawful basis,pass,,,OBL-03
+ISO 27701,A.1.2.6,Privacy impact assessment,pass,,,OBL-10; OBL-11
+ISO 27701,A.1.4.10,PII transmission controls,pass,,,OBL-12
+ISO 27701,A.1.4.6,PII de-identification and deletion at the end of processing,pass,,,OBL-04
+ISO 27701,A.1.4.8,Retention,pass,,,OBL-04
+ISO 27701,A.3.11,Information security incident management planning and preparation,pass,,,OBL-16; OBL-17
+ISO 27701,A.3.23,Secure authentication,pass,,,OBL-14
+ISO 27701,A.3.24,Information backup,pass,,,OBL-18
+ISO 27701,A.3.26,Use of cryptography,pass,,,OBL-12; OBL-13
+ISO 27701,A.3.27,Secure development life cycle,pass,,,OBL-14; OBL-15
+ISO 27701,A.3.28,Application security requirements,pass,,,OBL-15
+ISO 27701,A.3.29,Secure system architecture and engineering principles,pass,,,OBL-19
+ISO 27701,A.3.4,Information security roles and responsibilities,pass,,,OBL-23

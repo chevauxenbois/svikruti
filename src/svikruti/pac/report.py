@@ -162,7 +162,7 @@ def write_record_csv(result: CheckResult, path: str) -> None:
                 activity["id"], activity["name"], activity["owner"], _join(activity["purposes"]),
                 "; ".join(f"{k}: {v}" for k, v in basis.items()) if isinstance(basis, dict) else basis,
                 _join(activity["data_subjects"]), _join(activity["declared_categories"]), _join(activity["detected_categories"]),
-                _join(p["name"] for p in processors), _join(sorted({p["country"] for p in processors if p["country"]})),
+                _join([p["name"] for p in processors]), _join(sorted({p["country"] for p in processors if p["country"]})),
                 _join(sorted({p["transfer_mechanism"] for p in processors if p["transfer_mechanism"]})),
                 "; ".join(f"{flow['processor']}: {', '.join(flow['categories'])}" for flow in activity["detected_flows"]),
                 activity["retention"], activity["dpia"], _join(activity["logged_categories"]), _join(activity["paths"]),
@@ -281,7 +281,13 @@ def _erasure_cell(row: Dict[str, Any]) -> str:
     if value.startswith("retained"):
         return _pill("attested", "retained") + f'<div class="mute">{_e(value[len("retained: "):])}</div>'
     if value:
-        return _pill("pass", "reached") + f'<div class="mute">{_e(value.replace("reached by ", ""))}</div>'
+        request = row.get("rights_request")
+        note = (
+            '<div class="mute">rights request: reaches it</div>'
+            if request
+            else ('<div class="mute">' + _pill("MEDIUM", "no rights request reaches it") + "</div>" if "rights_request" in row else "")
+        )
+        return _pill("pass", "reached") + f'<div class="mute">{_e(value.replace("reached by ", ""))}</div>' + note
     return _pill("HIGH", "no erasure path")
 
 

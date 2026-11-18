@@ -703,6 +703,8 @@ class ScanIntegrationTests(unittest.TestCase):
             self.assertIn("Privacy as Code", [tab.label for tab in app.tabs])
             self.assertIn(("Open findings", "3"), [(m.label, m.value) for m in app.metric])
             self.assertIn("Mixpanel: Contact, Location", " ".join(block.value for block in app.markdown))
+            self.assertIn(("Unprotected high-risk fields", "0"), [(m.label, m.value) for m in app.metric])
+            self.assertIn("#### Where personal data is stored", [block.value for block in app.markdown])
 
 
 class FingerprintTests(unittest.TestCase):
@@ -849,7 +851,8 @@ class AiProviderTests(unittest.TestCase):
             _edit_manifest(repo, "  ai_allowed_categories: []", "  ai_allowed_categories: [identity]")
             self.assertEqual([f.category for f in _check(repo).open_findings() if f.rule == "P006"], ["contact"])
             _edit_manifest(repo, "  ai_allowed_categories: [identity]", "  ai_allowed_categories: [identity, contact]")
-            self.assertEqual(_rules(_check(repo)), [])
+            # Allowed for AI, but reminders rely on consent and this call never checks it.
+            self.assertEqual(_rules(_check(repo)), ["P008"])
 
 
     def test_vendor_names_in_prose_are_not_integrations(self):
@@ -996,6 +999,39 @@ class InventoryCliTests(unittest.TestCase):
             self.assertNotIn("CustomerPayload", {row["store"] for row in rows})
 
 
+class RecallBenchmarkTests(unittest.TestCase):
+    """benchmarks/recall must not regress: every expected finding stays found."""
+
+    def _run(self, cases):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("recall_run", Path("benchmarks/recall/run.py").resolve())
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        import yaml
+
+        loaded = yaml.safe_load(Path(cases).read_text(encoding="utf-8"))["cases"]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            root.mkdir()
+            module.plant(loaded, root)
+            return module.evaluate(loaded, root)
+
+    def test_tuning_set(self):
+        results = self._run("benchmarks/recall/cases.yaml")
+        self.assertEqual([r["case"] + ":" + r["type"] for r in results if not r["passed"]], [])
+
+    def test_channels_set(self):
+        results = self._run("benchmarks/recall/channels.yaml")
+        self.assertEqual([r["case"] + ":" + r["type"] for r in results if not r["passed"]], [])
+
+    def test_held_out_set(self):
+        results = self._run("benchmarks/recall/holdout.yaml")
+        misses = [r["case"] + ":" + r["type"] for r in results if not r["passed"]]
+        # Documented in RESULTS.md: an identifier named after a vendor reads as that vendor.
+        self.assertEqual(misses, ["py-vendor-comment-trap:none-vendor"])
+
+
 class SchemaAndToolingTests(unittest.TestCase):
     def test_committed_schema_matches_the_loader(self):
         from svikruti.pac.schema import manifest_schema
@@ -1089,6 +1125,34 @@ class GovernanceAppImportTests(unittest.TestCase):
         self.assertGreaterEqual(len(route("sample-actions.csv", Path("examples/sample-actions.csv").read_bytes())["actions"]), 1)
         self.assertGreaterEqual(len(route("sample-ropa.csv", Path("examples/sample-ropa.csv").read_bytes())["ropa"]), 1)
         self.assertIn("unrecognized", route("notes.docx", b"x")["note"])
+
+    def test_check_and_org_results_become_verified_records_and_tasks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            shutil.copy(DRIFT_FILE, repo / "services/payments/refund.js")
+            self.assertEqual(main(["check", "--repo", str(repo), "--out-dir", str(Path(tmp) / "c"), "--fail-on", "none"]), 0)
+            raw = (Path(tmp) / "c" / "privacy-check.json").read_bytes()
+            self.assertTrue(self.module.looks_like_check(raw))
+            self.assertFalse(self.module.looks_like_check(Path("examples/sample-report.json").read_bytes()))
+            parsed = self.module.parse_upload("privacy-check.json", raw)
+            repayments = next(r for r in parsed["ropa"] if r["activity_name"] == "EMI repayment collection")
+            self.assertIn("Location", repayments["data_categories"])
+            self.assertIn("drift: D002", repayments["_evidence"])
+            mixpanel = next(v for v in parsed["vendors"] if v["vendor_name"] == "Mixpanel")
+            self.assertEqual((mixpanel["kwargs"]["dpa_status"], mixpanel["kwargs"]["risk_level"]), ("NOT_STARTED", "HIGH"))
+            rules = {a["title"].split(":")[0] for a in parsed["actions"]}
+            self.assertTrue({"D002", "D003", "P001"} <= rules)
+            self.assertIn("refund.js", " ".join(a["description"] for a in parsed["actions"]))
+
+            other = Path(tmp) / "lending"
+            shutil.copytree(EXAMPLE, other)
+            self.assertEqual(main(["org", str(Path(tmp) / "c"), str(other), "--name", "payments", "--out-dir", str(Path(tmp) / "o")]), 0)
+            org = self.module.parse_upload("org-summary.json", (Path(tmp) / "o" / "org-summary.json").read_bytes())
+            self.assertEqual(len(org["ropa"]), 6)
+            self.assertIn("EMI repayment collection (payments)", [r["activity_name"] for r in org["ropa"]])
+            self.assertTrue(any(a["title"].startswith("[payments] D003") for a in org["actions"]))
+            self.assertIn("Declared in: lending, payments", next(v for v in org["vendors"] if v["vendor_name"] == "Razorpay")["kwargs"]["notes"])
+        self.assertIn("Not a Svikruti", self.module.parse_privacy_check('{"schema_version": "x"}')["note"])
 
     def test_manifest_detection_and_bad_input(self):
         self.assertTrue(self.module.looks_like_manifest('{"version": 1, "processing_activities": []}'))
@@ -1193,6 +1257,223 @@ class ReportAndCliTests(unittest.TestCase):
             self.assertEqual(main(["diff", str(base), str(head), "--fail-on-new", "critical"]), 0)
             self.assertEqual(main(["diff", str(base), str(head), "--fail-on-new", "high"]), 3)
             self.assertEqual(main(["frameworks"]), 0)
+
+
+class StoredDataSurfaceTests(unittest.TestCase):
+    def test_scan_report_and_dashboard_show_where_data_is_stored(self):
+        from svikruti.dashboard import inventory_rows
+
+        from svikruti.pac.engine import attach_check
+
+        scan = run_scan(str(EXAMPLE), None)
+        attach_check(scan, str(EXAMPLE / "privacy.yaml"))
+        self.assertTrue(scan.privacy_as_code.get("inventory"))
+        page = render_html(scan)
+        self.assertIn("Where personal data is stored", page)
+        self.assertIn("Unprotected high-risk fields", page)
+        self.assertIn("Processors on record", page)
+        stored = [row for row in scan.privacy_as_code["inventory"] if row.get("persistent")]
+        rows = inventory_rows(stored + [{"store": "Lead", "field": "pan", "data_category": "Government ID", "high_risk": True, "persistent": True, "protection": "none", "erasure": "", "file": "a.py", "line": 3}])
+        self.assertEqual((rows[0]["Store"], rows[0]["Protection"], rows[0]["Erasure"]), ("Lead", "NONE", "No erasure path"))
+        aadhaar = next(row for row in rows if row["Field"] == "aadhaar")
+        self.assertEqual(aadhaar["Protection"], "encrypted")
+        self.assertTrue(any(row["Erasure"].startswith("Retained:") for row in rows))
+
+
+class OrgAggregationTests(unittest.TestCase):
+    def _estate(self, tmp: str):
+        lending = Path(tmp) / "lending"
+        shutil.copytree(EXAMPLE, lending)
+        payments = Path(tmp) / "payments-svc"
+        shutil.copytree(EXAMPLE, payments)
+        shutil.copy(DRIFT_FILE, payments / "services/payments/refund.js")
+        text = (payments / "privacy.yaml").read_text(encoding="utf-8")
+        text = text.replace("    country: IN\n    contract: DPA-2025-011", "    country: SG\n    contract: DPA-2025-099", 1)
+        (payments / "privacy.yaml").write_text(text, encoding="utf-8")
+        return lending, payments
+
+    def test_cross_repo_processor_register_and_rollup(self):
+        from svikruti.pac.org import load_inputs
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lending, payments = self._estate(tmp)
+            org = load_inputs([str(lending), str(payments)])
+            self.assertEqual([repo.name for repo in org.repos], ["lending", "payments-svc"])
+            register = {item["name"]: item for item in org.processors()}
+            self.assertEqual(register["Razorpay"]["countries"], ["IN", "SG"])
+            self.assertTrue(any("country differs" in issue for issue in register["Razorpay"]["issues"]))
+            self.assertTrue(any("contract differs" in issue for issue in register["Razorpay"]["issues"]))
+            self.assertEqual(register["Mixpanel"]["used_undeclared_in"], ["payments-svc"])
+            self.assertEqual(register["MSG91"]["issues"], [])
+            self.assertTrue({item["repo"] for item in org.findings()} == {"payments-svc"})
+            gdpr = next(item for item in org.frameworks() if item["id"] == "gdpr")
+            art28 = next(row for row in gdpr["rows"] if row["ref"] == "Art. 28(3)")
+            self.assertEqual((art28["status"], art28["failing"]), ("fail", ["payments-svc"]))
+            contact = next(item for item in org.data_map() if item["category"] == "Contact")
+            self.assertIn("Mixpanel", contact["processors"])
+            self.assertEqual(contact["repos"], ["lending", "payments-svc"])
+
+    def test_cli_mixes_check_artifacts_and_repos(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            lending, payments = self._estate(tmp)
+            artifact = Path(tmp) / "ci" / "payments-svc"
+            self.assertEqual(main(["check", "--repo", str(payments), "--out-dir", str(artifact), "--fail-on", "none"]), 0)
+            out = Path(tmp) / "org"
+            args = ["org", str(artifact / "privacy-check.json"), str(lending), "--out-dir", str(out)]
+            self.assertEqual(main(args), 0)
+            self.assertEqual(main(args + ["--fail-on", "high"]), 3)
+            for name in ("org-report.html", "org-report.md", "org-summary.json", "processor-register.csv", "data-inventory.csv", "findings.csv", "org-processing-record.csv", "framework-matrix.csv"):
+                self.assertTrue((out / name).is_file(), name)
+            summary = json.loads((out / "org-summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["schema_version"], "svikruti-org-v1")
+            self.assertEqual({repo["name"] for repo in summary["repositories"]}, {"payments-svc", "lending"})
+            self.assertIn("lending,Applicant", (out / "data-inventory.csv").read_text(encoding="utf-8"))
+            record = (artifact / "processing-record.csv").read_text(encoding="utf-8")
+            self.assertNotIn("generator object", record)
+            self.assertIn("Razorpay", record)
+            self.assertNotIn("_erasure_paths", (artifact / "privacy-check.json").read_text(encoding="utf-8"))
+            self.assertIn("Razorpay", (out / "org-report.html").read_text(encoding="utf-8"))
+            self.assertEqual(main(["org", str(Path(tmp) / "missing")]), 2)
+            empty = Path(tmp) / "empty"
+            empty.mkdir()
+            self.assertEqual(main(["org", str(empty)]), 2)
+
+
+def _write(root: Path, files: dict) -> None:
+    for rel, text in files.items():
+        path = root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+
+def _flows(root: Path):
+    return {(e.file, e.metadata["third_party"], e.metadata["data_category"], e.metadata["flow"]) for e in scan_processor_flows(str(root))}
+
+
+class QueueAndInjectionFlowTests(unittest.TestCase):
+    def test_celery_task_and_bull_queue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "tasks.py": "import mailchimp_marketing as MailchimpMarketing\nfrom celery import shared_task\nclient = MailchimpMarketing.Client()\n\n@shared_task\ndef subscribe(address):\n    client.lists.add_list_member('l', {'email_address': address})\n",
+                "views.py": "from .tasks import subscribe\n\ndef signup(user):\n    subscribe.delay(user.email)\n",
+                "worker.js": "const twilio = require('twilio')(a, b);\nnew Worker('sms', async (job) => {\n  await twilio.messages.create({ to: job.data.to });\n});\n",
+                "enqueue.js": "const sms = new Queue('sms');\nasync function remind(c) {\n  await sms.add('due', { to: c.phone });\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("views.py", "Mailchimp", "Contact", "queue"), flows)
+            self.assertIn(("enqueue.js", "Twilio", "Contact", "queue"), flows)
+            detail = next(e.detail for e in scan_processor_flows(str(root)) if e.file == "views.py")
+            self.assertIn("task `subscribe`", detail)
+
+    def test_spring_event_with_constant_topic_and_unrelated_event_stays_quiet(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "Topics.java": "package a;\npublic final class Topics {\n    public static final String KYC = \"kyc-events\";\n}\n",
+                "Listener.java": "package a;\nimport com.sendgrid.SendGrid;\npublic class Listener {\n    private final SendGrid sendgrid = new SendGrid(\"k\");\n    @KafkaListener(topics = \"kyc-events\")\n    public void onKyc(String payload) {\n        sendgrid.api(payload);\n    }\n}\n",
+                "Signup.java": "package a;\npublic class Signup {\n    void register(User user) {\n        kafkaTemplate.send(Topics.KYC, user.getPanNumber());\n        kafkaTemplate.send(\"audit\", user.getEmail());\n    }\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("Signup.java", "SendGrid", "Government ID", "queue"), flows)
+            self.assertNotIn(("Signup.java", "SendGrid", "Contact", "queue"), flows)
+
+    def test_interface_injection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "di/Notifier.java": "package di;\npublic interface Notifier {\n    void notifyUser(String phone, String text);\n}\n",
+                "di/impl/SmsNotifier.java": "package di.impl;\nimport com.twilio.Twilio;\npublic class SmsNotifier implements Notifier {\n    public void notifyUser(String phone, String text) {\n        Twilio.messages.create(phone, text);\n    }\n}\n",
+                "app/LoanService.java": "package app;\nimport di.Notifier;\npublic class LoanService {\n    private Notifier notifier;\n    void approve(Applicant a) {\n        notifier.notifyUser(a.getMobileNumber(), \"ok\");\n    }\n}\n",
+            })
+            flows = _flows(root)
+            self.assertIn(("app/LoanService.java", "Twilio", "Contact", "wrapper"), flows)
+            self.assertFalse(any(f[0] == "di/Notifier.java" for f in flows))
+
+
+class FreeTextToAiTests(unittest.TestCase):
+    APP = (
+        "from flask import request\nfrom openai import OpenAI\nclient = OpenAI()\n\n"
+        "@app.post('/ask')\ndef ask():\n    q = request.json['question']\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': q}])\n\n"
+        "@app.post('/safe')\ndef safe():\n    q = redact(request.json['question'])\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': q}])\n\n"
+        "def digest(stats):\n    text = f'approved {stats.approved}'\n    return client.chat.completions.create(model='m', messages=[{'role': 'user', 'content': text}])\n"
+    )
+
+    def test_request_text_flagged_redacted_and_server_text_not(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {"app.py": self.APP})
+            hits = [e for e in scan_processor_flows(str(root)) if e.metadata["data_category"] == "Free text"]
+            self.assertEqual([e.line for e in hits], [8])
+            self.assertEqual(hits[0].severity, "HIGH")
+            self.assertIn("request.json", hits[0].metadata["free_text_source"])
+
+    def test_free_text_is_held_to_the_ai_allowlist(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            _write(repo, {"services/payments/assist.py": self.APP})
+            _edit_manifest(repo, "processors:\n  - id: razorpay", "processors:\n  - id: openai\n    name: OpenAI\n    purpose: Support answers\n    country: US\n    contract: DPA-9\n    transfer_mechanism: SCC\n    data_categories: [free_text]\n  - id: razorpay")
+            _edit_manifest(repo, "    processors: [razorpay]", "    processors: [razorpay, openai]")
+            _edit_manifest(repo, "data_categories: [contact, financial]", "data_categories: [contact, financial, free_text]")
+            p006 = [f for f in _check(repo).open_findings() if f.rule == "P006"]
+            self.assertEqual([f.category for f in p006], ["free_text"])
+            _edit_manifest(repo, "  ai_allowed_categories: []", "  ai_allowed_categories: [free_text]")
+            self.assertEqual([f for f in _check(repo).open_findings() if f.rule == "P006"], [])
+
+
+class RightsRequestTests(unittest.TestCase):
+    def test_entry_point_reaches_store_or_d011(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            result = _check(repo)
+            self.assertEqual(result.to_dict()["rights_request_entrypoints"], ["handle_erasure_request (services/onboarding/erasure.py:10)"])
+            applicant = next(r for r in result.inventory if r["store"] == "Applicant")
+            self.assertTrue(applicant["rights_request"].startswith("reached from handle_erasure_request()"))
+            # Rename the handler: the deletion still exists, but nothing a person can trigger reaches it.
+            path = repo / "services/onboarding/erasure.py"
+            path.write_text(path.read_text(encoding="utf-8").replace("handle_erasure_request", "delete_applicant_records"), encoding="utf-8")
+            d011 = [f for f in _check(repo).open_findings() if f.rule == "D011"]
+            self.assertEqual(len(d011), 1)
+            self.assertIn("no rights-request entry point was found", d011[0].detail)
+            self.assertEqual(d011[0].severity, "HIGH")  # Applicant holds government IDs
+            _edit_manifest(repo, "erasure:\n", "erasure:\n  entrypoints: [delete_applicant_records]\n")
+            self.assertEqual([f for f in _check(repo).open_findings() if f.rule == "D011"], [])
+
+    def test_routes_and_retention_jobs(self):
+        from svikruti.pac.datastore import rights_request_entrypoints
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "accounts/urls.py": "urlpatterns = [\n    path('accounts/close/', views.close),\n    path('accounts/two_factor/totp/remove/', views.remove_totp),\n]\n",
+                "accounts/views.py": "def close(request):\n    purge_profile(request.user)\n\ndef remove_totp(request):\n    pass\n\ndef purge_profile(user):\n    Profile.objects.filter(user=user).delete()\n",
+                "api/routes.js": "router.delete('/me', async (req, res) => {\n  await Customer.destroy({ where: { id: req.user.id } });\n});\nrouter.post('/items/remove', removeItem);\n",
+            })
+            entries = rights_request_entrypoints(root, ["accounts/urls.py", "accounts/views.py", "api/routes.js"])
+            names = sorted(entry.name for entry in entries)
+            self.assertEqual(names, ["DELETE /me", "close"])
+            close = next(entry for entry in entries if entry.name == "close")
+            self.assertIn("Profile.objects.filter", close.text)  # reached through purge_profile()
+
+
+class ConsentGateTests(unittest.TestCase):
+    def test_guard_in_caller_custom_guard_and_missing_guard(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            result = _check(repo)
+            self.assertEqual(result.consent["flows_guarded"], result.consent["flows_checked"])
+            self.assertNotIn("P008", _rules(result))
+            sms = repo / "services/notifications/sms.py"
+            text = sms.read_text(encoding="utf-8")
+            sms.write_text(text.replace("        if not borrower.reminder_consent:\n            continue\n", ""), encoding="utf-8")
+            result = _check(repo)
+            p008 = [f for f in result.open_findings() if f.rule == "P008"]
+            self.assertEqual((len(p008), p008[0].activity, p008[0].processor), (1, "reminders", "msg91"))
+            self.assertEqual(next(a for a in result.assessments if a.id == "OBL-22").status, "fail")
+            sms.write_text(sms.read_text(encoding="utf-8").replace("    for borrower in borrowers:\n", "    for borrower in borrowers:\n        if not may_contact(borrower):\n            continue\n"), encoding="utf-8")
+            self.assertIn("P008", _rules(_check(repo)))
+            (repo / "privacy.yaml").write_text((repo / "privacy.yaml").read_text(encoding="utf-8") + "\nconsent:\n  checks: [may_contact]\n", encoding="utf-8")
+            self.assertNotIn("P008", _rules(_check(repo)))
 
 
 if __name__ == "__main__":
