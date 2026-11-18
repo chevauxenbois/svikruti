@@ -208,9 +208,21 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _ensure_output_dirs(args: argparse.Namespace) -> None:
+    """Create the folder of every output path given (--out /tmp/svk/report.html with no /tmp/svk yet)."""
+    for name, value in vars(args).items():
+        if not isinstance(value, str) or not value or value.startswith("/dev/"):
+            continue
+        if name == "out_dir":
+            Path(value).mkdir(parents=True, exist_ok=True)
+        elif name == "out" or name.endswith("_out"):
+            Path(value).parent.mkdir(parents=True, exist_ok=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    _ensure_output_dirs(args)
 
     if args.command == "init-github-action":
         if args.out is None:

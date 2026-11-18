@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.12.1 - Java/Spring precision from an Apache Fineract review
+
+### Fixed
+
+- Java entities: `@Entity` / `@Table` on the lines above a class, and
+  `@Column` / `@JoinColumn` above a field, mark it as stored. Fineract went
+  from 0 to 59 inventoried fields.
+- Erasure: JPA parent-side cascades (`@OneToMany(cascade = ALL)`,
+  `orphanRemoval = true`), deletes through typed variables and Spring Data
+  repositories, and a call tree that skips builder and factory classes.
+- Rights-request entry names need a person as their whole object
+  (`DeleteClient`, not `DeleteClientCharge`).
+- Not reported as personal data: Swagger / OpenAPI example values, project
+  mailing lists, demo database dumps and test modules (`integration-tests`),
+  container service URLs (`http://tempo:4318`), concatenated variables after
+  `password=`, payment configuration and amounts (`periodPaymentRate`),
+  "email" or "phone" modifying another noun (`emailCampaign`), system account
+  usernames (`tenant.getUsername()`), and uncorroborated or low-severity
+  signals in the processing record (`/actuator/health` is not health data).
+- Output folders are created when missing (`--out /tmp/new/report.html`).
+- Identity, contact and ID terms: `firstname`, `lastname`, `fullname`,
+  `mobile_no`, `phone_no`, `national_id`, `document_key`.
+
 ## 0.12.0 - Sector packs, runtime redaction, VS Code
 
 ### Added

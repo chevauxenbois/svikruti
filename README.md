@@ -374,6 +374,14 @@ documentation emails, weak-hash names in comments). After fixing them:
 | healthchecks | 958 | 23 LOW | 11 | 8 | SHA-1 hashing (6), wildcard CORS (2) |
 | saleor | 4,638 | 23 LOW | 29 | 2 | MD5 used for cache keys (2) |
 
+Then Apache Fineract, a 7,640-file Java/Spring lending platform: CRITICAL/HIGH
+defects went from 44 to 13 after a hand review (31 false positives fixed:
+API-doc example emails, demo database dumps, container service URLs), and the
+inventory went from zero stored fields to 29 tables, finding identity
+document numbers stored without field-level protection. Details, including a
+correction to an earlier saleor figure, are in
+[benchmarks/recall/RESULTS.md](benchmarks/recall/RESULTS.md).
+
 All 11 remaining findings match what the code does; whether SHA-1 or MD5 is
 acceptable in each place is a judgement call. The risk score separates
 defects from data exposure and is not comparable with 0.8.x.
