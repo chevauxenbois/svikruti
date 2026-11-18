@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
-from svikruti.scanner.code import _ID_SUFFIX_RE, _code_outside_strings, _drop_record_identifiers, _file_context, _language_for, iter_source_files
+from svikruti.scanner.code import _ID_SUFFIX_RE, PROTECTING_CALL_NAME_RE, _code_outside_strings, _drop_protected_calls, _drop_record_identifiers, _file_context, _language_for, iter_source_files
 from svikruti.scanner.patterns import (
     AMBIGUOUS_SENSITIVE_TERMS,
     CATEGORY_SEVERITY,
@@ -351,7 +351,11 @@ def _python_logged_text(call: ast.Call, assignments: Dict[str, str]) -> Tuple[st
         elif isinstance(node, ast.FormattedValue):
             visit(node.value, whole)
         elif isinstance(node, ast.Call):
-            # str(email), mask(phone), json.dumps(payload), "..".format(email)
+            # redact(email), mask_phone(p), sha256(pan): what is logged is the protected value.
+            callee = node.func.attr if isinstance(node.func, ast.Attribute) else (node.func.id if isinstance(node.func, ast.Name) else "")
+            if PROTECTING_CALL_NAME_RE.match(callee):
+                return
+            # str(email), json.dumps(payload), "..".format(email)
             for child in list(node.args) + [keyword.value for keyword in node.keywords]:
                 visit(child, whole)
             if isinstance(node.func, ast.Attribute):
@@ -543,7 +547,7 @@ def _scan_js_ts_semantics(
             )
         log_match = JS_LOG_RE.search(line)
         if log_match:
-            for category in _categories_for_text(_drop_record_identifiers(_code_outside_strings(log_match.group(2)))):
+            for category in _categories_for_text(_drop_record_identifiers(_code_outside_strings(_drop_protected_calls(log_match.group(2))))):
                 key = f"semantic_js_log:{rel}:{line_number}:{category}"
                 if key in seen:
                     continue
@@ -770,7 +774,7 @@ def _scan_c_style_semantics(
                 _semantic_context_evidence(
                     # Identifiers and interpolations only: the word "email"
                     # in a log message is not an email address.
-                    _drop_record_identifiers(_code_outside_strings(line)),
+                    _drop_record_identifiers(_code_outside_strings(_drop_protected_calls(line))),
                     rel,
                     path,
                     line_number,
@@ -847,7 +851,7 @@ def _scan_dynamic_web_semantics(
                 _semantic_context_evidence(
                     # Identifiers and interpolations only: the word "email"
                     # in a log message is not an email address.
-                    _drop_record_identifiers(_code_outside_strings(line)),
+                    _drop_record_identifiers(_code_outside_strings(_drop_protected_calls(line))),
                     rel,
                     path,
                     line_number,

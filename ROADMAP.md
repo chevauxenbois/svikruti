@@ -5,7 +5,14 @@ reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 277
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.11.0
+## Current Release: 0.12.0
+
+- SOC 2, RBI (Digital Lending 2025, IT Governance 2023, payment data storage)
+  and SEBI CSCRF framework packs.
+- Runtime redaction library for Python and Node, recognised by the check.
+- VS Code extension.
+
+## 0.11.0
 
 - Data followed through queues, task runners and event buses (Celery,
   Dramatiq, RQ, Kafka, RabbitMQ, SQS, NATS, BullMQ, NestJS, Spring, Sidekiq,
@@ -58,11 +65,8 @@ review-ready artifacts over generic compliance checklists.
 
 ## Near Term
 
-- More framework packs: SOC 2 Privacy criteria, RBI/SEBI sector overlays,
-  Singapore PDPA, UK GDPR deltas.
-- Runtime companion: a lightweight log and prompt redaction library whose
-  presence the scanner recognises as protection.
-- IDE extension (VS Code / JetBrains) that runs `svikruti check` on save.
+- More framework packs: Singapore PDPA, UK GDPR deltas, IRDAI overlay.
+- JetBrains plugin (VS Code is done); publish the VS Code extension to the Marketplace.
 - Join producers and consumers that live in different repositories
   (`svikruti org` already sees both ends).
 - Grow the recall benchmark: more languages and frameworks, and a third set

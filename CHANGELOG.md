@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.12.0 - Sector packs, runtime redaction, VS Code
+
+### Added
+
+- Framework packs: `soc2` (2017 Trust Services Criteria, revised points of
+  focus 2022), `rbi` (Digital Lending Directions 2025, IT Governance Master
+  Direction 2023, Storage of Payment System Data 2018) and `sebi_cscrf`
+  (CSCRF, August 2024). RBI and SEBI are overlays meant to run with `dpdpa`.
+- `svikruti.redact`: validated runtime redaction for text, nested payloads,
+  chat messages and stdlib logging (`install_logging_redaction()`,
+  `RedactingFilter`), with label, partial and keyed-hash styles.
+- `svikruti-redact` (packages/redact-js): the same for Node, with console
+  and pino integration. Python and JS share test cases.
+- The check recognises redaction: values passed through `redact()`, `mask*()`,
+  `hash*()`, `sha*()`, `encrypt*()` or `tokenize*()` are not log leaks;
+  process-wide installs mark covered P001 findings as redacted at runtime;
+  `privacy-check.json` reports `runtime_redaction`.
+- VS Code extension (editors/vscode): check on save, findings as diagnostics
+  on the offending line or the matching `privacy.yaml` entry, suppression
+  quick fix, status bar count, bundled manifest schema.
+
 ## 0.11.0 - Queues, free text, rights requests, consent
 
 ### Added

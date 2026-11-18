@@ -97,7 +97,7 @@ class ManifestTests(unittest.TestCase):
 class FrameworkPackTests(unittest.TestCase):
     def test_builtin_packs_map_known_obligations(self):
         obligation_ids = {item["id"] for item in OBLIGATIONS}
-        self.assertEqual(builtin_pack_ids(), ["ccpa", "dpdpa", "gdpr", "iso27701", "iso27701_processor", "lgpd"])
+        self.assertEqual(builtin_pack_ids(), ["ccpa", "dpdpa", "gdpr", "iso27701", "iso27701_processor", "lgpd", "rbi", "sebi_cscrf", "soc2"])
         for pack_id in builtin_pack_ids():
             pack = load_pack(pack_id)
             self.assertTrue(set(pack.controls) <= obligation_ids, pack_id)
@@ -1039,6 +1039,8 @@ class SchemaAndToolingTests(unittest.TestCase):
         schema = manifest_schema()
         committed = json.loads(Path("docs/privacy.schema.json").read_text(encoding="utf-8"))
         self.assertEqual(committed, json.loads(json.dumps(schema)), "run `svikruti schema --out docs/privacy.schema.json`")
+        bundled = json.loads(Path("editors/vscode/privacy.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(bundled, committed, "copy docs/privacy.schema.json to editors/vscode/")
         activity = schema["properties"]["processing_activities"]["items"]
         self.assertEqual(activity["required"], ["id", "paths"])
         self.assertIn("lgpd", schema["properties"]["frameworks"]["items"]["anyOf"][0]["enum"])
@@ -1337,6 +1339,81 @@ class OrgAggregationTests(unittest.TestCase):
             empty = Path(tmp) / "empty"
             empty.mkdir()
             self.assertEqual(main(["org", str(empty)]), 2)
+
+
+class SectorPackTests(unittest.TestCase):
+    def test_soc2_rbi_sebi_packs(self):
+        for pack_id, expected in {"soc2": {"OBL-04": "P4.2", "OBL-21": "P5.1", "OBL-24": "P6.6"}, "rbi": {"OBL-09": "DL 13(iv)", "OBL-15": "ITG 26(a)-(f)"}, "sebi_cscrf": {"OBL-15": "DE.CM.S5", "OBL-09": "Part I, Definition 16(e)"}}.items():
+            pack = load_pack(pack_id)
+            self.assertFalse({key for key in pack.controls} - {item["id"] for item in OBLIGATIONS})
+            for obligation, ref in expected.items():
+                self.assertIn(ref, [entry["ref"] for entry in pack.refs(obligation)])
+        result = run_check(run_scan(str(EXAMPLE), None), load_manifest(EXAMPLE / "privacy.yaml"), frameworks=["dpdpa", "rbi", "sebi_cscrf", "soc2"], today=TODAY)
+        self.assertEqual([pack.id for pack in result.packs], ["dpdpa", "rbi", "sebi_cscrf", "soc2"])
+        self.assertEqual(result.framework_summary(result.packs[1])["counts"]["fail"], 0)
+
+
+class RuntimeRedactionTests(unittest.TestCase):
+    def test_detectors_validate_and_shared_cases_hold(self):
+        from svikruti.redact import find, redact, redact_messages
+
+        for text, expected in json.loads(Path("packages/redact-js/test/cases.json").read_text(encoding="utf-8")):
+            self.assertEqual(redact(text), expected)
+        self.assertEqual([m.kind for m in find("4111 1111 1111 1112 and 234567890123")], [])  # bad Luhn, bad Verhoeff
+        self.assertEqual(redact("call 9876543210", style="partial"), "call [PHONE ...3210]")
+        self.assertEqual(redact("a@b.com", style="hash", key="k"), redact("A@B.com", style="hash", key="k"))
+        message = [{"role": "user", "content": [{"type": "text", "text": "I am ravi@x.com"}]}]
+        self.assertEqual(redact_messages(message)[0]["content"][0]["text"], "I am [EMAIL]")
+        self.assertEqual(message[0]["content"][0]["text"], "I am ravi@x.com")
+
+    def test_logging_install(self):
+        import io
+        import logging
+
+        from svikruti.redact import install_logging_redaction, uninstall_logging_redaction
+
+        stream = io.StringIO()
+        logger = logging.getLogger("svk-redact-test")
+        logger.addHandler(logging.StreamHandler(stream))
+        logger.setLevel(logging.INFO)
+        install_logging_redaction()
+        try:
+            logger.info("refund for %s, PAN %s", "ravi@x.com", "ABCPE1234F")
+        finally:
+            uninstall_logging_redaction()
+        self.assertEqual(stream.getvalue().strip(), "refund for [EMAIL], PAN [PAN]")
+
+    def test_vscode_extension_core(self):
+        import shutil as _shutil
+        import subprocess
+
+        if not _shutil.which("node"):
+            self.skipTest("node not installed")
+        done = subprocess.run(["node", "--test"], cwd="editors/vscode", capture_output=True, text=True, timeout=120)
+        self.assertEqual(done.returncode, 0, done.stdout[-2000:])
+
+    def test_js_port_agrees(self):
+        import shutil as _shutil
+        import subprocess
+
+        if not _shutil.which("node"):
+            self.skipTest("node not installed")
+        done = subprocess.run(["node", "--test"], cwd="packages/redact-js", capture_output=True, text=True, timeout=120)
+        self.assertEqual(done.returncode, 0, done.stdout[-2000:])
+
+    def test_scanner_treats_redaction_as_protection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            shutil.copy(DRIFT_FILE, repo / "services/payments/refund.js")
+            self.assertIn("P001", _rules(_check(repo)))
+            checkout = repo / "services/payments/checkout.js"
+            checkout.write_text('const { installConsoleRedaction } = require("svikruti-redact");\ninstallConsoleRedaction();\n' + checkout.read_text(encoding="utf-8"), encoding="utf-8")
+            result = _check(repo)
+            p001 = next(f for f in result.findings if f.rule == "P001")
+            self.assertEqual(p001.status, "excepted")
+            self.assertIn("checkout.js:2", p001.exception_reason)
+            _write(repo, {"services/onboarding/audit.py": "import logging\nlogger = logging.getLogger(__name__)\n\ndef audit(applicant):\n    logger.info('kyc for %s', redact(applicant.email))\n    logger.info('kyc for %s', mask_phone(applicant.phone_number))\n"})
+            self.assertFalse([f for f in _check(repo).open_findings() if f.rule == "P001" and "audit.py" in " ".join(f.refs)])
 
 
 def _write(root: Path, files: dict) -> None:
