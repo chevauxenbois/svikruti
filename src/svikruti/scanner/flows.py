@@ -58,6 +58,8 @@ _BINDING_RES = (
 _KEY_RE = re.compile(r"""["']([A-Za-z_][\w-]*)["']\s*(?::|=>)""")
 _IMPORT_LINE_RE = re.compile(r"^\s*(?:import\b|from\s+\S+\s+import\b|use\s|require_once|require\s*\(|#include)|\brequire\s*\(", re.IGNORECASE)
 _ASSIGN_RE = re.compile(rf"^\s*(?:const|let|var|val|final)?\s*(?:self\.|this\.|\$)?({_IDENT})\s*(?::[^=]+)?(?::=|=)(?!=)\s*(.+)$")
+_SDK_SETUP_RE = re.compile(r"^[.:>-]*\s*(?:init|initialize|configure|config|setup|set_up|setOptions|set_options|load|use)\s*\(", re.IGNORECASE)
+_ASSIGNMENT_RE = re.compile(r"^\s*(?:const|let|var|val|final)?\s*[\w$.\[\]\"']+\s*(?::[^=]+)?(?::=|=)(?!=)")
 _SKIP_HANDLES = {"const", "let", "var", "import", "from", "require", "new", "await", "return", "this", "self", "default", "as", "type"}
 
 
@@ -120,7 +122,9 @@ def _argument_text(statement: str) -> str:
     statement = _CONSTANT_PAIR_RE.sub(" ", statement)
     # Passing `customer_id` or `intent.id` hands over a record reference, not the record's data.
     statement = _drop_record_identifiers(statement)
-    return _code_outside_strings(statement) + " " + " ".join(_KEY_RE.findall(statement))
+    # String values sent to a vendor API are options ("expand": ["default_payment_method"]),
+    # not field names; keys are kept separately below.
+    return _code_outside_strings(statement, keep_identifier_literals=False) + " " + " ".join(_KEY_RE.findall(statement))
 
 
 def _carries_its_inputs(value: str) -> bool:
@@ -589,14 +593,25 @@ def _call_sites(source: _SourceFile, handles: Set[str], call_targets: Set[str]) 
     for line_index, line in enumerate(lines):
         if _IMPORT_LINE_RE.search(line) or line.lstrip().startswith(("//", "#", "*", "/*")):
             continue
-        if target_re.search(line):
+        target = target_re.search(line)
+        if target and _SDK_SETUP_RE.search(line[target.end() - 1 :]):
+            continue  # sentry_sdk.init(...), mixpanel.init(token): configuration, not data
+        if target and target.group(0).rstrip().endswith("(") and starts[line_index] != line_index and re.search(r"[:,(=]\s*$", line[: target.start()]):
+            # The vendor client is a value inside a larger call, as in the Vercel AI SDK:
+            # generateText({ model: openai("gpt-4o"), prompt: `... ${user.email}` })
+            index = starts[line_index]
+        elif target:
             index = line_index
         elif argument_re and argument_re.search(line) and starts[line_index] != line_index:
             index = starts[line_index]
-        elif argument_re and argument_re.search(line) and "(" in line.split("=", 1)[-1]:
+        elif argument_re and argument_re.search(line) and "(" in (line.split("=", 1)[-1] if _ASSIGNMENT_RE.match(line) else line):
+            # requests.post(VENDOR_URL, json={...}): only an assignment's left side is skipped,
+            # never a keyword argument's.
             index = line_index
         else:
             continue
+        if re.search(r"(?:\.|::|->)\s*(?:init|initialize|configure|setup|set_up|setOptions)\s*\(", lines[index], re.IGNORECASE):
+            continue  # the enclosing statement configures an SDK (sentry_sdk.init(integrations=[...]))
         if "(" in _statement(lines, index) and index not in sites:
             sites.append(index)
     return sites

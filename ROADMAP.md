@@ -5,7 +5,17 @@ reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 277
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.9.0
+## Current Release: 0.10.0
+
+- `svikruti org`: one processing record, processor register, data map and
+  framework posture across many repositories, flagging vendors recorded
+  inconsistently between services.
+- Recall benchmark with a held-out set, run in the test suite.
+- Stored data (protection, erasure) in the scan report, dashboard and
+  governance import; governance app imports `privacy-check.json` and
+  `org-summary.json`.
+
+## 0.9.x
 
 - Privacy as code: `privacy.yaml` manifest, `svikruti init` / `check` / `diff`,
   drift and policy rules, framework packs (DPDPA, GDPR, ISO/IEC 27701:2025),
@@ -46,8 +56,10 @@ review-ready artifacts over generic compliance checklists.
 - Deeper data flow: dependency injection, queues and event buses between the
   caller and the processor (wrapper functions are already followed across
   files).
-- Measure recall: seed known leaks into real repositories and count what the
-  scanner finds (precision was hand-reviewed for 0.9.0; recall was not).
+- Grow the recall benchmark: more languages and frameworks, and a third set
+  written by someone other than the maintainer.
+- `svikruti org` straight from a GitHub organisation (download the latest
+  check artifact of every repository).
 
 - Improve JavaScript/TypeScript, Java, Go, Ruby, and PHP semantic coverage with
   deeper tree-sitter packs.

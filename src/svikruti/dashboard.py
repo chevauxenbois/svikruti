@@ -200,6 +200,40 @@ def _privacy_as_code(st: Any, report: Dict[str, Any]) -> None:
         ["Activity", "Declared data", "Detected in code", "Data sent to processors", "State"],
     )
 
+    stored = [row for row in data.get("inventory", []) if row.get("persistent")]
+    st.markdown("#### Where personal data is stored")
+    if stored:
+        rows = inventory_rows(stored)
+        gaps = st.columns(3)
+        gaps[0].metric("Stores with personal data", len({row.get("store") for row in stored}))
+        gaps[1].metric("Unprotected high-risk fields", sum(1 for row in rows if row["Protection"] == "NONE"))
+        gaps[2].metric("Stores no erasure reaches", len({row["Store"] for row in rows if row["Erasure"] == "No erasure path"}))
+        only_gaps = st.checkbox("Only gaps (unprotected high-risk fields, no erasure path, reaches logs)", value=False, key="pac_inventory_gaps")
+        if only_gaps:
+            rows = [row for row in rows if row["Protection"] == "NONE" or row["Erasure"] == "No erasure path" or row["Logs"]]
+        _render_simple_table(st, rows, ["Store", "Field", "Category", "Protection", "Erasure", "Sent to", "Logs", "Where"])
+    else:
+        st.caption("No persistent tables or models with personal data were found.")
+
+    processors = data.get("processors", [])
+    if processors:
+        st.markdown("#### Processors on record")
+        _render_simple_table(
+            st,
+            [
+                {
+                    "Processor": item.get("name"),
+                    "AI provider": "yes" if item.get("ai_provider") else "",
+                    "Country": item.get("country"),
+                    "Contract": item.get("contract"),
+                    "Transfer mechanism": item.get("transfer_mechanism"),
+                    "Data": ", ".join(item.get("data_categories") or []),
+                }
+                for item in processors
+            ],
+            ["Processor", "AI provider", "Country", "Contract", "Transfer mechanism", "Data"],
+        )
+
     st.markdown("#### Obligations")
     labels = {"pass": "Verified", "fail": "Failing", "attested": "Attested", "manual": "Not verified", "not_applicable": "Not applicable"}
     _render_simple_table(
@@ -210,6 +244,43 @@ def _privacy_as_code(st: Any, report: Dict[str, Any]) -> None:
         ],
         ["Result", "Obligation", "Evidence"],
     )
+
+
+_PROTECTED = {"encrypted", "tokenised", "hashed", "masked"}
+
+
+def inventory_rows(stored: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Dashboard rows for persistent fields, gaps first. Pure so it can be tested without Streamlit."""
+    rows = []
+    for row in stored:
+        kind = str(row.get("protection") or "none")
+        if kind in _PROTECTED:
+            protection = kind
+        elif kind == "binary":
+            protection = "binary, unverified"
+        else:
+            protection = "NONE" if row.get("high_risk") else "none"
+        erasure = str(row.get("erasure") or "")
+        if erasure.startswith("retained"):
+            erasure = "Retained: " + erasure[len("retained: "):]
+        elif erasure:
+            erasure = erasure.replace("reached by ", "Reached by ")
+        else:
+            erasure = "No erasure path"
+        rows.append(
+            {
+                "Store": row.get("store"),
+                "Field": row.get("field"),
+                "Category": f"{row.get('data_category')}{' (high risk)' if row.get('high_risk') else ''}",
+                "Protection": protection,
+                "Erasure": erasure,
+                "Sent to": ", ".join(row.get("sent_to") or []),
+                "Logs": "yes" if row.get("reaches_logs") else "",
+                "Where": f"{row.get('file')}:{row.get('line')}",
+            }
+        )
+    rows.sort(key=lambda item: (item["Protection"] != "NONE", item["Erasure"] != "No erasure path", not item["Logs"], str(item["Store"]), str(item["Field"])))
+    return rows
 
 
 def _load_initial_report(report_path: str | None, db_path: str) -> Dict[str, Any] | None:

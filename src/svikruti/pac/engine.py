@@ -17,6 +17,16 @@ from svikruti.pac.taxonomy import at_least, category_label
 SCHEMA_VERSION = "svikruti-privacy-check-v1"
 
 
+def _ai_slugs() -> set:
+    from svikruti.pac.taxonomy import slugify
+    from svikruti.scanner.patterns import AI_PROVIDERS
+
+    return {slugify(name) for name in AI_PROVIDERS}
+
+
+_AI_PROVIDER_SLUGS = _ai_slugs()
+
+
 @dataclass
 class CheckResult:
     manifest: Manifest
@@ -87,6 +97,20 @@ class CheckResult:
             "generated_at": self.generated_at,
             "manifest": self.manifest.path,
             "repo": self.scan.repo_path,
+            "organization": self.manifest.organization,
+            "processors": [
+                {
+                    "id": processor.id,
+                    "name": processor.name,
+                    "purpose": processor.purpose,
+                    "country": processor.country,
+                    "contract": processor.contract,
+                    "transfer_mechanism": processor.transfer_mechanism,
+                    "data_categories": [category_label(slug) for slug in processor.data_categories],
+                    "ai_provider": processor.id in self.model.ai_processors or processor.id in _AI_PROVIDER_SLUGS,
+                }
+                for processor in self.manifest.processors
+            ],
             "summary": {
                 "activities": len(self.manifest.activities),
                 "processors": len(self.manifest.processors),
@@ -104,7 +128,7 @@ class CheckResult:
             "obligations": [assessment.to_dict() for assessment in self.assessments],
             "matrix": [row for pack in self.packs for row in self.framework_matrix(pack)],
             "activities": self.activities_view,
-            "inventory": self.inventory,
+            "inventory": [{key: value for key, value in row.items() if not key.startswith("_")} for row in self.inventory],
             "manifest_warnings": self.manifest.warnings,
             "scan_summary": self.scan.summary.to_dict(),
             "disclaimers": [

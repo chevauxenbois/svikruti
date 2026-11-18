@@ -703,6 +703,8 @@ class ScanIntegrationTests(unittest.TestCase):
             self.assertIn("Privacy as Code", [tab.label for tab in app.tabs])
             self.assertIn(("Open findings", "3"), [(m.label, m.value) for m in app.metric])
             self.assertIn("Mixpanel: Contact, Location", " ".join(block.value for block in app.markdown))
+            self.assertIn(("Unprotected high-risk fields", "0"), [(m.label, m.value) for m in app.metric])
+            self.assertIn("#### Where personal data is stored", [block.value for block in app.markdown])
 
 
 class FingerprintTests(unittest.TestCase):
@@ -996,6 +998,35 @@ class InventoryCliTests(unittest.TestCase):
             self.assertNotIn("CustomerPayload", {row["store"] for row in rows})
 
 
+class RecallBenchmarkTests(unittest.TestCase):
+    """benchmarks/recall must not regress: every expected finding stays found."""
+
+    def _run(self, cases):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("recall_run", Path("benchmarks/recall/run.py").resolve())
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        import yaml
+
+        loaded = yaml.safe_load(Path(cases).read_text(encoding="utf-8"))["cases"]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            root.mkdir()
+            module.plant(loaded, root)
+            return module.evaluate(loaded, root)
+
+    def test_tuning_set(self):
+        results = self._run("benchmarks/recall/cases.yaml")
+        self.assertEqual([r["case"] + ":" + r["type"] for r in results if not r["passed"]], [])
+
+    def test_held_out_set(self):
+        results = self._run("benchmarks/recall/holdout.yaml")
+        misses = [r["case"] + ":" + r["type"] for r in results if not r["passed"]]
+        # Documented in RESULTS.md: an identifier named after a vendor reads as that vendor.
+        self.assertEqual(misses, ["py-vendor-comment-trap:none-vendor"])
+
+
 class SchemaAndToolingTests(unittest.TestCase):
     def test_committed_schema_matches_the_loader(self):
         from svikruti.pac.schema import manifest_schema
@@ -1089,6 +1120,34 @@ class GovernanceAppImportTests(unittest.TestCase):
         self.assertGreaterEqual(len(route("sample-actions.csv", Path("examples/sample-actions.csv").read_bytes())["actions"]), 1)
         self.assertGreaterEqual(len(route("sample-ropa.csv", Path("examples/sample-ropa.csv").read_bytes())["ropa"]), 1)
         self.assertIn("unrecognized", route("notes.docx", b"x")["note"])
+
+    def test_check_and_org_results_become_verified_records_and_tasks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = _copy_example(tmp)
+            shutil.copy(DRIFT_FILE, repo / "services/payments/refund.js")
+            self.assertEqual(main(["check", "--repo", str(repo), "--out-dir", str(Path(tmp) / "c"), "--fail-on", "none"]), 0)
+            raw = (Path(tmp) / "c" / "privacy-check.json").read_bytes()
+            self.assertTrue(self.module.looks_like_check(raw))
+            self.assertFalse(self.module.looks_like_check(Path("examples/sample-report.json").read_bytes()))
+            parsed = self.module.parse_upload("privacy-check.json", raw)
+            repayments = next(r for r in parsed["ropa"] if r["activity_name"] == "EMI repayment collection")
+            self.assertIn("Location", repayments["data_categories"])
+            self.assertIn("drift: D002", repayments["_evidence"])
+            mixpanel = next(v for v in parsed["vendors"] if v["vendor_name"] == "Mixpanel")
+            self.assertEqual((mixpanel["kwargs"]["dpa_status"], mixpanel["kwargs"]["risk_level"]), ("NOT_STARTED", "HIGH"))
+            rules = {a["title"].split(":")[0] for a in parsed["actions"]}
+            self.assertTrue({"D002", "D003", "P001"} <= rules)
+            self.assertIn("refund.js", " ".join(a["description"] for a in parsed["actions"]))
+
+            other = Path(tmp) / "lending"
+            shutil.copytree(EXAMPLE, other)
+            self.assertEqual(main(["org", str(Path(tmp) / "c"), str(other), "--name", "payments", "--out-dir", str(Path(tmp) / "o")]), 0)
+            org = self.module.parse_upload("org-summary.json", (Path(tmp) / "o" / "org-summary.json").read_bytes())
+            self.assertEqual(len(org["ropa"]), 6)
+            self.assertIn("EMI repayment collection (payments)", [r["activity_name"] for r in org["ropa"]])
+            self.assertTrue(any(a["title"].startswith("[payments] D003") for a in org["actions"]))
+            self.assertIn("Declared in: lending, payments", next(v for v in org["vendors"] if v["vendor_name"] == "Razorpay")["kwargs"]["notes"])
+        self.assertIn("Not a Svikruti", self.module.parse_privacy_check('{"schema_version": "x"}')["note"])
 
     def test_manifest_detection_and_bad_input(self):
         self.assertTrue(self.module.looks_like_manifest('{"version": 1, "processing_activities": []}'))
@@ -1193,6 +1252,86 @@ class ReportAndCliTests(unittest.TestCase):
             self.assertEqual(main(["diff", str(base), str(head), "--fail-on-new", "critical"]), 0)
             self.assertEqual(main(["diff", str(base), str(head), "--fail-on-new", "high"]), 3)
             self.assertEqual(main(["frameworks"]), 0)
+
+
+class StoredDataSurfaceTests(unittest.TestCase):
+    def test_scan_report_and_dashboard_show_where_data_is_stored(self):
+        from svikruti.dashboard import inventory_rows
+
+        from svikruti.pac.engine import attach_check
+
+        scan = run_scan(str(EXAMPLE), None)
+        attach_check(scan, str(EXAMPLE / "privacy.yaml"))
+        self.assertTrue(scan.privacy_as_code.get("inventory"))
+        page = render_html(scan)
+        self.assertIn("Where personal data is stored", page)
+        self.assertIn("Unprotected high-risk fields", page)
+        self.assertIn("Processors on record", page)
+        stored = [row for row in scan.privacy_as_code["inventory"] if row.get("persistent")]
+        rows = inventory_rows(stored + [{"store": "Lead", "field": "pan", "data_category": "Government ID", "high_risk": True, "persistent": True, "protection": "none", "erasure": "", "file": "a.py", "line": 3}])
+        self.assertEqual((rows[0]["Store"], rows[0]["Protection"], rows[0]["Erasure"]), ("Lead", "NONE", "No erasure path"))
+        aadhaar = next(row for row in rows if row["Field"] == "aadhaar")
+        self.assertEqual(aadhaar["Protection"], "encrypted")
+        self.assertTrue(any(row["Erasure"].startswith("Retained:") for row in rows))
+
+
+class OrgAggregationTests(unittest.TestCase):
+    def _estate(self, tmp: str):
+        lending = Path(tmp) / "lending"
+        shutil.copytree(EXAMPLE, lending)
+        payments = Path(tmp) / "payments-svc"
+        shutil.copytree(EXAMPLE, payments)
+        shutil.copy(DRIFT_FILE, payments / "services/payments/refund.js")
+        text = (payments / "privacy.yaml").read_text(encoding="utf-8")
+        text = text.replace("    country: IN\n    contract: DPA-2025-011", "    country: SG\n    contract: DPA-2025-099", 1)
+        (payments / "privacy.yaml").write_text(text, encoding="utf-8")
+        return lending, payments
+
+    def test_cross_repo_processor_register_and_rollup(self):
+        from svikruti.pac.org import load_inputs
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lending, payments = self._estate(tmp)
+            org = load_inputs([str(lending), str(payments)])
+            self.assertEqual([repo.name for repo in org.repos], ["lending", "payments-svc"])
+            register = {item["name"]: item for item in org.processors()}
+            self.assertEqual(register["Razorpay"]["countries"], ["IN", "SG"])
+            self.assertTrue(any("country differs" in issue for issue in register["Razorpay"]["issues"]))
+            self.assertTrue(any("contract differs" in issue for issue in register["Razorpay"]["issues"]))
+            self.assertEqual(register["Mixpanel"]["used_undeclared_in"], ["payments-svc"])
+            self.assertEqual(register["MSG91"]["issues"], [])
+            self.assertTrue({item["repo"] for item in org.findings()} == {"payments-svc"})
+            gdpr = next(item for item in org.frameworks() if item["id"] == "gdpr")
+            art28 = next(row for row in gdpr["rows"] if row["ref"] == "Art. 28(3)")
+            self.assertEqual((art28["status"], art28["failing"]), ("fail", ["payments-svc"]))
+            contact = next(item for item in org.data_map() if item["category"] == "Contact")
+            self.assertIn("Mixpanel", contact["processors"])
+            self.assertEqual(contact["repos"], ["lending", "payments-svc"])
+
+    def test_cli_mixes_check_artifacts_and_repos(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            lending, payments = self._estate(tmp)
+            artifact = Path(tmp) / "ci" / "payments-svc"
+            self.assertEqual(main(["check", "--repo", str(payments), "--out-dir", str(artifact), "--fail-on", "none"]), 0)
+            out = Path(tmp) / "org"
+            args = ["org", str(artifact / "privacy-check.json"), str(lending), "--out-dir", str(out)]
+            self.assertEqual(main(args), 0)
+            self.assertEqual(main(args + ["--fail-on", "high"]), 3)
+            for name in ("org-report.html", "org-report.md", "org-summary.json", "processor-register.csv", "data-inventory.csv", "findings.csv", "org-processing-record.csv", "framework-matrix.csv"):
+                self.assertTrue((out / name).is_file(), name)
+            summary = json.loads((out / "org-summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["schema_version"], "svikruti-org-v1")
+            self.assertEqual({repo["name"] for repo in summary["repositories"]}, {"payments-svc", "lending"})
+            self.assertIn("lending,Applicant", (out / "data-inventory.csv").read_text(encoding="utf-8"))
+            record = (artifact / "processing-record.csv").read_text(encoding="utf-8")
+            self.assertNotIn("generator object", record)
+            self.assertIn("Razorpay", record)
+            self.assertNotIn("_erasure_paths", (artifact / "privacy-check.json").read_text(encoding="utf-8"))
+            self.assertIn("Razorpay", (out / "org-report.html").read_text(encoding="utf-8"))
+            self.assertEqual(main(["org", str(Path(tmp) / "missing")]), 2)
+            empty = Path(tmp) / "empty"
+            empty.mkdir()
+            self.assertEqual(main(["org", str(empty)]), 2)
 
 
 if __name__ == "__main__":

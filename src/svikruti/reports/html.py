@@ -7,7 +7,7 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 from textwrap import dedent
-from typing import Iterable
+from typing import Any, Dict, Iterable
 
 from svikruti.models import Evidence, ScanResult
 from svikruti.reports.exports import issue_markdown
@@ -501,12 +501,50 @@ def _privacy_as_code_panel(result: ScanResult) -> str:
         for item in data.get("obligations", [])
     )
     by_severity = summary.get("open_by_severity", {})
+    stored = [row for row in data.get("inventory", []) if row.get("persistent")]
+    protected_kinds = {"encrypted", "tokenised", "hashed", "masked"}
+    unprotected = [row for row in stored if row.get("high_risk") and row.get("protection") not in protected_kinds]
+    stores = sorted({row.get("store", "") for row in stored})
+    unerased = sorted({row.get("store", "") for row in stored if not row.get("erasure")})
+
+    def _protection(row: Dict[str, Any]) -> str:
+        kind = str(row.get("protection") or "none")
+        if kind in protected_kinds:
+            return escape(kind) + (f'<br><span class="small">{escape(str(row.get("protection_evidence", "")))}</span>' if row.get("protection_evidence") else "")
+        if kind == "binary":
+            return "binary, unverified"
+        return "<strong>none</strong>" if row.get("high_risk") else "none"
+
+    def _erasure(row: Dict[str, Any]) -> str:
+        value = str(row.get("erasure") or "")
+        if value.startswith("retained"):
+            return "Retained: " + escape(value[len("retained: "):])
+        return escape(value.replace("reached by ", "Reached by ")) if value else "<strong>No erasure path</strong>"
+
+    ordered = sorted(stored, key=lambda row: (not (row.get("high_risk") and row.get("protection") not in protected_kinds), bool(row.get("erasure")), str(row.get("store")), str(row.get("field"))))
+    inventory_rows = "".join(
+        f'<tr><td><strong>{escape(str(row.get("store", "")))}</strong>.{escape(str(row.get("field", "")))}<br><span class="small">{escape(str(row.get("file", "")))}:{escape(str(row.get("line", "")))}</span></td>'
+        f'<td>{escape(str(row.get("data_category", "")))}{" (high risk)" if row.get("high_risk") else ""}</td>'
+        f"<td>{_protection(row)}</td><td>{_erasure(row)}</td>"
+        f'<td>{escape(", ".join(row.get("sent_to") or []))}{"<br><strong>reaches logs</strong>" if row.get("reaches_logs") else ""}</td></tr>'
+        for row in ordered[:200]
+    ) or '<tr><td colspan="5">No persistent tables or models with personal data were found.</td></tr>'
+    AI_TAG = ' <span class="small">AI provider</span>'
+    processor_rows = "".join(
+        f'<tr><td><strong>{escape(str(item.get("name", "")))}</strong>{AI_TAG if item.get("ai_provider") else ""}</td>'
+        f'<td>{escape(str(item.get("country", "")))}</td><td>{escape(str(item.get("contract", "")))}</td>'
+        f'<td>{escape(str(item.get("transfer_mechanism", "")))}</td><td>{escape(", ".join(item.get("data_categories") or []))}</td></tr>'
+        for item in data.get("processors", [])
+    ) or '<tr><td colspan="5">No processors declared.</td></tr>'
     return (
         '<section class="grid">'
         f'<div class="metric"><div class="label">Open findings</div><div class="value">{summary.get("open_findings", 0)}</div></div>'
         f'<div class="metric"><div class="label">Critical / high</div><div class="value">{by_severity.get("CRITICAL", 0)} / {by_severity.get("HIGH", 0)}</div></div>'
         f'<div class="metric"><div class="label">Declared activities</div><div class="value">{summary.get("activities", 0)}</div></div>'
         f'<div class="metric"><div class="label">Declared processors</div><div class="value">{summary.get("processors", 0)}</div></div>'
+        f'<div class="metric"><div class="label">Stores with personal data</div><div class="value">{len(stores)}</div></div>'
+        f'<div class="metric"><div class="label">Unprotected high-risk fields</div><div class="value">{len(unprotected)}</div></div>'
+        f'<div class="metric"><div class="label">Stores no erasure reaches</div><div class="value">{len(unerased)}</div></div>'
         '</section>'
         '<h3>Frameworks</h3>'
         '<table><thead><tr><th>Framework</th><th>Verified</th><th>Attested</th><th>Failing</th><th>Not verified</th><th>Verified share</th></tr></thead>'
@@ -517,6 +555,13 @@ def _privacy_as_code_panel(result: ScanResult) -> str:
         '<h3>Processing record, reconciled with code</h3>'
         '<table><thead><tr><th>Activity</th><th>Declared data</th><th>Detected in code</th><th>Data sent to processors</th><th>State</th></tr></thead>'
         f'<tbody>{activity_rows}</tbody></table>'
+        '<h3>Where personal data is stored</h3>'
+        '<p class="small">Persistent tables and models from the code: how each field is protected, and whether an erasure path reaches it. Use it to scope DSAR and breach response.</p>'
+        '<table><thead><tr><th>Store and field</th><th>Category</th><th>Protection</th><th>Erasure</th><th>Sent to / logs</th></tr></thead>'
+        f'<tbody>{inventory_rows}</tbody></table>'
+        '<h3>Processors on record</h3>'
+        '<table><thead><tr><th>Processor</th><th>Country</th><th>Contract</th><th>Transfer mechanism</th><th>Data</th></tr></thead>'
+        f'<tbody>{processor_rows}</tbody></table>'
         '<h3>Obligations</h3>'
         '<table><thead><tr><th>Result</th><th>Obligation</th><th>Evidence</th></tr></thead>'
         f'<tbody>{obligation_rows}</tbody></table>'

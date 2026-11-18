@@ -1,5 +1,54 @@
 # Changelog
 
+## 0.10.0 - Organisation view and measured recall
+
+### Added
+
+- `svikruti org`: merges `privacy-check.json` files, folders holding one, or
+  repositories with `privacy.yaml` into one organisation report (HTML,
+  Markdown, JSON `svikruti-org-v1`, and CSVs for the processing record,
+  processor register, data inventory, findings and framework matrix).
+  Flags processors recorded with different countries, contracts or transfer
+  mechanisms across services, processors used without a record in one
+  service, and per data category the stores, recipients, unprotected
+  high-risk fields, stores without erasure and logging exposure. Each
+  framework clause takes its worst status across repositories. `--fail-on`
+  gates estate-wide.
+- Recall benchmark (`benchmarks/recall`): planted leaks in seven languages,
+  a tuning set and a held-out set, a harness that can plant them inside any
+  repository, and published results including misses. Both sets run in the
+  test suite.
+- Scan HTML report and dashboard: the Privacy as Code tab shows where
+  personal data is stored, field protection, erasure coverage, and the
+  processors on record (with AI providers marked).
+- Governance app imports `privacy-check.json` and `org-summary.json`:
+  verified activities, processors found in code but not on record, and one
+  task per open finding with its fix and location.
+- `privacy-check.json` carries `organization` and a `processors` list (with
+  an `ai_provider` flag).
+- Vendors: Twilio, SendGrid, PostHog, Amplitude, Mailchimp, Brevo, Postmark,
+  Customer.io, Braze, Gupshup, Karix; more Segment and Sentry SDK spellings.
+- Logging sinks: `console.error/warn/info/debug`, Go `slog`, PHP Monolog and
+  `error_log`/`syslog`, Ruby `puts`, C# `ILogger` and Serilog.
+- Stored data: SQLAlchemy, SQLModel and mongoengine models; Prisma and
+  TypeORM `onDelete: Cascade`; SHA-2/3, BLAKE2, Argon2, bcrypt, scrypt and
+  PBKDF2 as hashing protection; Java annotations directly above a field.
+
+### Fixed
+
+- A keyword argument (`json=payload`) split a call at `=` and hid flows made
+  with a URL constant.
+- A vendor client passed as a value (`generateText({ model: openai(...) })`)
+  was not bound.
+- SDK set-up calls (`sentry_sdk.init(...)`) were reported as data flows.
+- Boolean and timestamp fields (`email_verified`, `phone_confirmed_at`) were
+  treated as personal data.
+- Type annotations naming a vendor (`Stripe.PaymentMethod`) were reported as
+  flows.
+- Internal `_erasure_paths` no longer leaks into `privacy-check.json`.
+- Processor `data_categories` in `privacy-check.json` are labels, matching
+  the rest of the file.
+
 ## 0.9.1
 
 ### Fixed

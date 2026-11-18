@@ -33,13 +33,13 @@ _PROTECTED_DECLARATION_RE = re.compile(
 )
 _BINARY_COLUMN_RE = re.compile(r"\b(?:LargeBinary|BinaryField|BYTEA|bytea|VARBINARY|BLOB|Bytes)\b|\[\]byte|\bbytes\b")
 _PROTECTING_CALL_RE = re.compile(
-    r"(?<![\w$])((?:[A-Za-z_$][\w$.]*?)?(?:encrypt|tokeni[sz]e|vault|hash|hmac|digest|mask|redact|pseudonymi[sz]e|seal|protect)\w*)\s*\(",
+    r"(?<![\w$])((?:[A-Za-z_$][\w$.]*?)?(?:encrypt|tokeni[sz]e|vault|hash|hmac|digest|mask|redact|pseudonymi[sz]e|seal|protect|sha\d+|sha3_\d+|blake2\w|argon2|bcrypt|scrypt|pbkdf2)\w*)\s*\(",
     re.IGNORECASE,
 )
 _PROTECTION_KINDS = (
     ("tokenised", re.compile(r"tokeni[sz]|vault|_ref(?:erence)?(?:_key)?\b|reference_key", re.IGNORECASE)),
     ("encrypted", re.compile(r"encrypt|cipher|fernet|pgp_sym|\baes(?:_?gcm|_?256)?\b|@convert|seal|protect", re.IGNORECASE)),
-    ("hashed", re.compile(r"hash|hmac|digest", re.IGNORECASE)),
+    ("hashed", re.compile(r"hash|hmac|digest|sha\d|sha3|blake2|argon2|bcrypt|scrypt|pbkdf2", re.IGNORECASE)),
     ("masked", re.compile(r"mask|last_?4|redact|pseudonymi", re.IGNORECASE)),
 )
 PROTECTED_KINDS = {"encrypted", "tokenised", "hashed", "masked"}
@@ -83,6 +83,10 @@ _CASCADE_RES = (
     re.compile(r"\bREFERENCES\s+[`\"\[]?([\w.]+)[`\"\]]?\s*(?:\([^)]*\))?[^,\n]*ON\s+DELETE\s+CASCADE", re.IGNORECASE),
     re.compile(r"ForeignKey\(\s*[\"']([\w]+)\.[\w]+[\"'][^)\n]*ondelete\s*=\s*[\"']CASCADE", re.IGNORECASE),
     re.compile(r"onDelete\s*:\s*(?:Cascade|[\"']CASCADE[\"'])[^\n]*?(?:references|=>)\s*\(?\s*(\w+)", re.IGNORECASE),
+    # Prisma: user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    re.compile(r"^\s*\w+\s+(\w+)\??\s+@relation\([^)\n]*onDelete:\s*Cascade", re.MULTILINE),
+    # TypeORM: @ManyToOne(() => User, { onDelete: "CASCADE" })
+    re.compile(r"@(?:ManyToOne|OneToOne)\(\s*\(\)\s*=>\s*(\w+)[^)\n]*onDelete:\s*[\"']CASCADE", re.IGNORECASE),
 )
 
 

@@ -1,8 +1,39 @@
 {
   "schema_version": "svikruti-privacy-check-v1",
-  "generated_at": "2026-11-15T04:01:34.785848+00:00",
+  "generated_at": "2026-11-16T15:43:13.458917+00:00",
   "manifest": "privacy.yaml",
   "repo": ".",
+  "organization": {
+    "name": "LendFlow Financial Services",
+    "role": "controller",
+    "privacy_contact": "privacy@lendflow.example"
+  },
+  "processors": [
+    {
+      "id": "razorpay",
+      "name": "Razorpay",
+      "purpose": "Payment processing",
+      "country": "IN",
+      "contract": "DPA-2025-011",
+      "transfer_mechanism": "",
+      "data_categories": [
+        "Contact"
+      ],
+      "ai_provider": false
+    },
+    {
+      "id": "msg91",
+      "name": "MSG91",
+      "purpose": "Transactional SMS",
+      "country": "IN",
+      "contract": "DPA-2025-019",
+      "transfer_mechanism": "",
+      "data_categories": [
+        "Contact"
+      ],
+      "ai_provider": false
+    }
+  ],
   "summary": {
     "activities": 3,
     "processors": 2,
@@ -2228,10 +2259,7 @@
       "protection": "none",
       "protection_evidence": "",
       "persistent": true,
-      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)",
-      "_erasure_paths": [
-        "handle_erasure_request:services/onboarding/erasure.py:10"
-      ]
+      "erasure": "reached by handle_erasure_request() (services/onboarding/erasure.py:10)"
     },
     {
       "store": "Applicant",

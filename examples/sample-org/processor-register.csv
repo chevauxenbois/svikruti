@@ -1,0 +1,4 @@
+processor,ai_provider,declared_in,used_without_record_in,countries,categories_declared,categories_sent_in_code,issues
+Mixpanel,,,payments,,,Contact; Location,used without a record in payments; declared nowhere
+Razorpay,,lending; payments,,IN; SG,Contact,Contact,"country differs across repositories: IN, SG; contract differs across repositories: DPA-2025-011, DPA-2025-099"
+MSG91,,lending; payments,,IN,Contact,Contact,

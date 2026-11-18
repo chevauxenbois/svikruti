@@ -123,6 +123,12 @@ def _annotate(rows: List[Dict[str, Any]], root: Optional[Path], lines_for: Any, 
     for row in rows:
         lines = lines_for(row["file"]) or []
         declaration = lines[row["line"] - 1] if row["line"] and row["line"] <= len(lines) else ""
+        # Annotations sit on the lines above a Java / Kotlin / TypeScript field:
+        # @Convert(converter = AttributeEncryptor.class) / @Column({ transformer: encrypted })
+        above = row["line"] - 2 if row["line"] else -1
+        while 0 <= above < len(lines) and lines[above].strip().startswith("@"):
+            declaration = lines[above] + " " + declaration
+            above -= 1
         protection = field_protection(row["field"], declaration, f"{row['file']}:{row['line']}", index)
         row["protection"] = protection.kind
         row["protection_evidence"] = protection.evidence

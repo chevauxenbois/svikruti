@@ -169,6 +169,24 @@ def build_parser() -> argparse.ArgumentParser:
     inventory.add_argument("--out", help="Write to a file instead of stdout (csv/json).")
     inventory.add_argument("--no-manifest", action="store_true", help="Ignore privacy.yaml even if present.")
 
+    org = subparsers.add_parser(
+        "org",
+        help="Merge many repositories into one privacy picture: org-wide processing record, processor register, data map and framework posture.",
+    )
+    org.add_argument(
+        "inputs",
+        nargs="+",
+        help="privacy-check.json files (CI artifacts), folders holding one, or repositories with privacy.yaml (checked in place).",
+    )
+    org.add_argument("--name", action="append", default=[], help="Display name for each input, in order. Repeatable. Default: folder name.")
+    org.add_argument("--out-dir", default="svikruti-org", help="Directory for the org report pack (default: svikruti-org).")
+    org.add_argument(
+        "--fail-on",
+        default="none",
+        choices=["low", "medium", "high", "critical", "none"],
+        help="Exit with code 3 when any repository has an open finding at this severity (default: none, report only).",
+    )
+
     subparsers.add_parser("frameworks", help="List built-in framework packs.")
     schema = subparsers.add_parser("schema", help="Print the JSON Schema for privacy.yaml (editor completion and validation).")
     schema.add_argument("--out", help="Write the schema to a file instead of stdout.")
@@ -218,6 +236,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_sync(args)
     if args.command == "frameworks":
         return _cmd_frameworks()
+    if args.command == "org":
+        return _cmd_org(args)
     if args.command == "inventory":
         return _cmd_inventory(args)
     if args.command == "schema":
@@ -574,6 +594,37 @@ def _cmd_inventory(args: argparse.Namespace) -> int:
         print(f"\n{len(rows)} field(s) in {len(stores)} stored table(s)/model(s).")
     if args.out and args.format != "table":
         print(f"Inventory written: {Path(args.out).resolve()}", file=sys.stderr)
+    return EXIT_OK
+
+
+def _cmd_org(args: argparse.Namespace) -> int:
+    from svikruti.pac.manifest import ManifestError
+    from svikruti.pac.org import OrgInputError, load_inputs, write_org_pack
+
+    try:
+        org = load_inputs(args.inputs, args.name or None)
+        files = write_org_pack(org, args.out_dir, args.fail_on)
+    except (OrgInputError, ManifestError) as exc:
+        print(f"svikruti org: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    except Exception as exc:
+        print(f"svikruti org failed: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    for item in org.skipped:
+        print(f"skipped: {item}", file=sys.stderr)
+    data = org.to_dict()
+    print(f"Svikruti org report: {len(org.repos)} repositories, {data['summary']['activities']} activities, {data['summary']['open_findings']} open findings")
+    for repo in data["repositories"]:
+        print(f"  {repo['name']:28} {repo['open_findings']:4} open  " + "  ".join(f"{fid} {stats['verified']}/{stats['applicable']}" for fid, stats in repo["frameworks"].items()))
+    conflicts = [item for item in data["processors"] if item["issues"]]
+    for item in conflicts[:10]:
+        print(f"  processor {item['name']}: {'; '.join(item['issues'])}")
+    print(f"Org report pack written: {Path(args.out_dir).resolve()} (open {Path(files['html']).name})")
+    if args.fail_on != "none":
+        gating = org.gating(args.fail_on)
+        if gating:
+            print(f"Org privacy gate failed: {len(gating)} finding(s) at {args.fail_on.upper()} or above", file=sys.stderr)
+            return EXIT_GATE
     return EXIT_OK
 
 

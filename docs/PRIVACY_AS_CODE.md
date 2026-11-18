@@ -433,6 +433,70 @@ become vendors, and any TODO becomes a task instead of an invented value.
 
 Exit codes: `0` passed, `1` error, `2` usage or invalid manifest, `3` gate failed.
 
+## Many repositories: `svikruti org`
+
+Each service keeps its own `privacy.yaml` and runs `svikruti check` in its own
+CI. The privacy team needs one picture. `svikruti org` merges them:
+
+```bash
+# from CI artifacts (privacy-check.json files, or folders holding one)
+svikruti org artifacts/onboarding artifacts/payments artifacts/notifications --out-dir org
+
+# or straight from checked-out repositories that have privacy.yaml
+svikruti org ../onboarding ../payments ../notifications --fail-on high
+```
+
+```text
+Svikruti org report: 3 repositories, 9 activities, 4 open findings
+  onboarding                      0 open  dpdpa 18/23  gdpr 18/23  iso27701 18/23
+  payments                        4 open  dpdpa 13/23  gdpr 13/23  iso27701 13/23
+  processor Mixpanel: used without a record in payments; declared nowhere
+  processor Razorpay: country differs across repositories: IN, SG; contract differs across repositories: DPA-2025-011, DPA-2025-099
+```
+
+It flags what no single repository can see:
+
+- **Processor register.** One row per vendor across the estate: which
+  services declare it, which use it without a record, its countries and
+  contracts. A vendor recorded as `IN` in one service and `SG` in another, or
+  with a contract in one and none in the next, is an issue to reconcile.
+- **Data map.** Per data category: which services hold it, the tables it is
+  stored in, which processors and AI providers receive it, high-risk fields
+  stored without protection, stores no erasure path reaches, and where it
+  reaches logs. This is the DSAR and breach-scoping view for the whole company.
+- **Framework posture.** Every clause takes its worst status across
+  repositories, with the repositories that fail it, so "GDPR Art. 28(3):
+  failing in payments" is one line rather than a hunt through reports.
+
+Outputs in `--out-dir` (default `svikruti-org/`):
+
+| File | Use |
+|---|---|
+| `org-report.html` | Self-contained report: repositories, framework posture, processor register, data map, failing clauses, findings |
+| `org-report.md` | The same for wikis and audit folders |
+| `org-summary.json` | Machine-readable (`svikruti-org-v1`); imports into the governance app |
+| `org-processing-record.csv` | Every activity in every repository, with a repository column |
+| `processor-register.csv` | One row per vendor with declared-in, used-without-record-in, countries and issues |
+| `data-inventory.csv` | Every stored personal-data field, with a repository column |
+| `findings.csv` | Every open finding, with a repository column |
+| `framework-matrix.csv` | One row per clause: worst status, failing in, not verified in |
+
+`--fail-on` (default `none`) gates on any repository's open findings, for a
+scheduled estate-wide job. `--name` sets display names in input order.
+
+A GitHub Actions pattern: each service uploads `svikruti-check/` as an
+artifact; a nightly job in a central repository downloads them with
+`gh run download` and runs `svikruti org` over the folders.
+
+### Governance app
+
+The Streamlit workbench (`app.py`, Import from Scanner) accepts
+`privacy-check.json` and `org-summary.json` as well as `privacy.yaml`. A
+manifest import gives what was declared; a check import gives what was
+verified: activities carry the data the code was found to process, vendors
+include processors found in code but not on record, and every open finding
+becomes a task with its fix and file location.
+
 ## Adopting on an existing codebase
 
 A first run on a large repository will report a backlog. Two mechanisms keep

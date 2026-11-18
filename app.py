@@ -1932,7 +1932,11 @@ def page_scanner_import():
             <strong>vendors.csv</strong> (and optionally <strong>actions.csv</strong>)
             here to populate your registries automatically. If the repository has a
             reviewed <strong>privacy.yaml</strong>, upload that instead: its purposes,
-            lawful bases, retention and contracts come across as written. Everything stays local —
+            lawful bases, retention and contracts come across as written. Best of all, upload
+            <strong>privacy-check.json</strong> from <code>svikruti check</code> (or
+            <strong>org-summary.json</strong> from <code>svikruti org</code> for every service at once):
+            the record arrives verified against the code, processors found in code but not on record
+            become vendors, and each open finding becomes a task with its fix. Everything stays local —
             nothing is uploaded to the internet.
         </div>
     </div>
@@ -1948,7 +1952,7 @@ def page_scanner_import():
         "Upload scanner output",
         type=["json", "csv", "yaml", "yml"],
         accept_multiple_files=True,
-        help="Accepts privacy.yaml / privacy.json, report.json, ropa.csv, vendors.csv, and actions.csv.",
+        help="Accepts privacy-check.json, org-summary.json, privacy.yaml / privacy.json, report.json, ropa.csv, vendors.csv, and actions.csv.",
     )
 
     if not uploaded:

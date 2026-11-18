@@ -56,7 +56,7 @@ RUBY_DB_RE = re.compile(r"\b([A-Z][A-Za-z0-9_]*)\.(create|update|save|insert_all
 
 PHP_REQUEST_RE = re.compile(r"\$request->(?:input|get|post)\(['\"]([^'\"]+)['\"]\]?", re.IGNORECASE)
 PHP_ROUTE_RE = re.compile(r"Route::(get|post|put|patch|delete)\s*\(\s*['\"]([^'\"]+)['\"]", re.IGNORECASE)
-PHP_LOG_RE = re.compile(r"\bLog::(info|warning|error|debug)\s*\((.*)\)", re.IGNORECASE)
+PHP_LOG_RE = re.compile(r"\b(?:Log::(info|warning|error|debug|notice|critical)|(error_log|syslog))\s*\((.*)\)", re.IGNORECASE)
 PHP_DB_RE = re.compile(r"\b(DB::table|->create|->update|->save|::create)\b", re.IGNORECASE)
 
 SQL_COLUMN_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s+(?:varchar|text|char|uuid|int|bigint|date|timestamp|json|jsonb|decimal|numeric)", re.IGNORECASE | re.MULTILINE)
@@ -213,6 +213,16 @@ def _python_model_fields(
     evidence: List[Evidence] = []
     base_names = ".".join(_name(base) for base in node.bases)
     is_model = "Model" in base_names or "BaseModel" in base_names or "Schema" in node.name
+    if not is_model:
+        # SQLAlchemy / SQLModel / mongoengine: class Account(Base) with __tablename__ or Column(...) fields.
+        body_text = " ".join(ast.dump(stmt) for stmt in node.body[:60])
+        is_model = (
+            any(name in base_names for name in ("Base", "DeclarativeBase", "SQLModel", "Document", "EmbeddedDocument"))
+            or "'__tablename__'" in body_text
+            or "id='Column'" in body_text
+            or "id='mapped_column'" in body_text
+            or "attr='Column'" in body_text
+        )
     if not is_model:
         return evidence
     for stmt in node.body:

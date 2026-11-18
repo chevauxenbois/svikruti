@@ -24,6 +24,7 @@ svikruti init --repo .     # write privacy.yaml from what the code does today
 svikruti check --repo .    # reconcile code against the manifest; exit 3 on drift
 svikruti sync --repo .     # show the manifest changes the code now needs
 svikruti init-github-action --mode check   # gate every pull request
+svikruti org ../svc-a ../svc-b ../svc-c     # one record, processor register and data map across services
 ```
 
 ```text
@@ -58,6 +59,12 @@ Privacy gate failed: 3 finding(s) at HIGH or above
   to `privacy.yaml`; what needs a person stays a TODO.
 - **Adoptable.** Baselines and line-independent fingerprints mean only what a
   pull request introduces can block it.
+- **Organisation-wide.** `svikruti org` merges every service into one
+  processing record, one processor register (flagging a vendor recorded with
+  different countries or contracts in different services) and one data map.
+- **Measured recall.** Planted leaks in seven languages, with a held-out set
+  written after tuning: 18/21 caught on its first run. See
+  [benchmarks/recall](benchmarks/recall/RESULTS.md).
 
 Worked example: [examples/privacy-as-code](examples/privacy-as-code) ·
 sample report: [examples/sample-privacy-check](examples/sample-privacy-check) ·
@@ -353,10 +360,18 @@ documentation emails, weak-hash names in comments). After fixing them:
 | saleor | 4,638 | 23 LOW | 29 | 2 | MD5 used for cache keys (2) |
 
 All 11 remaining findings match what the code does; whether SHA-1 or MD5 is
-acceptable in each place is a judgement call. Recall was not measured: a grep
-for logging calls that mention personal fields in saleor found none the
-scanner missed, which is weak evidence, not a recall figure. The risk score
-separates defects from data exposure and is not comparable with 0.8.x.
+acceptable in each place is a judgement call. The risk score separates
+defects from data exposure and is not comparable with 0.8.x.
+
+**Recall** (what the scanner misses) is measured separately in
+[benchmarks/recall](benchmarks/recall/RESULTS.md): known leaks planted in
+Python, TypeScript/JavaScript, Go, Java, Ruby, PHP and C#, covering logging,
+third-party and AI data flows, vendor detection, field protection and
+erasure. The baseline set caught 33/53 (62%) before tuning. A held-out set
+written afterwards caught 18/21 (86%) on its first run, with 2 of 4 traps
+quiet. After fixes, all 74 planted leaks are found inside healthchecks,
+saleor and a Next.js/Stripe starter, and the CRITICAL/HIGH defect counts
+above are unchanged.
 
 How to read this:
 

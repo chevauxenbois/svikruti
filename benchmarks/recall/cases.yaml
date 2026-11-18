@@ -1,0 +1,638 @@
+# Seeded privacy leaks for measuring what Svikruti finds and what it misses.
+#
+# Written before any detector was tuned against them (2026-11-16). Each case is
+# a small file in a common idiom of its language. `expect` lists what a correct
+# scanner must report; `type: none-*` cases are traps it must stay quiet on.
+#
+#   log         personal data of `category` reaches a logging call on the line containing `at`
+#   flow        `category` is passed to third party `vendor` on the line containing `at`
+#   vendor      third party `vendor` is detected in the file
+#   protection  stored field `field` is classified with a kind in `kinds`
+#   erasure     stored table/model `store` is (covered: true) or is not (covered: false) reached by erasure code
+#   none-log    no logging finding anywhere in the file
+#   none-flow   no processor flow anywhere in the file
+#   none-vendor no third party detected in the file
+
+cases:
+  # ------------------------------------------------------------------ Python
+  - id: py-log-percent
+    path: app/py/log_percent.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def register(user):
+          logger.info("registered %s with phone %s", user.email, user.phone_number)
+    expect:
+      - {type: log, category: Contact, at: 'logger.info("registered'}
+
+  - id: py-log-fstring
+    path: app/py/log_fstring.py
+    code: |
+      import logging
+      log = logging.getLogger("kyc")
+
+      def verify(applicant):
+          log.warning(f"KYC failed for PAN {applicant.pan_number}")
+    expect:
+      - {type: log, category: Government ID, at: 'log.warning(f"KYC'}
+
+  - id: py-log-extra-dict
+    path: app/py/log_extra.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def charge(order, card):
+          logger.error("charge failed", extra={"card_number": card.number, "order": order.id})
+    expect:
+      - {type: log, category: Financial, at: 'logger.error("charge failed"'}
+
+  - id: py-structlog-kwargs
+    path: app/py/structlog_kwargs.py
+    code: |
+      import structlog
+      logger = structlog.get_logger()
+
+      def login(request, user):
+          logger.info("login", email=user.email, ip_address=request.META["REMOTE_ADDR"])
+    expect:
+      - {type: log, category: Contact, at: 'logger.info("login"'}
+
+  - id: py-print-dict
+    path: app/py/print_dict.py
+    code: |
+      def debug_patient(patient):
+          print({"name": patient.full_name, "diagnosis": patient.diagnosis})
+    expect:
+      - {type: log, category: Health, at: 'print({"name"'}
+
+  - id: py-log-multiline
+    path: app/py/log_multiline.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def refund(customer, amount):
+          logger.info(
+              "refund %s to %s",
+              amount,
+              customer.upi_id,
+          )
+    expect:
+      - {type: log, category: Financial, at: 'customer.upi_id'}
+
+  - id: py-log-whole-payload
+    path: app/py/log_payload.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def signup(request):
+          payload = {"email": request.json["email"], "date_of_birth": request.json["dob"]}
+          logger.debug("signup payload: %s", payload)
+    expect:
+      - {type: log, category: Contact, at: 'logger.debug("signup payload'}
+
+  - id: py-log-ids-only
+    path: app/py/log_ids.py
+    code: |
+      import logging
+      logger = logging.getLogger(__name__)
+
+      def create(user, order):
+          user.save()
+          logger.info("user %s placed order %s", user.id, order.pk)
+          logger.warning("email bounce rate high for campaign %s", order.campaign_id)
+    expect:
+      - {type: none-log}
+
+  - id: py-stripe-customer
+    path: app/py/billing.py
+    code: |
+      import stripe
+
+      def create_customer(user):
+          return stripe.Customer.create(
+              email=user.email,
+              name=user.full_name,
+              phone=user.phone_number,
+          )
+    expect:
+      - {type: flow, vendor: Stripe, category: Contact, at: 'stripe.Customer.create('}
+      - {type: flow, vendor: Stripe, category: Identity, at: 'stripe.Customer.create('}
+
+  - id: py-segment-identify
+    path: app/py/analytics.py
+    code: |
+      import segment.analytics as analytics
+
+      def track_signup(user):
+          analytics.identify(user.id, {"email": user.email, "city": user.city})
+    expect:
+      - {type: flow, vendor: Segment, category: Contact, at: 'analytics.identify('}
+
+  - id: py-sentry-user
+    path: app/py/errors.py
+    code: |
+      import sentry_sdk
+
+      def bind_user(user):
+          sentry_sdk.set_user({"id": user.id, "email": user.email})
+    expect:
+      - {type: flow, vendor: Sentry, category: Contact, at: 'sentry_sdk.set_user('}
+
+  - id: py-openai-prompt
+    path: app/py/assistant.py
+    code: |
+      from openai import OpenAI
+
+      client = OpenAI()
+
+      def summarise_ticket(ticket):
+          messages = [
+              {"role": "system", "content": "You summarise support tickets."},
+              {"role": "user", "content": f"Customer {ticket.customer_email} wrote: {ticket.body}"},
+          ]
+          return client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    expect:
+      - {type: flow, vendor: OpenAI, category: Contact, at: 'client.chat.completions.create('}
+
+  - id: py-anthropic-prompt
+    path: app/py/claims.py
+    code: |
+      import anthropic
+
+      client = anthropic.Anthropic()
+
+      def triage(claim):
+          return client.messages.create(
+              model="claude-sonnet",
+              max_tokens=512,
+              messages=[{"role": "user", "content": f"Patient diagnosis: {claim.diagnosis}"}],
+          )
+    expect:
+      - {type: flow, vendor: Anthropic, category: Health, at: 'client.messages.create('}
+
+  - id: py-twilio-sms
+    path: app/py/sms.py
+    code: |
+      from twilio.rest import Client
+
+      client = Client(ACCOUNT_SID, AUTH_TOKEN)
+
+      def send_otp(user, otp):
+          client.messages.create(to=user.phone_number, from_=SENDER, body=f"Your OTP is {otp}")
+    expect:
+      - {type: vendor, vendor: Twilio}
+      - {type: flow, vendor: Twilio, category: Contact, at: 'client.messages.create('}
+
+  - id: py-sendgrid-mail
+    path: app/py/mailer.py
+    code: |
+      from sendgrid import SendGridAPIClient
+      from sendgrid.helpers.mail import Mail
+
+      sg = SendGridAPIClient(API_KEY)
+
+      def welcome(user):
+          message = Mail(from_email="hello@acme.test", to_emails=user.email, subject="Welcome")
+          sg.send(message)
+    expect:
+      - {type: vendor, vendor: SendGrid}
+      - {type: flow, vendor: SendGrid, category: Contact, at: 'sg.send(message)'}
+
+  - id: py-wrapper-cross-file
+    path: app/py/notify_users.py
+    extra_files:
+      app/py/sms_gateway.py: |
+        import requests
+
+        MSG91_URL = "https://control.msg91.com/api/v5/flow/"
+
+        def send_sms(mobile, template):
+            requests.post(MSG91_URL, json={"mobiles": mobile, "template_id": template})
+    code: |
+      from app.py.sms_gateway import send_sms
+
+      def remind(borrower):
+          send_sms(borrower.mobile_number, "EMI_DUE")
+    expect:
+      - {type: flow, vendor: MSG91, category: Contact, at: 'send_sms(borrower.mobile_number'}
+
+  - id: py-vendor-in-prompt-text
+    path: app/py/system_prompt.py
+    code: |
+      SYSTEM_PROMPT = """
+      You help users compare payment providers such as Stripe and Razorpay,
+      and LLM vendors such as OpenAI, Anthropic and Cohere.
+      """
+
+      def check_coherence(text):
+          return text.strip()
+    expect:
+      - {type: none-vendor}
+
+  - id: py-django-model-protection
+    path: app/py/kyc/models.py
+    code: |
+      from django.db import models
+      from encrypted_model_fields.fields import EncryptedCharField
+
+      class KycRecord(models.Model):
+          full_name = models.CharField(max_length=200)
+          aadhaar_number = EncryptedCharField(max_length=12)
+          pan_number = models.CharField(max_length=10)
+          aadhaar_reference = models.CharField(max_length=72)
+    expect:
+      - {type: protection, field: aadhaar_number, kinds: [encrypted]}
+      - {type: protection, field: pan_number, kinds: [none]}
+      - {type: protection, field: aadhaar_reference, kinds: [tokenised]}
+
+  - id: py-sqlalchemy-hash-on-write
+    path: app/py/accounts/models.py
+    extra_files:
+      app/py/accounts/service.py: |
+        import hashlib
+        from .models import Account
+
+        def create_account(session, form):
+            account = Account(
+                email=form["email"],
+                phone_number=hashlib.sha256(form["phone_number"].encode()).hexdigest(),
+            )
+            session.add(account)
+    code: |
+      from sqlalchemy import Column, Integer, String
+      from sqlalchemy.orm import declarative_base
+
+      Base = declarative_base()
+
+      class Account(Base):
+          __tablename__ = "accounts"
+          id = Column(Integer, primary_key=True)
+          email = Column(String)
+          phone_number = Column(String)
+    expect:
+      - {type: protection, field: phone_number, kinds: [hashed]}
+      - {type: protection, field: email, kinds: [none]}
+
+  - id: py-erasure-django
+    path: app/py/crm/models.py
+    extra_files:
+      app/py/crm/privacy.py: |
+        from .models import Lead, LeadNote
+
+        def forget_lead(lead_id):
+            Lead.objects.filter(pk=lead_id).delete()
+    code: |
+      from django.db import models
+
+      class Lead(models.Model):
+          email = models.EmailField()
+          phone = models.CharField(max_length=20)
+
+      class LeadNote(models.Model):
+          lead = models.ForeignKey(Lead, on_delete=models.CASCADE)
+          contact_phone = models.CharField(max_length=20)
+
+      class Campaign(models.Model):
+          owner_email = models.EmailField()
+    expect:
+      - {type: erasure, store: Lead, covered: true}
+      - {type: erasure, store: LeadNote, covered: true}
+      - {type: erasure, store: Campaign, covered: false}
+
+  # -------------------------------------------------------------- JavaScript / TypeScript
+  - id: js-console-template
+    path: app/js/signup.js
+    code: |
+      export async function signup(req, res) {
+        const { email, password } = req.body;
+        console.log(`new signup ${email}`);
+        res.sendStatus(201);
+      }
+    expect:
+      - {type: log, category: Contact, at: 'console.log(`new signup'}
+
+  - id: js-winston-object
+    path: app/js/payments.js
+    code: |
+      import logger from "./logger";
+
+      export function onPayment(payment) {
+        logger.info("payment received", { upi_id: payment.upi_id, amount: payment.amount });
+      }
+    expect:
+      - {type: log, category: Financial, at: 'logger.info("payment received"'}
+
+  - id: ts-pino-child
+    path: app/ts/session.ts
+    code: |
+      import pino from "pino";
+      const log = pino();
+
+      export function startSession(user: { id: string; email: string; phoneNumber: string }) {
+        log.info({ email: user.email }, "session started");
+      }
+    expect:
+      - {type: log, category: Contact, at: 'log.info({ email'}
+
+  - id: ts-console-error-object
+    path: app/ts/kyc.ts
+    code: |
+      export function failKyc(applicant: Applicant, err: Error) {
+        console.error("kyc failed", { aadhaar: applicant.aadhaar, err });
+      }
+    expect:
+      - {type: log, category: Government ID, at: 'console.error("kyc failed"'}
+
+  - id: ts-log-ids-only
+    path: app/ts/orders.ts
+    code: |
+      export async function placeOrder(order: Order) {
+        await db.order.create({ data: order });
+        console.log("order created", order.id, order.userId);
+        console.log("email queue length", queue.length);
+      }
+    expect:
+      - {type: none-log}
+
+  - id: ts-stripe-checkout
+    path: app/ts/checkout.ts
+    code: |
+      import Stripe from "stripe";
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+      export async function startCheckout(user: User, priceId: string) {
+        return stripe.checkout.sessions.create({
+          customer_email: user.email,
+          line_items: [{ price: priceId, quantity: 1 }],
+          mode: "subscription",
+        });
+      }
+    expect:
+      - {type: flow, vendor: Stripe, category: Contact, at: 'stripe.checkout.sessions.create('}
+
+  - id: ts-mixpanel-people
+    path: app/ts/tracking.ts
+    code: |
+      import mixpanel from "mixpanel-browser";
+
+      export function identifyUser(user: User) {
+        mixpanel.identify(user.id);
+        mixpanel.people.set({ $email: user.email, $name: user.fullName, city: user.city });
+      }
+    expect:
+      - {type: flow, vendor: Mixpanel, category: Contact, at: 'mixpanel.people.set('}
+
+  - id: ts-posthog-identify
+    path: app/ts/posthog.ts
+    code: |
+      import posthog from "posthog-js";
+
+      export function onLogin(user: User) {
+        posthog.identify(user.id, { email: user.email, phone: user.phoneNumber });
+      }
+    expect:
+      - {type: vendor, vendor: PostHog}
+      - {type: flow, vendor: PostHog, category: Contact, at: 'posthog.identify('}
+
+  - id: ts-amplitude
+    path: app/ts/amplitude.ts
+    code: |
+      import * as amplitude from "@amplitude/analytics-browser";
+
+      export function trackPurchase(user: User, total: number) {
+        amplitude.track("purchase", { total, email: user.email });
+      }
+    expect:
+      - {type: vendor, vendor: Amplitude}
+      - {type: flow, vendor: Amplitude, category: Contact, at: 'amplitude.track('}
+
+  - id: ts-openai-fetch
+    path: app/ts/llm.ts
+    code: |
+      const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+
+      export async function draftReply(customer: Customer, question: string) {
+        const body = {
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: `Reply to ${customer.fullName} at ${customer.email}: ${question}` }],
+        };
+        return fetch(OPENAI_URL, { method: "POST", body: JSON.stringify(body) });
+      }
+    expect:
+      - {type: flow, vendor: OpenAI, category: Contact, at: 'return fetch(OPENAI_URL'}
+
+  - id: ts-ai-sdk-generate
+    path: app/ts/ai_sdk.ts
+    code: |
+      import { generateText } from "ai";
+      import { openai } from "@ai-sdk/openai";
+
+      export async function personalise(user: User) {
+        return generateText({
+          model: openai("gpt-4o"),
+          prompt: `Write a birthday note for ${user.fullName}, born ${user.dateOfBirth}`,
+        });
+      }
+    expect:
+      - {type: flow, vendor: OpenAI, category: Identity, at: 'return generateText({'}
+
+  - id: ts-wrapper-cross-file
+    path: app/ts/welcome.ts
+    extra_files:
+      app/ts/email.ts: |
+        import sgMail from "@sendgrid/mail";
+
+        export async function sendEmail(to: string, subject: string, html: string) {
+          await sgMail.send({ to, from: "noreply@acme.test", subject, html });
+        }
+    code: |
+      import { sendEmail } from "./email";
+
+      export async function welcome(user: User) {
+        await sendEmail(user.email, "Welcome", "<p>Hi</p>");
+      }
+    expect:
+      - {type: flow, vendor: SendGrid, category: Contact, at: 'await sendEmail(user.email'}
+
+  - id: ts-prisma-erasure
+    path: app/ts/schema.prisma
+    extra_files:
+      app/ts/gdpr.ts: |
+        export async function deleteUserAccount(userId: string) {
+          await prisma.user.delete({ where: { id: userId } });
+        }
+    code: |
+      model User {
+        id       String    @id
+        email    String    @unique
+        fullName String
+        sessions Session[]
+      }
+
+      model Session {
+        id        String @id
+        userId    String
+        user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+        ipAddress String
+      }
+
+      model Newsletter {
+        id    String @id
+        email String
+      }
+    expect:
+      - {type: erasure, store: User, covered: true}
+      - {type: erasure, store: Session, covered: true}
+      - {type: erasure, store: Newsletter, covered: false}
+
+  # ------------------------------------------------------------------ Go
+  - id: go-log-printf
+    path: app/go/handler.go
+    code: |
+      package app
+
+      import "log"
+
+      func CreateUser(u User) {
+      	log.Printf("creating user email=%s phone=%s", u.Email, u.PhoneNumber)
+      }
+    expect:
+      - {type: log, category: Contact, at: 'log.Printf("creating user'}
+
+  - id: go-zap-fields
+    path: app/go/zap.go
+    code: |
+      package app
+
+      import "go.uber.org/zap"
+
+      func Verify(logger *zap.Logger, a Applicant) {
+      	logger.Info("kyc verified", zap.String("pan_number", a.PanNumber))
+      }
+    expect:
+      - {type: log, category: Government ID, at: 'logger.Info("kyc verified"'}
+
+  - id: go-stripe-params
+    path: app/go/billing.go
+    code: |
+      package app
+
+      import (
+      	"github.com/stripe/stripe-go/v76"
+      	"github.com/stripe/stripe-go/v76/customer"
+      )
+
+      func NewCustomer(u User) (*stripe.Customer, error) {
+      	params := &stripe.CustomerParams{Email: stripe.String(u.Email), Name: stripe.String(u.FullName)}
+      	return customer.New(params)
+      }
+    expect:
+      - {type: flow, vendor: Stripe, category: Contact, at: 'return customer.New(params)'}
+
+  # ------------------------------------------------------------------ Java
+  - id: java-slf4j
+    path: app/java/CustomerService.java
+    code: |
+      import org.slf4j.Logger;
+      import org.slf4j.LoggerFactory;
+
+      public class CustomerService {
+          private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
+
+          public void onboard(Customer customer) {
+              log.info("Onboarding customer {} with PAN {}", customer.getFullName(), customer.getPanNumber());
+          }
+      }
+    expect:
+      - {type: log, category: Government ID, at: 'log.info("Onboarding customer'}
+
+  - id: java-jpa-entity
+    path: app/java/Patient.java
+    code: |
+      import jakarta.persistence.*;
+
+      @Entity
+      @Table(name = "patients")
+      public class Patient {
+          @Id
+          private Long id;
+
+          @Column(name = "full_name")
+          private String fullName;
+
+          @Convert(converter = AttributeEncryptor.class)
+          private String diagnosis;
+
+          private String email;
+      }
+    expect:
+      - {type: protection, field: diagnosis, kinds: [encrypted]}
+      - {type: protection, field: email, kinds: [none]}
+
+  # ------------------------------------------------------------------ Ruby
+  - id: rb-rails-logger
+    path: app/rb/users_controller.rb
+    code: |
+      class UsersController < ApplicationController
+        def create
+          @user = User.create!(user_params)
+          Rails.logger.info("created user #{@user.email}")
+        end
+      end
+    expect:
+      - {type: log, category: Contact, at: 'Rails.logger.info("created user'}
+
+  - id: rb-puts-inspect
+    path: app/rb/debug.rb
+    code: |
+      def dump_student(student)
+        puts student.attributes.slice("full_name", "date_of_birth", "guardian_phone").inspect
+      end
+    expect:
+      - {type: log, category: Contact, at: 'puts student.attributes'}
+
+  # ------------------------------------------------------------------ PHP
+  - id: php-laravel-log-context
+    path: app/php/CheckoutController.php
+    code: |
+      <?php
+      use Illuminate\Support\Facades\Log;
+
+      class CheckoutController {
+          public function pay($request) {
+              Log::info('checkout started', ['email' => $request->email, 'upi_id' => $request->upi_id]);
+          }
+      }
+    expect:
+      - {type: log, category: Contact, at: "Log::info('checkout started'"}
+
+  - id: php-error-log
+    path: app/php/legacy.php
+    code: |
+      <?php
+      function register($user) {
+          error_log("register " . $user['phone_number']);
+      }
+    expect:
+      - {type: log, category: Contact, at: 'error_log("register'}
+
+  # ------------------------------------------------------------------ C#
+  - id: cs-ilogger
+    path: app/cs/AccountController.cs
+    code: |
+      public class AccountController : Controller
+      {
+          private readonly ILogger<AccountController> _logger;
+
+          public IActionResult Register(RegisterModel model)
+          {
+              _logger.LogInformation("Registering {Email} {PhoneNumber}", model.Email, model.PhoneNumber);
+              return Ok();
+          }
+      }
+    expect:
+      - {type: log, category: Contact, at: '_logger.LogInformation("Registering'}
