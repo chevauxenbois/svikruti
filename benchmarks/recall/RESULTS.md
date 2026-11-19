@@ -73,7 +73,7 @@ by hand:
 |---|---|---|---|
 | excalidraw | 1 (search API key in docs config) | 0 | 0 |
 | healthchecks | 8 (SHA-1 x6, wildcard CORS x2) | 0 | 0 |
-| saleor | 2 (MD5 for cache keys) | 0 | 13, all Stripe, all pass customer or payment data |
+| saleor | 2 (MD5 for cache keys) | 0 | 13 reported, all Stripe; 10 pass customer or payment data (see correction below) |
 | Next.js/Stripe starter | 0 | 0 | 6, all Stripe, all pass customer data |
 
 Two false flows that appeared while fixing recall were found this way and
@@ -104,9 +104,62 @@ behind it, an interface declaration) stayed quiet on the first run.
 
 Precision after these changes, same repositories and method as above:
 CRITICAL/HIGH defects 1 / 8 / 2 / 0 and processor flows 0 / 0 / 13 / 6,
-unchanged. Free text was checked on chatbot-ui (an open-source multi-provider
+unchanged (saleor's 13 was later corrected to 10, below). Free text was checked on chatbot-ui (an open-source multi-provider
 chat app): 14 sites reported, each read by hand; every one sends chat messages
 or embedding input taken from the request to OpenAI, Anthropic or Gemini.
+
+## Apache Fineract: a Java/Spring lending platform (0.12.1)
+
+Fineract (7,640 files, core banking and loan management) was the first large
+Java codebase reviewed. Every CRITICAL and HIGH finding was read against the
+source.
+
+**Scan, CRITICAL/HIGH defects: 44 before this review, 13 after.**
+
+| What was flagged | Count | Verdict |
+|---|---|---|
+| Email in `log.debug(...)` (password reset, OIDC login) | 2 | True |
+| `management.endpoints.web.cors.allowed-origins=*` | 1 | True |
+| `loan.getAccountNumber()` in batch-job logs | 9 | Debatable: an internal loan reference that still identifies a borrower. Kept |
+| Default admin row seeded by a schema migration | 1 | Borderline |
+| Removed as false positives | 31 | Swagger `@Schema(example = ...)` emails (7), demo database dumps and project mailing lists (9), container service URLs such as `http://tempo:4318` (9), `"password=" + password` read as a hard-coded secret (2), loan amounts and `emailCampaign` read as personal data (3), a phone number in a validator test (1) |
+
+**Privacy as code** (`init` then `check`, DPDPA and RBI packs). Before this
+review the inventory found no stored fields in Fineract at all: Java `@Entity`
+and `@Column` annotations sit on their own lines and were not read. After:
+29 tables and 59 personal-data fields, and
+
+- **P007, true:** `ClientIdentifier.documentKey` (passport, voter ID and other
+  identity document numbers) and `CreditReport.nationalId` are stored with no
+  field-level protection.
+- **Rights requests:** `DeleteClientCommandHandler`, `CloseClientCommandHandler`
+  and `DeleteUserCommandHandler` are found as entry points. Deleting a client
+  reaches `Client` and, through the JPA `@OneToMany(cascade = ALL)` on its
+  side, `ClientIdentifier`; deleting a user reaches `AppUser`.
+- **D010, 26 tables with no erasure path:** most are ledgers (loans, savings,
+  transactions, journal entries) that a regulated lender must retain; they
+  belong under `erasure.retained`. `Guarantor`, `ClientFamilyMembers`, `Staff`
+  and `Address` hold personal data with no deletion found; these were not
+  verified individually.
+- **P001 log findings, 25 locations:** 14 true (2 emails, 12 staff usernames
+  and display names around OIDC login and webhooks), 9 debatable (loan account
+  numbers), 2 false: a database connection username in `RoutingDataSource`,
+  held in a bare `username` variable that cannot be told apart from a
+  person's. Two more of the same kind (`tenant.getUsername()`,
+  `readOnlyUsername`) were fixed.
+
+Gaps this exposed, now fixed: JPA annotations above classes and fields,
+parent-side JPA cascades, deletes through typed variables
+(`final AppUser user = ...; user.delete()`) and Spring Data repositories
+(`appUserRepository.delete(...)`), rights-request names that must have a
+person as their whole object (`DeleteClient` but not `DeleteClientCharge`),
+and a call tree that no longer follows builder classes naming every command.
+
+**Correction to saleor.** The stricter payment-name rule removed 3 of saleor's
+13 Stripe flows. They passed `payment_intent` to `get_payment_method_details()`,
+which parses Stripe's response locally and makes no call. They were counted as
+true in the first hand review; the correct figure is 10 true flows of 10
+reported.
 
 ## Limits
 

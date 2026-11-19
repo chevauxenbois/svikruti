@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from svikruti.models import ScanResult
-from svikruti.pac.datastore import _CONTAINER_RES, cascades, entry_label, model_cascades, erasure_coverage, erasure_paths, field_protection, protection_index, rights_request_entrypoints
+from svikruti.pac.datastore import _CONTAINER_RES, cascades, entry_label, model_cascades, parent_side_cascades, erasure_coverage, erasure_paths, field_protection, protection_index, rights_request_entrypoints
 from svikruti.pac.globs import match_any
 from svikruti.pac.taxonomy import HIGH_RISK_CATEGORIES, category_slug
 from svikruti.reports.exports import _write_rows
@@ -132,11 +132,11 @@ def _annotate(rows: List[Dict[str, Any]], root: Optional[Path], lines_for: Any, 
         protection = field_protection(row["field"], declaration, f"{row['file']}:{row['line']}", index)
         row["protection"] = protection.kind
         row["protection_evidence"] = protection.evidence
-    from svikruti.pac.datastore import is_persistent_store, store_header
+    from svikruti.pac.datastore import field_is_column, is_persistent_store, store_header
 
     for row in rows:
         lines = lines_for(row["file"]) or []
-        row["persistent"] = bool(row["store"]) and is_persistent_store(row["file"], store_header(lines, row["line"] or 1))
+        row["persistent"] = bool(row["store"]) and (is_persistent_store(row["file"], store_header(lines, row["line"] or 1)) or field_is_column(lines, row["line"] or 1))
     erasure = check.manifest.erasure if check is not None else None
     paths = erasure_paths(root, files, erasure.handlers if erasure else ())
     stores: Dict[str, Any] = {}
@@ -145,6 +145,10 @@ def _annotate(rows: List[Dict[str, Any]], root: Optional[Path], lines_for: Any, 
             stores.setdefault(row["store"], (row["file"], row["line"] or 1))
     cascade_map = cascades(root, stores)
     model_parents = model_cascades(root, files)
+    for child, parents in parent_side_cascades(root, files).items():
+        model_parents.setdefault(child, set()).update(parents)
+        if child in stores:
+            cascade_map.setdefault(child, set()).update(parents)
     coverage = erasure_coverage(stores, paths, erasure.retained if erasure else {}, cascade_map, model_parents)
     # Which of those deletions a data subject's request actually reaches.
     entries = rights_request_entrypoints(root, files, erasure.entrypoints if erasure else ())

@@ -158,6 +158,11 @@ def build_code_model(evidence: Iterable[Evidence], min_confidence: str = "medium
             continue
         if _CONFIDENCE_RANK.get(str(metadata.get("confidence", "medium")), 2) < floor:
             continue
+        # Uncorroborated ambiguous terms ("health" next to an actuator endpoint) and
+        # literals the scanner already judged non-personal (mailing lists, API doc
+        # examples, fixtures) do not make a category part of the record.
+        if item.label.startswith("Possible ") or (item.kind == "literal_personal_data" and item.severity == "LOW"):
+            continue
         if item.kind == "third_party" and metadata.get("third_party"):
             name = str(metadata["third_party"])
             facts = model.files.setdefault(rel, FileFacts())

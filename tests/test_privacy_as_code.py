@@ -1233,6 +1233,12 @@ class ReportAndCliTests(unittest.TestCase):
             self.assertIn("HubSpot", comment)
             self.assertNotIn("Mixpanel", comment)
 
+    def test_cli_creates_missing_output_folders(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "not" / "yet"
+            self.assertEqual(main(["scan", "--repo", str(EXAMPLE), "--out", str(out / "r.html"), "--json-out", str(out / "deeper" / "r.json")]), 0)
+            self.assertTrue((out / "r.html").is_file() and (out / "deeper" / "r.json").is_file())
+
     def test_cli_usage_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(main(["check", "--repo", tmp]), 2)
@@ -1414,6 +1420,66 @@ class RuntimeRedactionTests(unittest.TestCase):
             self.assertIn("checkout.js:2", p001.exception_reason)
             _write(repo, {"services/onboarding/audit.py": "import logging\nlogger = logging.getLogger(__name__)\n\ndef audit(applicant):\n    logger.info('kyc for %s', redact(applicant.email))\n    logger.info('kyc for %s', mask_phone(applicant.phone_number))\n"})
             self.assertFalse([f for f in _check(repo).open_findings() if f.rule == "P001" and "audit.py" in " ".join(f.refs)])
+
+
+class FineractPrecisionTests(unittest.TestCase):
+    """Patterns from the Apache Fineract review (Java/Spring lending platform)."""
+
+    def test_scan_noise_classes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "api/UsersApiResourceSwagger.java": 'class S {\n    @Schema(example = "demomfi@mifos.org")\n    public String email;\n}\n',
+                ".asf.yaml": "notifications:\n  commits: commits@fineract.apache.org\n",
+                "db/multi-tenant-demo-backups/bk_demo.sql": "INSERT INTO m_appuser VALUES (1,'ravi.k@gmail.com');\n",
+                "src/test/java/ValidatorTest.java": 'class T { String m = "+919876543210"; }\n',
+                "docker-compose.yml": "services:\n  app:\n    environment:\n      OTLP: http://tempo:4318/v1/traces\n",
+                "svc/Bureau.java": 'class B { String body(String password) { return "user=x&password=" + password + "&\\r"; } }\n',
+                "svc/Steps.java": 'class S { void run(Loan loan) { log.info("payment {} {}", loan.periodPayment(), emailCampaign.getCampaignName()); } }\n',
+                "svc/Leak.java": 'class L { void run(String email) { log.debug("reset for {}", email); } }\n',
+            })
+            scan = run_scan(str(root), None)
+            severe = sorted((e.file, e.kind) for e in scan.evidence if e.severity in {"CRITICAL", "HIGH"} and e.kind in {"literal_personal_data", "insecure_transport", "secret_exposure", "logging_risk"})
+            self.assertEqual(severe, [("svc/Leak.java", "logging_risk")])
+
+    def test_jpa_entities_cascades_and_rights_requests(self):
+        from svikruti.pac.datastore import _erases, is_request_entry_name, store_variants
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root, {
+                "core/domain/Client.java": (
+                    "package d;\n@Entity\n@Table(name = \"m_client\")\npublic class Client {\n"
+                    "    @Column(name = \"firstname\")\n    private String firstname;\n"
+                    "    @Column(name = \"mobile_no\")\n    private String mobileNo;\n"
+                    "    @OneToMany(cascade = CascadeType.ALL, mappedBy = \"client\", orphanRemoval = true)\n    protected Set<ClientIdentifier> identifiers;\n}\n"
+                ),
+                "core/domain/ClientIdentifier.java": "package d;\n@Entity\npublic class ClientIdentifier {\n    @Column(name = \"document_key\")\n    private String documentKey;\n}\n",
+                "svc/handler/DeleteClientCommandHandler.java": "package h;\npublic class DeleteClientCommandHandler {\n    public Result processCommand(Command c) {\n        return this.service.deleteClient(c.entityId());\n    }\n}\n",
+                "svc/ClientService.java": "package s;\npublic class ClientService {\n    public Result deleteClient(final Long id) {\n        final Client client = this.clientRepository.findById(id);\n        this.clientRepository.delete(client);\n        return null;\n    }\n}\n",
+            })
+            rows = {(r["store"], r["field"]): r for r in __import__("svikruti.pac.inventory", fromlist=["build_inventory"]).build_inventory(run_scan(str(root), None))}
+            self.assertTrue(rows[("Client", "firstname")]["persistent"])
+            self.assertTrue(rows[("Client", "mobileNo")]["persistent"])
+            identifier = rows[("ClientIdentifier", "documentKey")]
+            self.assertTrue(identifier["erasure"].startswith("cascade from Client"))
+            self.assertTrue(identifier["rights_request"].startswith("cascade from Client"))
+        self.assertTrue(_erases("final AppUser user = repo.findById(id);\nuser.delete();", store_variants("AppUser")))
+        self.assertTrue(_erases("this.appUserRepository.deleteById(id);", store_variants("AppUser")))
+        self.assertFalse(_erases("final AppUser user = x;\nlog(user.getName());", store_variants("AppUser")))
+        self.assertEqual(
+            [is_request_entry_name(n) for n in ["DeleteClientCommandHandler", "AccountDelete", "DeleteClientChargeCommandHandler", "DeleteAccountNumberFormatCommandHandler", "AccountDeleteRequested"]],
+            [True, True, False, False, False],
+        )
+
+    def test_payment_and_system_account_names(self):
+        from svikruti.scanner.code import drop_not_the_data
+        from svikruti.scanner.semantic import _categories_for_text
+
+        for name in ["graceOnPrincipalPayment", "periodPaymentRate", "chargePaymentMode", "isCashPayment", "emailSubject", "jobDisplayName", "tenant.getUsername()", "readOnlyUsername"]:
+            self.assertEqual(_categories_for_text(name), [], name)
+        for name in ["paymentMethod", "payment_details", "default_payment_method", "user.username", "emailAddress"]:
+            self.assertTrue(_categories_for_text(drop_not_the_data(name)), name)
 
 
 def _write(root: Path, files: dict) -> None:

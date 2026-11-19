@@ -227,6 +227,42 @@ _ID_PAIR_RE = re.compile(r"""["']?[A-Za-z_$][\w$-]*["']?\s*(?::|=>|=)\s*(?=(?:[A
 _ACCESS_CHAIN_RE = re.compile(r"(?<![\w$])(?:[A-Za-z_$][\w$]*(?:\(\))?(?:\??\.|->|::))+([A-Za-z_$][\w$]*)(?![\w$])(?!\s*\()")
 
 
+# `emailCampaign`, `sms_template`, `phoneService`: the data word modifies another noun.
+# `periodPayment`, `minimumPayment`, `paymentAmount`: an amount carries no identity.
+_NOT_THE_DATA_RE = re.compile(
+    r"\b[A-Za-z_]*?(?:e_?mail|sms|phone|mobile|address|contact)_?(?:campaign|template|service|config|configuration|settings|provider|client|sender|job|type|status|enabled|subject|body|server|host|port|queue|channel|gateway|count|limit|domain|format|validator|verified|verification)s?\b"
+    r"|\b[A-Za-z_]*?(?:period|minimum|min|max|maximum|base|capped|total|monthly|next|due|installment|instalment|scheduled|expected|actual|remaining|last|first)_?payments?(?:_?amount)?\b"
+    r"|\bpayments?_?(?:amount|amounts|count|total|frequency|frequency_?type|type|term|terms|period|periods|date|due_?date|status|schedule|number)\b"
+    # Configuration and bookkeeping about payments, not a person's payment instrument:
+    # paymentType, chargePaymentMode, enablePaymentType, isCashPayment, paymentAllocationRules, overPaymentPortion
+    r"|\b[A-Za-z_]*?(?:payment|charge)_?(?:mode|allocation\w*|portion|rules?|types?|strategy|config\w*|channel|enabled?)\b"
+    r"|\b(?:is|has|enable|enabled|allow|allows)_?[A-Za-z_]*?payments?\w*\b|\b(?:over|under|pre|re|down|part|partial|advance|cash)_?payments?\w*\b"
+    r"|\be_?mail_?(?:attachment\w*|subject|message|body|file\w*|format|text|html|content)\b"
+    r"|\b(?:job|report|product|group|role|office|fund|code|tab|menu|template|campaign|file|step|task|charge|tax|column|table|entity|field|feature|plugin)_?(?:display_?)?(?:name|username)\b"
+    # Accounts of systems, not people: tenant.getUsername(), readOnlyUsername, smtpUser, db_user
+    r"|\b(?:tenant|db|database|datasource|data_source|jdbc|connection|schema|smtp|imap|ftp|sftp|proxy|broker|redis|kafka|rabbit\w*|mq|ldap_bind|bind|service_account|readonly|read_only)\s*(?:_|\.\s*(?:get_?)?)?(?:read_?only_?)?user_?(?:name)?\b",
+    re.IGNORECASE,
+)
+
+
+_PAYMENT_COMPOUND_RE = re.compile(r"\b[A-Za-z_]*[Pp]ayments?[A-Za-z_]*\b")
+_PAYMENT_INSTRUMENT_RE = re.compile(r"payments?_?(?:method|card|instrument|info|information|details?|source|account|mandate|upi|vpa)", re.IGNORECASE)
+
+
+def drop_not_the_data(text: str) -> str:
+    """Identifiers that contain a data word but are not that data (see _NOT_THE_DATA_RE),
+    and payment compounds that are configuration or amounts rather than a payment instrument."""
+    text = _NOT_THE_DATA_RE.sub(" ", text)
+
+    def payment(match: "re.Match[str]") -> str:
+        word = match.group(0)
+        if re.fullmatch(r"payments?", word, re.IGNORECASE) or _PAYMENT_INSTRUMENT_RE.search(re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", word)):
+            return word
+        return " "
+
+    return _PAYMENT_COMPOUND_RE.sub(payment, text)
+
+
 def _drop_record_identifiers(text: str) -> str:
     """Remove references that name a record, not the data in it.
 
@@ -241,6 +277,7 @@ def _drop_record_identifiers(text: str) -> str:
 
     text = _ID_PAIR_RE.sub(" ", text)
     text = _ID_ATTRIBUTE_RE.sub(" ", text)
+    text = drop_not_the_data(text)
     # `payment_information.gateway` is a gateway name: the owner object's
     # name says nothing about the value. Keep only the last attribute.
     text = _ACCESS_CHAIN_RE.sub(lambda match: " " + match.group(1), text)
@@ -433,6 +470,10 @@ _METADATA_FILENAME_PREFIXES = (
 )
 
 
+# OpenAPI / Swagger documentation: @Schema(example = "x@y.org"), @ApiModelProperty(example = ...), example: x@y.org
+_API_EXAMPLE_RE = re.compile(r"@(?:Schema|ApiModelProperty|ApiParam|Parameter|ExampleObject|Example)\b|\bexamples?\s*[:=]", re.IGNORECASE)
+
+
 def _email_literal_is_fixture(rel: str, line: str) -> bool:
     """Emails in tests/fixtures/docs, on reserved example domains, or in
     project-metadata files are fixture/attribution data, not personal-data
@@ -447,6 +488,9 @@ def _email_literal_is_fixture(rel: str, line: str) -> bool:
     if _is_test_path(lowered_rel):
         return True
     parts = lowered_rel.split("/")
+    # Demo databases and seed dumps: multi-tenant-demo-backups/, seeds/, bk_demo.sql
+    if any(re.search(r"(?:^|[-_])(?:demo|seed|seeds|sample|samples|backups?)(?:[-_]|$)", part) for part in parts[:-1]) or re.match(r"(?:bk_|seed|demo|sample)", parts[-1]):
+        return True
     if any(part in FIXTURE_PATH_SEGMENTS for part in parts):
         return True
     return parts[-1].startswith(_METADATA_FILENAME_PREFIXES)
@@ -465,7 +509,7 @@ _NON_EMAIL_DOMAIN_SUFFIXES = (
 _ROLE_MAILBOX_RE = re.compile(
     r"(?<![\w.+-])(?:no-?reply|do-?not-?reply|bot|ci|build|git|github|actions|support|help|info|hello|contact|sales|billing|admin|"
     r"security|privacy|legal|dpo|grievance|compliance|abuse|postmaster|webmaster|team|dev|developers?|opensource|oss|press|careers|jobs|"
-    r"notifications?|alerts?|mailer|system|root|feedback|enquir(?:y|ies)|office)(?:[+._-][\w.+-]*)?@",
+    r"notifications?|alerts?|mailer|system|root|feedback|enquir(?:y|ies)|office|commits?|issues|pullrequests|pull-requests|users|announce|private|builds?|reviews|jira|general)(?:[+._-][\w.+-]*)?@",
     re.IGNORECASE,
 )
 
@@ -601,12 +645,18 @@ def _file_context(rel_path: str, text: str) -> str:
     return "application"
 
 
-_TEST_PATH_SEGMENTS = {"test", "tests", "testing", "spec", "specs", "__tests__", "mocks", "fixtures", "cypress", "e2e"}
+_TEST_PATH_SEGMENTS = {
+    "test", "tests", "testing", "spec", "specs", "__tests__", "mocks", "fixtures", "cypress", "e2e",
+    "integration-tests", "integration_tests", "integrationtests", "integration-test", "e2e-tests", "functional-tests",
+    "acceptance-tests", "test-utils", "testutils", "test-fixtures", "testfixtures", "testdata", "test-data", "test_data",
+}
+# Demo databases, seed dumps and sample datasets: fixture data, not production code.
+_DEMO_SEGMENT_RE = re.compile(r"(?:^|[-_])(?:demo|demos|seed|seeds|seeders|sample-data|sample_data|samples)(?:[-_]|$)")
 
 
 def _is_test_path(lowered_path: str) -> bool:
     parts = lowered_path.replace("\\", "/").split("/")
-    if any(part in _TEST_PATH_SEGMENTS for part in parts[:-1]):
+    if any(part in _TEST_PATH_SEGMENTS or _DEMO_SEGMENT_RE.search(part) for part in parts[:-1]):
         return True
     filename = parts[-1]
     stem = filename.rsplit(".", 1)[0]
@@ -785,7 +835,7 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                     severity = "LOW"
                     label_text = "Email literal (shared mailbox)"
                     detail = "Role or system mailbox (support@, privacy@, noreply@, bot@): it identifies a function, not a person."
-                elif "Email" in literal_label and (is_prose or _ATTRIBUTION_LINE_RE.search(line) or all(_email_is_placeholder(str(value)) for value in matches)):
+                elif "Email" in literal_label and (is_prose or _ATTRIBUTION_LINE_RE.search(line) or _API_EXAMPLE_RE.search(line) or all(_email_is_placeholder(str(value)) for value in matches)):
                     severity = "LOW"
                     label_text = "Email literal (documentation, attribution or placeholder)"
                     detail = "Email in documentation, an author/licence line, or a placeholder such as you@yourdomain.com: not personal data held by the product."
@@ -793,6 +843,10 @@ def scan_repo(repo_path: str) -> CodeScanResult:
                     severity = "LOW"
                     label_text = "Email literal (test/example context)"
                     detail = "Email-format value on a reserved example domain or in a test/fixture/docs path; likely fixture data rather than real exposure."
+                elif file_context == "test" and "Aadhaar" not in literal_label and "PAN" not in literal_label:
+                    severity = "LOW"
+                    label_text = f"{literal_label} (test data)"
+                    detail = f"{literal_label} in a test file: fixture data exercising a validator, not data the product holds."
                 elif "mobile" in literal_label.lower() and mobile_mode == "bare":
                     severity = "MEDIUM"
                     label_text = "Possible Indian mobile literal"

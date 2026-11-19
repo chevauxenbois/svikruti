@@ -92,7 +92,7 @@ SECRET_REGEXES = {
     "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     "Private key material": re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     "Hard-coded token": re.compile(
-        r"(?i)\b(api[_-]?key|secret|token|password|client_secret)\b\s*[:=]\s*[\"'][^\"'\n]{12,}[\"']"
+        r"(?i)\b(api[_-]?key|secret|token|password|client_secret)\b\s*[:=]\s*[\"'](?![\s+])[^\"'\n]{10,}(?<![\s+])[^\"'\n\s+][\"']"
     ),
 }
 
@@ -147,6 +147,11 @@ def _skip_insecure_http(line: str, url_rest: str) -> bool:
     if "xmlns" in line.lower():
         return True
     lowered_url = url_rest.lower()
+    host = re.split(r"[/:?#;]", lowered_url, maxsplit=1)[0]
+    # http://tempo:4318, http://localstack:4566, http://prometheus:9090: a container or
+    # cluster service name, reachable only inside that network. `proxy_redirect https:// http://;`
+    if not host or ("." not in host and not host.startswith("$")) or host.startswith(("${", "{{")):
+        return True
     return any(token in lowered_url for token in HTTP_URL_ALLOWLIST)
 
 

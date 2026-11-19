@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Tuple
 import yaml
 
 HERE = Path(__file__).resolve().parent
-SEED_ROOT = "svk_recall_seeds"
+SEED_ROOT = "svk_recall_planted"
 LINE_TOLERANCE = (-1, 3)  # evidence may sit on the statement's first line or a few lines into it
 
 

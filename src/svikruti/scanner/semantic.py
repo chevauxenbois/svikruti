@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from svikruti.models import Evidence
-from svikruti.scanner.code import _ID_SUFFIX_RE, PROTECTING_CALL_NAME_RE, _code_outside_strings, _drop_protected_calls, _drop_record_identifiers, _file_context, _language_for, iter_source_files
+from svikruti.scanner.code import _ID_SUFFIX_RE, PROTECTING_CALL_NAME_RE, drop_not_the_data, _code_outside_strings, _drop_protected_calls, _drop_record_identifiers, _file_context, _language_for, iter_source_files
 from svikruti.scanner.patterns import (
     AMBIGUOUS_SENSITIVE_TERMS,
     CATEGORY_SEVERITY,
@@ -1173,7 +1173,7 @@ def _recommendation_for_role(role: str) -> str:
 
 def _categories_for_text(text: str) -> List[str]:
     found: Set[str] = set()
-    normalized = normalize_text(text)
+    normalized = normalize_text(drop_not_the_data(text))
     for pattern in PERSONAL_DATA_PATTERNS:
         # Ambiguous tokens (minor/school/patient/address/mobile/health/...)
         # are excluded here: semantic matching runs over whole function-body

@@ -274,6 +274,33 @@ def cascades(root: Optional[Path], store_files: Dict[str, Tuple[str, int]]) -> D
 _MODEL_DECL_RE = re.compile(r"^\s*(?:export\s+)?(?:(?:public|final|abstract)\s+)*(?:class|model)\s+(\w+)\b|\bCREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[`\"\[]?(\w+)", re.IGNORECASE)
 
 
+_PARENT_CASCADE_RE = re.compile(
+    r"@(?:OneToMany|OneToOne)\s*\(([^)]*)\)[\s\S]{0,240}?(?:Set|List|Collection|Iterable)\s*<\s*(\w+)\s*>|@(?:OneToOne)\s*\(([^)]*)\)\s*(?:@\w+(?:\([^)]*\))?\s*)*(?:private|protected|public)?\s*(\w+)\s+\w+\s*;"
+)
+
+
+def parent_side_cascades(root: Optional[Path], files: Iterable[str]) -> Dict[str, Set[str]]:
+    """child -> parents that delete it with themselves, read from the parent's side.
+
+    JPA declares it on the parent: `@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) Set<ClientIdentifier>`.
+    """
+    repo = _Repo(root, [rel for rel in files if rel.endswith((".java", ".kt", ".ts"))])
+    out: Dict[str, Set[str]] = {}
+    for rel in repo.files:
+        text = "\n".join(repo.lines(rel) or [])
+        if "OneTo" not in text:
+            continue
+        owner = re.search(r"\bclass\s+(\w+)", text)
+        if not owner:
+            continue
+        for match in _PARENT_CASCADE_RE.finditer(text):
+            options = match.group(1) if match.group(1) is not None else (match.group(3) or "")
+            child = match.group(2) or match.group(4)
+            if child and re.search(r"CascadeType\.(?:ALL|REMOVE)|orphanRemoval\s*=\s*true|cascade:\s*\[?[^\]]*[\"'](?:remove|soft-remove)[\"']|cascade:\s*true", options):
+                out.setdefault(child, set()).add(owner.group(1))
+    return out
+
+
 def model_cascades(root: Optional[Path], files: Iterable[str]) -> Dict[str, Set[str]]:
     """Cascade parents for every model / table in the repository, personal data or not.
 
@@ -321,13 +348,63 @@ def is_persistent_store(rel: str, header: str) -> bool:
 
 
 def store_header(lines: List[str], line: int) -> str:
+    """The declaration line plus the annotations above it (`@Entity` / `@Table` sit on their own lines in Java)."""
+    if not lines:
+        return ""
     start, _ = _declaration_bounds(lines, line)
-    return lines[start] if lines else ""
+    first = start
+    while first > 0 and start - first < 10 and (lines[first - 1].strip().startswith(("@", "//", "*", "/*")) or not lines[first - 1].strip()):
+        first -= 1
+    return "\n".join(lines[first : start + 1])
+
+
+_PERSISTENT_FIELD_ANNOTATION_RE = re.compile(r"^\s*@(?:Column|JoinColumn|Lob|Convert|Field|Indexed|Id|Basic|Enumerated|Temporal|ColumnTransformer)\b")
+
+
+def field_is_column(lines: List[str], line: int) -> bool:
+    """A field annotated as a database column (@Column above `private String mobileNo;`)."""
+    index = line - 2
+    while 0 <= index < len(lines) and line - index < 6 and lines[index].strip().startswith("@"):
+        if _PERSISTENT_FIELD_ANNOTATION_RE.match(lines[index]):
+            return True
+        index -= 1
+    return False
+
+
+def _typed_variables(text: str, variants: Iterable[str]) -> Set[str]:
+    """Locals declared as the store's type: `final AppUser user = ...`, `user: AppUser`, `var u = new AppUser(`."""
+    names: Set[str] = set()
+    for variant in variants:
+        v = re.escape(variant)
+        names.update(re.findall(rf"(?i)(?<![\w.]){v}\s+([a-z_]\w*)\s*[=;:,)]", text))
+        names.update(re.findall(rf"(?i)\b([a-z_]\w*)\s*:\s*{v}\b", text))
+        names.update(re.findall(rf"(?i)\b([a-z_]\w*)\s*=\s*new\s+{v}\s*\(", text))
+    return {name.lower() for name in names if len(name) > 1 and name.lower() not in {"self", "this", "it", "new", "final", "return"}}
+
+
+def _typed_variable_erased(text: str, variants: Iterable[str]) -> bool:
+    """`final AppUser user = ...; user.delete();` within the same function (60 lines), not anywhere in the call tree."""
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        for name in _typed_variables(line, variants):
+            window = "\n".join(lines[index : index + 60]).lower()
+            n = re.escape(name)
+            if re.search(rf"(?<![\w$]){n}\.(?:_raw_)?(?:delete|destroy|remove|anonymi[sz]e|erase|purge|soft_?delete|hard_?delete)\w*\s*\(|(?:delete|remove|purge|anonymi[sz]e|erase)\w*\s*\(\s*{n}\s*[,)]", window):
+                return True
+    return False
 
 
 def _erases(text: str, variants: Iterable[str]) -> bool:
     """Does this code delete or overwrite the store, rather than merely mention it?"""
     lowered = text.lower()
+    variants = set(variants)
+    for variant in variants:
+        v = re.escape(variant)
+        # Spring Data / DAO style: appUserRepository.delete(user), customer_repo.deleteById(id)
+        if re.search(rf"(?<![\w$]){v}_?(?:repository|repo|dao|store|mapper)\s*\.\s*(?:delete|remove|purge|anonymi[sz]e)\w*\s*\(", lowered):
+            return True
+    if _typed_variable_erased(text, variants):
+        return True
     for variant in variants:
         v = re.escape(variant)
         if re.search(
@@ -425,6 +502,20 @@ _MAX_REACH_DEPTH = 4
 _MAX_REACH_BODIES = 80
 
 
+_SUBJECT = r"(?:my_)?(?:user|account|customer|client|borrower|member|applicant|profile|person|patient|personal_data|data_subject|self|me)"
+_ENTRY_SUFFIX = r"(?:_(?:command_handler|handler|mutation|job|service|command|request|task|worker|resolver|controller|view|api|endpoint|action))?"
+_REQUEST_ENTRY_NAME_RE = re.compile(
+    rf"^(?:delete|erase|anonymi[sz]e|purge|forget|close|deactivate|destroy|remove)_{_SUBJECT}{_ENTRY_SUFFIX}$"
+    rf"|^{_SUBJECT}_(?:delete|erase|erasure|deletion|anonymi[sz]ation|purge|close|closure|deactivation|destroy){_ENTRY_SUFFIX}$"
+)
+
+
+def is_request_entry_name(name: str) -> bool:
+    """DeleteClientCommandHandler, AccountDelete, CustomerErasureJob: yes. DeleteClientCharge, AccountDeleteRequested: no."""
+    snake = _snake(name)
+    return bool(_REQUEST_ENTRY_NAME_RE.match(snake) or _DSAR_NAME_RE.search(snake))
+
+
 def _is_erasure_route(path: str, method: str, rest: str = "") -> bool:
     if _ERASURE_ROUTE_RE.search(path):
         return True
@@ -465,7 +556,7 @@ def rights_request_entrypoints(root: Optional[Path], files: Iterable[str], decla
                         break
                 body = "\n".join(lines[number:end])
                 bodies.setdefault(match.group(2).lower(), []).append((rel, number + 1, body))
-                if (is_erasure_name(match.group(2)) and re.search(r"(?:mutation|graphql|api|views?|controllers?|resolvers?|jobs?|handlers?|commands?)", rel, re.IGNORECASE)) or match.group(2).lower() in wanted:
+                if (is_request_entry_name(match.group(2)) and re.search(r"(?:mutation|graphql|api|views?|controllers?|resolvers?|jobs?|handlers?|commands?)", rel, re.IGNORECASE)) or match.group(2).lower() in wanted:
                     add_entry(match.group(2), rel, number + 1, body)
         # Management commands and scripts named for erasure: python manage.py delete_user <id>
         if re.search(r"(?:management/commands|scripts?|bin|jobs?|tasks?)/[^/]*$", rel) and is_erasure_name(Path(rel).stem):
@@ -523,7 +614,12 @@ def rights_request_entrypoints(root: Optional[Path], files: Iterable[str], decla
                 names.update(re.findall(r"(?<![\w$.])([A-Za-z_$][\w$]*)\s*\(", text))
                 names.update(re.findall(r"\.([A-Za-z_$][\w$]*)\s*\(", text))
                 names.update(_QUEUED_CALL_RE.findall(text))
-                names.update(re.findall(r"\bnew\s+([A-Za-z_$][\w$]*)", text))
+                # Constructed classes that do work (a job, a command), not builders and value objects
+                # that merely name every operation in the system.
+                names.update(
+                    name for name in re.findall(r"\bnew\s+([A-Za-z_$][\w$]*)", text)
+                    if not re.search(r"(?:Builder|Factory|Wrapper|Helper|Utils?|Mapper|Validator|Data|Dto|DTO|Exception|Error|Result|Response|Request|Context|Config|Configuration|Options|Params|Event|Message|List|Map|Set)$", name)
+                )
             frontier = []
             for name in names:
                 key = name.lower()
@@ -534,6 +630,8 @@ def rights_request_entrypoints(root: Optional[Path], files: Iterable[str], decla
                 if len(definitions) > 3:
                     continue  # a common method name (clean, run, handle): following it would pull in unrelated code
                 for _, _, body in definitions:
+                    if body.count("\n") > 400:
+                        continue  # a whole large class, not a function: too coarse to follow
                     frontier.append(body)
                     collected.append(body)
             if not frontier or len(collected) > _MAX_REACH_BODIES:

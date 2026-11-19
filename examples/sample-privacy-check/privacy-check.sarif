@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "Svikruti privacy-as-code",
-          "version": "0.12.0",
+          "version": "0.12.1",
           "informationUri": "https://github.com/chevauxenbois/svikruti",
           "rules": [
             {

@@ -237,9 +237,9 @@ Limits: dynamic dispatch through reflection or service locators, channel
 names built at runtime, and vendors called from a different repository (a
 separate worker service) are not followed. `svikruti org` shows the second
 repository's flows but does not join them. On saleor (4,600 files) the
-detector reports 13 Stripe flows in under a second, on a Next.js subscription
-starter 6. Reading them by hand, each passes a customer email, name, address
-or payment-method detail to Stripe. That is two repositories with one vendor,
+detector reports 10 Stripe flows, on a Next.js subscription starter 6.
+Reading them by hand, each passes a customer email, name, address or
+payment-method detail to Stripe. That is two repositories with one vendor,
 not a precision benchmark.
 
 ## AI model providers

@@ -20,12 +20,12 @@ class DataPattern:
 
 
 PERSONAL_DATA_PATTERNS: List[DataPattern] = [
-    DataPattern("Identity", ["full_name", "first_name", "last_name", "username", "user_name", "customer_name", "display_name", "date_of_birth", "dob"], "MEDIUM", "Notice transparency"),
-    DataPattern("Contact", ["email", "email_address", "phone", "phone_number", "mobile", "mobile_number", "telephone", "whatsapp"], "HIGH", "Consent and notice"),
+    DataPattern("Identity", ["full_name", "first_name", "last_name", "firstname", "lastname", "fullname", "middlename", "middle_name", "surname", "username", "user_name", "customer_name", "display_name", "date_of_birth", "dob"], "MEDIUM", "Notice transparency"),
+    DataPattern("Contact", ["email", "email_address", "phone", "phone_number", "phone_no", "mobile", "mobile_number", "mobile_no", "mobileno", "telephone", "whatsapp"], "HIGH", "Consent and notice"),
     # Standalone "pan" removed: it is too ambiguous as a bare token (panel,
     # pandas, PAN-EU, ...). Only compound tokens remain here; literal PAN
     # values are covered by the context-checked "PAN literal" regex below.
-    DataPattern("Government ID", ["aadhaar", "aadhar", "pan_number", "pan_card", "passport", "voter_id", "driving_license", "dl_number"], "CRITICAL", "Data minimization"),
+    DataPattern("Government ID", ["aadhaar", "aadhar", "pan_number", "pan_card", "passport", "passport_number", "voter_id", "driving_license", "dl_number", "national_id", "document_key"], "CRITICAL", "Data minimization"),
     DataPattern("Financial", ["card_number", "card_last4", "bank_account", "account_number", "ifsc", "upi", "upi_id", "payment", "payment_method", "razorpay_order"], "HIGH", "Security safeguards"),
     # "state" and "zip" removed: in code they overwhelmingly mean state
     # machines / React state and compressed archives, not location data.
