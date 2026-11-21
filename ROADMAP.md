@@ -1,11 +1,16 @@
 # Svikruti Roadmap
 
 Svikruti is open-source privacy as code: the repository is the source of truth,
-reconciled against a reviewed manifest and mapped to DPDPA, GDPR and ISO/IEC 27701.
+reconciled against a reviewed manifest, with framework packs for DPDPA, GDPR, ISO/IEC 27701, LGPD, CCPA, SOC 2, RBI and SEBI CSCRF.
 The roadmap prioritizes technical evidence, transparent limitations, and
 review-ready artifacts over generic compliance checklists.
 
-## Current Release: 0.12.0
+## Current Release: 0.13.0
+
+- Licence changed to FSL-1.1-MIT (each release becomes MIT after two years).
+- Precision fixes from a review of Apache Fineract (0.12.1).
+
+## 0.12.0
 
 - SOC 2, RBI (Digital Lending 2025, IT Governance 2023, payment data storage)
   and SEBI CSCRF framework packs.
@@ -102,7 +107,7 @@ review-ready artifacts over generic compliance checklists.
 - False-positive and false-negative examples.
 - New parser/language support.
 - India-specific vendor and SDK dictionaries.
-- DPDPA control mapping improvements.
+- Framework control mapping improvements.
 - Security evidence import formats.
 - Report/dashboard UX improvements.
 - Documentation, examples, and launch demos.

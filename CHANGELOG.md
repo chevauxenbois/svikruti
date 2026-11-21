@@ -11,6 +11,10 @@
   product or service is not permitted. Each release converts to MIT two years
   after publication. Releases up to and including 0.12.1 remain available
   under MIT.
+- Positioning: README, roadmap, launch plan, landing page, CLI help and
+  package metadata now lead with privacy as code. DPDPA is one of nine
+  framework packs (with GDPR, ISO/IEC 27701, LGPD, CCPA, SOC 2, RBI and SEBI
+  CSCRF), not the product's frame.
 
 ## 0.12.1 - Java/Spring precision from an Apache Fineract review
 

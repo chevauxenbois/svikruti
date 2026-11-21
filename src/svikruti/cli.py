@@ -35,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="svikruti",
         description=(
             "Svikruti: open-source privacy-as-code. Scan code for privacy evidence, reconcile it against "
-            "privacy.yaml, and map the result to DPDPA, GDPR and ISO/IEC 27701."
+            "privacy.yaml, gate pull requests on drift, and map the evidence to framework packs."
         ),
     )
     parser.add_argument("--version", action="version", version=f"svikruti {__version__}")
