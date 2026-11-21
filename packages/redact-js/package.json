@@ -1,13 +1,13 @@
 {
   "name": "svikruti-redact",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Strip personal data (email, phone, Aadhaar, PAN, card, IFSC, UPI, IBAN, SSN, IP) from logs and AI prompts at runtime. Zero dependencies.",
   "main": "index.js",
   "types": "index.d.ts",
   "files": ["index.js", "index.d.ts", "README.md"],
   "scripts": { "test": "node --test" },
   "keywords": ["privacy", "redaction", "pii", "dpdpa", "gdpr", "aadhaar", "llm", "logging"],
-  "license": "MIT",
+  "license": "FSL-1.1-MIT",
   "engines": { "node": ">=18" },
   "repository": { "type": "git", "url": "https://github.com/chevauxenbois/svikruti.git", "directory": "packages/redact-js" }
 }

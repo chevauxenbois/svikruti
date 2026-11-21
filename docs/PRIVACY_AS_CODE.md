@@ -724,7 +724,7 @@ Based on each project's public README at the time of writing (November 2026):
 | Privado (open source) | Static data-flow scan producing a JSON data map; RoPA through its cloud platform | Reconciles against a declared manifest and gates on drift; maps to several frameworks offline |
 | Fides / fideslang | Declared manifests and policy evaluation; humans write the declarations | Generates the manifest from code and verifies it stays true |
 | Bearer CLI | Security SAST with a privacy report | Privacy record, drift and framework crosswalk are the primary output |
-| HoundDog.ai | Privacy code scanner distributed as binaries under vendor terms | MIT-licensed source; rules, packs and taxonomy are plain files |
+| HoundDog.ai | Privacy code scanner distributed as binaries under vendor terms | Source-available (FSL-1.1-MIT, MIT after two years); rules, packs and taxonomy are plain files |
 | privacy-radar | Node/TypeScript scanner mapping to LGPD and GDPR | Python, JS/TS, Java, Go, Ruby, PHP, SQL, Prisma, OpenAPI and IaC; India-specific identifiers; manifest reconciliation |
 
 Scanners tell you what the code does. Declaration tools tell you what you

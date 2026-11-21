@@ -7,7 +7,7 @@ One scan maps to DPDPA, GDPR and ISO/IEC 27701.
 
 [![PyPI](https://img.shields.io/pypi/v/svikruti)](https://pypi.org/project/svikruti/)
 [![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
+[![License](https://img.shields.io/badge/License-FSL--1.1--MIT-18794e)](LICENSE)
 [![Frameworks](https://img.shields.io/badge/Frameworks-DPDPA_·_GDPR_·_ISO_27701-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
 [![AI Optional](https://img.shields.io/badge/AI-optional_BYOK-6f42c1)](#ai-co-pilot)
 
@@ -915,7 +915,29 @@ Useful contributions:
 
 ## License
 
-MIT License. Free for personal and commercial use.
+Svikruti is source-available under the
+[Functional Source License 1.1, MIT Future License](LICENSE) (FSL-1.1-MIT).
+Copyright 2026 Harsh Kahate.
+
+- **Free to use, modify and self-host**, at work included: scanning your own
+  code, running the gate in your CI, consultants using it for their clients.
+- **Not allowed:** offering Svikruti, or a product or service with
+  substantially similar functionality built from it, as a competing
+  commercial offering.
+- **Each release becomes MIT two years after it is published.** Releases up
+  to and including 0.12.1 were published under MIT and remain available under
+  MIT.
+
+"Svikruti" is the project's name; forks must not present themselves as
+Svikruti. Contributions are accepted under the same licence.
+
+## Work with me
+
+Svikruti is built and maintained by Harsh Kahate. If your team wants help
+putting privacy as code into practice (assessing your repositories, setting
+the gate up in CI, writing the first `privacy.yaml` with the people who own
+each activity, or mapping the evidence to DPDPA, RBI, SEBI, GDPR, ISO/IEC
+27701 or SOC 2), get in touch on [LinkedIn](https://linkedin.com/in/hkahate).
 
 ## Author
 
