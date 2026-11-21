@@ -3,12 +3,12 @@
 Open-source privacy as code. The repository is the source of truth: Svikruti
 reads what your code does with personal data, reconciles it against a
 reviewed `privacy.yaml`, and fails the pull request when the two drift apart.
-One scan maps to DPDPA, GDPR and ISO/IEC 27701.
+The same evidence maps to framework packs for DPDPA, GDPR, ISO/IEC 27701, LGPD, CCPA, SOC 2, RBI and SEBI CSCRF.
 
 [![PyPI](https://img.shields.io/pypi/v/svikruti)](https://pypi.org/project/svikruti/)
 [![Python](https://img.shields.io/badge/Python-3.9+-1f6feb)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-18794e)](LICENSE)
-[![Frameworks](https://img.shields.io/badge/Frameworks-DPDPA_·_GDPR_·_ISO_27701-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
+[![License](https://img.shields.io/badge/License-FSL--1.1--MIT-18794e)](LICENSE)
+[![Frameworks](https://img.shields.io/badge/Framework_packs-DPDPA_·_GDPR_·_ISO_27701_·_SOC_2_·_+5-047a78)](docs/PRIVACY_AS_CODE.md#obligations-and-frameworks)
 [![AI Optional](https://img.shields.io/badge/AI-optional_BYOK-6f42c1)](#ai-co-pilot)
 
 **Project page:** [chevauxenbois.com/projects/svikruti](https://chevauxenbois.com/projects/svikruti/)  
@@ -96,8 +96,8 @@ Svikruti helps teams answer one practical question:
 Svikruti combines three workflows that are usually separate:
 
 1. **Governance workbench**: a Streamlit app for gap assessment, RoPA, consent,
-   rights requests, vendors, breach response, document generation, and DPDPA
-   knowledge management.
+   rights requests, vendors, breach response, document generation, and a DPDPA
+   knowledge base.
 2. **Privacy engineering control room**: a scanner-native dashboard launched
    with `svikruti dashboard`, backed by a local SQLite evidence database for
    scan history, assurance posture, technical controls, breach readiness,
@@ -110,7 +110,7 @@ Svikruti combines three workflows that are usually separate:
 Most privacy tools start with questionnaires, screenshots, and manual evidence
 uploads. Svikruti starts with technical evidence: code, websites, CI security
 outputs, encryption signals, logging risks, vendors, consent journeys, and
-breach-readiness controls. The goal is simple: make DPDPA implementation
+breach-readiness controls. The goal is simple: make privacy obligations
 visible in engineering systems, not just in policy documents.
 
 ## Launch Demo
@@ -288,11 +288,12 @@ That single command can generate:
 
 Svikruti is not another static compliance checklist.
 
-- **India-first**: built around DPDPA concepts, Indian privacy operations, and
-  India-relevant vendors such as Razorpay, Cashfree, Juspay, PayU, PhonePe,
+- **Framework-neutral, India-aware**: one evidence model mapped to nine
+  framework packs, with India-specific identifiers (Aadhaar, PAN, UPI, IFSC)
+  and vendors such as Razorpay, Cashfree, Juspay, PayU, PhonePe,
   Exotel, MSG91, Shiprocket, Delhivery, MoEngage, CleverTap, and WebEngage.
 - **Evidence-first**: connects files, forms, SDKs, privacy notices, consent
-  journeys, and DPDPA control areas.
+  journeys, and framework control areas.
 - **Parser-assisted**: uses Python AST plus structured heuristics for JS/TS,
   Java, Go, Ruby, PHP, SQL, Prisma, GraphQL, OpenAPI, Postman, and Kubernetes
   to identify model fields, request sources, logging sinks, runtime config, and
@@ -303,7 +304,7 @@ Svikruti is not another static compliance checklist.
   on first use, so pre-provision it for offline or supply-chain-sensitive CI.
 - **Technical-control native**: treats encryption, key management, secrets,
   vulnerability management, monitoring, endpoint/workload detection, backups,
-  and incident response as DPDPA evidence.
+  and incident response as privacy evidence.
 - **Production-assurance honest**: separates verified evidence, inferred
   signals, failing controls, and unknowns so Svikruti does not overclaim from
   static scans alone.
@@ -329,7 +330,8 @@ Svikruti is not another static compliance checklist.
 
 Svikruti is:
 
-- an open-source privacy engineering workbench for DPDPA readiness review
+- an open-source privacy-as-code engine: code reconciled against a reviewed
+  `privacy.yaml`, enforced in pull requests
 - a local-first scanner that turns source, web, notice, vendor, and security
   signals into evidence artifacts
 - a way to make privacy, security, legal, product, and engineering teams review
@@ -340,7 +342,7 @@ Svikruti is:
 Svikruti is not:
 
 - legal advice
-- a DPDPA certification
+- a certification under any law or standard
 - a replacement for privacy counsel, security review, vendor diligence, or
   production architecture review
 - a guarantee that every runtime data flow, vendor, consent path, or
@@ -513,7 +515,8 @@ Deployment notes are in [docs/WEBSITE.md](docs/WEBSITE.md).
 
 ### 1. Governance Workbench
 
-Run the Streamlit app when you want a business-facing DPDPA workspace.
+Run the Streamlit app when you want a business-facing privacy workspace (it
+includes a DPDPA knowledge base).
 
 ```bash
 python3 -m venv .venv
@@ -878,8 +881,8 @@ positioning, free tier, enterprise tier, and follow-up roadmap.
 
 Suggested launch wedge:
 
-> Open-source PrivacyOps for India: scan your product, map engineering evidence
-> to DPDPA readiness, and generate the first audit pack in minutes.
+> Privacy as code: your repository is the record of processing. Reconcile it
+> with `privacy.yaml` and fail the pull request when the two drift apart.
 
 ## Roadmap
 
@@ -898,7 +901,7 @@ See [ROADMAP.md](ROADMAP.md) for the launch roadmap and contribution areas.
   incident-response evidence ingestion
 - Jira/Linear ticket sync
 - Hindi and Indian language notice support
-- sector-specific DPDPA packs
+- sector packs (health, insurance, ecommerce)
 
 ## Contributing
 
@@ -908,14 +911,36 @@ Useful contributions:
 - additional India-specific vendors and SDKs
 - tests for common web frameworks
 - privacy notice examples
-- DPDPA document templates
+- framework packs and document templates
 - language translations
 - UI improvements
 - deployment recipes
 
 ## License
 
-MIT License. Free for personal and commercial use.
+Svikruti is source-available under the
+[Functional Source License 1.1, MIT Future License](LICENSE) (FSL-1.1-MIT).
+Copyright 2026 Harsh Kahate.
+
+- **Free to use, modify and self-host**, at work included: scanning your own
+  code, running the gate in your CI, consultants using it for their clients.
+- **Not allowed:** offering Svikruti, or a product or service with
+  substantially similar functionality built from it, as a competing
+  commercial offering.
+- **Each release becomes MIT two years after it is published.** Releases up
+  to and including 0.12.1 were published under MIT and remain available under
+  MIT.
+
+"Svikruti" is the project's name; forks must not present themselves as
+Svikruti. Contributions are accepted under the same licence.
+
+## Work with me
+
+Svikruti is built and maintained by Harsh Kahate. If your team wants help
+putting privacy as code into practice (assessing your repositories, setting
+the gate up in CI, writing the first `privacy.yaml` with the people who own
+each activity, or mapping the evidence to DPDPA, RBI, SEBI, GDPR, ISO/IEC
+27701 or SOC 2), get in touch on [LinkedIn](https://linkedin.com/in/hkahate).
 
 ## Author
 
@@ -926,5 +951,5 @@ Information Security and Data Privacy Professional
 - LinkedIn: [hkahate](https://linkedin.com/in/hkahate)
 - Blog: [chevauxenbois.com](https://chevauxenbois.com)
 
-Svikruti is built to make DPDPA readiness practical for Indian startups,
-security teams, privacy teams, product teams, and engineering teams.
+Svikruti is built to make privacy as code practical for engineering, security
+and privacy teams, whichever law or standard applies to them.

@@ -35,5 +35,5 @@ Settings: `svikruti.command` (CLI path, e.g. a virtualenv's
 cd editors/vscode
 npm test                 # unit tests for the finding -> diagnostic mapping
 npm run package          # copies the schema and builds svikruti-<version>.vsix
-code --install-extension svikruti-0.12.0.vsix
+code --install-extension svikruti-0.13.0.vsix
 ```

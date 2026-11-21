@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "svikruti"
-version = "0.12.1"
-description = "Open-source privacy-as-code: code is the source of truth for DPDPA, GDPR and ISO/IEC 27701 evidence"
+version = "0.13.0"
+description = "Privacy as code: reconcile what your code does with personal data against privacy.yaml and fail the pull request on drift"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = { text = "FSL-1.1-MIT" }
 authors = [
   { name = "Harsh Kahate" }
 ]
-keywords = ["dpdpa", "gdpr", "iso27701", "privacy", "privacy-as-code", "privacyops", "compliance", "security", "india"]
+keywords = ["privacy-as-code", "privacy", "pii", "data-protection", "privacy-engineering", "gdpr", "dpdpa", "iso27701", "soc2", "compliance"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
