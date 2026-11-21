@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+
+- README brought in line with the code: privacy-as-code quick start first,
+  current recall figures (53/53, 21/21, 14/14), languages, vendors and AI
+  providers, the `--mode check` gate, pre-commit hooks, the VS Code
+  extension, runtime redaction and the current source layout.
+
 ## 0.13.0 - Licence change
 
 ### Changed
