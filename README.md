@@ -77,8 +77,10 @@ Privacy gate failed: 3 finding(s) at HIGH or above
 - **Organisation-wide.** `svikruti org` merges every service into one
   processing record, one processor register (flagging a vendor recorded with
   different countries or contracts in different services) and one data map.
-- **Measured recall.** Planted leaks in seven languages, with a held-out set
-  written after tuning: 18/21 caught on its first run. See
+- **Measured recall.** Planted leaks in Python, TypeScript/JavaScript, Go,
+  Java, Ruby, PHP and C#: 53/53 on the main set, 21/21 on a held-out set
+  written after tuning (18/21 on its first run), and 14/14 on queues,
+  dependency injection and free text sent to AI. See
   [benchmarks/recall](benchmarks/recall/RESULTS.md).
 
 Worked example: [examples/privacy-as-code](examples/privacy-as-code) ·
@@ -87,13 +89,9 @@ full guide: [docs/PRIVACY_AS_CODE.md](docs/PRIVACY_AS_CODE.md)
 
 ## What Else Is In The Box
 
-Svikruti helps teams answer one practical question:
-
-> What personal data does this product appear to process, where is the evidence,
-> what is missing from the privacy posture, and what should we fix before
-> launch?
-
-Svikruti combines three workflows that are usually separate:
+Privacy as code (`init`, `check`, `sync`, `inventory`, `org`) is the core and
+reads all nine framework packs. Around it sit three older workflows, still
+supported:
 
 1. **Governance workbench**: a Streamlit app for gap assessment, RoPA, consent,
    rights requests, vendors, breach response, document generation, and a DPDPA
@@ -105,7 +103,8 @@ Svikruti combines three workflows that are usually separate:
 3. **Evidence scanner**: a developer-first CLI that scans code, websites,
    privacy notices, consent journeys, and security scanner outputs, then
    produces HTML, SARIF, CSV, Markdown, JSON, local history, and optional AI
-   commentary.
+   commentary. Its control board and evidence flow map to DPDPA control
+   areas; framework-neutral obligations live in `svikruti check`.
 
 Most privacy tools start with questionnaires, screenshots, and manual evidence
 uploads. Svikruti starts with technical evidence: code, websites, CI security
@@ -143,15 +142,32 @@ visible in engineering systems, not just in policy documents.
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install "svikruti[parsers]"
-```
-
-The examples used below live in the repository, so clone it to follow along:
-
-```bash
 git clone https://github.com/chevauxenbois/svikruti.git && cd svikruti
 ```
 
 Working on Svikruti itself? Install from the clone instead: `pip install -e '.[parsers]'`.
+
+Run the privacy-as-code check on the worked example (a lending app with a
+reviewed `privacy.yaml`):
+
+```bash
+svikruti check --repo examples/privacy-as-code \
+  --privacy-file examples/privacy-as-code/privacy-notice.md --out-dir svikruti-check
+# then open svikruti-check/privacy-check.html: framework posture, findings, record
+
+svikruti inventory --repo examples/privacy-as-code   # where personal data is stored
+svikruti frameworks                                   # the nine packs
+```
+
+Then on your own repository:
+
+```bash
+svikruti init --repo /path/to/repo     # write privacy.yaml from what the code does today
+svikruti check --repo /path/to/repo    # fill the TODOs, then gate on drift
+svikruti init-github-action --mode check
+```
+
+### The evidence report (`svikruti scan`)
 
 Generate a full evidence pack with one flag:
 
@@ -394,11 +410,12 @@ Python, TypeScript/JavaScript, Go, Java, Ruby, PHP and C#, covering logging,
 third-party and AI data flows, vendor detection, field protection and
 erasure. The baseline set caught 33/53 (62%) before tuning. A held-out set
 written afterwards caught 18/21 (86%) on its first run, with 2 of 4 traps
-quiet. After fixes, all 74 planted leaks are found inside healthchecks,
-saleor and a Next.js/Stripe starter, and the CRITICAL/HIGH defect counts
-above are unchanged. A third set for queues, dependency injection and free
-text sent to AI caught 9/14 on its first run; see the results for what it
-missed.
+quiet. A third set for queues, dependency injection and free text sent to AI
+caught 9/14 on its first run. All three now pass in the test suite: 53/53,
+21/21 (3 of 4 traps quiet) and 14/14 (4 of 4 traps quiet). All 74 planted
+leaks of the first two sets are also found inside healthchecks, saleor and a
+Next.js/Stripe starter, with the CRITICAL/HIGH defect counts above
+unchanged.
 
 How to read this:
 
@@ -716,22 +733,44 @@ consent context.
 
 ## GitHub Pull-Request Gate
 
-Generate a workflow:
+Generate the privacy-as-code gate (recommended):
 
 ```bash
-svikruti init-github-action
+svikruti init-github-action --mode check
 ```
 
-The generated workflow can:
+It reconciles `privacy.yaml` on every pull request, posts the findings as a
+PR comment, uploads SARIF, and fails on drift at HIGH or above. Baselines
+mean only what the pull request introduces can block it.
+
+Or the evidence-report workflow (`--mode scan`, the default), which can:
 
 - scan the repository on pull requests
 - create HTML, JSON, CSV, Markdown, and SARIF artifacts
 - upload SARIF to GitHub code scanning
 - fail builds above a configured severity threshold
 
-More detail: [docs/GITHUB_ACTION.md](docs/GITHUB_ACTION.md).
+More detail: [docs/GITHUB_ACTION.md](docs/GITHUB_ACTION.md). For local
+gating, `.pre-commit-hooks.yaml` provides `svikruti-check` (pre-push) and
+`svikruti-sync`.
+
+## In The Editor And At Runtime
+
+- **VS Code extension** ([editors/vscode](editors/vscode)): runs
+  `svikruti check` on save and puts findings on the line that causes them,
+  with quick-fix suppressions and `privacy.yaml` validation. Build the
+  `.vsix` with `npm run package`.
+- **Runtime redaction**: `svikruti.redact` (Python, in this package) and
+  `svikruti-redact` (Node, [packages/redact-js](packages/redact-js)) strip
+  emails, phones, Aadhaar, PAN, cards, IFSC, UPI IDs, IBAN, SSN and IPs from
+  logs and AI prompts. `svikruti check` treats redacted values as protected.
 
 ## Detection Coverage
+
+Languages: Python (AST), TypeScript/JavaScript, Java, Go, Ruby, PHP and C#,
+with lighter coverage of Kotlin; SQL, Prisma, GraphQL, OpenAPI, Postman,
+Terraform and Kubernetes files; JPA, Django, SQLAlchemy, Prisma, TypeORM,
+Sequelize, Mongoose, ActiveRecord and Eloquent style models.
 
 Repository scan currently detects signals for:
 
@@ -747,7 +786,15 @@ Repository scan currently detects signals for:
 - request body collection points
 - database/schema/storage hints
 - logging near personal-data terms
-- India-relevant and global third-party tools
+- 43 India-relevant and global vendors and SDKs (payments, messaging,
+  analytics, logistics, KYC, cloud)
+- 7 AI model providers (OpenAI, Anthropic, Google Gemini, AWS Bedrock,
+  Mistral AI, Cohere, Groq), with the data categories and free text sent to
+  each
+- data flows through wrappers, dependency injection, queues, task runners and
+  event buses
+- field protection (encryption, tokenisation, vaults), erasure and retention
+  reach, rights-request entry points, and consent guards
 
 Website scan fetches a single page (the URL you pass) and currently detects:
 
@@ -801,58 +848,79 @@ svikruti/
   config.py               # Categories, questions, templates, settings
 
   src/svikruti/
-    ai.py                 # CLI AI evidence synthesis
     cli.py                # `svikruti` command line entry point
+    redact.py             # runtime redaction for logs and AI prompts
+    ai.py                 # CLI AI evidence synthesis
     dashboard.py          # scanner-native interactive control room
     models.py             # report/evidence dataclasses
     store.py              # local SQLite scan history
+    pac/                  # privacy as code
+      manifest.py         # privacy.yaml model and validation (schema.py)
+      engine.py           # check orchestration
+      reconcile.py        # drift and policy rules (D001-D011, P001-P008)
+      obligations.py      # 24 framework-neutral obligations
+      frameworks.py       # pack loading; packs/ holds the nine YAML packs
+      datastore.py        # stored data, protection, erasure and rights-request reach
+      consent.py          # consent guards in code
+      runtime.py          # recognises runtime redaction as protection
+      generate.py, sync.py  # init and sync
+      inventory.py        # svikruti inventory
+      org.py              # svikruti org
+      report.py           # HTML, JSON, SARIF, CSV and PR-comment output
+      fingerprint.py, suppress.py  # baselines and inline suppressions
     scanner/
       code.py             # static repository scanner
+      semantic.py         # data categories in code
+      flows.py            # processor and AI data flows, wrappers, DI
+      channels.py         # queues, task runners and event buses
+      tree_sitter_backend.py  # optional AST backend
       website.py          # public website scanner
       browser.py          # optional Playwright consent journey scanner
-      dpdpa.py            # DPDPA aggregation and RoPA starter
-      patterns.py         # transparent rules and dictionaries
+      dpdpa.py            # evidence-report DPDPA aggregation and RoPA starter
+      patterns.py         # rules, vendors and AI providers
       technical.py        # technical controls, security evidence import, breach readiness
+      assurance.py        # verified / inferred / failing / unknown
       runner.py           # scan orchestration
-    reports/
-      html.py             # offline evidence workbench renderer
-      exports.py          # CSV/Markdown exports
-      json_report.py      # JSON report
-      sarif.py            # GitHub code scanning output
+    reports/              # evidence-report HTML, JSON, SARIF, CSV/Markdown
 
-  examples/               # sample app/site/privacy notice and generated report
-  tests/                  # scanner tests
-  docs/                   # launch, GitHub Action docs, and screenshots
+  editors/vscode/         # VS Code extension
+  packages/redact-js/     # Node runtime redaction
+  benchmarks/recall/      # recall benchmark (main, held-out, channels)
+  site/                   # GitHub Pages launch site
+  examples/               # worked privacy-as-code example, sample reports
+  tests/                  # test suite
+  docs/                   # guides, schemas and screenshots
 ```
 
-## Free And Enterprise Model
+## Free And Hosted
 
-Open-source/free:
+Free under FSL-1.1-MIT (see [License](#license)):
 
+- privacy as code: `init`, `check`, `sync`, `inventory`, `org`, all nine
+  framework packs, the GitHub gate and pre-commit hooks
+- VS Code extension and runtime redaction (Python and Node)
 - local Streamlit governance workbench
 - local evidence scanner
 - local scanner-native dashboard
 - local SQLite scan history
-- DPDPA knowledge base
-- document generation
+- DPDPA knowledge base and document generation
 - BYOK AI flows
 - GitHub Action
 - HTML/JSON/SARIF/CSV/Markdown exports
 - technical-control register and breach-readiness pack
 - security scanner evidence import
 
-Enterprise/hosted direction:
+Hosted direction, if there is demand:
 
 - managed scan history and evidence vault
-- org dashboards across many products
+- continuous `svikruti org` posture across every repository
 - hosted AI with provider management
 - continuous technical-control posture across repositories, cloud config, CI,
   and security tools
 - Jira/Linear integrations
 - vendor evidence collection workflows
 - SSO, RBAC, audit logs, and policy approvals
-- sector packs for BFSI, healthcare, education, SaaS, ecommerce, and fintech
-- continuous privacy posture monitoring
+- more sector packs (health, insurance, ecommerce)
 
 ## Security And Privacy
 
@@ -876,8 +944,8 @@ Enterprise/hosted direction:
 
 ## Launch Plan
 
-See [docs/LAUNCH_PLAN.md](docs/LAUNCH_PLAN.md) for the initial launch motion,
-positioning, free tier, enterprise tier, and follow-up roadmap.
+See [docs/LAUNCH_PLAN.md](docs/LAUNCH_PLAN.md) for positioning, audience,
+channels and success measures.
 
 Suggested launch wedge:
 

@@ -575,7 +575,7 @@ Pre-commit users can run the gate before a push:
 ```yaml
 repos:
   - repo: https://github.com/chevauxenbois/svikruti
-    rev: v0.12.0
+    rev: v0.13.0
     hooks:
       - id: svikruti-check
 ```
